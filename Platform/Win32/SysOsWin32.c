@@ -1,0 +1,192 @@
+#include <Utils/SysString.h>
+#include <Platform/SysThread.h>
+#include <DataTypes/SysArray.h>
+#include <Platform/SysOsPrivate.h>
+
+BOOL WINAPI DllMain(HINSTANCE hinstDLL,
+  DWORD     fdwReason,
+  LPVOID    lpvReserved);
+
+HMODULE win32dll;
+
+BOOL WINAPI DllMain(HINSTANCE hinstDLL,DWORD fdwReason, LPVOID lpvReserved) {
+  switch (fdwReason) {
+    case DLL_PROCESS_ATTACH:
+      win32dll = hinstDLL;
+      sys_thread_init();
+      break;
+
+    case DLL_THREAD_DETACH:
+      sys_thread_detach();
+      break;
+
+    case DLL_PROCESS_DETACH:
+      // sys_process_detach();
+      break;
+    default:
+      break;
+  }
+
+  return TRUE;
+}
+
+void sys_real_init_console(void) {
+  CONSOLE_FONT_INFOEX cfi;
+  cfi.cbSize = sizeof(cfi);
+  cfi.nFont = 0;
+  cfi.dwFontSize.X = 0;
+  cfi.dwFontSize.Y = 16;
+  cfi.FontFamily = FF_DONTCARE;
+  cfi.FontWeight = FW_NORMAL;
+  wcscpy_s(cfi.FaceName, 9, L"Consolas");
+  SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi);
+
+  SetConsoleOutputCP(65001);
+
+  /* enable ansci color */
+  SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+  SetConsoleMode(GetStdHandle(STD_ERROR_HANDLE), 7);
+
+#if 0
+  /* resize console */
+  SMALL_RECT rc = { 0, 0, 120, 30 };
+  SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), true, &rc);
+#endif
+}
+
+bool sys_real_console_is_utf8(void) {
+  SysUInt cp = GetConsoleOutputCP();
+
+  if (cp == 65001) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * sys_real_get_env: get system enviroment
+ * @var: name
+ * need call sys_free_N after used
+ *
+ * Returns: new allocted string.
+ */
+const SysChar *sys_real_get_env(const SysChar *var) {
+  wchar_t *wvalue;
+  wchar_t tmp[2];
+  wchar_t *wname;
+  const SysChar *value;
+  int len;
+
+  wname = sys_ansi_to_wchar(var);
+  len = GetEnvironmentVariableW(wname, tmp, 2);
+  if (len == 0) {
+    sys_free_N(wname);
+    return NULL;
+  }
+
+  if (len == 1) {
+    len = 2;
+  }
+
+  wvalue = sys_new_N(wchar_t, len);
+
+  if (GetEnvironmentVariableW(wname, wvalue, len) != len - 1) {
+    sys_free_N(wname);
+    sys_free_N(wvalue);
+    return NULL;
+  }
+
+  value = sys_wchar_to_ansi(wvalue);
+
+  sys_free_N(wname);
+  sys_free_N(wvalue);
+
+  return value;
+}
+
+bool sys_real_set_env(const SysChar *var, const SysChar *value) {
+  wchar_t *wvar, *wvalue;
+  const wchar_t *wname;
+  SysChar *nvar;
+  int ret;
+  SysSize vlen;
+
+  vlen = strlen(var);
+
+  wname = sys_ansi_to_wchar(var);
+  wvalue = sys_ansi_to_wchar(value);
+  nvar = sys_new0_N(SysChar, vlen + 2);
+  sys_memcpy(nvar, vlen + 2, var, vlen);
+  sys_memcpy(nvar + vlen, vlen + 2, "=", 1);
+
+  wvar = sys_ansi_to_wchar(nvar);
+  _wputenv(wvar);
+
+  ret = (SetEnvironmentVariableW(wname, wvalue) != 0);
+
+  sys_free_N(nvar);
+  sys_free_N(wvar);
+
+  sys_free_N((void *)wname);
+  sys_free_N(wvalue);
+
+  return ret;
+}
+
+SysUInt64 sys_real_get_monoic_time(void) {
+  SysUInt64 ticks;
+
+  ticks = GetTickCount64();
+
+  return ticks;
+}
+
+void sys_real_usleep(unsigned long mseconds) {
+  /* Round up to the next millisecond */
+  Sleep(mseconds ? (1 + (mseconds - 1) / 1000) : 0);
+}
+
+void* sys_real_dlopen(const SysChar *filename) {
+  sys_return_val_if_fail(filename != NULL, NULL);
+
+  HINSTANCE handle;
+  wchar_t *wname;
+
+  wname = sys_ansi_to_wchar(filename);
+  handle = LoadLibraryW(wname);
+  sys_free_N(wname);
+
+  if (!handle) {
+    sys_warning_N("dlopen failed: %s.", filename);
+    return NULL;
+  }
+
+  return handle;
+}
+
+void* sys_real_dlsymbol(void *handle, const SysChar *symbol) {
+  sys_return_val_if_fail(handle != NULL, NULL);
+  sys_return_val_if_fail(symbol != NULL, NULL);
+
+  void *p = GetProcAddress(handle, symbol);
+  if (!p) {
+    sys_warning_N("dlsymbol failed: %s.", symbol);
+    return NULL;
+  }
+
+  return p;
+}
+
+void sys_real_dlclose(void* handle) {
+  sys_return_if_fail(handle != NULL);
+
+  FreeLibrary(handle);
+}
+
+void sys_real_init(void) {
+  static bool sys_inited;
+
+  if (sys_inited)
+    return;
+}

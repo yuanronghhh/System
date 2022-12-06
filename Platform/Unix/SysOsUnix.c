@@ -1,0 +1,79 @@
+#include <Utils/SysError.h>
+#include <Platform/SysOsPrivate.h>
+
+static SysInt dev_null = -1;
+
+void sys_real_init_console(void) {
+}
+
+bool sys_real_console_is_utf8(void) {
+  return true;
+}
+
+bool sys_real_set_env(const char *var, const char *value) {
+  SysInt result;
+
+  result = setenv (var, value, true);
+
+  return result == 0;
+}
+
+const char* sys_real_get_env(const char *var) {
+  sys_return_val_if_fail (var != NULL, NULL);
+
+  return getenv(var);
+}
+
+SysUInt64 sys_real_get_monoic_time(void) {
+  struct timespec ts;
+  SysInt time;
+
+  time = clock_gettime (CLOCK_MONOTONIC, &ts);
+  sys_abort_E(time != 0, "clock_gettime error.");
+
+  return (((SysUInt64) ts.tv_sec) * 1000000) + (ts.tv_nsec / 1000);
+}
+
+void sys_real_usleep(unsigned long mseconds) {
+  struct timespec request, remaining;
+  request.tv_sec = mseconds / 1000000;
+  request.tv_nsec = 1000 * (mseconds % 1000000);
+
+  while (nanosleep(&request, &remaining) == -1 && errno == EINTR) {
+    request = remaining;
+  }
+}
+
+void* sys_real_dlsymbol(void *handle, const char *symbol) {
+  sys_return_val_if_fail(handle != NULL, NULL);
+  sys_return_val_if_fail(symbol != NULL, NULL);
+
+  void *p = dlsym (handle, symbol);
+  SysChar *msg;
+
+  msg = dlerror();
+  if (msg) {
+    sys_warning_N("%s", msg);
+    return NULL;
+  }
+
+  return p;
+}
+
+void sys_real_init(void) {
+}
+
+void* sys_real_dlopen(const char *filename) {
+  void *handle = dlopen (filename, RTLD_GLOBAL | RTLD_LAZY);
+  if (!handle) {
+    return NULL;
+  }
+
+  return handle;
+}
+
+void sys_real_dlclose(void* handle) {
+  if(dlclose (handle) != 0) {
+    perror("dlclose failed");
+  }
+}
