@@ -1,15 +1,15 @@
 #ifndef __SYS_STRING_H__
 #define __SYS_STRING_H__
 
-#include <Fundamental/SysCommonCore.h>
+#include <System/Fundamental/SysCommonCore.h>
 
 SYS_BEGIN_DECLS
 
 #define SYS_BYTE_MAX INT_MAX
-#define SYS_LSTR(str) ((SysChar *)str), (sizeof(str) - 1)
+#define SYS_LSTR(str) (SysChar *)(str), (sizeof(str) - 1)
 #define sys_bin_new(o, szof) sys_malloc0_N((szof) * 8 + 1)
 #define sys_bin_tostr(buffer, o, szof) sys_bin_str_full(buffer, (szof) * 8 + 1, szof, &o)
-#define sys_strneq(s1, s2, n) (strncmp(s1, s2, n) == 0)
+#define sys_strneq(s1, s2, n) (strncmp(s1, s2, (n)) == 0)
 #define sys_strjoin(delim, ...) _sys_strjoin(delim, __VA_ARGS__, NULL)
 
 SYS_API wchar_t* sys_ansi_to_wchar(const SysChar* ansi);
@@ -32,7 +32,7 @@ SYS_API void sys_print(const SysChar* str);
 SYS_API void sys_strcpy(SysChar* __restrict dst, const SysChar* __restrict src);
 SYS_API void sys_strncpy(SysChar* __restrict dst, SysSize n, const SysChar* __restrict src);
 SYS_API SysSize sys_strlen(const SysChar* s, SysSize max);
-SYS_API bool sys_streq(const SysChar* s1, const SysChar* s2);
+SYS_API bool sys_str_equal(const SysChar* s1, const SysChar* s2);
 SYS_API int sys_strcmp(const SysChar* s1, const SysChar* s2);
 SYS_API int sys_strncmp(const SysChar* s1, const SysChar* s2, int max);
 SYS_API SysChar* sys_strupper(SysChar* s);
@@ -42,7 +42,7 @@ SYS_API SysChar* sys_strdup(const SysChar* s);
 SYS_API SysChar* sys_strpncpy(SysChar* dst, SysInt n, const SysChar* src);
 SYS_API SysChar* sys_strpcpy(SysChar* dst, const SysChar* src);
 SYS_API SysChar* sys_str_newsize(SysSize size);
-SYS_API void sys_strcat_M(SysChar** v1, SysSize* v1_max, SysSize* len, const SysChar* v2);
+SYS_API void sys_strmcat(SysChar** v1, SysSize* v1_max, SysSize* len, const SysChar* v2);
 SYS_API SysChar* sys_strlcat(SysChar* v1, SysSize v1_max, const SysChar* v2);
 
 SYS_API bool sys_str_override_c(SysChar* str, char oldchar, char newchar);

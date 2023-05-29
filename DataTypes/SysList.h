@@ -1,14 +1,13 @@
 #ifndef __SYS_LIST_H__
 #define __SYS_LIST_H__
 
-#include <Fundamental/SysCommonCore.h>
+#include <System/Fundamental/SysCommonCore.h>
 
 SYS_BEGIN_DECLS
 
-#define sys_list_foreach(list, node)        \
-    for(SysList *node = list;node;node = node->next) {          \
+#define SYS_LIST(o) ((SysList *)o)
 
-#define sys_list_foreach_end }
+#define sys_list_foreach(list, node) for(SysList *node = list;node;node = node->next)
 
 typedef struct _SysList SysList;
 
@@ -38,6 +37,7 @@ SYS_API SysList*   sys_list_find_custom(SysList *list, const SysPointer data,Sys
 SYS_API SysInt     sys_list_position(SysList *list, SysList *ulist);
 SYS_API SysInt     sys_list_index(SysList *list, const SysPointer  data);
 SYS_API SysList*   sys_list_last(SysList *list);
+SYS_API SysList* sys_list_first(SysList *list);
 SYS_API SysUInt    sys_list_length(SysList            *list);
 
 SYS_END_DECLS

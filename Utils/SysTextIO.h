@@ -1,7 +1,7 @@
 #ifndef __SYS_TIO_H__
 #define __SYS_TIO_H__
 
-#include <DataTypes/SysHashTable.h>
+#include <System/DataTypes/SysHashTable.h>
 
 SYS_BEGIN_DECLS
 

@@ -1,9 +1,12 @@
 #ifndef __SYS_SLIST_H__
 #define __SYS_SLIST_H__
 
-#include <Fundamental/SysCommonCore.h>
+#include <System/Fundamental/SysCommonCore.h>
 
 SYS_BEGIN_DECLS
+
+#define sys_slist_foreach(list, node) \
+    for(SysSList *node = list;node;node = node->next)
 
 typedef struct _SysSList SysSList;
 
@@ -41,7 +44,6 @@ SysInt sys_slist_position(SysSList *list, SysSList *llink);
 SysInt sys_slist_index(SysSList *list, const SysPointer data);
 SysSList* sys_slist_last(SysSList *list);
 SysUInt sys_slist_length(SysSList *list);
-void sys_slist_foreach(SysSList *list, SysFunc func, SysPointer user_data);
 SysSList* sys_slist_sort(SysSList *list, SysCompareFunc compare_func);
 SysSList* sys_slist_sort_with_data(SysSList *list, SysCompareDataFunc compare_func, SysPointer user_data);
 SysPointer sys_slist_nth_data(SysSList *list, SysUInt n);

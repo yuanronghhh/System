@@ -1,7 +1,8 @@
-#include <Utils/SysString.h>
-#include <Utils/SysFile.h>
-#include <Utils/SysError.h>
-#include <Platform/SysMemPrivate.h>
+#include "SysMem.h"
+#include <System/Utils/SysString.h>
+#include <System/Utils/SysFile.h>
+#include <System/Utils/SysError.h>
+#include <System/Platform/Common/SysMemPrivate.h>
 
 void sys_memcpy(
     SysPointer  const dst,
@@ -12,13 +13,32 @@ void sys_memcpy(
   sys_real_memcpy(dst, dst_size, src, src_size);
 }
 
+void _sys_clear_pointer(void **pp, SysDestroyFunc destroy) {
+  sys_return_if_fail(pp != NULL);
+  sys_return_if_fail(*pp != NULL);
+
+  /* Only one access, please; work around type aliasing */
+  union { char *in; SysPointer *out; } _pp;
+  SysPointer _p;
+
+  _pp.in = (char *)(pp);
+  _p = *_pp.out;
+  if (_p) {
+    *_pp.out = NULL;
+    destroy(_p);
+  }
+}
+
 SysPointer sys_realloc(void *mem, SysSize size) {
   void *nmem = NULL;
 
   if (size) {
     nmem = realloc(mem, size);
     if (nmem) { return nmem; }
-	sys_abort_E(nmem != NULL, "realloc failed.");
+
+    if (nmem == NULL) {
+      sys_abort_N("%s", "realloc failed.");
+    }
   }
 
   if (mem) {
@@ -72,16 +92,16 @@ SysPointer sys_memdup(const SysPointer mem, SysUInt byte_size) {
   return new_mem;
 }
 
-void _sys_slice_free_chain(SysSize type, SysPointer ptr, SysSize offset) {
-	SysUInt8 *node = ptr;
-	while (node) {
-		SysUInt8 *next = *(SysPointer *)(node + offset);
-		sys_free_N(node);
-		node = next;
-	}
+void _sys_slice_free_chain(SysSize typesize, SysPointer ptr, SysSize offset) {
+  SysUInt8 *node = ptr;
+  while (node) {
+    SysUInt8 *next = *(SysPointer *)(node + offset);
+    sys_free_N(node);
+    node = next;
+  }
 }
 
-void sys_leaks_init(void) {
+void sys_leaks_setup(void) {
   sys_real_leaks_init();
 }
 

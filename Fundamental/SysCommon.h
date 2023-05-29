@@ -1,7 +1,7 @@
 #ifndef __SYS_COMMON_H__
 #define __SYS_COMMON_H__
 
-#include <SysConfig.h>
+#include <System/SysConfig.h>
 
 #ifdef  __cplusplus
 #define SYS_BEGIN_DECLS  extern "C" {
@@ -14,11 +14,12 @@
 #define _USE_MATH_DEFINES
 
 #if _MSC_VER
-  #include <Platform/Win32/SysWin32.h>
+  #include <System/Platform/Win32/SysWin32.h>
 #elif __GNUC__
-  #include <Platform/Unix/SysUnix.h>
+  #include <System/Platform/Unix/SysUnix.h>
 #endif
 
+#include <stdint.h>
 #include <limits.h>
 #include <wchar.h>
 #include <fcntl.h>
@@ -33,12 +34,17 @@
 #include <assert.h>
 #include <math.h>
 #include <pthread.h>
+#include <signal.h>
 
 #define UNUSED(o) ((void)o)
 #define POINTER_TO_UINT(o) ((SysUInt)(SysUInt64)(o))
+#define POINTER_TO_INT(o) ((SysInt)(SysUInt64)(o))
+
 #define UINT_TO_POINTER(o) ((SysPointer)(SysUInt64)(o))
+#define INT_TO_POINTER(o) ((SysPointer)(SysInt64)(o))
+
 #define SYS_INLINE inline
-#define SysBool bool
+typedef bool SysBool;
 typedef int SysRef;
 typedef void* SysPointer;
 typedef int SysInt;
@@ -48,6 +54,8 @@ typedef char SysChar;
 typedef unsigned char u_char;
 typedef unsigned char SysUChar;
 typedef unsigned char SysUInt8;
+typedef signed char SysInt8;
+typedef signed short SysInt16;
 typedef unsigned int SysUInt32;
 typedef signed long long SysInt64;
 typedef unsigned long long SysUInt64;
@@ -56,17 +64,18 @@ typedef size_t SysSize;
 typedef wchar_t SysWChar;
 #define SysNULL NULL
 
-#define SYS_ARGS_FIXED(func, ptr) __FILE__, __func__, __LINE__, #func, #ptr,
-#define SYS_ARGS_N_FIXED const SysChar *_filename, const SysChar *_funcname, const SysInt _line, const SysChar * _callfunc, const SysChar *_ptrstr,
-#define SYS_ARGS_M_FIXED(func, ptr) SYS_ARGS_FIXED(func, ptr)
-#define SYS_ARGS_P_FIXED(func, ptr) _filename, _funcname, _line, _callfunc, _ptrstr,
+#define SYS_ARGS(func, ptr) __FILE__, __func__, __LINE__, #func, #ptr,
+#define SYS_ARGS_N const SysChar *_filename, const SysChar *_funcname, const SysInt _line, const SysChar * _callfunc, const SysChar *_ptrstr,
+#define SYS_ARGS_M(func, ptr) SYS_ARGS(func, ptr)
+#define SYS_ARGS_P(func, ptr) _filename, _funcname, _line, _callfunc, _ptrstr,
 
-typedef void (*SysFunc) (SysPointer data, SysPointer user_data);
-typedef int(*SysCompareFunc) (const void* a, const void* b);
-typedef int(*SysCompareDataFunc) (const void* a, const void* b, SysPointer user_data);
-typedef bool (*SysEqualFunc) (const SysPointer a, const SysPointer b);
-typedef int(*SysEqualDataFunc) (const void* a, const void* b, void *user_data);
-typedef void(*SysDestroyFunc) (void* data);
+typedef void       (*SysFunc) (SysPointer data, SysPointer user_data);
+typedef SysInt     (*SysCompareFunc) (const void* a, const void* b);
+typedef SysInt     (*SysCompareDataFunc) (const void* a, const void* b, SysPointer user_data);
+typedef SysBool    (*SysEqualFunc) (const SysPointer a, const SysPointer b);
+typedef SysInt     (*SysEqualDataFunc) (const void* a, const void* b, void *user_data);
+typedef void       (*SysDestroyFunc) (void* data);
 typedef SysPointer (*SysCopyFunc) (const SysPointer src, SysPointer data);
+
 
 #endif

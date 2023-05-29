@@ -1,5 +1,5 @@
-#include <Utils/SysError.h>
-#include <Utils/SysStringPrivate.h>
+#include <System/Utils/SysError.h>
+#include <System/Utils/SysStringPrivate.h>
 
 SysChar *sys_real_wchar_to_ansi(const SysWChar *uni) {
   int size;

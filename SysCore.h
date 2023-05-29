@@ -1,25 +1,31 @@
 #ifndef __SYS_CORE_H__
 #define __SYS_CORE_H__
 
-#include <SysConfig.h>
-#include <Fundamental/SysCommon.h>
-#include <Fundamental/SysCommonCore.h>
+#include <System/SysConfig.h>
+#include <System/Fundamental/SysCommon.h>
+#include <System/Fundamental/SysCommonCore.h>
 
-#include <Platform/SysOs.h>
-#include <Platform/SysMem.h>
-#include <Platform/SysProcess.h>
-#include <Platform/SysThread.h>
+#include <System/Platform/Common/SysOs.h>
+#include <System/Platform/Common/SysMem.h>
+#include <System/Platform/Common/SysAtomic.h>
+#include <System/Platform/Common/SysProcess.h>
+#include <System/Platform/Common/SysThread.h>
 
-#include <DataTypes/SysHashTable.h>
-#include <DataTypes/SysList.h>
-#include <DataTypes/SysSList.h>
-#include <DataTypes/SysQueue.h>
+#include <System/DataTypes/SysValue.h>
+#include <System/DataTypes/SysHashTable.h>
+#include <System/DataTypes/SysList.h>
+#include <System/DataTypes/SysSList.h>
+#include <System/DataTypes/SysQueue.h>
+#include <System/DataTypes/SysBHeap.h>
+#include <System/DataTypes/SysNode.h>
+#include <System/DataTypes/SysTree.h>
+#include <System/DataTypes/SysTypes.h>
 
-#include <Utils/SysTypes.h>
-#include <Utils/SysError.h>
-#include <Utils/SysPath.h>
-#include <Utils/SysString.h>
-#include <Utils/SysFile.h>
-#include <Utils/SysTextIO.h>
+#include <System/Utils/SysError.h>
+#include <System/Utils/SysError.h>
+#include <System/Utils/SysPath.h>
+#include <System/Utils/SysString.h>
+#include <System/Utils/SysFile.h>
+#include <System/Utils/SysTextIO.h>
 
 #endif

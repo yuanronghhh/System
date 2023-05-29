@@ -1,8 +1,8 @@
 #ifndef __SYS_PATH_H__
 #define __SYS_PATH_H__
 
-#include <Fundamental/SysCommonCore.h>
-#include <Utils/SysString.h>
+#include <System/Fundamental/SysCommonCore.h>
+#include <System/Utils/SysString.h>
 
 SYS_BEGIN_DECLS
 

@@ -1,7 +1,7 @@
-#include <Utils/SysError.h>
-#include <Platform/SysOsPrivate.h>
+#include <System/Utils/SysError.h>
+#include <System/Platform/Common/SysOsPrivate.h>
 
-static SysInt dev_null = -1;
+// static SysInt dev_null = -1;
 
 void sys_real_init_console(void) {
 }
@@ -29,7 +29,10 @@ SysUInt64 sys_real_get_monoic_time(void) {
   SysInt time;
 
   time = clock_gettime (CLOCK_MONOTONIC, &ts);
-  sys_abort_E(time != 0, "clock_gettime error.");
+
+  if (time == 0) {
+    sys_abort_N("%s", "clock_gettime error.");
+  }
 
   return (((SysUInt64) ts.tv_sec) * 1000000) + (ts.tv_nsec / 1000);
 }
@@ -60,7 +63,10 @@ void* sys_real_dlsymbol(void *handle, const char *symbol) {
   return p;
 }
 
-void sys_real_init(void) {
+void sys_real_setup(void) {
+}
+
+void sys_real_teardown(void) {
 }
 
 void* sys_real_dlopen(const char *filename) {
@@ -76,4 +82,19 @@ void sys_real_dlclose(void* handle) {
   if(dlclose (handle) != 0) {
     perror("dlclose failed");
   }
+}
+
+SysChar **sys_real_backtrace_string(SysInt *size) {
+  SysInt stack_size;
+  void *stack[SYS_BACKTRACE_SIZE];
+  SysChar **s;
+
+  stack_size = backtrace(stack, SYS_BACKTRACE_SIZE);
+  s = backtrace_symbols(stack, stack_size);
+  if(s == NULL) {
+    return NULL;
+  }
+  *size = stack_size;
+
+  return s;
 }

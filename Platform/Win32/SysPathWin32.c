@@ -1,6 +1,6 @@
-#include <DataTypes/SysArray.h>
-#include <Utils/SysString.h>
-#include <Utils/SysPathPrivate.h>
+#include <System/DataTypes/SysArray.h>
+#include <System/Utils/SysString.h>
+#include <System/Utils/SysPathPrivate.h>
 
 
 SysChar *sys_real_getcwd(void) {

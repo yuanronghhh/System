@@ -1,6 +1,6 @@
-#include <Platform/SysAtomic.h>
-#include <Utils/SysString.h>
-#include <DataTypes/SysHashTable.h>
+#include <System/Platform/Common/SysAtomic.h>
+#include <System/Utils/SysString.h>
+#include <System/DataTypes/SysHashTable.h>
 
 /**
  * this code from glib hashtable
@@ -303,14 +303,14 @@ static inline void sys_hash_table_maybe_resize(SysHashTable *hash_table) {
 }
 
 SysHashTable *sys_hash_table_new(SysHashFunc hash_func,
-	SysEqualFunc key_equal_func) {
+    SysEqualFunc key_equal_func) {
   return sys_hash_table_new_full(hash_func, key_equal_func, NULL, NULL);
 }
 
 SysHashTable *sys_hash_table_new_full(SysHashFunc hash_func,
-	SysEqualFunc key_equal_func,
-                                      SysDestroyFunc key_destroy_func,
-                                      SysDestroyFunc value_destroy_func) {
+    SysEqualFunc key_equal_func,
+    SysDestroyFunc key_destroy_func,
+    SysDestroyFunc value_destroy_func) {
   SysHashTable *hash_table;
 
   hash_table = sys_slice_new(SysHashTable);
@@ -507,10 +507,10 @@ void sys_hash_table_unref(SysHashTable *hash_table) {
     if (hash_table->keys != hash_table->values)
       sys_free_N(hash_table->values);
 
-	if (hash_table->keys != NULL) {
-		sys_free_N(hash_table->keys);
-		sys_free_N(hash_table->hashes);
-	}
+    if (hash_table->keys != NULL) {
+      sys_free_N(hash_table->keys);
+      sys_free_N(hash_table->hashes);
+    }
 
     sys_slice_free(SysHashTable, hash_table);
   }

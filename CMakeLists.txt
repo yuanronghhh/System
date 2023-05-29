@@ -1,11 +1,5 @@
 set(INC
-  .
-  ./Fundamental
-  ./DataTypes
-  ./Platform
-  ./Platform/Unix
-  ./Platform/Win32
-  ./Utils
+  ../
 )
 
 set(INC_SYS
@@ -47,6 +41,13 @@ endif()
 set(SRC
   ${OS_SYS_SRC}
 
+  ./DataTypes/SysNode.h
+  ./DataTypes/SysNode.c
+  ./DataTypes/SysTree.h
+  ./DataTypes/SysTree.c
+
+  ./DataTypes/SysBHeap.h
+  ./DataTypes/SysBHeap.c
   ./DataTypes/SysHashTable.h
   ./DataTypes/SysHashTable.c
   ./DataTypes/SysArray.h
@@ -57,6 +58,10 @@ set(SRC
   ./DataTypes/SysSList.c
   ./DataTypes/SysQueue.h
   ./DataTypes/SysQueue.c
+  ./DataTypes/SysValue.h
+  ./DataTypes/SysValue.c
+  ./DataTypes/SysTypes.h
+  ./DataTypes/SysTypes.c
 
   ./Utils/SysFile.h
   ./Utils/SysFilePrivate.h
@@ -70,30 +75,31 @@ set(SRC
   ./Utils/SysError.h
   ./Utils/SysErrorPrivate.h
   ./Utils/SysError.c
-  ./Utils/SysTypes.h
-  ./Utils/SysTypes.c
   ./Utils/SysTextIO.h
   ./Utils/SysTextIO.c
 
-  ./Platform/SysMemPrivate.h
-  ./Platform/SysMem.h
-  ./Platform/SysMemMap.h
-  ./Platform/SysMem.c
-  ./Platform/SysOsPrivate.h
-  ./Platform/SysOs.h
-  ./Platform/SysOs.c
-  ./Platform/SysAtomic.h
-  ./Platform/SysAtomicPrivate.h
-  ./Platform/SysAtomic.c
-  ./Platform/SysThread.h
-  ./Platform/SysThreadPrivate.h
-  ./Platform/SysThread.c
-  ./Platform/SysProcess.c
-  ./Platform/SysProcess.h
-  ./Platform/SysProcessPrivate.h
+  ./Platform/Common/SysMemPrivate.h
+  ./Platform/Common/SysMem.h
+  ./Platform/Common/SysMemMap.h
+  ./Platform/Common/SysMem.c
+  ./Platform/Common/SysOsPrivate.h
+  ./Platform/Common/SysOs.h
+  ./Platform/Common/SysOs.c
+  ./Platform/Common/SysAtomic.h
+  ./Platform/Common/SysAtomicPrivate.h
+  ./Platform/Common/SysAtomic.c
 
-  ./Fundamental/SysCommon.h
+  # thread not worked
+  ./Platform/Common/SysThread.h
+  ./Platform/Common/SysThreadPrivate.h
+  ./Platform/Common/SysThread.c
+
+  ./Platform/Common/SysProcess.c
+  ./Platform/Common/SysProcess.h
+  ./Platform/Common/SysProcessPrivate.h
+
   ./Fundamental/SysCommonCore.h
+  ./Fundamental/SysCommon.h
 
   ./SysConfig.h
   ./SysConfig.h.in
@@ -107,5 +113,6 @@ configure_file(${CMAKE_CURRENT_LIST_DIR}/SysConfig.h.in
 
 target_link_libraries(System
   ${PTHREAD_LIBRARIES}
+  ${DBG_LIBRAREIS}
 )
 set_property(TARGET System PROPERTY FOLDER CstProject)

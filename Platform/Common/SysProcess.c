@@ -1,5 +1,5 @@
-#include <Utils/SysString.h>
-#include <Platform/SysProcessPrivate.h>
+#include <System/Utils/SysString.h>
+#include <System/Platform/Common/SysProcessPrivate.h>
 
 SysInt sys_execvp(const SysChar* path, SysChar* const args[]) {
   return sys_real_execvp(path, args);
@@ -40,8 +40,6 @@ SYS_API bool sys_subprocess_communicate(SysSubProcess *sub,
 
   return false;
 }
-
-
 
 void sys_subprocess_terminate(SysSubProcess *sub) {
   sys_real_subprocess_terminate(sub);

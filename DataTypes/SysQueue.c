@@ -1,4 +1,4 @@
-#include <DataTypes/SysQueue.h>
+#include <System/DataTypes/SysQueue.h>
 
 /**
  * this code from glib GQueue
@@ -18,9 +18,9 @@ void sys_queue_free(SysQueue *queue) {
 }
 
 void sys_queue_free_full(SysQueue *queue, SysDestroyFunc free_func) {
-  sys_queue_foreach(queue, node)
+  for (SysList *node = queue->head; node; node = node->next) {
     free_func(node->data);
-  sys_queue_foreach_end
+  }
 
   sys_queue_free(queue);
 }
@@ -39,7 +39,7 @@ void sys_queue_clear(SysQueue *queue) {
   sys_queue_init(queue);
 }
 
-bool sys_queue_is_empty(SysQueue *queue) {
+SysBool sys_queue_is_empty(SysQueue *queue) {
   sys_return_val_if_fail(queue != NULL, true);
 
   return queue->head == NULL;
@@ -385,7 +385,7 @@ SysInt sys_queue_index(SysQueue *queue, const SysPointer  data) {
   return sys_list_index(queue->head, data);
 }
 
-bool sys_queue_remove(SysQueue *queue, const SysPointer  data) {
+SysBool sys_queue_remove(SysQueue *queue, const SysPointer  data) {
   SysList *link;
 
   sys_return_val_if_fail(queue != NULL, false);

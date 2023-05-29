@@ -1,7 +1,7 @@
-#include <Utils/SysString.h>
-#include <Platform/SysThread.h>
-#include <DataTypes/SysArray.h>
-#include <Platform/SysOsPrivate.h>
+#include <System/Utils/SysString.h>
+#include <System/DataTypes/SysArray.h>
+#include <System/Platform/Common/SysThread.h>
+#include <System/Platform/Common/SysOsPrivate.h>
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL,
   DWORD     fdwReason,
@@ -184,9 +184,51 @@ void sys_real_dlclose(void* handle) {
   FreeLibrary(handle);
 }
 
-void sys_real_init(void) {
-  static bool sys_inited;
+SysChar **sys_real_backtrace_string(SysInt *size) {
+  SysInt i;
+  SysInt frame_size, rsize;
+  SysChar **s, **p;
+  IMAGEHLP_SYMBOL64 *symbol;
+  void *stack[SYS_BACKTRACE_SIZE];
 
-  if (sys_inited)
-    return;
+  HANDLE         process;
+  int dp = 0;
+
+  IMAGEHLP_LINE lineInfo = { sizeof(IMAGEHLP_LINE) };
+  process = GetCurrentProcess();
+
+  SymInitialize(process, NULL, TRUE);
+
+  frame_size = CaptureStackBackTrace(2, SYS_BACKTRACE_SIZE, stack, NULL);
+  if (frame_size < 4) {
+    return NULL;
+  }
+  rsize = frame_size - 3;
+
+  s = sys_new_N(SysChar *, rsize);
+  p = s;
+
+  symbol = (IMAGEHLP_SYMBOL64 *)sys_malloc_N(sizeof(IMAGEHLP_SYMBOL64) + 256 * sizeof(char));
+  symbol->MaxNameLength = 255;
+  symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+
+  for (i = 0; i < rsize; i++) {
+    DWORD_PTR addr = (DWORD_PTR)stack[i];
+
+    SymGetSymFromAddr(process, addr, 0, symbol);
+    SymGetLineFromAddr(process, addr, (DWORD *)&dp, &lineInfo);
+
+    *p++ = sys_strdup_printf("%s:%d:%s - %p\n",  lineInfo.FileName, lineInfo.LineNumber, symbol->Name, symbol->Address);
+  }
+  sys_free_N(symbol);
+
+  *size = rsize;
+
+  return s;
+}
+
+void sys_real_setup(void) {
+}
+
+void sys_real_teardown(void) {
 }

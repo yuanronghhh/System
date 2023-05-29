@@ -1,5 +1,5 @@
-#include <Utils/SysString.h>
-#include <Utils/SysFilePrivate.h>
+#include <System/Utils/SysString.h>
+#include <System/Utils/SysFilePrivate.h>
 
 #define LINE_BLOCK 512
 
@@ -135,10 +135,11 @@ SysInt sys_open(SysChar* filename, SysInt flags, SysInt mode) {
 
 SysInt sys_fputs(FILE* const fp, SysChar const* s) {
   SysInt len;
-  SYS_LEAK_IGNORE(
-      len = fputs(s, fp);
-      )
-    return len;
+  SYS_LEAK_IGNORE_BEGIN;
+    len = fputs(s, fp);
+  SYS_LEAK_IGNORE_END;
+
+  return len;
 }
 
 SysInt sys_fprintf(FILE* const fp,SysChar const* const format, ...) {
@@ -154,13 +155,13 @@ SysInt sys_fprintf(FILE* const fp,SysChar const* const format, ...) {
   return len;
 }
 
-SysInt sys_vfprintf(FILE* const fp,char const* const format,va_list args) {
+SysInt sys_vfprintf(FILE* const fp, SysChar const* const format,va_list args) {
   SysInt len;
-  SYS_LEAK_IGNORE(
-      len = vfprintf(fp, format, args);
-      )
+  SYS_LEAK_IGNORE_BEGIN;
+    len = vfprintf(fp, format, args);
+  SYS_LEAK_IGNORE_END;
 
-    return len;
+  return len;
 }
 
 void sys_fclose(FILE* fp) {

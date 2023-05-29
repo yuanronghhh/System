@@ -1,5 +1,5 @@
-#include <Platform/SysMem.h>
-#include <Utils/SysFilePrivate.h>
+#include <System/Platform/Common/SysMem.h>
+#include <System/Utils/SysFilePrivate.h>
 
 static SysChar exe_path[MAX_PATH];
 
@@ -7,7 +7,7 @@ static SysChar exe_path[MAX_PATH];
 FILE *sys_real_fopen(const SysChar *fpath, const SysChar * mode) {
   FILE *fp = fopen(fpath, mode);
   if (!fp){
-    sys_warning_N("%s", "failed open file.");
+    sys_warning_N("failed open file: %s",  fpath);
     return NULL;
   }
 

@@ -1,7 +1,7 @@
 #ifndef __SYS_STRING_PRIVATE_H__
 #define __SYS_STRING_PRIVATE_H__
 
-#include <Utils/SysString.h>
+#include <System/Utils/SysString.h>
 
 SYS_BEGIN_DECLS
 

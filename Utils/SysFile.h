@@ -1,7 +1,7 @@
 #ifndef __SYS_FILE_H__
 #define __SYS_FILE_H__
 
-#include <Fundamental/SysCommonCore.h>
+#include <System/Fundamental/SysCommonCore.h>
 
 SYS_BEGIN_DECLS
 

@@ -1,16 +1,12 @@
-#include <Platform/SysThreadPrivate.h>
+#include <System/Platform/Common/SysThreadPrivate.h>
+#include "SysThreadWin32.h"
 
 typedef struct _SysWin32Thread SysWin32Thread;
-typedef struct _SysWin32Mutex SysWin32Mutex;
 
 struct _SysWin32Thread {
   SysRealThread parent;
   SysThreadFunc proxy;
   HANDLE      handle;
-};
-
-struct _SysWin32Mutex {
-  SysRealMutex parent;
 };
 
 static CRITICAL_SECTION private_lock;
@@ -37,8 +33,13 @@ void sys_real_private_set(SysPrivate *key, SysPointer value) {
       rkey = impl2;
     }
 
-    sys_abort_E(rkey != TLS_OUT_OF_INDEXES && rkey != 0, "win32 private_set TlsAlloc failed.");
-    sys_abort_E(sys_atomic_ptr_cmpxchg(&key->p, NULL, UINT_TO_POINTER(rkey)), "win32 private_set new key failed.");
+    if (rkey == TLS_OUT_OF_INDEXES || rkey == 0) {
+      sys_abort_N("%s", "win32 private_set TlsAlloc failed.");
+    }
+
+    if (!sys_atomic_ptr_cmpxchg(&key->p, NULL, UINT_TO_POINTER(rkey))) {
+      sys_abort_N("%s", "win32 private_set new key failed.");
+    }
 
     LeaveCriticalSection(&private_lock);
   }
@@ -126,27 +127,69 @@ fail:
   return NULL;
 }
 
-/* Mutex */
-SysRealMutex *sys_real_mutex_new() {
-  SysWin32Mutex *mutex = sys_new0_N(SysWin32Mutex, 1);
-
+/* {{{1 SysMutex */
+void sys_mutex_init(SysMutex *mutex) {
   InitializeSRWLock((SysPointer)mutex);
-
-  return (SysRealMutex *)mutex;
 }
 
-void sys_real_mutex_lock(SysRealMutex *mutex) {
+void sys_mutex_clear(SysMutex *mutex) {
+}
+
+void sys_mutex_lock(SysMutex *mutex) {
   AcquireSRWLockExclusive((SysPointer)mutex);
 }
 
-bool sys_real_mutex_trylock(SysRealMutex *mutex) {
+SysBool sys_mutex_trylock(SysMutex *mutex) {
   return TryAcquireSRWLockExclusive((SysPointer)mutex);
 }
 
-void sys_real_mutex_unlock(SysRealMutex *mutex) {
+void sys_mutex_unlock(SysMutex *mutex) {
   ReleaseSRWLockExclusive((SysPointer)mutex);
 }
 
-void sys_real_mutex_free(SysRealMutex *mutex) {
-  sys_free_N(mutex);
+static CRITICAL_SECTION * sys_rec_mutex_impl_new(void) {
+  CRITICAL_SECTION *cs;
+
+  cs = sys_slice_new(CRITICAL_SECTION);
+  InitializeCriticalSection(cs);
+
+  return cs;
+}
+
+static void sys_rec_mutex_impl_free(CRITICAL_SECTION *cs) {
+  DeleteCriticalSection(cs);
+  sys_slice_free(CRITICAL_SECTION, cs);
+}
+
+static CRITICAL_SECTION *sys_rec_mutex_get_impl(SysRecMutex *mutex) {
+  CRITICAL_SECTION *impl = mutex->p;
+
+  if (mutex->p == NULL) {
+    impl = sys_rec_mutex_impl_new();
+    if (InterlockedCompareExchangePointer(&mutex->p, impl, NULL) != NULL)
+      sys_rec_mutex_impl_free(impl);
+    impl = mutex->p;
+  }
+
+  return impl;
+}
+
+void sys_rec_mutex_init(SysRecMutex *mutex) {
+  mutex->p = sys_rec_mutex_impl_new();
+}
+
+void sys_rec_mutex_clear(SysRecMutex *mutex) {
+  sys_rec_mutex_impl_free(mutex->p);
+}
+
+void sys_rec_mutex_lock(SysRecMutex *mutex) {
+  EnterCriticalSection(sys_rec_mutex_get_impl(mutex));
+}
+
+void sys_rec_mutex_unlock(SysRecMutex *mutex) {
+  LeaveCriticalSection(mutex->p);
+}
+
+SysBool sys_rec_mutex_trylock(SysRecMutex *mutex) {
+  return TryEnterCriticalSection(sys_rec_mutex_get_impl(mutex));
 }

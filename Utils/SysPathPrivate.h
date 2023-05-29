@@ -1,7 +1,7 @@
 #ifndef __SYS_PATH_PRIVATE_H__
 #define __SYS_PATH_PRIVATE_H__
 
-#include <Utils/SysPath.h>
+#include <System/Utils/SysPath.h>
 
 SYS_BEGIN_DECLS
 

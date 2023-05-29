@@ -1,10 +1,10 @@
-#include <DataTypes/SysSList.h>
+#include <System/DataTypes/SysSList.h>
 
 
 #include "SysSList.h"
 
 /**
- * this code from glib GQueue
+ * this code from glib slist
  * see: ftp://ftp.gtk.org/pub/gtk/
  * license under GNU Lesser General Public
  */
@@ -26,8 +26,11 @@ void sys_slist_free_1 (SysSList *list) {
 }
 
 void sys_slist_free_full (SysSList         *list,
-		   SysDestroyFunc  free_func) {
-  sys_slist_foreach (list, (SysFunc) free_func, NULL);
+    SysDestroyFunc  free_func) {
+  sys_slist_foreach (list, node) {
+    free_func(node->data);
+  }
+
   sys_slist_free (list);
 }
 
@@ -366,16 +369,16 @@ SysUInt sys_slist_length (SysSList *list) {
   return length;
 }
 
-void sys_slist_foreach (SysSList   *list,
-                 SysFunc     func,
-                 SysPointer  user_data) {
-  while (list)
-    {
-      SysSList *next = list->next;
-      (*func) (list->data, user_data);
-      list = next;
-    }
-}
+// void sys_slist_foreach (SysSList   *list,
+//                  SysFunc     func,
+//                  SysPointer  user_data) {
+//   while (list)
+//     {
+//       SysSList *next = list->next;
+//       (*func) (list->data, user_data);
+//       list = next;
+//     }
+// }
 
 static SysSList* sys_slist_insert_sorted_real (SysSList   *list,
                             SysPointer  data,

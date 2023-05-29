@@ -1,9 +1,13 @@
-#ifndef __SYS_COMMON_CORE_H__
-#define __SYS_COMMON_CORE_H__
+#ifndef __SYS_COMMON_TYPE_H__
+#define __SYS_COMMON_TYPE_H__
 
-#include <Platform/SysAtomic.h>
-#include <Platform/SysMem.h>
-#include <Platform/SysOs.h>
-#include <Utils/SysError.h>
+#include <System/Platform/Common/SysAtomic.h>
+#include <System/Platform/Common/SysMem.h>
+#include <System/Platform/Common/SysOs.h>
+#include <System/Utils/SysError.h>
+
+typedef struct _SysPtrArray SysPtrArray;
+typedef struct _SysArray SysArray;
+typedef struct _SysByteArray SysByteArray;
 
 #endif

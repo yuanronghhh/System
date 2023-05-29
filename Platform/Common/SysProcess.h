@@ -1,7 +1,7 @@
 #ifndef __SYS_PROCESS_H__
 #define __SYS_PROCESS_H__
 
-#include <Fundamental/SysCommonCore.h>
+#include <System/Fundamental/SysCommon.h>
 
 typedef struct _SysSubProcess SysSubProcess;
 typedef struct _SysSubProcessOption SysSubProcessOption;
@@ -11,9 +11,9 @@ struct _SysSubProcessOption {
   SysSize cmdlen;
   const SysChar *cwd;
 
-  SYS_IO_TYPE std0type;
-  SYS_IO_TYPE std1type;
-  SYS_IO_TYPE std2type;
+  SYS_IO_ENUM std0type;
+  SYS_IO_ENUM std1type;
+  SYS_IO_ENUM std2type;
 };
 
 struct _SysSubProcess {
@@ -33,7 +33,5 @@ SYS_API bool sys_subprocess_communicate(SysSubProcess *sub,
     SysError**       error);
 
 SYS_API void sys_subprocess_terminate(SysSubProcess *sub);
-
-SYS_API void sys_init(void);
 
 #endif

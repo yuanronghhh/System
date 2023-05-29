@@ -1,5 +1,5 @@
-#include <Utils/SysFile.h>
-#include <Platform/SysProcessPrivate.h>
+#include <System/Utils/SysFile.h>
+#include <System/Platform/Common/SysProcessPrivate.h>
 
 typedef struct _SysSubProcessPosix SysSubProcessPosix;
 
@@ -11,7 +11,7 @@ struct _SysSubProcessPosix {
   FILE* s_stderr;
 };
 
-static SysInt devnull = -1;
+// static SysInt devnull = -1;
 
 SysInt sys_real_dev_null(void) {
   SysInt dev_null = sys_open("/dev/null", O_RDWR, -1);
@@ -31,7 +31,7 @@ static bool posix_get_handle(
   FILE* rfd0, FILE* wfd0,
   FILE* rfd1, FILE* wfd1,
   FILE* rfd2, FILE* wfd2,
-  SYS_IO_TYPE std0_type, SYS_IO_TYPE std1_type, SYS_IO_TYPE std2_type) {
+  SYS_IO_ENUM std0_type, SYS_IO_ENUM std1_type, SYS_IO_ENUM std2_type) {
 
 #if 0
   FILE* std0, *std1, *std2;

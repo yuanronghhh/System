@@ -1,5 +1,5 @@
-#include <Utils/SysString.h>
-#include <Utils/SysErrorPrivate.h>
+#include <System/Utils/SysString.h>
+#include <System/Utils/SysErrorPrivate.h>
 
 static SysChar buff[1024];
 /**
@@ -8,7 +8,7 @@ static SysChar buff[1024];
  *
  * Returns: Void
  */
-SysChar* sys_real_strerr(SysInt errnum) {
+const SysChar* sys_real_strerr(SysInt errnum) {
   SysChar *msg = strerror_r(errnum, buff, sizeof(buff));
 
   return msg;

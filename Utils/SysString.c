@@ -1,7 +1,7 @@
-#include <Utils/SysError.h>
-#include <Platform/SysOs.h>
-#include <Platform/SysMem.h>
-#include <Utils/SysStringPrivate.h>
+#include <System/Utils/SysError.h>
+#include <System/Platform/Common/SysOs.h>
+#include <System/Platform/Common/SysMem.h>
+#include <System/Utils/SysStringPrivate.h>
 
 #define SYS_BYTE_INIT_SIZE 4096
 
@@ -55,9 +55,9 @@ SysChar **sys_strsplit(SysChar * s, const SysChar *delim, int * count) {
  *  example:
  *    SysSize mlen = 200, len = 0;
  *    SysChar *s = sys_str_newsize(char, mlen);
- *    sys_strcat_M(&s, &mlen, &len, "var");
- *    sys_strcat_M(&s, &mlen, &len, "=");
- *    sys_strcat_M(&s, &mlen, &len, "foo");
+ *    sys_strmcat(&s, &mlen, &len, "var");
+ *    sys_strmcat(&s, &mlen, &len, "=");
+ *    sys_strmcat(&s, &mlen, &len, "foo");
  *    sys_free_N(s);
  *
  * @v1: *v1 is the string to store.
@@ -66,7 +66,7 @@ SysChar **sys_strsplit(SysChar * s, const SysChar *delim, int * count) {
  *
  * Returns: v1 string length.
  */
-void sys_strcat_M(SysChar** v1, SysSize* v1_max, SysSize* len, const SysChar* v2) {
+void sys_strmcat(SysChar** v1, SysSize* v1_max, SysSize* len, const SysChar* v2) {
   sys_return_if_fail(*v1 != NULL);
   sys_return_if_fail(v2 != NULL);
   sys_return_if_fail(v1_max != NULL && "sys_strcat max_len should not be null.");
@@ -86,7 +86,10 @@ void sys_strcat_M(SysChar** v1, SysSize* v1_max, SysSize* len, const SysChar* v2
     nearup = sys_nearest_pow((SysUInt)(nlen + 1));
 
     nstr = sys_realloc_N(*v1, nearup);
-    sys_abort_E(nstr != NULL, "renew failed");
+    if (nstr == NULL) {
+      sys_abort_N("%s", "renew failed");
+    }
+
     *v1 = nstr;
     *v1_max = nearup;
   }
@@ -221,9 +224,9 @@ int sys_asprintf(SysChar **str, const SysChar *format, ...) {
 
 int sys_vprintf(const SysChar *format, va_list va) {
   int len;
-  SYS_LEAK_IGNORE(
+  SYS_LEAK_IGNORE_BEGIN;
       len = sys_real_vprintf(format, va);
-  )
+  SYS_LEAK_IGNORE_END;
   return len;
 }
 
@@ -255,9 +258,9 @@ int sys_printf(const SysChar *format, ...) {
 void sys_print(const SysChar *str) {
   sys_return_if_fail(str != NULL);
 
-  SYS_LEAK_IGNORE(
+  SYS_LEAK_IGNORE_BEGIN;
     fputs(str, stdout);
-  )
+  SYS_LEAK_IGNORE_END;
   fflush(stdout);
 }
 
@@ -463,7 +466,7 @@ SysSize sys_strlen(const SysChar *s, SysSize max) {
   return len;
 }
 
-bool sys_streq(const SysChar *s1, const SysChar *s2) {
+SysBool sys_str_equal(const SysChar *s1, const SysChar *s2) {
   sys_return_val_if_fail(s1 != NULL, false);
   sys_return_val_if_fail(s2 != NULL, false);
 
@@ -546,6 +549,7 @@ SysDouble sys_str_to_double(const SysChar *str) {
 
 SysInt64 sys_str_to_int64(const SysChar *str) {
   sys_return_val_if_fail(str != NULL, 0);
+
   return strtol(str, NULL, 10);
 }
 

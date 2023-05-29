@@ -1,7 +1,7 @@
-#include <DataTypes/SysList.h>
+#include <System/DataTypes/SysList.h>
 
 /**
- * this code from glib hashtable
+ * this code from glib list
  * see: ftp://ftp.gtk.org/pub/gtk/
  * license under GNU Lesser General Public
  */
@@ -12,11 +12,11 @@ SysList* sys_list_new(void) {
 }
 
 void sys_list_free_full(SysList  *list, SysDestroyFunc func) {
-  sys_list_foreach(list, node)
+  sys_list_foreach(list, node) {
     func(node->data);
-  sys_list_foreach_end
+  };
 
-  sys_list_free_1(list);
+  sys_list_free(list);
 }
 
 void sys_list_free(SysList *list) {

@@ -1,5 +1,5 @@
-#include <Utils/SysString.h>
-#include <Utils/SysPathPrivate.h>
+#include <System/Utils/SysString.h>
+#include <System/Utils/SysPathPrivate.h>
 
 /**
  * sys_getcwd: get current workspace.
@@ -37,17 +37,6 @@ SysChar* sys_path_dirname(const SysChar *path) {
 
 bool sys_path_exists(const SysChar *path) {
   return sys_real_path_exists(path);
-}
-
-SysChar *_sys_path_join(SysChar *delim, const SysChar *path, ...) {
-	SysChar *npath;
-
-	va_list args;
-	va_start(args, delim);
-	npath = sys_strjoinv(delim, args);
-	va_end(args);
-
-	return npath;
 }
 
 /**
@@ -88,10 +77,10 @@ const SysChar *sys_path_basename(const SysChar *path) {
  * Returns: return NULL if no dot match.
  */
 const SysChar *sys_path_extension(const SysChar *path) {
-	sys_return_val_if_fail(path != NULL, NULL);
+  sys_return_val_if_fail(path != NULL, NULL);
 
-	const SysChar *s = strrchr(path, '.');
-	return s ? s + 1 : (SysChar *)path;
+  const SysChar *s = strrchr(path, '.');
+  return s ? s + 1 : (SysChar *)path;
 }
 
 /**
@@ -101,8 +90,8 @@ const SysChar *sys_path_extension(const SysChar *path) {
  * Returns: new allocated string.
  */
 SysChar* sys_path_purename(const SysChar *path) {
-	sys_return_val_if_fail(path != NULL, NULL);
-	SysInt len = (SysInt)(sys_path_extension(path) - path);
+  sys_return_val_if_fail(path != NULL, NULL);
+  SysInt len = (SysInt)(sys_path_extension(path) - path);
 
-	return sys_strndup(path, len - 1);
+  return sys_strndup(path, len - 1);
 }

@@ -1,7 +1,7 @@
 #ifndef __SYS_FILE_PRIVATE_H__
 #define __SYS_FILE_PRIVATE_H__
 
-#include <Utils/SysFile.h>
+#include <System/Utils/SysFile.h>
 
 FILE *sys_real_fopen(const SysChar *fpath, const SysChar *mode);
 SysSize sys_real_fread(

@@ -1,20 +1,14 @@
 #ifndef __SYS_ARRAY_H__
 #define __SYS_ARRAY_H__
 
-#include <Fundamental/SysCommonCore.h>
+#include <System/Fundamental/SysCommonCore.h>
 
 SYS_BEGIN_DECLS
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #define sys_array_foreach(type, node, array, len)        \
-  for (SysInt i = 0; i < (SysInt)len; i++) { \
-    type node = array[i];
-
-#define sys_array_foreach_end }
-
-typedef struct _SysPtrArray SysPtrArray;
-typedef struct _SysArray SysArray;
-typedef struct _SysByteArray SysByteArray;
+  type node = array[0];                                  \
+  for (int i = 0; i < (int)(len); node = array[++i])
 
 struct _SysArray {
   void** pdata;
@@ -27,8 +21,8 @@ struct _SysPtrArray {
 };
 
 struct _SysByteArray {
-	void** pdata;
-	SysUInt len;
+  void** pdata;
+  SysUInt len;
 };
 
 
@@ -87,12 +81,9 @@ SYS_API void sys_ptr_array_add(SysPtrArray *array, SysPointer data);
 SYS_API void sys_ptr_array_extend(SysPtrArray *array_to_extend, SysPtrArray *array, SysCopyFunc func, SysPointer user_data);
 SYS_API void sys_ptr_array_extend_and_steal(SysPtrArray *array_to_extend, SysPtrArray *array);
 SYS_API void sys_ptr_array_insert(SysPtrArray *array, SysInt index_, SysPointer data);
-SYS_API void sys_ptr_array_sort(SysPtrArray *array, SysCompareFunc compare_func);
-SYS_API void sys_ptr_array_sort_with_data(SysPtrArray *array, SysCompareDataFunc compare_func, SysPointer user_data);
 SYS_API void sys_ptr_array_foreach(SysPtrArray *array, SysFunc func, SysPointer user_data);
 SYS_API SysBool sys_ptr_array_find(SysPtrArray *haystack, const SysPointer needle, SysUInt *index_);
 SYS_API SysBool sys_ptr_array_find_with_equal_func(SysPtrArray *haystack, const SysPointer needle, SysEqualFunc equal_func, SysUInt *index_);
-
 
 /* Byte arrays, an array of SysUInt8.  Implemented as a SysArray,
  * but type-safe.

@@ -1,7 +1,7 @@
 #ifndef __SYS_PROCESS_PRIVATE_H__
 #define __SYS_PROCESS_PRIVATE_H__
 
-#include <Platform/SysProcess.h>
+#include <System/Platform/Common/SysProcess.h>
 
 SysInt sys_real_dev_null(void);
 SysInt sys_real_execvp(const SysChar* path, SysChar* const args[]);

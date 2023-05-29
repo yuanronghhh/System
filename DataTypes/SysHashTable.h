@@ -1,7 +1,7 @@
 #ifndef __SYS_HASH_TABLE_H__
 #define __SYS_HASH_TABLE_H__
 
-#include <DataTypes/SysArray.h>
+#include <System/DataTypes/SysArray.h>
 
 /**
  * this code from glib hashtable

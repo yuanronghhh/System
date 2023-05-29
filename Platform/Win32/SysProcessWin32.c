@@ -1,10 +1,15 @@
-#include <Utils/SysFile.h>
-#include <Utils/SysString.h>
-#include <Platform/SysThread.h>
-#include <DataTypes/SysArray.h>
-#include <Platform/SysProcessPrivate.h>
+#include <System/Utils/SysFile.h>
+#include <System/Utils/SysString.h>
+#include <System/DataTypes/SysArray.h>
+#include <System/Platform/Common/SysThread.h>
+#include <System/Platform/Common/SysProcessPrivate.h>
 
-#define CloseHandle_N(h) sys_abort_E(CloseHandle(h), "close handle failed");
+#define CloseHandle_N(h) \
+do {                                         \
+  if (!(CloseHandle(h))) {                   \
+    sys_abort_N("%s",  "close handle failed"); \
+  }                                          \
+} while(0)
 
 typedef struct _SysSubProcessWin32 SysSubProcessWin32;
 
@@ -39,7 +44,7 @@ static bool win32_get_handle(
   PHANDLE rfd0, PHANDLE wfd0,
   PHANDLE rfd1, PHANDLE wfd1,
   PHANDLE rfd2, PHANDLE wfd2,
-  SYS_IO_TYPE std0_type, SYS_IO_TYPE std1_type, SYS_IO_TYPE std2_type) {
+  SYS_IO_ENUM std0_type, SYS_IO_ENUM std1_type, SYS_IO_ENUM std2_type) {
 
   HANDLE std0, std1, std2;
 

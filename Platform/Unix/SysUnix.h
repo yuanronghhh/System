@@ -17,18 +17,20 @@ extern "C" {
 #include <sys/statfs.h>
 #include <libintl.h>
 #include <X11/Xlib.h>
+#include <execinfo.h>
 
 #define PATH_SEP "/"
 #ifndef MAX_PATH
-#define MAX_PATH 260
+  #define MAX_PATH 260
 #endif
-#define sys_handle int
+
+#define SYS_HANDLE int
 #define SYS_OS_UNIX 1
 #define SYS_API extern __attribute__((visibility("default")))
 
 #define max(a, b)  (((a) > (b)) ? (a) : (b))
 #define min(a, b)  (((a) < (b)) ? (a) : (b))
-#define asb(a)	   (((a) < 0) ? -(a) : (a))
+#define asb(a)     (((a) < 0) ? -(a) : (a))
 #define clamp(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
 
 #ifdef __cplusplus

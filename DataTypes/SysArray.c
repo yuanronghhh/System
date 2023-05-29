@@ -1,9 +1,9 @@
-#include <DataTypes/SysHashTable.h>
-#include <Utils/SysString.h>
-#include <DataTypes/SysArray.h>
+#include <System/DataTypes/SysHashTable.h>
+#include <System/Utils/SysString.h>
+#include <System/DataTypes/SysArray.h>
 
 /**
- * this code from glib hashtable
+ * this code from glib array
  * see: ftp://ftp.gtk.org/pub/gtk/
  * license under GNU Lesser General Public
  */

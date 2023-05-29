@@ -1,7 +1,7 @@
 #ifndef __SYS_MEM_PRIVATE_H__
 #define __SYS_MEM_PRIVATE_H__
 
-#include <Platform/SysMem.h>
+#include <System/Platform/Common/SysMem.h>
 
 SYS_BEGIN_DECLS
 

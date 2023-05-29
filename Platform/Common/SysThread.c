@@ -1,4 +1,4 @@
-#include <Platform/SysThreadPrivate.h>
+#include <System/Platform/Common/SysThreadPrivate.h>
 
 static void sys_thread_clean(SysPointer data);
 
@@ -68,7 +68,9 @@ SysPointer sys_thread_join(SysThread *thread) {
 SysThread* sys_thread_self(void) {
   SysRealThread* thread = sys_private_get(&private_thread);
 
-  sys_abort_E(thread != NULL, "thread may not created by sys_thread_new.");
+  if (thread == NULL) {
+    sys_abort_N("%s", "thread may not created by sys_thread_new.");
+  }
 
   sys_private_set(&private_thread, thread);
 
@@ -81,36 +83,6 @@ void sys_thread_unref(SysThread *thread) {
   if (!sys_ref_count_dec(real)) {
     return;
   }
-  
+
   sys_real_thread_free(real);
-}
-
-SysMutex *sys_mutex_new(void) {
-  SysRealMutex *real = sys_real_mutex_new();
-
-  return (SysMutex *)real;
-}
-
-void sys_mutex_free(SysMutex *mutex) {
-  SysRealMutex *real = (SysRealMutex *)mutex;
-
-  sys_real_mutex_free(real);
-}
-
-void sys_mutex_lock(SysMutex *mutex) {
-  SysRealMutex *real = (SysRealMutex *)mutex;
-
-  sys_real_mutex_lock(real);
-}
-
-bool sys_mutex_trylock(SysMutex *mutex) {
-  SysRealMutex *real = (SysRealMutex *)mutex;
-
-  return sys_real_mutex_trylock(real);
-}
-
-void sys_mutex_unlock(SysMutex *mutex) {
-  SysRealMutex *real = (SysRealMutex *)mutex;
-
-  sys_real_mutex_unlock(real);
 }

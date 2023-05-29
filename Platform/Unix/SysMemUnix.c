@@ -1,4 +1,4 @@
-#include <Platform/SysMemPrivate.h>
+#include <System/Platform/Common/SysMemPrivate.h>
 
 void sys_real_memcpy(
     void*       const dst,
