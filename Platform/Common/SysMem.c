@@ -1,8 +1,7 @@
-#include "SysMem.h"
+#include <System/Platform/Common/SysMemPrivate.h>
 #include <System/Utils/SysString.h>
 #include <System/Utils/SysFile.h>
 #include <System/Utils/SysError.h>
-#include <System/Platform/Common/SysMemPrivate.h>
 
 void sys_memcpy(
     SysPointer  const dst,
