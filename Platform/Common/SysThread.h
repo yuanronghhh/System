@@ -48,7 +48,6 @@ struct _SysPrivate {
 SYS_API SysPointer sys_private_get(SysPrivate *key);
 SYS_API void sys_private_set(SysPrivate *key, SysPointer value);
 
-
 /* Mutex */
 SYS_API void sys_mutex_clear(SysMutex *mutex);
 SYS_API void sys_mutex_init(SysMutex *mutex);

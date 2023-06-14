@@ -57,12 +57,12 @@ typedef unsigned char SysUInt8;
 typedef signed char SysInt8;
 typedef signed short SysInt16;
 typedef unsigned int SysUInt32;
+typedef unsigned long SysULong;
 typedef signed long long SysInt64;
 typedef unsigned long long SysUInt64;
 typedef double SysDouble;
 typedef size_t SysSize;
 typedef wchar_t SysWChar;
-#define SysNULL NULL
 
 #define SYS_ARGS(func, ptr) __FILE__, __func__, __LINE__, #func, #ptr,
 #define SYS_ARGS_N const SysChar *_filename, const SysChar *_funcname, const SysInt _line, const SysChar * _callfunc, const SysChar *_ptrstr,

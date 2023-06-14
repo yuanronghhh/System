@@ -1,59 +1,99 @@
 #include <System/Platform/Common/SysThreadPrivate.h>
 
-typedef struct _SysUnixThread SysUnixThread;
-typedef struct _SysUnixMutex SysUnixMutex;
+/**
+ * this code from glib GThread
+ * see: ftp://ftp.gtk.org/pub/gtk/
+ * license under GNU Lesser General Public
+ */
 
-struct _SysUnixThread {
-  SysRealThread parent;
-  SysThreadFunc proxy;
-  pthread_t     *thread;
+typedef struct _SysUnixMutex SysUnixMutex;
+typedef struct _SysThreadPosix SysThreadPosix;
+
+/* Thread */
+#define posix_check_err(err, name) { \
+  int error = (err);        \
+  if (error)           \
+    sys_error ("file %s: line %d (%s): error '%s' during '%s'",  \
+           __FILE__, __LINE__, __func__,  \
+           sys_strerr (error), name);     \
+  }
+
+#define posix_check_cmd(cmd) posix_check_err (cmd, #cmd)
+
+struct _SysThreadPosix {
+  SysRealThread thread;
+
+  pthread_t real_thread;
+  SysBool  joined;
+  SysMutex    lock;
 };
 
-SysPointer sys_real_private_get(SysPrivate *key) {
-  sys_return_val_if_fail(key == NULL, NULL);
+void sys_real_thread_free (SysRealThread *thread) {
+  SysThreadPosix *pt = (SysThreadPosix *) thread;
 
-  pthread_key_t *pkey = (pthread_key_t *)key->p;
+  if (!pt->joined) {
 
-  return pthread_getspecific (*pkey);
-}
-
-void sys_real_private_set (SysPrivate *key, SysPointer value) {
-  sys_return_if_fail(key == NULL);
-  sys_return_if_fail(value == NULL);
-
-  SysInt status;
-  pthread_key_t *pkey = (pthread_key_t *)key->p;
-
-  status = pthread_setspecific (*pkey, value);
-  if(status == 0) {
-    sys_abort_N("%s", "unix private_set pthread_setspecific failed.");
+    pthread_detach (pt->real_thread);
   }
+
+  sys_mutex_clear (&pt->lock);
+
+  sys_slice_free (SysThreadPosix, pt);
 }
 
-void sys_real_thread_init(void) {
+SysRealThread * sys_real_thread_new (SysThreadFunc thread_func, SysError **error) {
+  SysThreadPosix *thread;
+  pthread_attr_t attr;
+  SysInt ret;
+
+  thread = sys_slice_new0 (SysThreadPosix);
+
+  posix_check_cmd (pthread_attr_init (&attr));
+
+  ret = pthread_create (&thread->real_thread, &attr, (void* (*)(void*))thread_func, thread);
+
+  posix_check_cmd (pthread_attr_destroy (&attr));
+
+  if (ret == EAGAIN) {
+    sys_error_set_N (error, "Error creating thread: %s", sys_strerr (ret));
+    sys_slice_free (SysThreadPosix, thread);
+    return NULL;
+  }
+
+  posix_check_err (ret, "pthread_create");
+
+  sys_mutex_init (&thread->lock);
+
+  return (SysRealThread *) thread;
 }
 
-void sys_real_thread_detach(void) {
+void sys_thread_yield (void) {
+  sched_yield ();
 }
 
-SysRealThread *sys_real_thread_new(SysThreadFunc proxy, SysError **error) {
-  sys_return_val_if_fail(proxy == NULL, NULL);
-  sys_return_val_if_fail(*error != NULL, NULL);
+void sys_real_thread_wait (SysRealThread *thread) {
+  SysThreadPosix *pt = (SysThreadPosix *) thread;
 
-  return NULL;
+  sys_mutex_lock (&pt->lock);
+
+  if (!pt->joined) {
+    posix_check_cmd (pthread_join (pt->real_thread, NULL));
+    pt->joined = true;
+  }
+
+  sys_mutex_unlock (&pt->lock);
 }
 
-void sys_real_thread_exit(void) {
+void sys_real_thread_exit (void) {
+  pthread_exit (NULL);
 }
 
-void sys_real_thread_wait(SysRealThread *thread) {
-  sys_return_if_fail(thread == NULL);
-
-}
-
-void sys_real_thread_free(SysRealThread *thread) {
-  sys_return_if_fail(thread == NULL);
-
+void sys_real_thread_set_name (const SysChar *name) {
+#if defined(HAVE_PTHREAD_SETNAME_NP_WITH_TID)
+  pthread_setname_np (pthread_self(), name); /* on Linux and Solaris */
+#elif defined(HAVE_PTHREAD_SETNAME_NP_WITHOUT_TID)
+  pthread_setname_np (name); /* on OS X and iOS */
+#endif
 }
 
 /* Mutex */
