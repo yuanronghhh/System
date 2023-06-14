@@ -9,8 +9,11 @@ typedef struct _SysRealThread SysRealThread;
 
 struct _SysRealThread {
   SysThread thread;
+
+  SysInt ref_count;
+  SysBool ours;
+  SysChar *name;
   SysPointer retval;
-  SysRef ref_count;
 };
 
 SYS_END_DECLS

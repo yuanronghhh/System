@@ -1,17 +1,23 @@
+#include <System/DataTypes/SysSList.h>
 #include <System/Platform/Common/SysThreadPrivate.h>
 
+/**
+ * this code from glib Thread
+ * see: ftp://ftp.gtk.org/pub/gtk/
+ * license under GNU Lesser General Public
+ */
 
 static SysMutex    sys_once_mutex;
 static SysCond     sys_once_cond;
 static SysSList   *sys_once_init_list = NULL;
 
-static void sys_thread_cleanup (gpointer data);
-static GPrivate     sys_thread_specific_private = SYS_PRIVATE_INIT (sys_thread_cleanup);
+static void sys_thread_cleanup (SysPointer data);
+static SysPrivate sys_thread_specific_private = SYS_PRIVATE_INIT (sys_thread_cleanup);
 
 SYS_LOCK_DEFINE_STATIC (sys_thread_new);
 
 /* SysOnce {{{1 ------------------------------------------------------------- */
-gpointer sys_once_impl (SysOnce *once, SysThreadFunc func, gpointer arg) {
+SysPointer sys_once_impl (SysOnce *once, SysThreadFunc func, SysPointer arg) {
   sys_mutex_lock (&sys_once_mutex);
 
   while (once->status == SYS_ONCE_STATUS_PROGRESS)
@@ -94,11 +100,11 @@ void sys_thread_unref (SysThread *thread) {
   }
 }
 
-static void sys_thread_cleanup (gpointer data) {
+static void sys_thread_cleanup (SysPointer data) {
   sys_thread_unref (data);
 }
 
-gpointer sys_thread_proxy (gpointer data) {
+SysPointer sys_thread_proxy (SysPointer data) {
   SysRealThread* thread = data;
 
   sys_assert (data);
@@ -127,7 +133,7 @@ gpointer sys_thread_proxy (gpointer data) {
   return NULL;
 }
 
-SysThread * sys_thread_new (const gchar *name, SysThreadFunc  func, gpointer     data) {
+SysThread * sys_thread_new (const gchar *name, SysThreadFunc  func, SysPointer     data) {
   GError *error = NULL;
   SysThread *thread;
 
@@ -139,11 +145,11 @@ SysThread * sys_thread_new (const gchar *name, SysThreadFunc  func, gpointer    
   return thread;
 }
 
-SysThread * sys_thread_try_new (const gchar  *name, SysThreadFunc   func, gpointer      data, GError      **error) {
+SysThread * sys_thread_try_new (const gchar  *name, SysThreadFunc   func, SysPointer      data, GError      **error) {
   return sys_thread_new_internal (name, sys_thread_proxy, func, data, 0, error);
 }
 
-SysThread * sys_thread_new_internal (const gchar   *name, SysThreadFunc    proxy, SysThreadFunc    func, gpointer       data, gsize          stack_size, GError       **error) {
+SysThread * sys_thread_new_internal (const gchar   *name, SysThreadFunc    proxy, SysThreadFunc    func, SysPointer       data, gsize          stack_size, GError       **error) {
   SysRealThread *thread;
 
   sys_return_val_if_fail (func != NULL, NULL);
@@ -163,7 +169,7 @@ SysThread * sys_thread_new_internal (const gchar   *name, SysThreadFunc    proxy
   return (SysThread*) thread;
 }
 
-void sys_thread_exit (gpointer retval) {
+void sys_thread_exit (SysPointer retval) {
   SysRealThread* real = (SysRealThread*) sys_thread_self ();
 
   if SYS_UNLIKELY (!real->ours)
@@ -174,9 +180,9 @@ void sys_thread_exit (gpointer retval) {
   sys_system_thread_exit ();
 }
 
-gpointer sys_thread_join (SysThread *thread) {
+SysPointer sys_thread_join (SysThread *thread) {
   SysRealThread *real = (SysRealThread*) thread;
-  gpointer retval;
+  SysPointer retval;
 
   sys_return_val_if_fail (thread, NULL);
   sys_return_val_if_fail (real->ours, NULL);
