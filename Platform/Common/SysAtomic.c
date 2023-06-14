@@ -8,11 +8,11 @@ void sys_atomic_int_inc(SysInt *x) {
   sys_real_atomic_int_inc(x);
 }
 
-SysInt sys_atomic_int_get(const volatile SysInt *i) {
-  return sys_real_atomic_int_get(i);
+SysInt _sys_atomic_int_get(const volatile SysInt *x) {
+  return sys_real_atomic_int_get(x);
 }
 
-void sys_atomic_int_set(volatile SysInt *x, SysInt n) {
+void _sys_atomic_int_set(volatile SysInt *x, SysInt n) {
   sys_real_atomic_int_set(x, n);
 }
 

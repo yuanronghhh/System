@@ -34,12 +34,12 @@ struct _SysRWLock {
   SysUInt i[2];
 };
 
-struct _SysCond
-{
+struct _SysCond {
   SysPointer p;
   SysUInt i[2];
 };
 
+#define SYS_PRIVATE_INIT(notify) { NULL, (notify) }
 struct _SysPrivate {
   SysPointer p;
   SysDestroyFunc dest_func;

@@ -2,7 +2,7 @@
 
 static void sys_thread_clean(SysPointer data);
 
-static SysPrivate private_thread = { NULL, sys_thread_clean };
+static SysPrivate private_thread = SYS_PRIVATE_INIT(sys_thread_clean);
 
 void sys_private_set(SysPrivate *key, SysPointer value) {
   sys_real_private_set(key, value);

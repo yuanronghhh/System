@@ -228,6 +228,7 @@ SysChar **sys_real_backtrace_string(SysInt *size) {
 }
 
 void sys_real_setup(void) {
+  sys_thread_init();
 }
 
 void sys_real_teardown(void) {

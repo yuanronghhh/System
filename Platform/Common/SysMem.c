@@ -17,15 +17,12 @@ void _sys_clear_pointer(void **pp, SysDestroyFunc destroy) {
   sys_return_if_fail(pp != NULL);
   sys_return_if_fail(*pp != NULL);
 
-  /* Only one access, please; work around type aliasing */
-  union { char *in; SysPointer *out; } _pp;
   SysPointer _p;
 
-  _pp.in = (char *)(pp);
-  _p = *_pp.out;
+  _p = *pp;
   if (_p) {
-    *_pp.out = NULL;
     destroy(_p);
+    *pp = NULL;
   }
 }
 
