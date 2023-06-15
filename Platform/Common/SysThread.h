@@ -60,7 +60,7 @@ struct _SysPrivate {
 
 typedef enum {
   SYS_ONCE_STATUS_NOTCALLED,
-  SYS_ONCE_STATUS_PROSysRESS,
+  SYS_ONCE_STATUS_PROGRESS,
   SYS_ONCE_STATUS_READY
 } SysOnceStatus;
 
@@ -151,8 +151,8 @@ SYS_API SysPointer sys_private_get (SysPrivate *key);
 SYS_API void sys_private_set (SysPrivate *key, SysPointer value);
 SYS_API void sys_private_replace (SysPrivate *key, SysPointer value);
 SYS_API SysPointer sys_once_impl (SysOnce *once, SysThreadFunc func, SysPointer arg);
-SYS_API SysBool sys_once_init_enter (volatile void *location);
-SYS_API void sys_once_init_leave (volatile void *location, SysSize result);
+SYS_API SysBool sys_once_init_enter (volatile SysPointer location);
+SYS_API void sys_once_init_leave (volatile SysPointer location, SysSize result);
 
 #if defined(SYS_ATOMIC_LOCK_FREE) && defined(__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4) && defined(__ATOMIC_SEQ_CST)
 # define sys_once(once, func, arg) \

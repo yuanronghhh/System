@@ -39,15 +39,15 @@ SysPointer sys_once_impl (SysOnce *once, SysThreadFunc func, SysPointer arg) {
   return once->retval;
 }
 
-SysBool (sys_once_init_enter) (volatile void *location) {
-  volatile gsize *value_location = location;
+SysBool (sys_once_init_enter) (volatile SysPointer location) {
+  const volatile SysPointer value_location = location;
   SysBool need_init = false;
   sys_mutex_lock (&sys_once_mutex);
 
   if (sys_atomic_pointer_get (value_location) == NULL) {
 
     if (!sys_slist_find (sys_once_init_list, (void*) value_location)) {
-      need_init = TRUE;
+      need_init = true;
       sys_once_init_list = sys_slist_prepend (sys_once_init_list, (void*) value_location);
 
     } else {
@@ -63,14 +63,14 @@ SysBool (sys_once_init_enter) (volatile void *location) {
   return need_init;
 }
 
-void (sys_once_init_leave) (volatile void *location, gsize          result) {
-  volatile gsize *value_location = location;
+void (sys_once_init_leave) (volatile SysPointer location, SysSize result) {
+  volatile SysPointer value_location = location;
 
   sys_return_if_fail (sys_atomic_pointer_get (value_location) == NULL);
   sys_return_if_fail (result != 0);
   sys_return_if_fail (sys_once_init_list != NULL);
 
-  sys_atomic_pointer_set (value_location, result);
+  sys_atomic_pointer_set (value_location, (SysPointer)result);
   sys_mutex_lock (&sys_once_mutex);
   sys_once_init_list = sys_slist_remove (sys_once_init_list, (void*) value_location);
   sys_cond_broadcast (&sys_once_cond);
@@ -118,11 +118,7 @@ SysPointer sys_thread_proxy (SysPointer data) {
   SYS_LOCK (sys_thread_new);
   SYS_UNLOCK (sys_thread_new);
 
-  TRACE (GLIB_THREAD_SPAWNED (thread->thread.func, thread->thread.data,
-        thread->name));
-
-  if (thread->name)
-  {
+  if (thread->name) {
     sys_system_thread_set_name (thread->name);
     sys_free (thread->name);
     thread->name = NULL;
@@ -133,23 +129,24 @@ SysPointer sys_thread_proxy (SysPointer data) {
   return NULL;
 }
 
-SysThread * sys_thread_new (const gchar *name, SysThreadFunc  func, SysPointer     data) {
-  GError *error = NULL;
+SysThread * sys_thread_new (const SysChar *name, SysThreadFunc  func, SysPointer     data) {
+  SysError *error = NULL;
   SysThread *thread;
 
   thread = sys_thread_new_internal (name, sys_thread_proxy, func, data, 0, &error);
 
-  if SYS_UNLIKELY (thread == NULL)
+  if SYS_UNLIKELY (thread == NULL) {
     sys_error ("creating thread '%s': %s", name ? name : "", error->message);
+  }
 
   return thread;
 }
 
-SysThread * sys_thread_try_new (const gchar  *name, SysThreadFunc   func, SysPointer      data, GError      **error) {
+SysThread * sys_thread_try_new (const SysChar  *name, SysThreadFunc   func, SysPointer      data, SysError      **error) {
   return sys_thread_new_internal (name, sys_thread_proxy, func, data, 0, error);
 }
 
-SysThread * sys_thread_new_internal (const gchar   *name, SysThreadFunc    proxy, SysThreadFunc    func, SysPointer       data, gsize          stack_size, GError       **error) {
+SysThread * sys_thread_new_internal (const SysChar   *name, SysThreadFunc    proxy, SysThreadFunc    func, SysPointer       data, SysSize          stack_size, SysError       **error) {
   SysRealThread *thread;
 
   sys_return_val_if_fail (func != NULL, NULL);
@@ -158,8 +155,8 @@ SysThread * sys_thread_new_internal (const gchar   *name, SysThreadFunc    proxy
   thread = sys_system_thread_new (proxy, stack_size, error);
   if (thread) {
     thread->ref_count = 2;
-    thread->ours = TRUE;
-    thread->thread.joinable = TRUE;
+    thread->ours = true;
+    thread->thread.joinable = true;
     thread->thread.func = func;
     thread->thread.data = data;
     thread->name = sys_strdup (name);

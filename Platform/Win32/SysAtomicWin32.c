@@ -26,18 +26,18 @@ bool sys_real_atomic_cmpxchg(SysInt *x, SysInt o, SysInt n) {
   return InterlockedCompareExchange(x, n, o) == o;
 }
 
-bool sys_real_atomic_ptr_cmpxchg(SysPointer *x, SysPointer o, SysPointer n) {
+bool sys_real_atomic_pointer_cmpxchg(SysPointer *x, SysPointer o, SysPointer n) {
   return InterlockedCompareExchangePointer(x, n, o) == o;
 }
 
-SysPointer sys_real_atomic_ptr_get(const volatile SysPointer x) {
+SysPointer sys_real_atomic_pointer_get(const volatile SysPointer x) {
   const SysPointer *ptr = x;
 
   MemoryBarrier();
   return *ptr;
 }
 
-void sys_real_atomic_ptr_set(volatile void *o, SysPointer n) {
+void sys_real_atomic_pointer_set(volatile void *o, SysPointer n) {
   volatile void **ptr = o;
 
   *ptr = n;

@@ -26,11 +26,11 @@ bool sys_real_atomic_cmpxchg(SysInt *x, SysInt o, SysInt n) {
   return __sync_bool_compare_and_swap(x, o, n);
 }
 
-bool sys_real_atomic_ptr_cmpxchg(SysPointer *x, SysPointer o, SysPointer n) {
+bool sys_real_atomic_pointer_cmpxchg(SysPointer *x, SysPointer o, SysPointer n) {
   return __sync_bool_compare_and_swap (x, o, n);
 }
 
-SysPointer sys_real_atomic_ptr_get(SysPointer x) {
+SysPointer sys_real_atomic_pointer_get(SysPointer x) {
   const SysPointer *ptr = x;
   __sync_synchronize ();
   __asm__ __volatile__ ("" : : : "memory");
@@ -38,7 +38,7 @@ SysPointer sys_real_atomic_ptr_get(SysPointer x) {
   return *(ptr);
 }
 
-void sys_real_atomic_ptr_set(volatile void *o, SysPointer n) {
+void sys_real_atomic_pointer_set(volatile SysPointer o, SysPointer n) {
   volatile SysPointer *ptr = o;
 
   *ptr = n;

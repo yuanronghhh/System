@@ -125,11 +125,11 @@ static void sys_mutex_impl_free (pthread_mutex_t *mutex) {
 }
 
 static inline pthread_mutex_t *sys_mutex_get_impl (SysMutex *mutex) {
-  pthread_mutex_t *impl = sys_atomic_ptr_get (&mutex->p);
+  pthread_mutex_t *impl = sys_atomic_pointer_get (&mutex->p);
 
   if (impl == NULL) {
     impl = sys_mutex_impl_new ();
-  if (!sys_atomic_ptr_cmpxchg (&mutex->p, NULL, impl))
+  if (!sys_atomic_pointer_cmpxchg (&mutex->p, NULL, impl))
       sys_mutex_impl_free (impl);
     impl = mutex->p;
   }
@@ -195,12 +195,12 @@ static void sys_rec_mutex_impl_free (pthread_mutex_t *mutex) {
 }
 
 static inline pthread_mutex_t *sys_rec_mutex_get_impl (SysRecMutex *rec_mutex) {
-  pthread_mutex_t *impl = sys_atomic_ptr_get (&rec_mutex->p);
+  pthread_mutex_t *impl = sys_atomic_pointer_get (&rec_mutex->p);
 
   if (impl == NULL)
   {
     impl = sys_rec_mutex_impl_new ();
-    if (!sys_atomic_ptr_cmpxchg (&rec_mutex->p, NULL, impl))
+    if (!sys_atomic_pointer_cmpxchg (&rec_mutex->p, NULL, impl))
       sys_rec_mutex_impl_free (impl);
     impl = rec_mutex->p;
   }
@@ -253,12 +253,12 @@ static void sys_rw_lock_impl_free (pthread_rwlock_t *rwlock) {
 }
 
 static inline pthread_rwlock_t *sys_rw_lock_get_impl (SysRWLock *lock) {
-  pthread_rwlock_t *impl = sys_atomic_ptr_get (&lock->p);
+  pthread_rwlock_t *impl = sys_atomic_pointer_get (&lock->p);
 
   if (impl == NULL)
   {
     impl = sys_rw_lock_impl_new ();
-    if (!sys_atomic_ptr_cmpxchg (&lock->p, NULL, impl))
+    if (!sys_atomic_pointer_cmpxchg (&lock->p, NULL, impl))
       sys_rw_lock_impl_free (impl);
     impl = lock->p;
   }
@@ -341,12 +341,12 @@ static void sys_cond_impl_free (pthread_cond_t *cond) {
 }
 
 static inline pthread_cond_t *sys_cond_get_impl (SysCond *cond) {
-  pthread_cond_t *impl = sys_atomic_ptr_get (&cond->p);
+  pthread_cond_t *impl = sys_atomic_pointer_get (&cond->p);
 
   if (impl == NULL)
   {
     impl = sys_cond_impl_new ();
-    if (!sys_atomic_ptr_cmpxchg (&cond->p, NULL, impl))
+    if (!sys_atomic_pointer_cmpxchg (&cond->p, NULL, impl))
       sys_cond_impl_free (impl);
     impl = cond->p;
   }

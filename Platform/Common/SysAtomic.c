@@ -28,14 +28,14 @@ bool sys_atomic_cmpxchg(SysInt *x, SysInt o, SysInt n) {
   return sys_real_atomic_cmpxchg(x, o, n);
 }
 
-bool sys_atomic_ptr_cmpxchg(SysPointer x, SysPointer o, SysPointer n) {
-  return sys_real_atomic_ptr_cmpxchg(x, o, n);
+bool sys_atomic_pointer_cmpxchg(SysPointer *x, SysPointer o, SysPointer n) {
+  return sys_real_atomic_pointer_cmpxchg(x, o, n);
 }
 
-SysPointer sys_atomic_ptr_get(const volatile SysPointer x) {
-  return sys_real_atomic_ptr_get(x);
+SysPointer sys_atomic_pointer_get(const volatile SysPointer x) {
+  return sys_real_atomic_pointer_get(x);
 }
 
-void sys_atomic_ptr_set(void* o, SysPointer n) {
-  sys_real_atomic_ptr_set(o, n);
+void sys_atomic_pointer_set(SysPointer o, SysPointer n) {
+  sys_real_atomic_pointer_set(o, n);
 }

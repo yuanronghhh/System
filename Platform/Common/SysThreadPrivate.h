@@ -28,6 +28,27 @@ struct _SysRealThread {
   SysPointer retval;
 };
 
+void            sys_system_thread_wait            (SysRealThread  *thread);
+
+SysRealThread *   sys_system_thread_new             (SysThreadFunc   func,
+    SysULong        stack_size,
+    SysError      **error);
+void            sys_system_thread_free            (SysRealThread  *thread);
+
+void            sys_system_thread_exit            (void);
+void            sys_system_thread_set_name        (const SysChar  *name);
+
+/* gthread.c */
+SysThread *       sys_thread_new_internal           (const SysChar  *name,
+    SysThreadFunc   proxy,
+    SysThreadFunc   func,
+    SysPointer      data,
+    SysSize         stack_size,
+    SysError      **error);
+
+SysPointer        sys_thread_proxy                  (SysPointer      thread);
+
+
 SYS_END_DECLS
 
 #endif
