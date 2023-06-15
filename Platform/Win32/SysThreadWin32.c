@@ -31,7 +31,7 @@ void sys_mutex_unlock (SysMutex *mutex)
   ReleaseSRWLockExclusive ((SysPointer) mutex);
 }
 
-/* {{{1 GRecMutex */
+/* {{{1 SysRecMutex */
 
 static CRITICAL_SECTION * sys_rec_mutex_impl_new (void)
 {
@@ -49,12 +49,10 @@ static void sys_rec_mutex_impl_free (CRITICAL_SECTION *cs)
   sys_slice_free (CRITICAL_SECTION, cs);
 }
 
-static CRITICAL_SECTION * sys_rec_mutex_get_impl (GRecMutex *mutex)
-{
+static CRITICAL_SECTION * sys_rec_mutex_get_impl (SysRecMutex *mutex) {
   CRITICAL_SECTION *impl = mutex->p;
 
-  if SYS_UNLIKELY (mutex->p == NULL)
-  {
+  if SYS_UNLIKELY (mutex->p == NULL) {
     impl = sys_rec_mutex_impl_new ();
     if (InterlockedCompareExchangePointer (&mutex->p, impl, NULL) != NULL)
       sys_rec_mutex_impl_free (impl);
@@ -64,98 +62,98 @@ static CRITICAL_SECTION * sys_rec_mutex_get_impl (GRecMutex *mutex)
   return impl;
 }
 
-void sys_rec_mutex_init (GRecMutex *mutex)
+void sys_rec_mutex_init (SysRecMutex *mutex)
 {
   mutex->p = sys_rec_mutex_impl_new ();
 }
 
-void sys_rec_mutex_clear (GRecMutex *mutex)
+void sys_rec_mutex_clear (SysRecMutex *mutex)
 {
   sys_rec_mutex_impl_free (mutex->p);
 }
 
-void sys_rec_mutex_lock (GRecMutex *mutex)
+void sys_rec_mutex_lock (SysRecMutex *mutex)
 {
   EnterCriticalSection (sys_rec_mutex_get_impl (mutex));
 }
 
-void sys_rec_mutex_unlock (GRecMutex *mutex)
+void sys_rec_mutex_unlock (SysRecMutex *mutex)
 {
   LeaveCriticalSection (mutex->p);
 }
 
-SysBool sys_rec_mutex_trylock (GRecMutex *mutex)
+SysBool sys_rec_mutex_trylock (SysRecMutex *mutex)
 {
   return TryEnterCriticalSection (sys_rec_mutex_get_impl (mutex));
 }
 
-/* {{{1 GRWLock */
+/* {{{1 SysRWLock */
 
-void sys_rw_lock_init (GRWLock *lock)
+void sys_rw_lock_init (SysRWLock *lock)
 {
   InitializeSRWLock ((SysPointer) lock);
 }
 
-void sys_rw_lock_clear (GRWLock *lock)
+void sys_rw_lock_clear (SysRWLock *lock)
 {
 }
 
-void sys_rw_lock_writer_lock (GRWLock *lock)
+void sys_rw_lock_writer_lock (SysRWLock *lock)
 {
   AcquireSRWLockExclusive ((SysPointer) lock);
 }
 
-SysBool sys_rw_lock_writer_trylock (GRWLock *lock)
+SysBool sys_rw_lock_writer_trylock (SysRWLock *lock)
 {
   return TryAcquireSRWLockExclusive ((SysPointer) lock);
 }
 
-void sys_rw_lock_writer_unlock (GRWLock *lock)
+void sys_rw_lock_writer_unlock (SysRWLock *lock)
 {
   ReleaseSRWLockExclusive ((SysPointer) lock);
 }
 
-void sys_rw_lock_reader_lock (GRWLock *lock)
+void sys_rw_lock_reader_lock (SysRWLock *lock)
 {
   AcquireSRWLockShared ((SysPointer) lock);
 }
 
-SysBool sys_rw_lock_reader_trylock (GRWLock *lock)
+SysBool sys_rw_lock_reader_trylock (SysRWLock *lock)
 {
   return TryAcquireSRWLockShared ((SysPointer) lock);
 }
 
-void sys_rw_lock_reader_unlock (GRWLock *lock)
+void sys_rw_lock_reader_unlock (SysRWLock *lock)
 {
   ReleaseSRWLockShared ((SysPointer) lock);
 }
 
-/* {{{1 GCond */
-void sys_cond_init (GCond *cond)
+/* {{{1 SysCond */
+void sys_cond_init (SysCond *cond)
 {
   InitializeConditionVariable ((SysPointer) cond);
 }
 
-void sys_cond_clear (GCond *cond)
+void sys_cond_clear (SysCond *cond)
 {
 }
 
-void sys_cond_signal (GCond *cond)
+void sys_cond_signal (SysCond *cond)
 {
   WakeConditionVariable ((SysPointer) cond);
 }
 
-void sys_cond_broadcast (GCond *cond)
+void sys_cond_broadcast (SysCond *cond)
 {
   WakeAllConditionVariable ((SysPointer) cond);
 }
 
-void sys_cond_wait (GCond  *cond, SysMutex *entered_mutex)
+void sys_cond_wait (SysCond  *cond, SysMutex *entered_mutex)
 {
   SleepConditionVariableSRW ((SysPointer) cond, (SysPointer) entered_mutex, INFINITE, 0);
 }
 
-SysBool sys_cond_wait_until (GCond  *cond, SysMutex *entered_mutex, SysInt64  end_time)
+SysBool sys_cond_wait_until (SysCond  *cond, SysMutex *entered_mutex, SysInt64  end_time)
 {
   SysInt64 span, start_time;
   DWORD span_millis;
@@ -191,21 +189,21 @@ SysBool sys_cond_wait_until (GCond  *cond, SysMutex *entered_mutex, SysInt64  en
   return signalled;
 }
 
-/* {{{1 GPrivate */
+/* {{{1 SysPrivate */
 
-typedef struct _GPrivateDestructor GPrivateDestructor;
+typedef struct _SysPrivateDestructor SysPrivateDestructor;
 
-struct _GPrivateDestructor
+struct _SysPrivateDestructor
 {
   DWORD               index;
-  GDestroyNotify      notify;
-  GPrivateDestructor *next;
+  SysDestroyFunc      notify;
+  SysPrivateDestructor *next;
 };
 
-static GPrivateDestructor *sys_private_destructors;  /* (atomic) prepend-only */
+static SysPrivateDestructor *sys_private_destructors;  /* (atomic) prepend-only */
 static CRITICAL_SECTION sys_private_lock;
 
-static DWORD sys_private_get_impl (GPrivate *key)
+static DWORD sys_private_get_impl (SysPrivate *key)
 {
   DWORD impl = (DWORD) GPOINTER_TO_UINT(key->p);
 
@@ -215,15 +213,11 @@ static DWORD sys_private_get_impl (GPrivate *key)
     impl = (UINT_PTR) key->p;
     if (impl == 0)
     {
-      GPrivateDestructor *destructor;
+      SysPrivateDestructor *destructor;
 
       impl = TlsAlloc ();
 
-      if SYS_UNLIKELY (impl == 0)
-      {
-        /* Ignore TLS index 0 temporarily (as 0 is the indicator that we
-         * haven't allocated TLS yet) and alloc again;
-         * See https://gitlab.gnome.org/GNOME/glib/-/issues/2058 */
+      if SYS_UNLIKELY (impl == 0) {
         DWORD impl2 = TlsAlloc ();
         TlsFree (impl);
         impl = impl2;
@@ -234,18 +228,13 @@ static DWORD sys_private_get_impl (GPrivate *key)
 
       if (key->notify != NULL)
       {
-        destructor = malloc (sizeof (GPrivateDestructor));
+        destructor = malloc (sizeof (SysPrivateDestructor));
         if SYS_UNLIKELY (destructor == NULL)
           sys_thread_abort (errno, "malloc");
         destructor->index = impl;
         destructor->notify = key->notify;
         destructor->next = sys_atomic_pointer_get (&sys_private_destructors);
 
-        /* We need to do an atomic store due to the unlocked
-         * access to the destructor list from the thread exit
-         * function.
-         *                * It can double as a sanity check...
-         */
         if (!sys_atomic_pointer_compare_and_exchange (&sys_private_destructors,
               destructor->next,
               destructor))
@@ -262,17 +251,17 @@ static DWORD sys_private_get_impl (GPrivate *key)
   return impl;
 }
 
-SysPointer sys_private_get (GPrivate *key)
+SysPointer sys_private_get (SysPrivate *key)
 {
   return TlsGetValue (sys_private_get_impl (key));
 }
 
-void sys_private_set (GPrivate *key, SysPointer  value)
+void sys_private_set (SysPrivate *key, SysPointer  value)
 {
   TlsSetValue (sys_private_get_impl (key), value);
 }
 
-void sys_private_replace (GPrivate *key, SysPointer  value)
+void sys_private_replace (SysPrivate *key, SysPointer  value)
 {
   DWORD impl = sys_private_get_impl (key);
   SysPointer old;
@@ -287,9 +276,8 @@ void sys_private_replace (GPrivate *key, SysPointer  value)
 
 #define win32_check_for_error(what) SYS_STMT_START{			\
   if (!(what))								\
-  sys_error ("file %s: line %d (%s): error %s during %s",		\
-      __FILE__, __LINE__, SYS_STRFUNC,				\
-      sys_win32_error_message (GetLastError ()), #what);		\
+  sys_error_N("error %s during %s",		\
+      GetLastError (), #what);		\
 }SYS_STMT_END
 
 #define SYS_MUTEX_SIZE (sizeof (SysPointer))
@@ -298,13 +286,13 @@ typedef BOOL (__stdcall *GTryEnterCriticalSectionFunc) (CRITICAL_SECTION *);
 
 typedef struct
 {
-  GRealThread thread;
+  SysRealThread thread;
 
-  GThreadFunc proxy;
+  SysThreadFunc proxy;
   HANDLE      handle;
 } GThreadWin32;
 
-void sys_system_thread_free (GRealThread *thread)
+void sys_system_thread_free (SysRealThread *thread)
 {
   GThreadWin32 *wt = (GThreadWin32 *) thread;
 
@@ -317,7 +305,7 @@ void sys_system_thread_exit (void)
   _endthreadex (0);
 }
 
-static guint __stdcall sys_thread_win32_proxy (SysPointer data)
+static SysUInt __stdcall sys_thread_win32_proxy (SysPointer data)
 {
   GThreadWin32 *self = data;
 
@@ -330,29 +318,31 @@ static guint __stdcall sys_thread_win32_proxy (SysPointer data)
   return 0;
 }
 
-SysBool sys_system_thread_get_scheduler_settings (GThreadSchedulerSettings *scheduler_settings)
+SysBool sys_system_thread_get_scheduler_settings (SysThreadSchedulerSettings *scheduler_settings)
 {
   HANDLE current_thread = GetCurrentThread ();
   scheduler_settings->thread_prio = GetThreadPriority (current_thread);
 
-  return TRUE;
+  return true;
 }
 
-GRealThread * sys_system_thread_new (GThreadFunc proxy, gulong stack_size, const GThreadSchedulerSettings *scheduler_settings, const char *name, GThreadFunc func, SysPointer data, GError **error)
+SysRealThread * sys_system_thread_new (SysThreadFunc proxy, SysULong stack_size, 
+  const SysThreadSchedulerSettings *scheduler_settings, const char *name, 
+  SysThreadFunc func, SysPointer data, SysError **error)
 {
   GThreadWin32 *thread;
-  GRealThread *base_thread;
-  guint ignore;
+  SysRealThread *base_thread;
+  SysUInt ignore;
   const SysChar *message = NULL;
   int thread_prio;
 
   thread = sys_slice_new0 (GThreadWin32);
   thread->proxy = proxy;
   thread->handle = (HANDLE) NULL;
-  base_thread = (GRealThread*)thread;
+  base_thread = (SysRealThread*)thread;
   base_thread->ref_count = 2;
-  base_thread->ours = TRUE;
-  base_thread->thread.joinable = TRUE;
+  base_thread->ours = true;
+  base_thread->thread.joinable = true;
   base_thread->thread.func = func;
   base_thread->thread.data = data;
   base_thread->name = sys_strdup (name);
@@ -402,14 +392,11 @@ GRealThread * sys_system_thread_new (GThreadFunc proxy, gulong stack_size, const
     goto error;
   }
 
-  return (GRealThread *) thread;
+  return (SysRealThread *) thread;
 
 error:
   {
-    SysChar *win_error = sys_win32_error_message (GetLastError ());
-    sys_set_error (error, SYS_THREAD_ERROR, SYS_THREAD_ERROR_AGAIN,
-        "%s: %s", message, win_error);
-    sys_free (win_error);
+    sys_error_set_N(error, "error code: %d,%d", GetLastError(), SYS_THREAD_ERROR_AGAIN);
     if (thread->handle)
       CloseHandle (thread->handle);
     sys_slice_free (GThreadWin32, thread);
@@ -422,7 +409,7 @@ void sys_thread_yield (void)
   Sleep(0);
 }
 
-void sys_system_thread_wait (GRealThread *thread)
+void sys_system_thread_wait (SysRealThread *thread)
 {
   GThreadWin32 *wt = (GThreadWin32 *) thread;
 
@@ -468,7 +455,7 @@ static void SetThreadName (DWORD  dwThreadID, LPCSTR szThreadName)
   __try
   {
     RaiseException (EXCEPTION_SET_THREAD_NAME, 0, infosize,
-        (const ULONSYS_PTR *) &info);
+        (const ULONG_PTR *) &info);
   }
   __except (EXCEPTION_EXECUTE_HANDLER)
   {
@@ -492,7 +479,7 @@ static SysBool sys_thread_win32_load_library (void)
 {
   /* FIXME: Add support for UWP app */
 #if !defined(SYS_WINAPI_ONLY_APP)
-  static gsize _init_once = 0;
+  static SysSize _init_once = 0;
   if (sys_once_init_enter (&_init_once))
   {
     kernel32_module = LoadLibraryW (L"kernel32.dll");
@@ -517,11 +504,11 @@ static SysBool sys_thread_win32_set_thread_desc (const SysChar *name)
   wchar_t *namew;
 
   if (!sys_thread_win32_load_library () || !name)
-    return FALSE;
+    return false;
 
   namew = sys_utf8_to_utf16 (name, -1, NULL, NULL, NULL);
   if (!namew)
-    return FALSE;
+    return false;
 
   hr = SetThreadDescriptionFunc (GetCurrentThread (), namew);
 
@@ -556,14 +543,14 @@ void sys_thread_win32_thread_detach (void)
 
   do
   {
-    GPrivateDestructor *dtor;
+    SysPrivateDestructor *dtor;
 
     /* We go by the POSIX book on this one.
      *      * If we call a destructor then there is a chance that some new
      * TLS variables got set by code called in that destructor.
      *      * Loop until nothing is left.
      */
-    dtors_called = FALSE;
+    dtors_called = false;
 
     for (dtor = sys_atomic_pointer_get (&sys_private_destructors); dtor; dtor = dtor->next)
     {
@@ -575,7 +562,7 @@ void sys_thread_win32_thread_detach (void)
         /* POSIX says to clear this before the call */
         TlsSetValue (dtor->index, NULL);
         dtor->notify (value);
-        dtors_called = TRUE;
+        dtors_called = true;
       }
     }
   }

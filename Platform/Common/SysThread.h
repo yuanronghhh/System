@@ -24,7 +24,6 @@ struct _SysThread {
   SysThreadFunc func;
   SysPointer data;
   SysBool joinable;
-  SysThreadPriority priority;
 };
 
 union _SysMutex {
@@ -108,6 +107,8 @@ SYS_API void sys_thread_unref (SysThread *thread);
 SYS_API SysThread * sys_thread_new (const SysChar *name, SysThreadFunc func, SysPointer data);
 SYS_API SysThread * sys_thread_try_new (const SysChar *name, SysThreadFunc func, SysPointer data, SysError **error);
 
+
+SYS_API void sys_thread_init (void);
 SYS_API SysThread * sys_thread_self (void);
 SYS_API void sys_thread_exit (SysPointer retval);
 SYS_API SysPointer sys_thread_join (SysThread *thread);

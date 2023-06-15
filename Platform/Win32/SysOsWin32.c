@@ -1,7 +1,8 @@
 #include <System/Utils/SysString.h>
 #include <System/DataTypes/SysArray.h>
-#include <System/Platform/Common/SysThread.h>
+#include <System/Platform/Common/SysThreadWin32.h>
 #include <System/Platform/Common/SysOsPrivate.h>
+
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL,
   DWORD     fdwReason,
@@ -13,11 +14,11 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,DWORD fdwReason, LPVOID lpvReserved) {
   switch (fdwReason) {
     case DLL_PROCESS_ATTACH:
       win32dll = hinstDLL;
-      sys_thread_init();
+      sys_thread_win32_init();
       break;
 
     case DLL_THREAD_DETACH:
-      sys_thread_detach();
+      sys_thread_win32_thread_detach ();
       break;
 
     case DLL_PROCESS_DETACH:
