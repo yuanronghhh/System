@@ -1,4 +1,5 @@
 #include <System/Platform/Common/SysThreadPrivate.h>
+#include <System/Utils/SysString.h>
 
 
 static void sys_thread_abort (SysInt status, const SysChar *function) {
@@ -166,11 +167,11 @@ SysBool sys_cond_wait_until (SysCond  *cond, SysMutex *entered_mutex, SysInt64  
 
     if SYS_UNLIKELY (span < 0)
       span_millis = 0;
-    else if SYS_UNLIKELY (span > SYS_GINT64_CONSTANT (1000) * (DWORD) INFINITE)
+    else if SYS_UNLIKELY (span > INT64_CONSTANT (1000) * (DWORD) INFINITE)
       span_millis = INFINITE;
     else
       /* Round up so we don't time out too early */
-      span_millis = (span + 1000 - 1) / 1000;
+      span_millis = (DWORD)((span + 1000 - 1) / 1000);
 
     /* We never want to wait infinitely */
     if (span_millis >= INFINITE)
@@ -205,12 +206,12 @@ static CRITICAL_SECTION sys_private_lock;
 
 static DWORD sys_private_get_impl (SysPrivate *key)
 {
-  DWORD impl = (DWORD) GPOINTER_TO_UINT(key->p);
+  DWORD impl = (DWORD) POINTER_TO_UINT(key->p);
 
   if SYS_UNLIKELY (impl == 0)
   {
     EnterCriticalSection (&sys_private_lock);
-    impl = (UINT_PTR) key->p;
+    impl = (DWORD) POINTER_TO_UINT(key->p);
     if (impl == 0)
     {
       SysPrivateDestructor *destructor;
@@ -235,14 +236,14 @@ static DWORD sys_private_get_impl (SysPrivate *key)
         destructor->notify = key->notify;
         destructor->next = sys_atomic_pointer_get (&sys_private_destructors);
 
-        if (!sys_atomic_pointer_compare_and_exchange (&sys_private_destructors,
+        if (!sys_atomic_pointer_cmpxchg (&sys_private_destructors,
               destructor->next,
               destructor))
           sys_thread_abort (0, "sys_private_get_impl(1)");
       }
 
       /* Ditto, due to the unlocked access on the fast path */
-      if (!sys_atomic_pointer_compare_and_exchange (&key->p, NULL, impl))
+      if (!sys_atomic_pointer_cmpxchg (&key->p, NULL, UINT_TO_POINTER(impl)))
         sys_thread_abort (0, "sys_private_get_impl(2)");
     }
     LeaveCriticalSection (&sys_private_lock);
@@ -272,7 +273,7 @@ void sys_private_replace (SysPrivate *key, SysPointer  value)
     key->notify (old);
 }
 
-/* {{{1 GThread */
+/* {{{1 SysThread */
 
 #define win32_check_for_error(what) SYS_STMT_START{			\
   if (!(what))								\
@@ -290,14 +291,14 @@ typedef struct
 
   SysThreadFunc proxy;
   HANDLE      handle;
-} GThreadWin32;
+} SysThreadWin32;
 
 void sys_system_thread_free (SysRealThread *thread)
 {
-  GThreadWin32 *wt = (GThreadWin32 *) thread;
+  SysThreadWin32 *wt = (SysThreadWin32 *) thread;
 
   win32_check_for_error (CloseHandle (wt->handle));
-  sys_slice_free (GThreadWin32, wt);
+  sys_slice_free (SysThreadWin32, wt);
 }
 
 void sys_system_thread_exit (void)
@@ -307,13 +308,11 @@ void sys_system_thread_exit (void)
 
 static SysUInt __stdcall sys_thread_win32_proxy (SysPointer data)
 {
-  GThreadWin32 *self = data;
+  SysThreadWin32 *self = data;
 
   self->proxy (self);
 
   sys_system_thread_exit ();
-
-  sys_assert_not_reached ();
 
   return 0;
 }
@@ -326,17 +325,21 @@ SysBool sys_system_thread_get_scheduler_settings (SysThreadSchedulerSettings *sc
   return true;
 }
 
-SysRealThread * sys_system_thread_new (SysThreadFunc proxy, SysULong stack_size, 
-  const SysThreadSchedulerSettings *scheduler_settings, const char *name, 
-  SysThreadFunc func, SysPointer data, SysError **error)
-{
-  GThreadWin32 *thread;
+SysRealThread * sys_system_thread_new (SysThreadFunc proxy,
+    SysSize stack_size,
+    const SysThreadSchedulerSettings *scheduler_settings,
+    const char *name,
+    SysThreadFunc func,
+    SysPointer data,
+    SysError **error) {
+
+  SysThreadWin32 *thread;
   SysRealThread *base_thread;
   SysUInt ignore;
   const SysChar *message = NULL;
   int thread_prio;
 
-  thread = sys_slice_new0 (GThreadWin32);
+  thread = sys_slice_new0 (SysThreadWin32);
   thread->proxy = proxy;
   thread->handle = (HANDLE) NULL;
   base_thread = (SysRealThread*)thread;
@@ -347,7 +350,7 @@ SysRealThread * sys_system_thread_new (SysThreadFunc proxy, SysULong stack_size,
   base_thread->thread.data = data;
   base_thread->name = sys_strdup (name);
 
-  thread->handle = (HANDLE) _beSysInthreadex (NULL, stack_size, sys_thread_win32_proxy, thread,
+  thread->handle = (HANDLE) _beginthreadex (NULL, (SysUInt)stack_size, sys_thread_win32_proxy, thread,
       CREATE_SUSPENDED, &ignore);
 
   if (thread->handle == NULL)
@@ -399,7 +402,7 @@ error:
     sys_error_set_N(error, "error code: %d,%d", GetLastError(), SYS_THREAD_ERROR_AGAIN);
     if (thread->handle)
       CloseHandle (thread->handle);
-    sys_slice_free (GThreadWin32, thread);
+    sys_slice_free (SysThreadWin32, thread);
     return NULL;
   }
 }
@@ -411,7 +414,7 @@ void sys_thread_yield (void)
 
 void sys_system_thread_wait (SysRealThread *thread)
 {
-  GThreadWin32 *wt = (GThreadWin32 *) thread;
+  SysThreadWin32 *wt = (SysThreadWin32 *) thread;
 
   win32_check_for_error (WAIT_FAILED != WaitForSingleObject (wt->handle, INFINITE));
 }
@@ -501,12 +504,12 @@ static SysBool sys_thread_win32_load_library (void)
 static SysBool sys_thread_win32_set_thread_desc (const SysChar *name)
 {
   HRESULT hr;
-  wchar_t *namew;
+  SysWChar *namew;
 
   if (!sys_thread_win32_load_library () || !name)
     return false;
 
-  namew = sys_utf8_to_utf16 (name, -1, NULL, NULL, NULL);
+  namew = sys_ansi_to_wchar(name);
   if (!namew)
     return false;
 
@@ -524,7 +527,7 @@ void sys_system_thread_set_name (const SysChar *name)
 
 /* {{{1 Epilogue */
 
-void sys_thread_win32_init (void)
+void sys_system_thread_init(void)
 {
   InitializeCriticalSection (&sys_private_lock);
 
@@ -537,7 +540,7 @@ void sys_thread_win32_init (void)
 #endif
 }
 
-void sys_thread_win32_thread_detach (void)
+void sys_system_thread_detach (void)
 {
   SysBool dtors_called;
 

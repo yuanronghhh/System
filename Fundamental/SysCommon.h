@@ -37,12 +37,6 @@
 #include <signal.h>
 
 #define UNUSED(o) ((void)o)
-#define POINTER_TO_UINT(o) ((SysUInt)(SysUInt64)(o))
-#define POINTER_TO_INT(o) ((SysInt)(SysUInt64)(o))
-
-#define UINT_TO_POINTER(o) ((SysPointer)(SysUInt64)(o))
-#define INT_TO_POINTER(o) ((SysPointer)(SysInt64)(o))
-
 #define SYS_INLINE inline
 typedef bool SysBool;
 typedef int SysRef;

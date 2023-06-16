@@ -1,5 +1,6 @@
-#include <System/DataTypes/SysSList.h>
 #include <System/Platform/Common/SysThreadPrivate.h>
+#include <System/DataTypes/SysSList.h>
+#include <System/Utils/SysString.h>
 
 /**
  * this code from glib Thread
@@ -10,6 +11,8 @@
 static SysMutex    sys_once_mutex;
 static SysCond     sys_once_cond;
 static SysSList   *sys_once_init_list = NULL;
+static SysUInt sys_thread_n_created_counter = 0;  /* (atomic) */
+
 
 static void sys_thread_cleanup (SysPointer data);
 static SysPrivate sys_thread_specific_private = SYS_PRIVATE_INIT (sys_thread_cleanup);
@@ -40,14 +43,14 @@ SysPointer sys_once_impl (SysOnce *once, SysThreadFunc func, SysPointer arg) {
 }
 
 SysBool (sys_once_init_enter) (volatile SysPointer location) {
-  const volatile SysPointer value_location = location;
+  volatile SysPointer value_location = location;
   SysBool need_init = false;
   sys_mutex_lock (&sys_once_mutex);
 
   if (sys_atomic_pointer_get (value_location) == NULL) {
 
     if (!sys_slist_find (sys_once_init_list, (void*) value_location)) {
-      need_init = true;
+      need_init = TRUE;
       sys_once_init_list = sys_slist_prepend (sys_once_init_list, (void*) value_location);
 
     } else {
@@ -63,7 +66,7 @@ SysBool (sys_once_init_enter) (volatile SysPointer location) {
   return need_init;
 }
 
-void (sys_once_init_leave) (volatile SysPointer location, SysSize result) {
+void (sys_once_init_leave) (volatile SysPointer location, SysSize          result) {
   volatile SysPointer value_location = location;
 
   sys_return_if_fail (sys_atomic_pointer_get (value_location) == NULL);
@@ -78,7 +81,6 @@ void (sys_once_init_leave) (volatile SysPointer location, SysSize result) {
 }
 
 /* SysThread  */
-
 SysThread * sys_thread_ref (SysThread *thread) {
   SysRealThread *real = (SysRealThread *) thread;
 
@@ -118,7 +120,8 @@ SysPointer sys_thread_proxy (SysPointer data) {
   SYS_LOCK (sys_thread_new);
   SYS_UNLOCK (sys_thread_new);
 
-  if (thread->name) {
+  if (thread->name)
+  {
     sys_system_thread_set_name (thread->name);
     sys_free (thread->name);
     thread->name = NULL;
@@ -133,44 +136,39 @@ SysThread * sys_thread_new (const SysChar *name, SysThreadFunc  func, SysPointer
   SysError *error = NULL;
   SysThread *thread;
 
-  thread = sys_thread_new_internal (name, sys_thread_proxy, func, data, 0, &error);
+  thread = sys_thread_new_internal (name, sys_thread_proxy, func, data, 0, NULL, &error);
 
-  if SYS_UNLIKELY (thread == NULL) {
-    sys_error ("creating thread '%s': %s", name ? name : "", error->message);
-  }
+  if SYS_UNLIKELY (thread == NULL)
+    sys_error_N ("creating thread '%s': %s", name ? name : "", error->message);
 
   return thread;
 }
 
 SysThread * sys_thread_try_new (const SysChar  *name, SysThreadFunc   func, SysPointer      data, SysError      **error) {
-  return sys_thread_new_internal (name, sys_thread_proxy, func, data, 0, error);
+  return sys_thread_new_internal (name, sys_thread_proxy, func, data, 0, NULL, error);
 }
 
-SysThread * sys_thread_new_internal (const SysChar   *name, SysThreadFunc    proxy, SysThreadFunc    func, SysPointer       data, SysSize          stack_size, SysError       **error) {
-  SysRealThread *thread;
+SysThread * sys_thread_new_internal (const SysChar *name,
+    SysThreadFunc proxy,
+    SysThreadFunc func,
+    SysPointer data,
+    SysSize stack_size,
+    const SysThreadSchedulerSettings *scheduler_settings,
+    SysError **error) {
 
   sys_return_val_if_fail (func != NULL, NULL);
 
-  SYS_LOCK (sys_thread_new);
-  thread = sys_system_thread_new (proxy, stack_size, error);
-  if (thread) {
-    thread->ref_count = 2;
-    thread->ours = true;
-    thread->thread.joinable = true;
-    thread->thread.func = func;
-    thread->thread.data = data;
-    thread->name = sys_strdup (name);
-  }
-  SYS_UNLOCK (sys_thread_new);
+  sys_atomic_int_inc (&sys_thread_n_created_counter);
 
-  return (SysThread*) thread;
+  return (SysThread *) sys_system_thread_new (proxy, stack_size, scheduler_settings,
+                                          name, func, data, error);
 }
 
 void sys_thread_exit (SysPointer retval) {
   SysRealThread* real = (SysRealThread*) sys_thread_self ();
 
   if SYS_UNLIKELY (!real->ours)
-    sys_error ("attempt to sys_thread_exit() a thread not created by GLib");
+    sys_error_N ("attempt to sys_thread_exit() a thread not created by GLib");
 
   real->retval = retval;
 
@@ -196,6 +194,14 @@ SysPointer sys_thread_join (SysThread *thread) {
   return retval;
 }
 
+void sys_thread_init (void) {
+  sys_system_thread_init();
+}
+
+void sys_thread_detach(void) {
+  sys_system_thread_detach();
+}
+
 SysThread* sys_thread_self (void) {
   SysRealThread* thread = sys_private_get (&sys_thread_specific_private);
 
@@ -209,7 +215,7 @@ SysThread* sys_thread_self (void) {
   return (SysThread*) thread;
 }
 
-guint sys_get_num_processors (void) {
+SysUInt sys_get_num_processors (void) {
 #ifdef SYS_OS_WIN32
   unsigned int count;
   SYSTEM_INFO sysinfo;

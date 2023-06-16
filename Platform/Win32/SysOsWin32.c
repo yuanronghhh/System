@@ -1,7 +1,7 @@
+#include <System/Platform/Common/SysOsPrivate.h>
 #include <System/Utils/SysString.h>
 #include <System/DataTypes/SysArray.h>
-#include <System/Platform/Common/SysThreadWin32.h>
-#include <System/Platform/Common/SysOsPrivate.h>
+#include <System/Platform/Common/SysThread.h>
 
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL,
@@ -14,11 +14,11 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,DWORD fdwReason, LPVOID lpvReserved) {
   switch (fdwReason) {
     case DLL_PROCESS_ATTACH:
       win32dll = hinstDLL;
-      sys_thread_win32_init();
+      sys_thread_init();
       break;
 
     case DLL_THREAD_DETACH:
-      sys_thread_win32_thread_detach ();
+      sys_thread_detach ();
       break;
 
     case DLL_PROCESS_DETACH:
@@ -28,7 +28,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,DWORD fdwReason, LPVOID lpvReserved) {
       break;
   }
 
-  return TRUE;
+  return true;
 }
 
 void sys_real_init_console(void) {
@@ -40,7 +40,7 @@ void sys_real_init_console(void) {
   cfi.FontFamily = FF_DONTCARE;
   cfi.FontWeight = FW_NORMAL;
   wcscpy_s(cfi.FaceName, 9, L"Consolas");
-  SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi);
+  SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), false, &cfi);
 
   SetConsoleOutputCP(65001);
 
@@ -135,7 +135,7 @@ bool sys_real_set_env(const SysChar *var, const SysChar *value) {
   return ret;
 }
 
-SysUInt64 sys_real_get_monoic_time(void) {
+SysUInt64 sys_real_get_monotonic_time(void) {
   SysUInt64 ticks;
 
   ticks = GetTickCount64();
@@ -198,7 +198,7 @@ SysChar **sys_real_backtrace_string(SysInt *size) {
   IMAGEHLP_LINE lineInfo = { sizeof(IMAGEHLP_LINE) };
   process = GetCurrentProcess();
 
-  SymInitialize(process, NULL, TRUE);
+  SymInitialize(process, NULL, true);
 
   frame_size = CaptureStackBackTrace(2, SYS_BACKTRACE_SIZE, stack, NULL);
   if (frame_size < 4) {
@@ -229,7 +229,6 @@ SysChar **sys_real_backtrace_string(SysInt *size) {
 }
 
 void sys_real_setup(void) {
-  sys_thread_init();
 }
 
 void sys_real_teardown(void) {

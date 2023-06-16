@@ -2,6 +2,7 @@
 #include <System/Utils/SysError.h>
 #include <System/DataTypes/SysArray.h>
 #include <System/DataTypes/SysTypes.h>
+#include <System/Platform/Common/SysThread.h>
 #include <System/Platform/Common/SysOsPrivate.h>
 
 #define  ALIGNOF_GUINT32 SYS_ALIGNOF (uint32_t)
@@ -282,8 +283,8 @@ const char* sys_get_env(const char *var) {
   return sys_real_get_env(var);
 }
 
-SysUInt64 sys_get_monoic_time(void) {
-  return sys_real_get_monoic_time();
+SysUInt64 sys_get_monotonic_time(void) {
+  return sys_real_get_monotonic_time();
 }
 
 void sys_usleep(unsigned long mseconds) {
@@ -323,6 +324,7 @@ void sys_setup(void) {
   sys_leaks_setup();
   sys_type_setup();
   sys_real_setup();
+  sys_thread_init();
 
   inited = true;
 }
@@ -332,6 +334,7 @@ void sys_teardown(void) {
     return;
   }
 
+  sys_thread_detach();
   sys_real_teardown();
   sys_type_teardown();
   sys_leaks_report();

@@ -35,7 +35,7 @@ SYS_API void sys_qsort_with_data(const SysPointer  pbase, SysInt total_elems,
 
 SYS_API bool sys_set_env(const char *var, const char *value);
 SYS_API const char *sys_get_env(const char *var);
-SYS_API SysUInt64 sys_get_monoic_time(void);
+SYS_API SysUInt64 sys_get_monotonic_time(void);
 SYS_API void sys_usleep(unsigned long mseconds);
 SYS_API void* sys_dlopen(const char *filename);
 SYS_API void* sys_dlsymbol(void *handle, const char *symbol);
