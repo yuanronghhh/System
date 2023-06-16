@@ -64,6 +64,10 @@ typedef double SysDouble;
 typedef size_t SysSize;
 typedef wchar_t SysWChar;
 
+#define SYS_STMT_START
+#define SYS_STMT_END
+#define SYS_UNLIKELY
+#define SYS_LIKELY
 #define SYS_ARGS(func, ptr) __FILE__, __func__, __LINE__, #func, #ptr,
 #define SYS_ARGS_N const SysChar *_filename, const SysChar *_funcname, const SysInt _line, const SysChar * _callfunc, const SysChar *_ptrstr,
 #define SYS_ARGS_M(func, ptr) SYS_ARGS(func, ptr)
