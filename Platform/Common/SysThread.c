@@ -39,7 +39,7 @@ SysPointer sys_once_impl (SysOnce *once, SysThreadFunc func, SysPointer arg) {
   return once->retval;
 }
 
-SysBool (sys_once_init_enter) (volatile void *location) {
+SysBool sys_once_init_enter (volatile SysPointer location) {
   volatile gsize *value_location = location;
   SysBool need_init = false;
   sys_mutex_lock (&sys_once_mutex);
@@ -63,7 +63,7 @@ SysBool (sys_once_init_enter) (volatile void *location) {
   return need_init;
 }
 
-void (sys_once_init_leave) (volatile void *location, gsize          result) {
+void sys_once_init_leave (volatile void *location, gsize          result) {
   volatile gsize *value_location = location;
 
   sys_return_if_fail (sys_atomic_pointer_get (value_location) == NULL);
@@ -197,6 +197,9 @@ SysPointer sys_thread_join (SysThread *thread) {
   sys_thread_unref (thread);
 
   return retval;
+}
+
+void sys_thread_init (void) {
 }
 
 SysThread* sys_thread_self (void) {

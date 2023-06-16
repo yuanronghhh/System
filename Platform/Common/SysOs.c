@@ -282,8 +282,8 @@ const char* sys_get_env(const char *var) {
   return sys_real_get_env(var);
 }
 
-SysUInt64 sys_get_monoic_time(void) {
-  return sys_real_get_monoic_time();
+SysUInt64 sys_get_monotonic_time(void) {
+  return sys_real_get_monotonic_time();
 }
 
 void sys_usleep(unsigned long mseconds) {

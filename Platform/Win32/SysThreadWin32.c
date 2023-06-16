@@ -166,11 +166,11 @@ SysBool sys_cond_wait_until (SysCond  *cond, SysMutex *entered_mutex, SysInt64  
 
     if SYS_UNLIKELY (span < 0)
       span_millis = 0;
-    else if SYS_UNLIKELY (span > SYS_GINT64_CONSTANT (1000) * (DWORD) INFINITE)
+    else if SYS_UNLIKELY (span > INT64_CONSTANT (1000) * (DWORD) INFINITE)
       span_millis = INFINITE;
     else
       /* Round up so we don't time out too early */
-      span_millis = (span + 1000 - 1) / 1000;
+      span_millis = (SysULong)(span + 1000 - 1) / 1000;
 
     /* We never want to wait infinitely */
     if (span_millis >= INFINITE)
@@ -205,12 +205,12 @@ static CRITICAL_SECTION sys_private_lock;
 
 static DWORD sys_private_get_impl (SysPrivate *key)
 {
-  DWORD impl = (DWORD) GPOINTER_TO_UINT(key->p);
+  DWORD impl = (DWORD) POINTER_TO_UINT(key->p);
 
   if SYS_UNLIKELY (impl == 0)
   {
     EnterCriticalSection (&sys_private_lock);
-    impl = (UINT_PTR) key->p;
+    impl = (DWORD)POINTER_TO_UINT(key->p);
     if (impl == 0)
     {
       SysPrivateDestructor *destructor;

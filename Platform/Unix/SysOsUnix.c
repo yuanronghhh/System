@@ -24,7 +24,7 @@ const char* sys_real_get_env(const char *var) {
   return getenv(var);
 }
 
-SysUInt64 sys_real_get_monoic_time(void) {
+SysUInt64 sys_real_get_monotonic_time(void) {
   struct timespec ts;
   SysInt time;
 
