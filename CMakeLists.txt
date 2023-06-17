@@ -88,11 +88,9 @@ set(SRC
   ./Platform/Common/SysAtomic.h
   ./Platform/Common/SysAtomicPrivate.h
   ./Platform/Common/SysAtomic.c
-
-  # thread not worked
+  ./Platform/Common/SysThread.c
   ./Platform/Common/SysThread.h
   ./Platform/Common/SysThreadPrivate.h
-  ./Platform/Common/SysThread.c
 
   ./Platform/Common/SysProcess.c
   ./Platform/Common/SysProcess.h

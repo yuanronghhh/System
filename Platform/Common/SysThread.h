@@ -111,6 +111,7 @@ SYS_API SysThread * sys_thread_try_new (const SysChar *name, SysThreadFunc func,
 SYS_API void sys_thread_init(void);
 SYS_API void sys_thread_detach(void);
 
+
 SYS_API SysThread * sys_thread_self (void);
 SYS_API void sys_thread_exit (SysPointer retval);
 SYS_API SysPointer sys_thread_join (SysThread *thread);

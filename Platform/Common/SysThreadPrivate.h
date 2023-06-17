@@ -3,23 +3,12 @@
 
 #include <System/Platform/Common/SysThread.h>
 
+
 SYS_BEGIN_DECLS
 
 typedef struct _SysRealThread SysRealThread;
-
-/* Platform-specific scheduler settings for a thread */
-typedef struct {
-#if SYS_OS_UNIX
-  /* This is for modern Linux */
-  struct sched_attr *attr;
-#elif SYS_OS_WIN32
-  SysInt thread_prio;
-#else
-  void *dummy;
-#endif
-} SysThreadSchedulerSettings;
-
-struct _SysRealThread {
+struct  _SysRealThread
+{
   SysThread thread;
 
   SysInt ref_count;
@@ -28,36 +17,38 @@ struct _SysRealThread {
   SysPointer retval;
 };
 
-void            sys_system_thread_init(void);
-void            sys_system_thread_detach(void);
+void sys_system_thread_init(void);
+void sys_system_thread_detach(void);
 
 void            sys_system_thread_wait            (SysRealThread  *thread);
 
 SysRealThread *sys_system_thread_new (SysThreadFunc proxy,
-                                  SysSize stack_size,
-                                  const SysThreadSchedulerSettings *scheduler_settings,
+                                  SysULong stack_size,
                                   const char *name,
                                   SysThreadFunc func,
                                   SysPointer data,
                                   SysError **error);
-
 void            sys_system_thread_free            (SysRealThread  *thread);
 
 void            sys_system_thread_exit            (void);
 void            sys_system_thread_set_name        (const SysChar  *name);
 
 /* gthread.c */
-SysThread * sys_thread_new_internal (const SysChar *name,
-    SysThreadFunc proxy,
-    SysThreadFunc func,
-    SysPointer data,
-    SysSize stack_size,
-    const SysThreadSchedulerSettings *scheduler_settings,
-    SysError **error);
+SysThread *sys_thread_new_internal (const SysChar *name,
+                                SysThreadFunc proxy,
+                                SysThreadFunc func,
+                                SysPointer data,
+                                SysSize stack_size,
+                                SysError **error);
 
 SysPointer        sys_thread_proxy                  (SysPointer      thread);
 
+SysUInt           sys_thread_n_created              (void);
+
+SysPointer        sys_private_set_alloc0            (SysPrivate       *key,
+                                                 SysSize           size);
 
 SYS_END_DECLS
 
 #endif
+
