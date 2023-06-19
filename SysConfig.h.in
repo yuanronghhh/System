@@ -12,6 +12,6 @@ typedef unsigned long long SysUInt64;
 #define UINT64_CONSTANT(val)	((val##ULL))
 
 #define SIZEOF_INT 8
-#define SYS_DEBUG 0
+#define SYS_DEBUG 1
 
 #endif

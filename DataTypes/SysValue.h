@@ -17,11 +17,12 @@ typedef SysPtrArray SysJObject;
 typedef SysChar SysJChar;
 
 typedef enum _SYS_JVALUE_ENUM {
-  SYS_JBOOL = 1,
+  SYS_BOOL = 1,
   SYS_STRING,
+  SYS_POINTER,
+  SYS_NULL,
   SYS_JARRAY,
   SYS_JOBJECT,
-  SYS_JNULL,
   SYS_JSOURCE,
 
   SYS_JINT,
@@ -29,7 +30,6 @@ typedef enum _SYS_JVALUE_ENUM {
   SYS_JPROPERTY,
   SYS_JPAIR,
   SYS_JNODE,
-  SYS_JPOINTER,
 
   SYS_JINVALID
 } SYS_VALUE_ENUM;
@@ -41,6 +41,7 @@ SysValue * sys_value_copy(SysValue * o);
 void sys_value_ref(SysValue* value);
 void sys_value_unref(SysValue* value);
 SysValue * sys_value_new_string(const SysChar * s);
+SysValue * sys_value_new_pointer(const SysPointer ptr);
 void sys_value_free(SysValue* value);
 
 SYS_END_DECLS

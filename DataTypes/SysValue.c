@@ -23,7 +23,7 @@ struct _SysValue {
   union {
     SysValue *v_node;
     SysJSource *v_source;
-    SysJPointer v_pointer;
+    SysPointer v_pointer;
     SysJBool v_bool;
     SysJDouble v_double;
     SysJInt v_int;
@@ -37,7 +37,7 @@ struct _SysValue {
 };
 
 SysInt sys_value_data_type(SysValue *o) {
-  sys_return_val_if_fail(o != NULL, -1);
+  if(o == NULL) { return SYS_NULL; }
 
   return o->type;
 }
@@ -56,7 +56,7 @@ SysValue* sys_value_new(void) {
 
 SysValue *sys_value_copy(SysValue *o) {
   sys_return_val_if_fail(o != NULL, NULL);
-  
+
   SysValue *n = NULL;
 
   switch (o->type) {
@@ -77,6 +77,17 @@ SysValue* sys_value_new_string(const SysChar *s) {
 
   o->type = SYS_STRING;
   o->v.v_string = sys_strdup(s);
+
+  return o;
+}
+
+SysValue * sys_value_new_pointer(const SysPointer ptr) {
+  sys_return_val_if_fail(ptr != NULL, NULL);
+
+  SysValue *o = sys_value_new();
+
+  o->type = SYS_POINTER;
+  o->v.v_pointer = ptr;
 
   return o;
 }
