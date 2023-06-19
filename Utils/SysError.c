@@ -86,7 +86,7 @@ void sys_verror(SYS_ARGS_N const SysChar* format, va_list args) {
   sys_vlog(SYS_ARGS_P(sys_log, msg) stderr, SYS_LOG_ERROR, format, args);
 
 #if SYS_DEBUG
-  const SysChar *err = sys_strerr(errno);
+  const SysChar *err = sys_strerror(errno);
   UNUSED(err);
 
   sys_break();
@@ -137,11 +137,11 @@ void sys_error_free(SysError* err) {
 }
 
 /**
- * sys_strerr: get recognized string from errno.
+ * sys_strerror: get recognized string from errno.
  * @errnum: errno
  *
  * Returns: void
  */
-const SysChar* sys_strerr(SysInt errnum) {
+const SysChar* sys_strerror(SysInt errnum) {
   return sys_real_strerr(errnum);
 }

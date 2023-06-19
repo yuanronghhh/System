@@ -6,7 +6,7 @@
 SYS_BEGIN_DECLS
 
 SysWChar *sys_real_ansi_to_wchar(const SysChar *ansi);
-SysChar *sys_real_wchar_to_ansi(const SysWChar *uni);
+SysChar *sys_real_wchar_to_mbyte(const SysWChar *uni);
 void sys_real_strcpy(SysChar* __restrict dst, const SysChar* __restrict src);
 SysChar *sys_real_strncpy(SysChar *dst, SysSize n, const SysChar *src);
 int sys_real_vprintf(const SysChar *format, va_list va);

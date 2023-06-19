@@ -65,6 +65,6 @@ SYS_API  void       sys_verror         (SYS_ARGS_N  const      SysChar*    forma
 SYS_API  SysError*  sys_error_new      (void);
 SYS_API  void       sys_error_free     (SysError*         err);
 SYS_API  void       sys_error_set      (SYS_ARGS_N  SysError*  *err,       const          SysChar*   format,     ...);
-SYS_API  const SysChar*   sys_strerr(SysInt  errnum);
+SYS_API  const SysChar*   sys_strerror(SysInt  errnum);
 
 #endif

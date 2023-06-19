@@ -12,8 +12,8 @@ SYS_BEGIN_DECLS
 #define sys_strneq(s1, s2, n) (strncmp(s1, s2, (n)) == 0)
 #define sys_strjoin(delim, ...) _sys_strjoin(delim, __VA_ARGS__, NULL)
 
-SYS_API wchar_t* sys_ansi_to_wchar(const SysChar* ansi);
-SYS_API SysChar* sys_wchar_to_ansi(const SysWChar* uni);
+SYS_API wchar_t* sys_mbyte_to_wchar(const SysChar* ansi);
+SYS_API SysChar* sys_wchar_to_mbyte(const SysWChar* uni);
 
 SYS_API SysDouble sys_str_to_double(const SysChar* str);
 SYS_API SysInt64 sys_str_to_int64(const SysChar* str);

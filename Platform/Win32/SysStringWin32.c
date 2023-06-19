@@ -1,7 +1,7 @@
 #include <System/Utils/SysError.h>
 #include <System/Utils/SysStringPrivate.h>
 
-SysChar *sys_real_wchar_to_ansi(const SysWChar *uni) {
+SysChar *sys_real_wchar_to_mbyte(const SysWChar *uni) {
   int size;
   SysChar *nstr;
 

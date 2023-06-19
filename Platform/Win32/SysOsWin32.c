@@ -79,7 +79,7 @@ const SysChar *sys_real_get_env(const SysChar *var) {
   const SysChar *value;
   int len;
 
-  wname = sys_ansi_to_wchar(var);
+  wname = sys_mbyte_to_wchar(var);
   len = GetEnvironmentVariableW(wname, tmp, 2);
   if (len == 0) {
     sys_free_N(wname);
@@ -98,7 +98,7 @@ const SysChar *sys_real_get_env(const SysChar *var) {
     return NULL;
   }
 
-  value = sys_wchar_to_ansi(wvalue);
+  value = sys_wchar_to_mbyte(wvalue);
 
   sys_free_N(wname);
   sys_free_N(wvalue);
@@ -115,13 +115,13 @@ bool sys_real_set_env(const SysChar *var, const SysChar *value) {
 
   vlen = strlen(var);
 
-  wname = sys_ansi_to_wchar(var);
-  wvalue = sys_ansi_to_wchar(value);
+  wname = sys_mbyte_to_wchar(var);
+  wvalue = sys_mbyte_to_wchar(value);
   nvar = sys_new0_N(SysChar, vlen + 2);
   sys_memcpy(nvar, vlen + 2, var, vlen);
   sys_memcpy(nvar + vlen, vlen + 2, "=", 1);
 
-  wvar = sys_ansi_to_wchar(nvar);
+  wvar = sys_mbyte_to_wchar(nvar);
   _wputenv(wvar);
 
   ret = (SetEnvironmentVariableW(wname, wvalue) != 0);
@@ -154,7 +154,7 @@ void* sys_real_dlopen(const SysChar *filename) {
   HINSTANCE handle;
   wchar_t *wname;
 
-  wname = sys_ansi_to_wchar(filename);
+  wname = sys_mbyte_to_wchar(filename);
   handle = LoadLibraryW(wname);
   sys_free_N(wname);
 

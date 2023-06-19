@@ -23,7 +23,7 @@ void sys_system_thread_detach(void);
 void            sys_system_thread_wait            (SysRealThread  *thread);
 
 SysRealThread *sys_system_thread_new (SysThreadFunc proxy,
-                                  SysULong stack_size,
+                                  SysSize stack_size,
                                   const char *name,
                                   SysThreadFunc func,
                                   SysPointer data,

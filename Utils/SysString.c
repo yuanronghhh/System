@@ -553,13 +553,13 @@ SysInt64 sys_str_to_int64(const SysChar *str) {
   return strtol(str, NULL, 10);
 }
 
-SysChar *sys_wchar_to_ansi(const SysWChar *uni) {
+SysChar *sys_wchar_to_mbyte(const SysWChar *uni) {
   sys_return_val_if_fail(uni != NULL, NULL);
 
-  return sys_real_wchar_to_ansi(uni);
+  return sys_real_wchar_to_mbyte(uni);
 }
 
-SysWChar *sys_ansi_to_wchar(const SysChar *ansi) {
+SysWChar *sys_mbyte_to_wchar(const SysChar *ansi) {
   sys_return_val_if_fail(ansi != NULL, NULL);
 
   return sys_real_ansi_to_wchar(ansi);

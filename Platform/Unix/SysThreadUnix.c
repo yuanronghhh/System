@@ -487,7 +487,7 @@ sys_rw_lock_writer_lock (SysRWLock *rw_lock)
   int retval = pthread_rwlock_wrlock (sys_rw_lock_get_impl (rw_lock));
 
   if (retval != 0)
-    sys_abort_N ("Failed to get RW lock %p: %s", rw_lock, sys_strerr (retval));
+    sys_abort_N ("Failed to get RW lock %p: %s", rw_lock, sys_strerror (retval));
 }
 
 /**
@@ -557,7 +557,7 @@ sys_rw_lock_reader_lock (SysRWLock *rw_lock)
   int retval = pthread_rwlock_rdlock (sys_rw_lock_get_impl (rw_lock));
 
   if (retval != 0)
-    sys_abort_N ("Failed to get RW lock %p: %s", rw_lock, sys_strerr (retval));
+    sys_abort_N ("Failed to get RW lock %p: %s", rw_lock, sys_strerror (retval));
 }
 
 /**
@@ -1045,7 +1045,7 @@ sys_private_replace (SysPrivate *key,
   int error = (err); 							\
   if (error)	 		 		 			\
     sys_error_N ("file %s: line %d (%s): error '%s' during '%s'",		\
-           sys_strerr (error), name);					\
+           sys_strerror (error), name);					\
   }SYS_STMT_END
 
 #define posix_check_cmd(cmd) posix_check_err (cmd, #cmd)
@@ -1126,7 +1126,7 @@ sys_system_thread_new (SysThreadFunc proxy,
 
   if (ret == EAGAIN)
     {
-      sys_error_set_N (error, "Error creating thread: %s", sys_strerr (ret));
+      sys_error_set_N (error, "Error creating thread: %s", sys_strerror (ret));
       sys_free (thread->thread.name);
       sys_slice_free (SysThreadPosix, thread);
       return NULL;

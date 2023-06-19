@@ -11,7 +11,7 @@ FILE *sys_real_fopen(const SysChar *filename, const SysChar * mode) {
     return fp;
   }
 
-  sys_error_N("%s: %s", sys_strerr(errno), filename);
+  sys_error_N("%s: %s", sys_strerror(errno), filename);
   return NULL;
 }
 
@@ -33,7 +33,7 @@ SysInt sys_real_open(SysChar *filename, SysInt flags, SysInt mode) {
     return fp;
   }
 
-  sys_error_N("%s: %s", sys_strerr(errno), filename);
+  sys_error_N("%s: %s", sys_strerror(errno), filename);
   return -1;
 }
 
