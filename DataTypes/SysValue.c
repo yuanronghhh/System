@@ -22,12 +22,11 @@ struct _SysValue {
 
   union {
     SysValue *v_node;
-    SysJSource *v_source;
     SysPointer v_pointer;
-    SysJBool v_bool;
-    SysJDouble v_double;
-    SysJInt v_int;
-    SysJChar* v_string;
+    SysBool v_bool;
+    SysDouble v_double;
+    SysInt v_int;
+    SysChar* v_string;
     SysJPair *v_pair;
     SysJObject *v_object;
     SysJArray *v_array;
@@ -44,6 +43,10 @@ SysInt sys_value_data_type(SysValue *o) {
 
 const SysChar* sys_value_v_string(SysValue *o) {
   return o->v.v_string;
+}
+
+const SysPointer sys_value_v_pointer(SysValue *o) {
+  return o->v.v_pointer;
 }
 
 SysValue* sys_value_new(void) {
