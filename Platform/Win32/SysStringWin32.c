@@ -23,27 +23,27 @@ SysWChar *sys_real_ansi_to_wchar(const SysChar *ansi) {
   return wstr;
 }
 
-void sys_real_strcpy(SysChar *__restrict dst, const SysChar *__restrict src) {
+void sys_strcpy(SysChar *__restrict dst, const SysChar *__restrict src) {
 	SysSize n = strlen(src);
 	memcpy(dst, src, n);
 	dst[n] = '\0';
 }
 
-SysChar *sys_real_strncpy(SysChar *dst, SysSize n, const SysChar *src) {
-	memcpy(dst, src, n);
-	dst[n] = '0';
-	return dst;
+SysChar *sys_strncpy(SysChar *dst, SysSize n, const SysChar *src) {
+  memcpy(dst, src, n);
+  dst[n] = '0';
+  return dst;
 }
 
 int sys_real_vsprintf(SysChar *str, SysSize size, const SysChar *format, va_list args) {
   return vsprintf_s(str, size, format, args);
 }
 
-int sys_real_vprintf(const SysChar *format, va_list va) {
+int sys_vprintf(const SysChar *format, va_list va) {
   return vprintf_s(format, va);
 }
 
-int sys_real_vasprintf(SysChar **ptr, const SysChar *format, va_list va) {
+int sys_vasprintf(SysChar **ptr, const SysChar *format, va_list va) {
   int len;
 
   len = _vscprintf_p(format, va) + 1;

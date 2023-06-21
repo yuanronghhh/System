@@ -12,7 +12,7 @@ SYS_BEGIN_DECLS
 #define sys_strneq(s1, s2, n) (strncmp(s1, s2, (n)) == 0)
 #define sys_strjoin(delim, ...) _sys_strjoin(delim, __VA_ARGS__, NULL)
 
-SYS_API wchar_t* sys_mbyte_to_wchar(const SysChar* ansi);
+SYS_API SysWChar* sys_mbyte_to_wchar(const SysChar* mbyte);
 SYS_API SysChar* sys_wchar_to_mbyte(const SysWChar* uni);
 
 SYS_API SysDouble sys_str_to_double(const SysChar* str);
@@ -30,7 +30,7 @@ SYS_API int sys_asprintf(SysChar** str, const SysChar* format, ...);
 SYS_API SysChar* sys_strdup_printf(const SysChar* format, ...);
 SYS_API void sys_print(const SysChar* str);
 SYS_API void sys_strcpy(SysChar* __restrict dst, const SysChar* __restrict src);
-SYS_API void sys_strncpy(SysChar* __restrict dst, SysSize n, const SysChar* __restrict src);
+SYS_API SysChar* sys_strncpy(SysChar* __restrict dst, SysSize n, const SysChar* __restrict src);
 SYS_API SysSize sys_strlen(const SysChar* s, SysSize max);
 SYS_API bool sys_str_equal(const SysChar* s1, const SysChar* s2);
 SYS_API int sys_strcmp(const SysChar* s1, const SysChar* s2);
