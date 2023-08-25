@@ -17,3 +17,13 @@ bool sys_real_path_exists(const SysChar *path) {
 
   return false;
 }
+
+SysBool sys_real_path_is_absolute(const SysChar *path) {
+  sys_return_val_if_fail(path != NULL, false);
+
+  if (*path == '/') {
+    return true;
+  }
+
+  return false;
+}

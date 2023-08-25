@@ -11,9 +11,8 @@ SYS_BEGIN_DECLS
     #include "vld.h"
     #define SYS_LEAK_IGNORE_BEGIN VLDGlobalDisable()
     #define SYS_LEAK_IGNORE_END VLDGlobalEnable()
-
-    #define SYS_LEAK_DISABLE VLDGlobalDisable()
-    #define SYS_LEAK_ENABLE VLDGlobalEnable()
+    #define SYS_LEAK_DISABLE VLDDisable()
+    #define SYS_LEAK_ENABLE VLDRestore()
   #else
     #define SYS_LEAK_IGNORE_BEGIN
     #define SYS_LEAK_IGNORE_END

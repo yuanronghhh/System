@@ -52,11 +52,13 @@ static void sys_object_init(SysObject *self);
 static void sys_object_class_init(SysObjectClass *self);
 
 static SysTypeClass* sys_object_parent_class = NULL;
-SysObjectPrivate * sys_object_get_private(SysObject* o) {
-   return (SysObjectPrivate *)sys_type_get_private(((SysTypeInstance *)o), sys_object_get_type()); 
+static SysInt SysObject_private_offset;
+SysPointer sys_object_get_private(SysObject* o) {
+  return (((SysUInt8 *)o) + SysObject_private_offset);
 }
 static void sys_object_class_intern_init(SysPointer cls) {
   sys_object_parent_class = NULL;
+  sys_type_class_adjust_private_offset(cls, &SysObject_private_offset);
   sys_object_class_init(cls);
 }
 SysType sys_object_get_type(void) {
@@ -68,7 +70,6 @@ SysType sys_object_get_type(void) {
   const SysTypeInfo info = {
       sizeof(SysObjectClass),
       sizeof(SysObject),
-      sizeof(SysObjectPrivate),
       "SysObject",
 
       (SysTypeInitFunc)sys_object_base_class_init,
@@ -104,7 +105,6 @@ static void sys_object_base_class_init(SysObjectClass *self) {
 }
 
 static void sys_object_class_init(SysObjectClass *ocls) {
-  ocls->construct = sys_object_construct_i;
   ocls->dispose = sys_object_dispose_i;
   ocls->finalize = sys_object_finalize_i;
 }
@@ -179,6 +179,14 @@ void * _sys_object_cast_check(SysObject* self, SysType ttype) {
   }
 
   SysType type = sys_type_from_instance(self);
+  SysTypeNode *node = sys_type_node(type);
+
+  if (sys_atomic_int_get(&node->ref_count) < 0
+    || sys_atomic_int_get(&node->n_supers) < 0) {
+
+    sys_error_N("%s", "Object check node Failed");
+    return NULL;
+  }
 
   if (!sys_ref_count_cmp(self, 0)) {
     sys_return_val_if_fail(sys_type_is_a(type, ttype), NULL);
@@ -191,11 +199,18 @@ void * _sys_object_cast_check(SysObject* self, SysType ttype) {
 void* _sys_class_cast_check(SysObjectClass* cls, SysType ttype) {
   sys_return_val_if_fail(cls != NULL, NULL);
 
+  sys_assert(cls->dispose != NULL);
+
   SysType type = sys_type_from_class(cls);
   SysTypeNode *node = sys_type_node(type);
 
-  sys_return_val_if_fail(sys_type_is_a(type, ttype), NULL);
-  sys_return_val_if_fail(SYS_REF_CHECK(node, MAX_REF_NODE), NULL);
+  if (sys_atomic_int_get(&node->ref_count) < 0
+    || sys_atomic_int_get(&node->n_supers) < 0
+    || !sys_type_is_a(type, ttype)) {
+
+    sys_error_N("%s", "Class check node Failed");
+    return NULL;
+  }
 
   return cls;
 }
@@ -221,12 +236,11 @@ SysType sys_type_new(SysType ptype, const SysTypeInfo *info) {
     ppsize = pnode->data.instance.private_size;
   }
 
-  nodesize = sizeof(SysTypeNode) + sizeof(SysType) * (pn_supers + 1);
+  nodesize = (int)sizeof(SysTypeNode) + (int)sizeof(SysType) * (pn_supers + 1);
   node = sys_malloc0_N(nodesize);
   node->name = sys_strdup(info->name);
 
   node->data.instance.instance_size = info->instance_size;
-  node->data.instance.private_size = ppsize + info->private_size;
   node->data.instance.class_size = info->class_size;
   node->data.instance.class_init = info->class_init;
   node->data.instance.class_finalize = info->class_finalize;
@@ -271,7 +285,33 @@ void sys_type_node_unref(SysTypeNode *node) {
 void *sys_type_get_private(SysTypeInstance *instance, SysType type) {
   SysTypeNode *node = sys_type_node(type);
 
-  return (((SysChar *)instance) - node->data.instance.private_size);
+  return ((SysUInt8 *)instance) - node->data.instance.private_size;
+}
+
+void sys_type_class_adjust_private_offset (SysTypeClass *cls, SysInt * private_offset) {
+  sys_return_if_fail(cls != NULL);
+  sys_return_if_fail(private_offset != NULL);
+
+  if (*private_offset > 0) {
+    sys_return_if_fail (*private_offset <= 0xffff);
+
+  } else {
+    return;
+  }
+
+  SysTypeNode* node = sys_type_node(cls->type);
+  SysTypeNode* pnode = sys_type_node(NODE_PARENT(node));
+  if (pnode) {
+
+    node->data.instance.private_size = pnode->data.instance.private_size + *private_offset;
+  } else {
+
+    node->data.instance.private_size = *private_offset;
+  }
+
+  sys_assert(node->data.instance.private_size <= 0xffff);
+
+  *private_offset = -(SysInt)node->data.instance.private_size;
 }
 
 void sys_type_class_free(SysTypeClass *cls) {
@@ -301,7 +341,6 @@ void sys_type_class_unref(SysTypeClass *cls) {
 SysTypeClass *sys_type_class_ref(SysType type) {
   sys_return_val_if_fail(type != 0, NULL);
 
-  SysType ptype;
   SysTypeNode *node;
   SysTypeNode *pnode;
   SysTypeClass *cls, *pcls;
@@ -319,8 +358,8 @@ SysTypeClass *sys_type_class_ref(SysType type) {
   cls->type = (SysType)node;
   node->data.instance.class_ptr = cls;
 
-  ptype = NODE_PARENT(node);
-  if(ptype) {
+  for (SysInt i = node->n_supers; i > 0; i--) {
+    SysType ptype = node->supers[i];
     pnode = sys_type_node(ptype);
 
     pcls = sys_type_class_ref(ptype);
@@ -329,7 +368,7 @@ SysTypeClass *sys_type_class_ref(SysType type) {
   }
   node->data.instance.class_init(cls);
 
-  sys_assert(node->data.instance.private_size > 0 && "checkclass inherit and GET_CLASS OR CLASS use wrong?.");
+  sys_assert(node->data.instance.private_size >= 0 && "check class inherit and GET_CLASS OR CLASS use wrong?.");
 
   return cls;
 }
@@ -340,16 +379,11 @@ SysTypeInstance *sys_type_new_instance(SysType type) {
   SysTypeInstance *instance;
   SysChar *mp;
   SysTypeClass *cls;
+  SysInstanceInitFunc ofunc, nfunc;
 
   int priv_psize = 0;
 
   node = sys_type_node(type);
-  priv_psize = node->data.instance.private_size;
-
-  mp = sys_malloc0_N(priv_psize + node->data.instance.instance_size);
-  instance = (SysTypeInstance *)(mp + priv_psize);
-
-  SysInstanceInitFunc ofunc, nfunc;
 
   ofunc = node->data.instance.instance_init;
   cls = sys_type_class_ref(type);
@@ -357,6 +391,10 @@ SysTypeInstance *sys_type_new_instance(SysType type) {
 
   sys_assert(ofunc == nfunc && "maybe use *_CLASS instead of *_GET_CLASS ? ");
 
+  priv_psize = node->data.instance.private_size;
+
+  mp = sys_malloc0_N(priv_psize + node->data.instance.instance_size);
+  instance = (SysTypeInstance *)(mp + priv_psize);
   instance->type_class = cls;
 
   for (SysInt i = node->n_supers; i > 0; i--) {

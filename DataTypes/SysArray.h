@@ -6,9 +6,6 @@
 SYS_BEGIN_DECLS
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-#define sys_array_foreach(type, node, array, len)        \
-  type node = array[0];                                  \
-  for (int i = 0; i < (int)(len); node = array[++i])
 
 struct _SysArray {
   void** pdata;

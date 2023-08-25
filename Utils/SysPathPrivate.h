@@ -6,7 +6,8 @@
 SYS_BEGIN_DECLS
 
 SysChar *sys_real_getcwd(void);
-bool sys_real_path_exists(const SysChar *path);
+SysBool sys_real_path_exists(const SysChar *path);
+SysBool sys_real_path_is_absolute(const SysChar *path);
 
 SYS_END_DECLS
 

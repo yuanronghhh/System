@@ -37,8 +37,8 @@ SysPointer sys_real_atomic_pointer_get(const volatile SysPointer x) {
   return *ptr;
 }
 
-void sys_real_atomic_pointer_set(volatile void *o, SysPointer n) {
-  volatile void **ptr = o;
+void sys_real_atomic_pointer_set(volatile SysPointer o, SysPointer n) {
+  volatile SysPointer *ptr = o;
 
   *ptr = n;
   MemoryBarrier();

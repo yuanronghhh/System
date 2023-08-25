@@ -17,18 +17,25 @@ SYS_BEGIN_DECLS
 #define SYS_OBJECT_CLASS(cls) ((SysObjectClass *)sys_class_cast_check(cls, SYS_TYPE_OBJECT))
 #define SYS_OBJECT_GET_CLASS(o) sys_instance_get_class(o, SysObjectClass)
 
-#define SYS_DEFINE_TYPE_WITH_PRIVATE(TypeName, type_name, ptype)                    \
+#define SYS_ADD_PRIVATE(TypeName) \
+{ \
+  TypeName##_private_offset = sizeof(TypeName##Private); \
+}
+
+#define SYS_DEFINE_BEGIN(TypeName, type_name, T_P, flag)  \
 static void type_name##_init(TypeName *self);                          \
 static void type_name##_class_init(TypeName##Class *o);                \
 static void type_name##_dispose(SysObject *o);                         \
-static SysTypeClass* type_name##_parent_class = NULL;                     \
-TypeName##Private * type_name##_get_private(TypeName* o) {                \
-   return (TypeName##Private *)sys_type_get_private(((SysTypeInstance *)o), type_name##_get_type()); \
-}                                                                                                    \
-static void type_name##_class_intern_init (SysPointer klass) \
+static SysTypeClass* type_name##_parent_class = NULL;                  \
+static SysInt TypeName##_private_offset = 0;                           \
+SysPointer type_name##_get_private(TypeName* o) {              \
+   return (((SysUInt8 *)o) + TypeName##_private_offset); \
+} \
+static void type_name##_class_intern_init (SysPointer kclass) \
 { \
-  type_name##_parent_class = sys_type_class_ref(ptype); \
-  type_name##_class_init ((TypeName##Class*) klass); \
+  type_name##_parent_class = sys_type_class_ref(T_P); \
+  sys_type_class_adjust_private_offset (kclass, &TypeName##_private_offset); \
+  type_name##_class_init ((TypeName##Class*) kclass); \
 } \
 SysType type_name##_get_type(void) {                     \
   static SysType type = 0;                               \
@@ -38,23 +45,29 @@ SysType type_name##_get_type(void) {                     \
   const SysTypeInfo info = {                             \
       sizeof(TypeName##Class),                           \
       sizeof(TypeName),                                  \
-      sizeof(TypeName##Private),                         \
       #TypeName,                                         \
       NULL,                                              \
       NULL,                                              \
       (SysTypeInitFunc)type_name##_class_intern_init,    \
       NULL,                                              \
       (SysInstanceInitFunc)type_name##_init              \
-  };                                                     \
-  type = sys_type_new((ptype), &info);                   \
-  return type;                                           \
+  }; \
+  type = sys_type_new((T_P), &info);
+
+#define SYS_DEFINE_END() \
+    return type; \
 }
+
+#define SYS_DEFINE_WITH_CODE(TypeName, type_name, T_P, _flag_, _CODE_) SYS_DEFINE_BEGIN(TypeName, type_name, T_P, _flag_){_CODE_;}SYS_DEFINE_END()
+
+#define SYS_DEFINE_TYPE_WITH_PRIVATE(TypeName, type_name, T_P) SYS_DEFINE_WITH_CODE(TypeName, type_name, T_P, 0, SYS_ADD_PRIVATE(TypeName))
+
+#define SYS_DEFINE_TYPE(TypeName, type_name, T_P) SYS_DEFINE_WITH_CODE(TypeName, type_name, T_P, 0, {})
 
 typedef size_t SysType;
 typedef struct _SysObject SysObject;
 
 typedef struct _SysObjectClass SysObjectClass;
-typedef SysPointer SysObjectPrivate;
 
 typedef struct _SysTypeInfo SysTypeInfo;
 typedef struct _SysTypeNode SysTypeNode;
@@ -72,7 +85,6 @@ typedef void (*SysRefHook) (SysObject *o, const SysChar *name, SysInt ref_count)
 struct _SysTypeInfo {
   SysInt class_size;
   SysInt instance_size;
-  SysInt private_size;
   SysChar *name;
 
   SysTypeInitFunc class_base_init;
@@ -95,8 +107,6 @@ struct _SysTypeInstance {
 struct _SysObjectClass {
   SysTypeClass parent;
 
-  // only used for sealed class
-  void (*construct)(SysObject *o, ...);
   void (*dispose)(SysObject *self);
   void (*finalize)(SysObject *self);
 };
@@ -110,7 +120,6 @@ struct _SysObject {
 #define sys_object_ref(o) _sys_object_ref(SYS_OBJECT(o))
 
 SYS_API void* sys_object_new(SysType type, const SysChar * first, ...);
-
 SYS_API SysType sys_object_get_type(void);
 SYS_API void _sys_object_ref(SysObject* self);
 SYS_API void _sys_object_unref(SysObject* self);
@@ -137,6 +146,7 @@ SYS_API void sys_type_free_instance(SysTypeInstance *instance);
 SYS_API void *sys_type_get_private(SysTypeInstance *instance, SysType type);
 SYS_API void sys_type_class_unref(SysTypeClass *cls);
 SYS_API void sys_type_class_free(SysTypeClass *cls);
+SYS_API void sys_type_class_adjust_private_offset (SysTypeClass *cls, SysInt * private_offset);
 SYS_API SysTypeClass *sys_type_class_ref(SysType type);
 SYS_API SysBool sys_type_is_a(SysType child, SysType parent);
 
