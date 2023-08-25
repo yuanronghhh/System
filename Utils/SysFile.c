@@ -126,6 +126,7 @@ SysSize sys_fread(
     SysSize elem_size,
     SysSize elem_count,
     FILE*  fp) {
+
   return sys_real_fread(buffer, bufsize, elem_size, elem_count, fp);
 }
 
@@ -176,4 +177,12 @@ void sys_fcloseall(void) {
 
 const SysChar* sys_exe_path(void) {
   return sys_real_exe_path();
+}
+
+SysBool sys_file_get_contents (const SysChar *filename,
+                     SysChar       **contents,
+                     SysSize       *length,
+                     SysError      **error) {
+
+  return false;
 }
