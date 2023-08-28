@@ -1,5 +1,5 @@
+#include <System/Utils/SysFile.h>
 #include <System/Utils/SysString.h>
-#include <System/Utils/SysFilePrivate.h>
 
 #define LINE_BLOCK 512
 
@@ -116,24 +116,6 @@ SysInt sys_ungetc(SysInt c, FILE* fp) {
   return ungetc(c, fp);
 }
 
-FILE* sys_fopen(const SysChar* filename, const SysChar* mode) {
-  return sys_real_fopen(filename, mode);
-}
-
-SysSize sys_fread(
-    void*  buffer,
-    SysSize bufsize,
-    SysSize elem_size,
-    SysSize elem_count,
-    FILE*  fp) {
-
-  return sys_real_fread(buffer, bufsize, elem_size, elem_count, fp);
-}
-
-SysInt sys_open(SysChar* filename, SysInt flags, SysInt mode) {
-  return sys_real_open(filename, flags, mode);
-}
-
 SysInt sys_fputs(FILE* const fp, SysChar const* s) {
   SysInt len;
   SYS_LEAK_IGNORE_BEGIN;
@@ -169,14 +151,6 @@ void sys_fclose(FILE* fp) {
   sys_return_if_fail(fp != NULL);
 
   fclose(fp);
-}
-
-void sys_fcloseall(void) {
-  sys_real_fcloseall();
-}
-
-const SysChar* sys_exe_path(void) {
-  return sys_real_exe_path();
 }
 
 SysBool sys_file_get_contents (const SysChar *filename,

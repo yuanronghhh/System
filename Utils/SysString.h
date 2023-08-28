@@ -44,6 +44,7 @@ SYS_API SysChar* sys_strpcpy(SysChar* dst, const SysChar* src);
 SYS_API SysChar* sys_str_newsize(SysSize size);
 SYS_API void sys_strmcat(SysChar** v1, SysSize* v1_max, SysSize* len, const SysChar* v2);
 SYS_API SysChar* sys_strlcat(SysChar* v1, SysSize v1_max, const SysChar* v2);
+SYS_API int sys_vsprintf(SysChar* str, SysSize size, const SysChar* format, va_list args);
 
 SYS_API bool sys_str_override_c(SysChar* str, char oldchar, char newchar);
 SYS_API SysChar** sys_strsplit(SysChar*  s, const SysChar* delim, int*  count);

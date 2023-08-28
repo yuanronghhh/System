@@ -64,9 +64,7 @@ set(SRC
   ./DataTypes/SysTypes.c
 
   ./Utils/SysFile.h
-  ./Utils/SysFilePrivate.h
   ./Utils/SysFile.c
-  ./Utils/SysStringPrivate.h
   ./Utils/SysString.h
   ./Utils/SysString.c
   ./Utils/SysPathPrivate.h
@@ -86,7 +84,6 @@ set(SRC
   ./Platform/Common/SysOs.h
   ./Platform/Common/SysOs.c
   ./Platform/Common/SysAtomic.h
-  ./Platform/Common/SysAtomicPrivate.h
   ./Platform/Common/SysAtomic.c
   ./Platform/Common/SysThread.c
   ./Platform/Common/SysThread.h

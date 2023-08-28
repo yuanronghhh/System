@@ -1,7 +1,7 @@
+#include <System/Utils/SysString.h>
 #include <System/Utils/SysError.h>
 #include <System/Platform/Common/SysOs.h>
 #include <System/Platform/Common/SysMem.h>
-#include <System/Utils/SysStringPrivate.h>
 
 #define SYS_BYTE_INIT_SIZE 4096
 
@@ -269,7 +269,7 @@ int sys_snprintf(SysChar *str, SysSize size, const SysChar *format, ...) {
   va_list args;
   va_start(args, format);
 
-  len = sys_real_vsprintf(str, size, format, args);
+  len = sys_vsprintf(str, size, format, args);
 
   va_end(args);
 

@@ -1,6 +1,6 @@
 #include <System/Utils/SysString.h>
 
-SysSize sys_real_fread(
+SysSize sys_fread(
     void*  buffer,
     SysSize bufsize,
     SysSize elem_size,
@@ -49,7 +49,7 @@ SysInt sys_vasprintf (SysChar** str, const SysChar* format, va_list va) {
   return count;
 }
 
-SysInt sys_real_vsprintf(SysChar* str, SysSize size, const SysChar* format, va_list args) {
+SysInt sys_vsprintf(SysChar* str, SysSize size, const SysChar* format, va_list args) {
   return vsnprintf(str, size, format, args);
 }
 
@@ -72,7 +72,7 @@ SysWChar *sys_mbyte_to_wchar(const SysChar* mbyte) {
   setlocale(LC_CTYPE, "");
   mbslen = mbstowcs(NULL, mbyte, 0);
   if (mbslen == (SysSize)-1) {
-    perror("sys_real_ansi_to_wchar failed");
+    perror("sys_ansi_to_wchar failed");
     exit(-1);
   }
 

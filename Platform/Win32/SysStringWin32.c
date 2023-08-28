@@ -1,32 +1,32 @@
 #include <System/Utils/SysError.h>
-#include <System/Utils/SysStringPrivate.h>
+#include <System/Utils/SysString.h>
 
-SysChar *sys_real_wchar_to_mbyte(const SysWChar *uni) {
+SysChar *sys_wchar_to_mbyte(const SysWChar *wchar) {
   int size;
   SysChar *nstr;
 
-  size = WideCharToMultiByte(CP_ACP, 0, uni, -1, NULL, 0, NULL, NULL);
+  size = WideCharToMultiByte(CP_ACP, 0, wchar, -1, NULL, 0, NULL, NULL);
   nstr = (SysChar *)malloc(size * sizeof(SysChar));
-  WideCharToMultiByte(CP_ACP, 0, uni, -1, nstr, size, NULL, NULL);
+  WideCharToMultiByte(CP_ACP, 0, wchar, -1, nstr, size, NULL, NULL);
 
   return nstr;
 }
 
-SysWChar *sys_real_ansi_to_wchar(const SysChar *ansi) {
+SysWChar *sys_mbyte_to_wchar(const SysChar *mbyte) {
   int size;
   SysWChar *wstr;
 
-  size = MultiByteToWideChar(CP_ACP, 0, ansi, -1, NULL, 0);
+  size = MultiByteToWideChar(CP_ACP, 0, mbyte, -1, NULL, 0);
   wstr = (SysWChar *)malloc(size * sizeof(SysWChar));
-  MultiByteToWideChar(CP_ACP, 0, ansi, -1, wstr, size);
+  MultiByteToWideChar(CP_ACP, 0, mbyte, -1, wstr, size);
 
   return wstr;
 }
 
 void sys_strcpy(SysChar *__restrict dst, const SysChar *__restrict src) {
-	SysSize n = strlen(src);
-	memcpy(dst, src, n);
-	dst[n] = '\0';
+  SysSize n = strlen(src);
+  memcpy(dst, src, n);
+  dst[n] = '\0';
 }
 
 SysChar *sys_strncpy(SysChar *dst, SysSize n, const SysChar *src) {
@@ -35,7 +35,7 @@ SysChar *sys_strncpy(SysChar *dst, SysSize n, const SysChar *src) {
   return dst;
 }
 
-int sys_real_vsprintf(SysChar *str, SysSize size, const SysChar *format, va_list args) {
+int sys_vsprintf(SysChar *str, SysSize size, const SysChar *format, va_list args) {
   return vsprintf_s(str, size, format, args);
 }
 
