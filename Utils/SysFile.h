@@ -27,11 +27,12 @@ SYS_API SysInt sys_putc(SysInt c, FILE* fp);
 SYS_API SysInt sys_fgetc(FILE* fp);
 SYS_API SysInt sys_ungetc(SysInt c, FILE* fp);
 SYS_API FILE* sys_fopen(const SysChar* filename, const SysChar* mode);
-SYS_API SysSize sys_fread(void*  buffer,SysSize bufsize,SysSize elem_size,SysSize elem_count, FILE*  fp);
+SYS_API SysSize sys_fread(void*  buffer, SysSize bufsize, SysSize elem_size, SysSize elem_count, FILE*  fp);
 SYS_API void sys_fclose(FILE* fp);
 SYS_API void sys_fcloseall(void);
 SYS_API bool sys_fstat(FILE*  fp, SysFileState* state);
 SYS_API const SysChar* sys_exe_path(void);
+SYS_API SysBool sys_file_get_contents (const SysChar *filename, SysChar **contents, SysSize *length, SysError **error);
 
 SYS_END_DECLS
 
