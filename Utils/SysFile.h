@@ -20,7 +20,9 @@ SYS_API SysSize sys_vfformat(FILE* fp, SysChar** maxbuf, const SysChar* format, 
 
 SYS_API SysInt sys_vfprintf(FILE* const fp, SysChar const* const format, va_list args);
 SYS_API SysInt sys_fprintf(FILE* const fp, SysChar  const* const format, ...);
-SYS_API SysInt sys_open(SysChar* filename, SysInt flags, SysInt mode);
+SYS_API SysInt sys_close(SysInt fd);
+SYS_API SysInt sys_open(const SysChar* filename, SysInt flags, SysInt mode);
+SYS_API SysSSize sys_read(SysInt fd, SysPointer buf, SysSize mcount);
 SYS_API SysInt sys_fputs(FILE* const fp, SysChar const* s);
 SYS_API SysChar* sys_fgets(SysChar* buf, SysInt max, FILE* fp);
 SYS_API SysInt sys_putc(SysInt c, FILE* fp);

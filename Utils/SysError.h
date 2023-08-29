@@ -55,16 +55,16 @@ struct _SysError {
   SysInt line;
 };
 
-SYS_API  void       sys_break          (void);
-SYS_API  void       sys_abort          (SYS_ARGS_N  const      SysChar*    format,        ...);
-SYS_API  void       sys_exit           (SYS_ARGS_N  SysInt     exitcode,   const          SysChar*   format,     ...);
-SYS_API  void       sys_warning        (SYS_ARGS_N  const      SysChar*    format,        ...);
-SYS_API  void       sys_log            (SYS_ARGS_N  FILE*      std,        SYS_LOG_LEVEL  level,     const       SysChar*   format,  ...);
-SYS_API  void       sys_error          (SYS_ARGS_N  const      SysChar*    format,        ...);
-SYS_API  void       sys_verror         (SYS_ARGS_N  const      SysChar*    format,        va_list    args);
-SYS_API  SysError*  sys_error_new      (void);
-SYS_API  void       sys_error_free     (SysError*         err);
-SYS_API  void       sys_error_set      (SYS_ARGS_N  SysError*  *err,       const          SysChar*   format,     ...);
-SYS_API  const SysChar*   sys_strerror(SysInt  errnum);
+SYS_API void sys_break (void);
+SYS_API void sys_abort (SYS_ARGS_N const SysChar* format, ...);
+SYS_API void sys_exit (SYS_ARGS_N SysInt exitcode, const SysChar* format, ...);
+SYS_API void sys_warning (SYS_ARGS_N const SysChar* format, ...);
+SYS_API void sys_log (SYS_ARGS_N FILE* std, SYS_LOG_LEVEL level, const SysChar* format, ...);
+SYS_API void sys_error (SYS_ARGS_N const SysChar* format, ...);
+SYS_API void sys_verror (SYS_ARGS_N const SysChar* format, va_list args);
+SYS_API SysError* sys_error_new (void);
+SYS_API void sys_error_free (SysError* err);
+SYS_API void sys_error_set (SYS_ARGS_N SysError** err, const SysChar* format, ...);
+SYS_API const SysChar* sys_strerror(SysInt errnum);
 
 #endif

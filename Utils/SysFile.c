@@ -152,11 +152,3 @@ void sys_fclose(FILE* fp) {
 
   fclose(fp);
 }
-
-SysBool sys_file_get_contents (const SysChar *filename,
-                     SysChar       **contents,
-                     SysSize       *length,
-                     SysError      **error) {
-
-  return false;
-}

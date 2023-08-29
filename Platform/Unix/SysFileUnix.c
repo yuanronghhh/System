@@ -47,7 +47,14 @@ void sys_fcloseall(void) {
   fcloseall();
 }
 
-SysInt sys_open(SysChar *filename, SysInt flags, SysInt mode) {
+SysInt sys_open(const SysChar *filename, SysInt flags, SysInt mode) {
   return open(filename, flags, mode);
 }
 
+SysSize sys_read(SysInt fd, SysPointer buf, SysSize mcount) {
+  return read(fd, buf, mcount);
+}
+
+SysInt sys_close(SysInt fd) {
+  return close(fd);
+}

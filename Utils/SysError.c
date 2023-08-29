@@ -101,7 +101,7 @@ SysError* sys_error_new(void) {
   return nerror;
 }
 
-void sys_error_set(SYS_ARGS_N SysError* *err, const SysChar* format, ...) {
+void sys_error_set(SYS_ARGS_N SysError**err, const SysChar* format, ...) {
   sys_return_if_fail(err != NULL);
   sys_return_if_fail(*err == NULL);
 
@@ -111,8 +111,8 @@ void sys_error_set(SYS_ARGS_N SysError* *err, const SysChar* format, ...) {
     sys_free_N((*err)->message);
     nerror = (*err);
   } else {
-      nerror = sys_error_new();
-      *err = nerror;
+    nerror = sys_error_new();
+    *err = nerror;
   }
 
   nerror->func = _funcname;

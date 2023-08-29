@@ -57,6 +57,7 @@ typedef signed long long SysInt64;
 typedef unsigned long long SysUInt64;
 typedef double SysDouble;
 typedef size_t SysSize;
+typedef ssize_t SysSSize;
 typedef wchar_t SysWChar;
 
 #define SYS_STMT_START
