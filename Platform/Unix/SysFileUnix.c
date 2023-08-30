@@ -1,5 +1,5 @@
 #include <System/Platform/Common/SysMem.h>
-#include <System/Utils/SysFilePrivate.h>
+#include <System/Utils/SysFile.h>
 
 static SysChar exe_path[MAX_PATH];
 
@@ -51,7 +51,7 @@ SysInt sys_open(const SysChar *filename, SysInt flags, SysInt mode) {
   return open(filename, flags, mode);
 }
 
-SysSize sys_read(SysInt fd, SysPointer buf, SysSize mcount) {
+SysSSize sys_read(SysInt fd, SysPointer buf, SysSize mcount) {
   return read(fd, buf, mcount);
 }
 
