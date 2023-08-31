@@ -229,7 +229,12 @@ SysChar **sys_real_backtrace_string(SysInt *size) {
 }
 
 void sys_real_setup(void) {
+  WSADATA info;
+  if (WSAStartup(MAKEWORD(1, 1), &info) != 0) {
+    sys_abort_N("%s", "WSAStartup() init for sockect failed");
+  }
 }
 
 void sys_real_teardown(void) {
 }
+

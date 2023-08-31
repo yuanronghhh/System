@@ -14,6 +14,8 @@ extern "C" {
 #include <process.h>
 #include <sys/types.h>
 #include <DbgHelp.h>
+#include <WinSock2.h>
+#include <WS2tcpip.h>
 
 #define SYS_OS_WIN32 1
 #define SYS_API __declspec(dllexport)

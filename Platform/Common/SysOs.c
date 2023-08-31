@@ -312,6 +312,72 @@ SysChar **sys_backtrace_string(SysInt *size) {
   return sys_real_backtrace_string(size);
 }
 
+SysUIntPtr sys_socket(int af, int type, int protocol) {
+  return socket(af, type, protocol);
+}
+
+void sys_arg_init(SysSArg *self, SysInt argc, const SysChar* argv[]) {
+  sys_return_if_fail(self != NULL);
+  sys_return_if_fail(argv != NULL);
+
+  self->argc = argc;
+  self->argv = (SysChar **)argv;
+}
+
+static SysBool pflag_equal(const SysChar *pflag, const SysChar *key) {
+  sys_return_val_if_fail(pflag != NULL, false);
+  sys_return_val_if_fail(key != NULL, false);
+
+  if (*pflag != '-') {
+    return false;
+  }
+
+  if (*(pflag + 1) == '-') {
+
+    return sys_strcmp(key, pflag + 2) == 0;
+  } else {
+
+    return sys_strcmp(key, pflag + 1) == 0;
+  }
+}
+
+int sys_arg_index(SysSArg *self, const SysChar *key, SysBool is_flag) {
+  sys_return_val_if_fail(self != NULL, -1);
+  sys_return_val_if_fail(key != NULL, -1);
+
+  const SysChar* arg;
+  if (self->argc < 2) {
+    return -1;
+  }
+
+  for (int i = 1; i < self->argc; i++) {
+    arg = self->argv[i];
+    if (!pflag_equal(arg, key)) {
+      continue;
+    }
+
+    if (is_flag) {
+      return i;
+    }
+
+    if (i >= self->argc) {
+      return -1;
+    }
+
+    if (self->argv[i + 1] == NULL) {
+      return -1;
+    }
+
+    if(*self->argv[i + 1] == '-') {
+      return -1;
+    }
+
+    return i + 1;
+  }
+
+  return 1;
+}
+
 void sys_setup(void) {
   if(inited) {
     return;

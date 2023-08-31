@@ -107,6 +107,7 @@ configure_file(${CMAKE_CURRENT_LIST_DIR}/SysConfig.h.in
   ${CMAKE_CURRENT_LIST_DIR}/SysConfig.h)
 
 target_link_libraries(System
+  ${ADDTIONAL_LIBRARIES}
   ${PTHREAD_LIBRARIES}
   ${DBG_LIBRAREIS}
 )

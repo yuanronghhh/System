@@ -55,6 +55,7 @@ typedef unsigned int SysUInt32;
 typedef unsigned long SysULong;
 typedef signed long long SysInt64;
 typedef unsigned long long SysUInt64;
+typedef uintptr_t SysUIntPtr;
 typedef double SysDouble;
 typedef size_t SysSize;
 typedef ssize_t SysSSize;
