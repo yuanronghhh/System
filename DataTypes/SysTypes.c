@@ -88,10 +88,6 @@ static void sys_object_base_finalize(SysObject *self) {
   sys_return_if_fail(self != NULL);
 }
 
-static void sys_object_construct_i(SysObject *self, ...) {
-  sys_return_if_fail(self != NULL);
-}
-
 static void sys_object_dispose_i(SysObject *self) {
   sys_return_if_fail(self != NULL);
 }
@@ -227,13 +223,11 @@ SysType sys_type_new(SysType ptype, const SysTypeInfo *info) {
   SysTypeNode *node;
   int nodesize = 0;
   int pn_supers = 0;
-  int ppsize = 0;
 
   pnode = sys_type_node(ptype);
 
   if (pnode) {
     pn_supers = pnode->n_supers + 1;
-    ppsize = pnode->data.instance.private_size;
   }
 
   nodesize = (int)sizeof(SysTypeNode) + (int)sizeof(SysType) * (pn_supers + 1);
