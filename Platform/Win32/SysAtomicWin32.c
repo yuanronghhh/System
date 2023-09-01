@@ -1,7 +1,7 @@
 #include <System/Platform/Common/SysAtomic.h>
 
 void sys_atomic_int_inc(SysInt *x) {
-  InterlockedIncrement(x);
+  InterlockedIncrement((volatile long *)x);
 }
 
 SysInt _sys_atomic_int_get(const volatile SysInt *i) {
@@ -15,7 +15,7 @@ void _sys_atomic_int_set(volatile SysInt *x, SysInt n) {
 }
 
 bool sys_atomic_int_dec_and_test(SysInt *x) {
-  return InterlockedDecrement(x) == 0;
+  return InterlockedDecrement((volatile long*)x) == 0;
 }
 
 bool sys_atomic_int_dec(SysInt *x) {
@@ -23,7 +23,7 @@ bool sys_atomic_int_dec(SysInt *x) {
 }
 
 bool sys_atomic_cmpxchg(SysInt *x, SysInt o, SysInt n) {
-  return InterlockedCompareExchange(x, n, o) == o;
+  return InterlockedCompareExchange((volatile long*)x, n, o) == o;
 }
 
 bool sys_atomic_pointer_cmpxchg(SysPointer *x, SysPointer o, SysPointer n) {

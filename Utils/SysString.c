@@ -23,7 +23,7 @@ SysChar **sys_strsplit(SysChar * s, const SysChar *delim, int * count) {
     delLen = strlen(delim);
   *count = 1;
 
-  while ((_s = strstr(_s, delim))) {
+  while ((_s = strstr(_s, delim)) != NULL) {
     _s += delLen;
     ++*count;
   }
@@ -35,7 +35,7 @@ SysChar **sys_strsplit(SysChar * s, const SysChar *delim, int * count) {
     *ptrs = _s = ((SysChar *)data) + ptrsSize;
 
     if (*count > 1) {
-      while ((_s = strstr(_s, delim))) {
+      while ((_s = strstr(_s, delim)) != NULL) {
         *_s = '\0';
         _s += delLen;
         *++ptrs = _s;
@@ -461,7 +461,7 @@ SysChar *sys_strupper(SysChar *s) {
 
   SysUChar *ns = (SysUChar *)s;
   for (; *ns; ns++) {
-    *ns = toupper(*ns);
+    *ns = (SysUChar)toupper(*ns);
   }
 
   return s;
@@ -472,7 +472,7 @@ SysChar *sys_strlower(SysChar *s) {
 
   SysUChar *ns = (SysUChar *)s;
   for (;*ns; ns++) {
-    *ns = tolower(*ns);
+    *ns = (SysUChar)tolower(*ns);
   }
 
   return s;

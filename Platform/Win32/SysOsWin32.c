@@ -11,6 +11,8 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,
 HMODULE win32dll;
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL,DWORD fdwReason, LPVOID lpvReserved) {
+  UNUSED(lpvReserved);
+
   switch (fdwReason) {
     case DLL_PROCESS_ATTACH:
       win32dll = hinstDLL;
@@ -92,7 +94,7 @@ const SysChar *sys_real_get_env(const SysChar *var) {
 
   wvalue = sys_new_N(wchar_t, len);
 
-  if (GetEnvironmentVariableW(wname, wvalue, len) != len - 1) {
+  if ((int)GetEnvironmentVariableW(wname, wvalue, len) != (len - 1)) {
     sys_free_N(wname);
     sys_free_N(wvalue);
     return NULL;
@@ -148,7 +150,7 @@ void sys_real_usleep(unsigned long mseconds) {
   Sleep(mseconds ? (1 + (mseconds - 1) / 1000) : 0);
 }
 
-void* sys_real_dlopen(const SysChar *filename) {
+SysPointer sys_real_dlopen(const SysChar *filename) {
   sys_return_val_if_fail(filename != NULL, NULL);
 
   HINSTANCE handle;
@@ -166,11 +168,11 @@ void* sys_real_dlopen(const SysChar *filename) {
   return handle;
 }
 
-void* sys_real_dlsymbol(void *handle, const SysChar *symbol) {
+SysPointer sys_real_dlsymbol(void *handle, const SysChar *symbol) {
   sys_return_val_if_fail(handle != NULL, NULL);
   sys_return_val_if_fail(symbol != NULL, NULL);
 
-  void *p = GetProcAddress(handle, symbol);
+  SysPointer p = (SysPointer)GetProcAddress(handle, symbol);
   if (!p) {
     sys_warning_N("dlsymbol failed: %s.", symbol);
     return NULL;

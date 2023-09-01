@@ -44,9 +44,9 @@ static void sys_bheap_sinkdown(SysBHeap *hp, SysInt n) {
   SysInt swap;
 
   SysPointer child1;
-  SysDouble child1_score;
   SysPointer child2;
   SysDouble child2_score;
+  SysDouble child1_score = 0;
 
   while(true) {
     child2N = (n + 1) * 2;
