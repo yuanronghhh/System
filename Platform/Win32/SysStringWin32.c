@@ -29,7 +29,7 @@ void sys_strcpy(SysChar *__restrict dst, const SysChar *__restrict src) {
   dst[n] = '\0';
 }
 
-SysChar *sys_strncpy(SysChar *dst, SysSize n, const SysChar *src) {
+SysChar *sys_strncpy(SysChar * __restrict dst, SysSize n, const SysChar * __restrict src) {
   memcpy(dst, src, n);
   dst[n] = '0';
   return dst;

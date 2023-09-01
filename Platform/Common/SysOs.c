@@ -375,7 +375,7 @@ int sys_arg_index(SysSArg *self, const SysChar *key, SysBool is_flag) {
     return i + 1;
   }
 
-  return 1;
+  return -1;
 }
 
 void sys_setup(void) {
