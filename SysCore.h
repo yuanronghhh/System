@@ -10,6 +10,7 @@
 #include <System/Platform/Common/SysAtomic.h>
 #include <System/Platform/Common/SysProcess.h>
 #include <System/Platform/Common/SysThread.h>
+#include <System/Platform/Common/SysSocket.h>
 
 #include <System/DataTypes/SysValue.h>
 #include <System/DataTypes/SysHashTable.h>

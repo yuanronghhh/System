@@ -18,6 +18,7 @@ set(UNIX_SYS_SRC
   ./Platform/Unix/SysAtomicUnix.c
   ./Platform/Unix/SysProcessUnix.c
   ./Platform/Unix/SysPathUnix.c
+  ./Platform/Unix/SysSocketUnix.c
 )
 set(WIN32_SYS_SRC
   ./Platform/Win32/SysFileWin32.c
@@ -30,6 +31,7 @@ set(WIN32_SYS_SRC
   ./Platform/Win32/SysThreadWin32.c
   ./Platform/Win32/SysWin32.h
   ./Platform/Win32/SysProcessWin32.c
+  ./Platform/Win32/SysSocketWin32.c
 )
 
 if(UNIX)
@@ -87,6 +89,7 @@ set(SRC
   ./Platform/Common/SysAtomic.c
   ./Platform/Common/SysThread.c
   ./Platform/Common/SysThread.h
+  ./Platform/Common/SysSocket.h
   ./Platform/Common/SysThreadPrivate.h
 
   ./Platform/Common/SysProcess.c

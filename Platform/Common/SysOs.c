@@ -312,10 +312,6 @@ SysChar **sys_backtrace_string(SysInt *size) {
   return sys_real_backtrace_string(size);
 }
 
-SysUIntPtr sys_socket(int af, int type, int protocol) {
-  return socket(af, type, protocol);
-}
-
 void sys_arg_init(SysSArg *self, SysInt argc, const SysChar* argv[]) {
   sys_return_if_fail(self != NULL);
   sys_return_if_fail(argv != NULL);

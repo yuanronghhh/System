@@ -18,6 +18,8 @@ extern "C" {
 #include <libintl.h>
 #include <X11/Xlib.h>
 #include <execinfo.h>
+#include <sys/socket.h>
+#include <netdb.h>
 
 #define PATH_SEP "/"
 #ifndef MAX_PATH
