@@ -89,6 +89,7 @@ set(SRC
   ./Platform/Common/SysAtomic.c
   ./Platform/Common/SysThread.c
   ./Platform/Common/SysThread.h
+  ./Platform/Common/SysSocket.c
   ./Platform/Common/SysSocket.h
   ./Platform/Common/SysThreadPrivate.h
 

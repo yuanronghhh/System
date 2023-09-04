@@ -286,18 +286,19 @@ void sys_type_class_adjust_private_offset (SysTypeClass *cls, SysInt * private_o
   sys_return_if_fail(cls != NULL);
   sys_return_if_fail(private_offset != NULL);
 
+  SysTypeNode* node = sys_type_node(cls->type);
+  SysTypeNode* pnode = sys_type_node(NODE_PARENT(node));
+
+  sys_debug_N("%s, %d", node->name, *private_offset);
+
   if (*private_offset > 0) {
     sys_return_if_fail (*private_offset <= 0xffff);
 
-  } else {
-    return;
   }
 
-  SysTypeNode* node = sys_type_node(cls->type);
-  SysTypeNode* pnode = sys_type_node(NODE_PARENT(node));
   if (pnode) {
 
-    node->data.instance.private_size = pnode->data.instance.private_size + *private_offset;
+    node->data.instance.private_size += pnode->data.instance.private_size + *private_offset;
   } else {
 
     node->data.instance.private_size = *private_offset;

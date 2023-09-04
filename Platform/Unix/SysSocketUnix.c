@@ -1,14 +1,6 @@
 #include <System/Platform/Common/SysSocket.h>
 
 
-SysSocket *sys_socket_new(SysInt fd) {
-  SysSocket *s = sys_new0_N(SysSocket, 1);
-
-  s->fd = fd;
-
-  return s;
-}
-
 SysSocket *sys_socket(int domain, int type, int protocol) {
   SysInt fd;
 
@@ -33,13 +25,13 @@ int sys_socket_setopt(SysSocket *s, int level, int optname, const void *optval, 
   return setsockopt(s->fd, level, optname, optval, optlen);
 }
 
-int sys_listen(SysSocket *s, int backlog) {
+int sys_socket_listen(SysSocket *s, int backlog) {
   sys_return_val_if_fail(s != NULL, -1);
 
   return listen(s->fd, backlog);
 }
 
-SysSocket* sys_accept(SysSocket *s, struct sockaddr *addr, socklen_t *addrlen) {
+SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *addrlen) {
   sys_return_val_if_fail(s != NULL, NULL);
   SysInt fd;
 
@@ -52,7 +44,7 @@ SysSocket* sys_accept(SysSocket *s, struct sockaddr *addr, socklen_t *addrlen) {
   return sys_socket_new(fd);
 }
 
-int sys_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
+int sys_socket_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
   sys_return_val_if_fail(s != NULL, -1);
 
   return bind(s->fd, addr, addrlen);
@@ -69,7 +61,7 @@ void sys_freeaddrinfo(struct addrinfo *res) {
   sys_freeaddrinfo(res);
 }
 
-int sys_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen) {
+SysSSize sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen) {
   sys_return_val_if_fail(s != NULL, -1);
 
   return connect(s->fd, addr, addrlen);
