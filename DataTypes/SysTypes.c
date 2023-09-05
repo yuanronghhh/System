@@ -35,12 +35,10 @@ struct _SysTypeNode {
   SysType supers[1]; // must be last field
 };
 
-#define TYPE_LOCK sys_mutex_unlock(&g_type_lock)
-#define TYPE_UNLOCK sys_mutex_unlock(&g_type_lock)
 
 static SysRefHook sys_object_unref_debug_func = NULL;
 static SysRefHook sys_object_ref_debug_func = NULL;
-static SysMutex g_type_lock;
+static SysRWLock type_lock;
 
 static SysHashTable *ht = NULL;
 
@@ -289,24 +287,20 @@ void sys_type_class_adjust_private_offset (SysTypeClass *cls, SysInt * private_o
   SysTypeNode* node = sys_type_node(cls->type);
   SysTypeNode* pnode = sys_type_node(NODE_PARENT(node));
 
-  sys_debug_N("%s, %d", node->name, *private_offset);
+  sys_rw_lock_writer_lock(&type_lock);
 
-  if (*private_offset > 0) {
+  if (*private_offset >= 0) {
     sys_return_if_fail (*private_offset <= 0xffff);
 
-  }
-
-  if (pnode) {
-
-    node->data.instance.private_size += pnode->data.instance.private_size + *private_offset;
   } else {
-
-    node->data.instance.private_size = *private_offset;
+    return;
   }
 
   sys_assert(node->data.instance.private_size <= 0xffff);
-
+  node->data.instance.private_size = pnode ? pnode->data.instance.private_size + *private_offset: *private_offset;
   *private_offset = -(SysInt)node->data.instance.private_size;
+
+  sys_rw_lock_writer_unlock(&type_lock);
 }
 
 void sys_type_class_free(SysTypeClass *cls) {
@@ -341,6 +335,7 @@ SysTypeClass *sys_type_class_ref(SysType type) {
   SysTypeClass *cls, *pcls;
 
   node = sys_type_node(type);
+
   cls = node->data.instance.class_ptr;
 
   sys_ref_count_inc(node);
@@ -444,7 +439,7 @@ void sys_type_teardown(void) {
   sys_hash_table_unref(ht);
   ht = NULL;
 
-  sys_mutex_clear(&g_type_lock);
+  sys_rw_lock_clear(&type_lock);
 }
 
 void sys_type_setup(void) {
@@ -455,7 +450,7 @@ void sys_type_setup(void) {
       NULL,
       (SysDestroyFunc)sys_type_node_unref);
 
-  sys_mutex_init(&g_type_lock);
+  sys_rw_lock_init(&type_lock);
 }
 
 static SYS_INLINE SysTypeNode* sys_type_node(SysType type) {
