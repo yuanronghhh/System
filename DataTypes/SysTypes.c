@@ -293,6 +293,7 @@ void sys_type_class_adjust_private_offset (SysTypeClass *cls, SysInt * private_o
     sys_return_if_fail (*private_offset <= 0xffff);
 
   } else {
+    sys_rw_lock_writer_unlock(&type_lock);
     return;
   }
 
