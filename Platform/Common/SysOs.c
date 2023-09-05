@@ -47,8 +47,6 @@ struct msort_param
   char *t;
 };
 
-static void msort_with_tmp(const struct msort_param *p, void *b, size_t n);
-
 static void msort_with_tmp(const struct msort_param *p, void *b, size_t n)
 {
   char *b1, *b2;

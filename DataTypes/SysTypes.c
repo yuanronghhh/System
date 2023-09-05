@@ -292,14 +292,10 @@ void sys_type_class_adjust_private_offset (SysTypeClass *cls, SysInt * private_o
   if (*private_offset >= 0) {
     sys_return_if_fail (*private_offset <= 0xffff);
 
-  } else {
-    sys_rw_lock_writer_unlock(&type_lock);
-    return;
+    sys_assert(node->data.instance.private_size <= 0xffff);
+    node->data.instance.private_size = pnode ? pnode->data.instance.private_size + *private_offset : *private_offset;
+    *private_offset = -(SysInt)node->data.instance.private_size;
   }
-
-  sys_assert(node->data.instance.private_size <= 0xffff);
-  node->data.instance.private_size = pnode ? pnode->data.instance.private_size + *private_offset: *private_offset;
-  *private_offset = -(SysInt)node->data.instance.private_size;
 
   sys_rw_lock_writer_unlock(&type_lock);
 }
