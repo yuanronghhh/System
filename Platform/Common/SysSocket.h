@@ -17,6 +17,7 @@ struct _SysSocket {
 #endif
 };
 
+#define SYS_FD_CLR(socket, fdset) FD_CLR((socket)->fd, fdset)
 #define SYS_FD_SET(socket, fdset) FD_SET((socket)->fd, fdset)
 #define SYS_FD_ISSET(socket, fdset) FD_ISSET((socket)->fd, fdset)
 #define SYS_FD_ZERO(fdset) FD_ZERO(fdset)
