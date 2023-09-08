@@ -20,6 +20,8 @@ extern "C" {
 #include <execinfo.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #define PATH_SEP "/"
 #ifndef MAX_PATH
