@@ -592,7 +592,7 @@ sys_thread_win32_set_thread_desc (const SysChar *name)
   if (!sys_thread_win32_load_library () || !name)
     return false;
 
-  namew = sys_mbyte_to_wchar(name);
+  namew = sys_mbyte_to_wchar(name, NULL);
   if (!namew)
     return false;
 

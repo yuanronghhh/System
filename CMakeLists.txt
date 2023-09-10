@@ -64,6 +64,8 @@ set(SRC
   ./DataTypes/SysValue.c
   ./DataTypes/SysTypes.h
   ./DataTypes/SysTypes.c
+  ./DataTypes/SysQuark.h
+  ./DataTypes/SysQuark.c
 
   ./Utils/SysFile.h
   ./Utils/SysFile.c
@@ -91,6 +93,7 @@ set(SRC
   ./Platform/Common/SysThread.h
   ./Platform/Common/SysSocket.c
   ./Platform/Common/SysSocket.h
+  ./Platform/Common/SysSocketPrivate.h
   ./Platform/Common/SysThreadPrivate.h
 
   ./Platform/Common/SysProcess.c
@@ -114,5 +117,6 @@ target_link_libraries(System
   ${ADDTIONAL_LIBRARIES}
   ${PTHREAD_LIBRARIES}
   ${DBG_LIBRAREIS}
+  ${VLD_LIBRAREIS}
 )
 set_property(TARGET System PROPERTY FOLDER CstProject)

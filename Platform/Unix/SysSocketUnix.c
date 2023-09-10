@@ -1,4 +1,4 @@
-#include <System/Platform/Common/SysSocket.h>
+#include <System/Platform/Common/SysSocketPrivate.h>
 
 
 SysSocket *sys_socket(int domain, int type, int protocol) {
@@ -83,4 +83,12 @@ SysSSize sys_socket_send(SysSocket *s, const void *buf, size_t len, int flags) {
   sys_return_val_if_fail(s != NULL, -1);
 
   return send(s->fd, buf, len, flags);
+}
+
+const char * sys_socket_strerror(int err) {
+  return sys_strerror(err);
+}
+
+SysInt sys_socket_errno(void) {
+  return errno;
 }

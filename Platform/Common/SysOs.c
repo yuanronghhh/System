@@ -1,5 +1,6 @@
 #include <System/Utils/SysString.h>
 #include <System/Utils/SysError.h>
+#include <System/DataTypes/SysQuark.h>
 #include <System/DataTypes/SysArray.h>
 #include <System/DataTypes/SysTypes.h>
 #include <System/Platform/Common/SysThread.h>
@@ -378,6 +379,7 @@ void sys_setup(void) {
   }
 
   sys_console_setup();
+  sys_quark_setup();
   sys_leaks_setup();
   sys_type_setup();
   sys_real_setup();
@@ -394,6 +396,8 @@ void sys_teardown(void) {
   sys_thread_detach();
   sys_real_teardown();
   sys_type_teardown();
+  sys_quark_teardown();
   sys_leaks_report();
+
   inited = false;
 }

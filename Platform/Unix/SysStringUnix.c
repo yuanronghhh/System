@@ -53,26 +53,29 @@ SysInt sys_vsprintf(SysChar* str, SysSize size, const SysChar* format, va_list a
   return vsnprintf(str, size, format, args);
 }
 
-SysChar* sys_wchar_to_mbyte(const SysWChar *uni) {
+SysChar *sys_wchar_to_mbyte(const SysWChar *wchar, int *nsize) {
   SysInt size;
   SysChar* sz;
 
   setlocale(LC_CTYPE, "");
-  size = wcstombs(NULL, uni, 0) + 1;
+  size = wcstombs(NULL, wchar, 0) + 1;
   sz = (SysChar* )malloc(size * sizeof(char));
-  wcstombs(sz, uni, size);
+  wcstombs(sz, wchar, size);
+  if (nsize) {
+    *nsize = size;
+  }
 
   return sz;
 }
 
-SysWChar *sys_mbyte_to_wchar(const SysChar* mbyte) {
+SysWChar *sys_mbyte_to_wchar(const SysChar *mbyte, int *nsize) {
   SysWChar *sz;
   SysSize mbslen;
 
   setlocale(LC_CTYPE, "");
   mbslen = mbstowcs(NULL, mbyte, 0);
-  if (mbslen == (SysSize)-1) {
-    perror("sys_ansi_to_wchar failed");
+  if (mbslen == (SysSize)(-1)) {
+    perror("sys_mbyte_to_wchar failed");
     exit(-1);
   }
 
@@ -80,6 +83,9 @@ SysWChar *sys_mbyte_to_wchar(const SysChar* mbyte) {
   if (mbstowcs(sz, mbyte, mbslen + 1) == (SysSize) -1) {
     perror("mbstowcs");
     exit(EXIT_FAILURE);
+  }
+  if (nsize) {
+    *nsize = mbslen + 1;
   }
 
   return sz;

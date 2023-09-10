@@ -14,14 +14,14 @@ SysChar *sys_real_getcwd(void) {
     return NULL;
   }
 
-  cwd = sys_wchar_to_mbyte(&wbuf[0]);
+  cwd = sys_wchar_to_mbyte(&wbuf[0], NULL);
   return cwd;
 }
 
 SysBool sys_real_path_exists(const SysChar *path) {
   sys_return_val_if_fail(path != NULL, false);
 
-  SysWChar *wname = sys_mbyte_to_wchar(path);
+  SysWChar *wname = sys_mbyte_to_wchar(path, NULL);
   DWORD attr;
 
   attr = GetFileAttributesW(wname);

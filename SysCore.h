@@ -21,6 +21,7 @@
 #include <System/DataTypes/SysNode.h>
 #include <System/DataTypes/SysTree.h>
 #include <System/DataTypes/SysTypes.h>
+#include <System/DataTypes/SysQueue.h>
 
 #include <System/Utils/SysError.h>
 #include <System/Utils/SysError.h>

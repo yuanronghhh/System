@@ -34,6 +34,8 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,DWORD fdwReason, LPVOID lpvReserved) {
 }
 
 void sys_real_init_console(void) {
+  SetConsoleOutputCP(65001);
+
   CONSOLE_FONT_INFOEX cfi;
   cfi.cbSize = sizeof(cfi);
   cfi.nFont = 0;
@@ -43,8 +45,6 @@ void sys_real_init_console(void) {
   cfi.FontWeight = FW_NORMAL;
   wcscpy_s(cfi.FaceName, 9, L"Consolas");
   SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), false, &cfi);
-
-  SetConsoleOutputCP(65001);
 
   /* enable ansci color */
   SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), 7);
@@ -81,7 +81,7 @@ const SysChar *sys_real_get_env(const SysChar *var) {
   const SysChar *value;
   int len;
 
-  wname = sys_mbyte_to_wchar(var);
+  wname = sys_mbyte_to_wchar(var, NULL);
   len = GetEnvironmentVariableW(wname, tmp, 2);
   if (len == 0) {
     sys_free_N(wname);
@@ -100,7 +100,7 @@ const SysChar *sys_real_get_env(const SysChar *var) {
     return NULL;
   }
 
-  value = sys_wchar_to_mbyte(wvalue);
+  value = sys_wchar_to_mbyte(wvalue, NULL);
 
   sys_free_N(wname);
   sys_free_N(wvalue);
@@ -117,13 +117,13 @@ bool sys_real_set_env(const SysChar *var, const SysChar *value) {
 
   vlen = strlen(var);
 
-  wname = sys_mbyte_to_wchar(var);
-  wvalue = sys_mbyte_to_wchar(value);
+  wname = sys_mbyte_to_wchar(var, NULL);
+  wvalue = sys_mbyte_to_wchar(value, NULL);
   nvar = sys_new0_N(SysChar, vlen + 2);
   sys_memcpy(nvar, vlen + 2, var, vlen);
   sys_memcpy(nvar + vlen, vlen + 2, "=", 1);
 
-  wvar = sys_mbyte_to_wchar(nvar);
+  wvar = sys_mbyte_to_wchar(nvar, NULL);
   _wputenv(wvar);
 
   ret = (SetEnvironmentVariableW(wname, wvalue) != 0);
@@ -156,7 +156,7 @@ SysPointer sys_real_dlopen(const SysChar *filename) {
   HINSTANCE handle;
   wchar_t *wname;
 
-  wname = sys_mbyte_to_wchar(filename);
+  wname = sys_mbyte_to_wchar(filename, NULL);
   handle = LoadLibraryW(wname);
   sys_free_N(wname);
 

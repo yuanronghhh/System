@@ -1,20 +1,26 @@
-#include <System/Platform/Common/SysSocket.h>
-
+#include <System/Platform/Common/SysSocketPrivate.h>
+#include <System/DataTypes/SysQuark.h>
+#include <System/Utils/SysString.h>
 
 SysSocket *sys_socket(int domain, int type, int protocol) {
   SOCKET fd;
 
+  SYS_LEAK_IGNORE_BEGIN;
   fd = socket(AF_INET, SOCK_STREAM, 0);
+  SYS_LEAK_IGNORE_END;
+
   if (fd == INVALID_SOCKET) {
+    sys_warning_N("socket: %s", sys_socket_strerror(sys_socket_errno()));
     return NULL;
   }
 
-  return sys_socket_new((SysInt)fd);
+  return sys_socket_new(fd);
 }
 
 void sys_socket_free(SysSocket *s) {
   sys_return_if_fail(s != NULL);
 
+  shutdown(s->fd, SD_BOTH);
   closesocket(s->fd);
   sys_free_N(s);
 }
@@ -22,13 +28,25 @@ void sys_socket_free(SysSocket *s) {
 int sys_socket_setopt(SysSocket *s, int level, int optname, void *optval, socklen_t optlen) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  return setsockopt(s->fd, level, optname, (char *)optval, optlen);
+  int r = setsockopt(s->fd, level, optname, (char *)optval, optlen);
+  if (r < 0) {
+
+    sys_warning_N("setsockopt: %s", sys_socket_strerror(sys_socket_errno()));
+  }
+
+  return r;
 }
 
 int sys_socket_listen(SysSocket *s, int backlog) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  return listen(s->fd, backlog);
+  int r = listen(s->fd, backlog);
+  if (r < 0) {
+
+    sys_warning_N("listen: %s", sys_socket_strerror(sys_socket_errno()));
+  }
+
+  return r;
 }
 
 SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *addrlen) {
@@ -38,6 +56,7 @@ SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *add
   fd = accept(s->fd, addr, addrlen);
   if(fd == INVALID_SOCKET) {
 
+    sys_warning_N("accept: %s", sys_socket_strerror(sys_socket_errno()));
     return NULL;
   }
 
@@ -47,7 +66,12 @@ SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *add
 int sys_socket_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  return bind(s->fd, addr, addrlen);
+  int r = bind(s->fd, addr, addrlen);
+  if (r < 0) {
+
+    sys_warning_N("bind: %s", sys_socket_strerror(sys_socket_errno()));
+  }
+  return r;
 }
 
 int sys_getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res) {
@@ -60,26 +84,84 @@ void sys_freeaddrinfo(struct addrinfo *res) {
   freeaddrinfo(res);
 }
 
-SysSSize sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen) {
+int sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  return connect(s->fd, addr, addrlen);
+  int r = connect(s->fd, addr, addrlen);
+  if (r < 0) {
+
+    sys_warning_N("connect: %s", sys_socket_strerror(sys_socket_errno()));
+  }
+  return r;
 }
 
-SysInt sys_socket_get_fd(SysSocket *s) {
+SOCKET sys_socket_get_fd(SysSocket *s) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  return (SysInt)s->fd;
+  return s->fd;
 }
 
-SysSSize sys_socket_recv(SysSocket *s, void *buf, size_t len, int flags) {
+int sys_socket_recv(SysSocket *s, void *buf, size_t len, int flags) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  return recv(s->fd, buf, (int)len, flags);
+  int r = recv(s->fd, buf, (int)len, flags);
+  if (r < 0) {
+
+    sys_warning_N("recv: %s", sys_socket_strerror(sys_socket_errno()));
+  }
+  return r;
 }
 
-SysSSize sys_socket_send(SysSocket *s, const void *buf, size_t len, int flags) {
+int sys_socket_send(SysSocket *s, const void *buf, size_t len, int flags) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  return send(s->fd, buf, (int)len, flags);
+  int r = send(s->fd, buf, (int)len, flags);
+  if (r < 0) {
+
+    sys_warning_N("send: %s", sys_socket_strerror(sys_socket_errno()));
+  }
+  return r;
+}
+
+SysInt sys_socket_ioctl(SysSocket *s, long cmd, u_long * argp) {
+  sys_return_val_if_fail(s != NULL, -1);
+
+  int r = ioctlsocket(s->fd, cmd, argp);
+  if (r < 0) {
+
+    sys_warning_N("ioctlsocket: %s", sys_socket_strerror(sys_socket_errno()));
+  }
+  return r;
+}
+
+SysInt sys_socket_errno(void) {
+  return WSAGetLastError();
+}
+
+const char* sys_socket_strerror(int err) {
+  char *umsg;
+  const char *qmsg;
+  wchar_t *msg;
+
+  FormatMessageW(
+    FORMAT_MESSAGE_ALLOCATE_BUFFER
+    | FORMAT_MESSAGE_IGNORE_INSERTS
+    | FORMAT_MESSAGE_FROM_SYSTEM,
+    NULL, err, 0,
+    (LPWSTR)&msg, 0, NULL);
+
+  if (msg == NULL) {
+    return NULL;
+  }
+
+  umsg = sys_wchar_to_mbyte(msg, NULL);
+  if(umsg == NULL) {
+    return NULL;
+  }
+
+  qmsg = sys_quark_string(umsg);
+  LocalFree(msg);
+  LocalFree(umsg);
+
+  return qmsg;
 }
