@@ -2,7 +2,7 @@
 #include <System/DataTypes/SysQuark.h>
 #include <System/Utils/SysString.h>
 
-SysSocket *sys_socket(int domain, int type, int protocol, SysBool noblocking) {
+SysSocket *sys_socket_new_I(int domain, int type, int protocol, SysBool noblocking) {
   SOCKET fd;
 
   fd = socket(domain, type, protocol);
@@ -12,7 +12,7 @@ SysSocket *sys_socket(int domain, int type, int protocol, SysBool noblocking) {
     return NULL;
   }
 
-  return sys_socket_new_I(fd, noblocking);
+  return sys_socket_new_fd(fd);
 }
 
 void sys_socket_free(SysSocket *s) {
@@ -70,7 +70,7 @@ SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *add
   }
 #endif
 
-  return sys_socket_new_I((SysInt)fd, s->noblocking);
+  return sys_socket_new_fd((SysInt)fd);
 }
 
 int sys_socket_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
@@ -106,7 +106,8 @@ int sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addr
 
 #if USE_OPENSSL
     if (SSL_connect(s->ssl) <= 0) {
-      sys_warning_N("ssl: %d", SSL_get_error(s->ssl, r));
+      unsigned long ssl_code = ERR_get_error();
+      sys_warning_N("ssl: %d,%s", ssl_code, ERR_error_string(ssl_code, NULL));
       return -1;
     }
 #endif

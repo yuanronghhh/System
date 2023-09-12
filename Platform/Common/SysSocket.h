@@ -12,13 +12,13 @@ typedef struct _SysSocket SysSocket;
 #endif
 
 #if USE_OPENSSL
-SYS_API SysSocket* sys_socket_new_ssl(SOCKET fd, SysBool noblocking, SSL* ssl);
+SYS_API SysSocket *sys_socket_new_ssl(int domain, int type, int protocol, SysBool noblocking, SSL_CTX * ssl_ctx);
 SYS_API SSL* sys_socket_get_ssl(SysSocket* s);
 #endif
 
-SYS_API SysSocket *sys_socket_new_I(SOCKET fd, SysBool noblocking);
-SYS_API SysInt sys_socket_set_noblock(SysSocket* s, SysBool bvalue);
-SYS_API SysSocket *sys_socket(int domain, int type, int protocol, SysBool noblocking);
+SYS_API SysSocket *sys_socket_new_I(int domain, int type, int protocol, SysBool noblocking);
+SYS_API SysSocket *sys_socket_new_fd(SOCKET fd);
+SYS_API SysInt sys_socket_set_blocking(SysSocket *s, SysBool bvalue);
 SYS_API void sys_socket_free(SysSocket *s);
 SYS_API int sys_socket_setopt(SysSocket *s, int level, int optname, const void *optval, socklen_t optlen);
 SYS_API int sys_socket_listen(SysSocket *s, int backlog);
