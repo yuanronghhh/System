@@ -1,15 +1,17 @@
 #include <System/Platform/Common/SysSocketPrivate.h>
 
 
-SysSocket *sys_socket(int domain, int type, int protocol) {
+SysSocket *sys_socket(int domain, int type, int protocol, SysBool noblocking) {
   SysInt fd;
 
-  fd = socket(AF_INET, SOCK_STREAM, 0);
+  fd = socket(domain, type, protocol);
   if (fd < 0) {
+    sys_warning_N("socket: %s", sys_socket_strerror(sys_socket_errno()));
+
     return NULL;
   }
 
-  return sys_socket_new(fd);
+  return sys_socket_new(fd, noblocking);
 }
 
 void sys_socket_free(SysSocket *s) {

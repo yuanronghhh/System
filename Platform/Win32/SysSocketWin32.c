@@ -2,19 +2,17 @@
 #include <System/DataTypes/SysQuark.h>
 #include <System/Utils/SysString.h>
 
-SysSocket *sys_socket(int domain, int type, int protocol) {
+SysSocket *sys_socket(int domain, int type, int protocol, SysBool noblocking) {
   SOCKET fd;
 
-  SYS_LEAK_IGNORE_BEGIN;
-  fd = socket(AF_INET, SOCK_STREAM, 0);
-  SYS_LEAK_IGNORE_END;
+  fd = socket(domain, type, protocol);
 
   if (fd == INVALID_SOCKET) {
-    sys_warning_N("socket: %s", sys_socket_strerror(sys_socket_errno()));
+    sys_debug_N("socket: %s", sys_socket_strerror(sys_socket_errno()));
     return NULL;
   }
 
-  return sys_socket_new(fd);
+  return sys_socket_new(fd, noblocking);
 }
 
 void sys_socket_free(SysSocket *s) {
@@ -31,7 +29,7 @@ int sys_socket_setopt(SysSocket *s, int level, int optname, void *optval, sockle
   int r = setsockopt(s->fd, level, optname, (char *)optval, optlen);
   if (r < 0) {
 
-    sys_warning_N("setsockopt: %s", sys_socket_strerror(sys_socket_errno()));
+    sys_debug_N("setsockopt: %s", sys_socket_strerror(sys_socket_errno()));
   }
 
   return r;
@@ -43,7 +41,7 @@ int sys_socket_listen(SysSocket *s, int backlog) {
   int r = listen(s->fd, backlog);
   if (r < 0) {
 
-    sys_warning_N("listen: %s", sys_socket_strerror(sys_socket_errno()));
+    sys_debug_N("listen: %s", sys_socket_strerror(sys_socket_errno()));
   }
 
   return r;
@@ -56,11 +54,11 @@ SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *add
   fd = accept(s->fd, addr, addrlen);
   if(fd == INVALID_SOCKET) {
 
-    sys_warning_N("accept: %s", sys_socket_strerror(sys_socket_errno()));
+    sys_debug_N("accept: %s", sys_socket_strerror(sys_socket_errno()));
     return NULL;
   }
 
-  return sys_socket_new((SysInt)fd);
+  return sys_socket_new((SysInt)fd, s->noblocking);
 }
 
 int sys_socket_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
@@ -69,7 +67,7 @@ int sys_socket_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen
   int r = bind(s->fd, addr, addrlen);
   if (r < 0) {
 
-    sys_warning_N("bind: %s", sys_socket_strerror(sys_socket_errno()));
+    sys_debug_N("bind: %s", sys_socket_strerror(sys_socket_errno()));
   }
   return r;
 }
@@ -88,9 +86,9 @@ int sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addr
   sys_return_val_if_fail(s != NULL, -1);
 
   int r = connect(s->fd, addr, addrlen);
-  if (r < 0) {
+  if (r == SOCKET_ERROR) {
 
-    sys_warning_N("connect: %s", sys_socket_strerror(sys_socket_errno()));
+    sys_debug_N("connect: %s", sys_socket_strerror(sys_socket_errno()));
   }
   return r;
 }
@@ -107,7 +105,7 @@ int sys_socket_recv(SysSocket *s, void *buf, size_t len, int flags) {
   int r = recv(s->fd, buf, (int)len, flags);
   if (r < 0) {
 
-    sys_warning_N("recv: %s", sys_socket_strerror(sys_socket_errno()));
+    sys_debug_N("recv: %s", sys_socket_strerror(sys_socket_errno()));
   }
   return r;
 }
@@ -118,7 +116,7 @@ int sys_socket_send(SysSocket *s, const void *buf, size_t len, int flags) {
   int r = send(s->fd, buf, (int)len, flags);
   if (r < 0) {
 
-    sys_warning_N("send: %s", sys_socket_strerror(sys_socket_errno()));
+    sys_debug_N("send: %s", sys_socket_strerror(sys_socket_errno()));
   }
   return r;
 }
@@ -129,7 +127,7 @@ SysInt sys_socket_ioctl(SysSocket *s, long cmd, u_long * argp) {
   int r = ioctlsocket(s->fd, cmd, argp);
   if (r < 0) {
 
-    sys_warning_N("ioctlsocket: %s", sys_socket_strerror(sys_socket_errno()));
+    sys_debug_N("ioctlsocket: %s", sys_socket_strerror(sys_socket_errno()));
   }
   return r;
 }

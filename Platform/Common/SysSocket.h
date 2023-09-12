@@ -11,8 +11,9 @@ typedef struct _SysSocket SysSocket;
 #define SOCKET SysInt
 #endif
 
-SYS_API SysSocket *sys_socket_new(SOCKET fd);
-SYS_API SysSocket *sys_socket(int domain, int type, int protocol);
+SYS_API SysSocket *sys_socket_new(SOCKET fd, SysBool noblocking);
+SYS_API SysInt sys_socket_set_noblock(SysSocket* s, SysBool bvalue);
+SYS_API SysSocket *sys_socket(int domain, int type, int protocol, SysBool noblocking);
 SYS_API void sys_socket_free(SysSocket *s);
 SYS_API int sys_socket_setopt(SysSocket *s, int level, int optname, const void *optval, socklen_t optlen);
 SYS_API int sys_socket_listen(SysSocket *s, int backlog);

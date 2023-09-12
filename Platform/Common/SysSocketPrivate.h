@@ -12,6 +12,8 @@ struct _SysSocket {
 #elif SYS_OS_UNIX
   SysInt fd;
 #endif
+
+  SysBool noblocking;
 };
 
 SYS_END_DECLS
