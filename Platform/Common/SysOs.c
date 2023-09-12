@@ -373,6 +373,14 @@ int sys_arg_index(SysSArg *self, const SysChar *key, SysBool is_flag) {
   return -1;
 }
 
+static void sys_ssl_setup(void) {
+#if USE_OPENSSL
+  SSL_library_init();
+  OpenSSL_add_all_algorithms();
+  SSL_load_error_strings();
+#endif
+}
+
 void sys_setup(void) {
   if(inited) {
     return;
@@ -384,6 +392,7 @@ void sys_setup(void) {
   sys_type_setup();
   sys_real_setup();
   sys_thread_init();
+  sys_ssl_setup();
 
   inited = true;
 }

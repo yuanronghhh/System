@@ -12,14 +12,20 @@ SysSocket *sys_socket(int domain, int type, int protocol, SysBool noblocking) {
     return NULL;
   }
 
-  return sys_socket_new(fd, noblocking);
+  return sys_socket_new_I(fd, noblocking);
 }
 
 void sys_socket_free(SysSocket *s) {
   sys_return_if_fail(s != NULL);
 
+#if USE_OPENSSL
+  SSL_shutdown(s->ssl);
+  SSL_free(s->ssl);
+#else
   shutdown(s->fd, SD_BOTH);
   closesocket(s->fd);
+#endif
+
   sys_free_N(s);
 }
 
@@ -58,7 +64,13 @@ SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *add
     return NULL;
   }
 
-  return sys_socket_new((SysInt)fd, s->noblocking);
+#if USE_OPENSSL
+  if (SSL_accept(s->ssl) <= 0) {
+    return NULL;
+  }
+#endif
+
+  return sys_socket_new_I((SysInt)fd, s->noblocking);
 }
 
 int sys_socket_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
@@ -69,6 +81,7 @@ int sys_socket_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen
 
     sys_debug_N("bind: %s", sys_socket_strerror(sys_socket_errno()));
   }
+
   return r;
 }
 
@@ -90,6 +103,14 @@ int sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addr
 
     sys_debug_N("connect: %s", sys_socket_strerror(sys_socket_errno()));
   }
+
+#if USE_OPENSSL
+    if (SSL_connect(s->ssl) <= 0) {
+      sys_warning_N("ssl: %d", SSL_get_error(s->ssl, r));
+      return -1;
+    }
+#endif
+
   return r;
 }
 
@@ -101,8 +122,14 @@ SOCKET sys_socket_get_fd(SysSocket *s) {
 
 int sys_socket_recv(SysSocket *s, void *buf, size_t len, int flags) {
   sys_return_val_if_fail(s != NULL, -1);
+  int r;
 
-  int r = recv(s->fd, buf, (int)len, flags);
+#if USE_OPENSSL
+  r = SSL_read(s->ssl, buf, (int)len);
+#else
+  r = recv(s->fd, buf, (int)len, flags);
+#endif
+
   if (r < 0) {
 
     sys_debug_N("recv: %s", sys_socket_strerror(sys_socket_errno()));
@@ -112,8 +139,13 @@ int sys_socket_recv(SysSocket *s, void *buf, size_t len, int flags) {
 
 int sys_socket_send(SysSocket *s, const void *buf, size_t len, int flags) {
   sys_return_val_if_fail(s != NULL, -1);
+  int r;
 
-  int r = send(s->fd, buf, (int)len, flags);
+#if USE_OPENSSL
+  r = SSL_write(s->ssl, buf, (int)len);
+#else
+  r = send(s->fd, buf, (int)len, flags);
+#endif
   if (r < 0) {
 
     sys_debug_N("send: %s", sys_socket_strerror(sys_socket_errno()));

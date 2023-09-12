@@ -14,6 +14,10 @@ struct _SysSocket {
 #endif
 
   SysBool noblocking;
+
+#if USE_OPENSSL
+  SSL *ssl;
+#endif
 };
 
 SYS_END_DECLS

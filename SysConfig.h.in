@@ -11,6 +11,7 @@ typedef unsigned long long SysUInt64;
 #define INT64_CONSTANT(val)	((val##LL))
 #define UINT64_CONSTANT(val)	((val##ULL))
 
+#define USE_OPENSSL ${USE_OPENSSL}
 #define SIZEOF_INT 8
 #define SYS_DEBUG ${DEBUG}
 

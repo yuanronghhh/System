@@ -6,6 +6,10 @@
 #include <System/Platform/Common/SysOs.h>
 #include <System/Utils/SysError.h>
 
+#if USE_OPENSSL
+#include <System/Utils/SysOpenSSL.h>
+#endif
+
 typedef struct _SysPtrArray SysPtrArray;
 typedef struct _SysArray SysArray;
 typedef struct _SysByteArray SysByteArray;

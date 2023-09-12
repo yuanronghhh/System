@@ -5,6 +5,7 @@ set(INC
 set(INC_SYS
   ${PTHREAD_INCLUDE_DIRS}
   ${VLD_INCLUDE_DIRS}
+  ${OPENSSL_INCLUDE_DIRS}
 )
 
 set(UNIX_SYS_SRC
@@ -108,12 +109,20 @@ set(SRC
   ./SysCore.h  # for expose api
 )
 
+if(USE_OPENSSL)
+  LIST(APPEND SRC
+    ./Utils/SysOpenSSL.h
+    ./Utils/SysOpenSSL.c)
+endif()
+
+
 add_dep_libs(System "${SRC}" "${INC}" "${INC_SYS}")
 
 configure_file(${CMAKE_CURRENT_LIST_DIR}/SysConfig.h.in
   ${CMAKE_CURRENT_LIST_DIR}/SysConfig.h)
 
 target_link_libraries(System
+  ${OPENSSL_LIBRARIES}
   ${ADDTIONAL_LIBRARIES}
   ${PTHREAD_LIBRARIES}
   ${DBG_LIBRAREIS}

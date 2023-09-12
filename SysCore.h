@@ -30,4 +30,8 @@
 #include <System/Utils/SysFile.h>
 #include <System/Utils/SysTextIO.h>
 
+#if USE_OPENSSL
+#include <System/Utils/SysOpenSSL.h>
+#endif
+
 #endif

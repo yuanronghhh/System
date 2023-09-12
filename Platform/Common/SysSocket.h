@@ -11,13 +11,18 @@ typedef struct _SysSocket SysSocket;
 #define SOCKET SysInt
 #endif
 
-SYS_API SysSocket *sys_socket_new(SOCKET fd, SysBool noblocking);
+#if USE_OPENSSL
+SYS_API SysSocket* sys_socket_new_ssl(SOCKET fd, SysBool noblocking, SSL* ssl);
+SYS_API SSL* sys_socket_get_ssl(SysSocket* s);
+#endif
+
+SYS_API SysSocket *sys_socket_new_I(SOCKET fd, SysBool noblocking);
 SYS_API SysInt sys_socket_set_noblock(SysSocket* s, SysBool bvalue);
 SYS_API SysSocket *sys_socket(int domain, int type, int protocol, SysBool noblocking);
 SYS_API void sys_socket_free(SysSocket *s);
 SYS_API int sys_socket_setopt(SysSocket *s, int level, int optname, const void *optval, socklen_t optlen);
 SYS_API int sys_socket_listen(SysSocket *s, int backlog);
-SYS_API SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *addrlen);
+SYS_API SysSocket* sys_socket_accept(SysSocket* s, struct sockaddr* addr, socklen_t* addrlen);
 SYS_API int sys_socket_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen);
 SYS_API int sys_getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res);
 SYS_API void sys_freeaddrinfo(struct addrinfo *res);
