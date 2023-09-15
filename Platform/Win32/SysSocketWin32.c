@@ -106,10 +106,16 @@ int sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addr
 
 #if USE_OPENSSL
     if (SSL_connect(s->ssl) <= 0) {
-      unsigned long ssl_code = ERR_get_error();
-      sys_warning_N("ssl: %d,%s", ssl_code, ERR_error_string(ssl_code, NULL));
+      sys_ssl_error();
       return -1;
     }
+
+    if (SSL_get_verify_result(s->ssl) != X509_V_OK) {
+      sys_ssl_error();
+      return -1;
+    }
+#else
+
 #endif
 
   return r;
