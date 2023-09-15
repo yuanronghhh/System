@@ -101,15 +101,21 @@ int sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addr
   int r = connect(s->fd, addr, addrlen);
   if (r == SOCKET_ERROR) {
 
-    sys_debug_N("connect: %s", sys_socket_strerror(sys_socket_errno()));
+    sys_debug_N("connect: %s", sys_socket_error());
   }
 
 #if USE_OPENSSL
     if (SSL_connect(s->ssl) <= 0) {
-      unsigned long ssl_code = ERR_get_error();
-      sys_warning_N("ssl: %d,%s", ssl_code, ERR_error_string(ssl_code, NULL));
+      sys_ssl_error();
       return -1;
     }
+
+    if (SSL_get_verify_result(s->ssl) != X509_V_OK) {
+      sys_ssl_error();
+      return -1;
+    }
+#else
+
 #endif
 
   return r;
@@ -195,4 +201,8 @@ const char* sys_socket_strerror(int err) {
   LocalFree(umsg);
 
   return qmsg;
+}
+
+const char *sys_socket_error(void) {
+  return sys_socket_strerror(sys_socket_errno());
 }

@@ -6,17 +6,32 @@ SysSocket *sys_socket_new_ssl(int domain, int type, int protocol, SysBool nobloc
 
   SysSocket *s;
   SSL *ssl;
-  
+
   s = sys_socket_new_I(domain, type, protocol, noblocking);
   sys_return_val_if_fail(s != NULL, NULL);
 
   ssl = SSL_new(ssl_ctx);
-  sys_return_val_if_fail(ssl != NULL, NULL);
+  if(ssl == NULL) {
+    return NULL;
+  }
 
   s->ssl = ssl;
   SSL_set_fd(s->ssl, (int)s->fd);
 
+  if (SSL_get_verify_result(ssl) != X509_V_OK) {
+    goto fail;
+  }
+
   return s;
+
+fail:
+  ERR_print_errors_fp(stderr);
+  if(ssl != NULL) {
+    SSL_free(ssl);
+  }
+
+  sys_socket_free(s);
+  return NULL;
 }
 
   SSL* sys_socket_get_ssl(SysSocket* s) {
