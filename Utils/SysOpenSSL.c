@@ -8,10 +8,19 @@ void sys_ssl_setup(void) {
   int n;
   STACK_OF(SSL_COMP) *ssl_comp_methods;
 
-  OPENSSL_config(NULL);
+#if OPENSSL_VERSION_NUMBER >= 0x10100003L
+    if (OPENSSL_init_ssl(OPENSSL_INIT_LOAD_CONFIG, NULL) == 0) {
+        sys_error_N("%s", "OPENSSL_init_ssl() failed");
+        return;
+    }
+
+    ERR_clear_error();
+#else
+
   SSL_library_init();
-  OpenSSL_add_all_algorithms();
   SSL_load_error_strings();
+  OpenSSL_add_all_algorithms();
+#endif
 
   ssl_comp_methods = SSL_COMP_get_compression_methods();
   n = sk_SSL_COMP_num(ssl_comp_methods);

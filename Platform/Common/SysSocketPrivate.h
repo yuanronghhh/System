@@ -20,6 +20,8 @@ struct _SysSocket {
 #endif
 };
 
+int sys_socket_real_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen);
+
 SYS_END_DECLS
 
 #endif

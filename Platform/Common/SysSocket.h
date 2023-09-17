@@ -26,7 +26,7 @@ SYS_API SysSocket* sys_socket_accept(SysSocket* s, struct sockaddr* addr, sockle
 SYS_API int sys_socket_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen);
 SYS_API int sys_getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res);
 SYS_API void sys_freeaddrinfo(struct addrinfo *res);
-SYS_API int sys_socket_connect(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen);
+SYS_API int sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen);
 SYS_API SOCKET sys_socket_get_fd(SysSocket *s);
 SYS_API int sys_socket_recv(SysSocket *s, void *buf, size_t len, int flags);
 SYS_API int sys_socket_send(SysSocket *s, const void *buf, size_t len, int flags);

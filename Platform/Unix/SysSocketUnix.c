@@ -1,18 +1,19 @@
 #include <System/Platform/Common/SysSocketPrivate.h>
 
 
-SysSocket *sys_socket(int domain, int type, int protocol, SysBool noblocking) {
+SysSocket *sys_socket_new_I(int domain, int type, int protocol, SysBool noblocking) {
   SysInt fd;
 
   fd = socket(domain, type, protocol);
   if (fd < 0) {
-    sys_warning_N("socket: %s", sys_socket_strerror(sys_socket_errno()));
+    sys_warning_N("socket: %s", sys_socket_error());
 
     return NULL;
   }
 
-  return sys_socket_new(fd, noblocking);
+  return sys_socket_new_fd(fd);
 }
+
 
 void sys_socket_free(SysSocket *s) {
   sys_return_if_fail(s != NULL);
@@ -43,7 +44,7 @@ SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *add
     return NULL;
   }
 
-  return sys_socket_new(fd);
+  return sys_socket_new_fd(fd);
 }
 
 int sys_socket_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
@@ -63,10 +64,10 @@ void sys_freeaddrinfo(struct addrinfo *res) {
   sys_freeaddrinfo(res);
 }
 
-SysSSize sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen) {
+SysInt sys_socket_real_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  return connect(s->fd, addr, addrlen);
+  return (SysInt)connect(s->fd, addr, addrlen);
 }
 
 SysInt sys_socket_get_fd(SysSocket *s) {
@@ -75,16 +76,27 @@ SysInt sys_socket_get_fd(SysSocket *s) {
   return s->fd;
 }
 
-SysSSize sys_socket_recv(SysSocket *s, void *buf, size_t len, int flags) {
+SysInt sys_socket_recv(SysSocket *s, void *buf, size_t len, int flags) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  return recv(s->fd, buf, len, flags);
+  return (SysInt)recv(s->fd, buf, len, flags);
 }
 
-SysSSize sys_socket_send(SysSocket *s, const void *buf, size_t len, int flags) {
+SysInt sys_socket_send(SysSocket *s, const void *buf, size_t len, int flags) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  return send(s->fd, buf, len, flags);
+  return (SysInt)send(s->fd, buf, len, flags);
+}
+
+SysInt sys_socket_ioctl(SysSocket *s, long cmd, u_long * argp) {
+  sys_return_val_if_fail(s != NULL, -1);
+
+  int r = ioctl(s->fd, cmd, argp);
+  if (r < 0) {
+
+    sys_warning_N("ioctlsocket: %s", sys_socket_error());
+  }
+  return r;
 }
 
 const char * sys_socket_strerror(int err) {

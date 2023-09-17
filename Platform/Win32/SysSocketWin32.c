@@ -95,7 +95,7 @@ void sys_freeaddrinfo(struct addrinfo *res) {
   freeaddrinfo(res);
 }
 
-int sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen) {
+int sys_socket_real_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen) {
   sys_return_val_if_fail(s != NULL, -1);
 
   int r = connect(s->fd, addr, addrlen);
@@ -114,8 +114,6 @@ int sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addr
       sys_ssl_error();
       return -1;
     }
-#else
-
 #endif
 
   return r;
@@ -203,6 +201,3 @@ const char* sys_socket_strerror(int err) {
   return qmsg;
 }
 
-const char *sys_socket_error(void) {
-  return sys_socket_strerror(sys_socket_errno());
-}

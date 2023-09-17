@@ -19,6 +19,7 @@ extern "C" {
 #include <X11/Xlib.h>
 #include <execinfo.h>
 #include <sys/socket.h>
+#include <sys/ioctl.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>

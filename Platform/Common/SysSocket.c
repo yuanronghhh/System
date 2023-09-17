@@ -54,3 +54,30 @@ SysInt sys_socket_set_blocking(SysSocket *s, SysBool bvalue) {
   return sys_socket_ioctl(s, FIONBIO, &ul);
 }
 
+const char *sys_socket_error(void) {
+  return sys_socket_strerror(sys_socket_errno());
+}
+
+int sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen) {
+  sys_return_val_if_fail(s != NULL, -1);
+
+  int r = sys_socket_real_connect(s, addr, addrlen);
+  if (r < 0) {
+
+    sys_debug_N("connect: %s", sys_socket_error());
+  }
+
+#if USE_OPENSSL
+  // if (SSL_connect(s->ssl) <= 0) {
+  //   sys_ssl_error();
+  //   return -1;
+  // }
+
+  if (SSL_get_verify_result(s->ssl) != X509_V_OK) {
+    sys_ssl_error();
+    return -1;
+  }
+#endif
+
+  return r;
+}
