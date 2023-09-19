@@ -2,31 +2,23 @@
 #include <System/DataTypes/SysQuark.h>
 #include <System/Utils/SysString.h>
 
-SysSocket *sys_socket_new_I(int domain, int type, int protocol, SysBool noblocking) {
+SysSocket *sys_socket_real_new_I(int domain, int type, int protocol, SysBool noblocking) {
   SOCKET fd;
 
   fd = socket(domain, type, protocol);
 
   if (fd == INVALID_SOCKET) {
-    sys_debug_N("socket: %s", sys_socket_strerror(sys_socket_errno()));
     return NULL;
   }
 
   return sys_socket_new_fd(fd);
 }
 
-void sys_socket_free(SysSocket *s) {
+void sys_socket_real_close(SysSocket *s) {
   sys_return_if_fail(s != NULL);
 
-#if USE_OPENSSL
-  SSL_shutdown(s->ssl);
-  SSL_free(s->ssl);
-#else
   shutdown(s->fd, SD_BOTH);
   closesocket(s->fd);
-#endif
-
-  sys_free_N(s);
 }
 
 int sys_socket_setopt(SysSocket *s, int level, int optname, void *optval, socklen_t optlen) {
@@ -35,7 +27,6 @@ int sys_socket_setopt(SysSocket *s, int level, int optname, void *optval, sockle
   int r = setsockopt(s->fd, level, optname, (char *)optval, optlen);
   if (r < 0) {
 
-    sys_debug_N("setsockopt: %s", sys_socket_strerror(sys_socket_errno()));
   }
 
   return r;
@@ -44,42 +35,29 @@ int sys_socket_setopt(SysSocket *s, int level, int optname, void *optval, sockle
 int sys_socket_listen(SysSocket *s, int backlog) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  int r = listen(s->fd, backlog);
-  if (r < 0) {
-
-    sys_debug_N("listen: %s", sys_socket_strerror(sys_socket_errno()));
-  }
-
-  return r;
+  return listen(s->fd, backlog);
 }
 
-SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *addrlen) {
+SysSocket* sys_socket_real_accept(SysSocket *s, struct sockaddr *addr, socklen_t *addrlen) {
   sys_return_val_if_fail(s != NULL, NULL);
   SOCKET fd;
 
   fd = accept(s->fd, addr, addrlen);
   if(fd == INVALID_SOCKET) {
 
-    sys_debug_N("accept: %s", sys_socket_strerror(sys_socket_errno()));
     return NULL;
   }
+  s->fd = fd;
 
-#if USE_OPENSSL
-  if (SSL_accept(s->ssl) <= 0) {
-    return NULL;
-  }
-#endif
-
-  return sys_socket_new_fd((SysInt)fd);
+  return s;
 }
 
-int sys_socket_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
+int sys_socket_real_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
   sys_return_val_if_fail(s != NULL, -1);
 
   int r = bind(s->fd, addr, addrlen);
   if (r < 0) {
 
-    sys_debug_N("bind: %s", sys_socket_strerror(sys_socket_errno()));
   }
 
   return r;
@@ -101,72 +79,28 @@ int sys_socket_real_connect(SysSocket *s, const struct sockaddr *addr, socklen_t
   int r = connect(s->fd, addr, addrlen);
   if (r == SOCKET_ERROR) {
 
-    sys_debug_N("connect: %s", sys_socket_error());
   }
-
-#if USE_OPENSSL
-    if (SSL_connect(s->ssl) <= 0) {
-      sys_ssl_error();
-      return -1;
-    }
-
-    if (SSL_get_verify_result(s->ssl) != X509_V_OK) {
-      sys_ssl_error();
-      return -1;
-    }
-#endif
 
   return r;
 }
 
-SOCKET sys_socket_get_fd(SysSocket *s) {
+int sys_socket_real_recv(SysSocket *s, void *buf, size_t len, int flags) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  return s->fd;
+  return recv(s->fd, buf, (int)len, flags);
 }
 
-int sys_socket_recv(SysSocket *s, void *buf, size_t len, int flags) {
+int sys_socket_real_send(SysSocket *s, const void *buf, size_t len, int flags) {
   sys_return_val_if_fail(s != NULL, -1);
   int r;
 
-#if USE_OPENSSL
-  r = SSL_read(s->ssl, buf, (int)len);
-#else
-  r = recv(s->fd, buf, (int)len, flags);
-#endif
-
-  if (r < 0) {
-
-    sys_debug_N("recv: %s", sys_socket_strerror(sys_socket_errno()));
-  }
-  return r;
+  return send(s->fd, buf, (int)len, flags);
 }
 
-int sys_socket_send(SysSocket *s, const void *buf, size_t len, int flags) {
-  sys_return_val_if_fail(s != NULL, -1);
-  int r;
-
-#if USE_OPENSSL
-  r = SSL_write(s->ssl, buf, (int)len);
-#else
-  r = send(s->fd, buf, (int)len, flags);
-#endif
-  if (r < 0) {
-
-    sys_debug_N("send: %s", sys_socket_strerror(sys_socket_errno()));
-  }
-  return r;
-}
-
-SysInt sys_socket_ioctl(SysSocket *s, long cmd, u_long * argp) {
+SysInt sys_socket_real_ioctl(SysSocket *s, long cmd, u_long * argp) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  int r = ioctlsocket(s->fd, cmd, argp);
-  if (r < 0) {
-
-    sys_debug_N("ioctlsocket: %s", sys_socket_strerror(sys_socket_errno()));
-  }
-  return r;
+  return ioctlsocket(s->fd, cmd, argp);
 }
 
 SysInt sys_socket_errno(void) {

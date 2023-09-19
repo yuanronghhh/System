@@ -19,7 +19,7 @@ SYS_API SSL* sys_socket_get_ssl(SysSocket* s);
 SYS_API SysSocket *sys_socket_new_I(int domain, int type, int protocol, SysBool noblocking);
 SYS_API SysSocket *sys_socket_new_fd(SOCKET fd);
 SYS_API SysInt sys_socket_set_blocking(SysSocket *s, SysBool bvalue);
-SYS_API void sys_socket_free(SysSocket *s);
+SYS_API void sys_socket_close(SysSocket *s);
 SYS_API int sys_socket_setopt(SysSocket *s, int level, int optname, const void *optval, socklen_t optlen);
 SYS_API int sys_socket_listen(SysSocket *s, int backlog);
 SYS_API SysSocket* sys_socket_accept(SysSocket* s, struct sockaddr* addr, socklen_t* addrlen);

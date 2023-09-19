@@ -9,18 +9,19 @@ void sys_ssl_setup(void) {
   STACK_OF(SSL_COMP) *ssl_comp_methods;
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100003L
-    if (OPENSSL_init_ssl(OPENSSL_INIT_LOAD_CONFIG, NULL) == 0) {
-        sys_error_N("%s", "OPENSSL_init_ssl() failed");
-        return;
-    }
+  if (OPENSSL_init_ssl(OPENSSL_INIT_LOAD_CONFIG, NULL) == 0) {
+    sys_error_N("%s", "OPENSSL_init_ssl() failed");
+    return;
+  }
 
-    ERR_clear_error();
+  ERR_clear_error();
 #else
 
   SSL_library_init();
   SSL_load_error_strings();
   OpenSSL_add_all_algorithms();
 #endif
+
 
   ssl_comp_methods = SSL_COMP_get_compression_methods();
   n = sk_SSL_COMP_num(ssl_comp_methods);
@@ -31,6 +32,87 @@ void sys_ssl_setup(void) {
   }
 }
 
+static void sys_ssl_ctx_set_client_option(SSL_CTX *ctx) {
+    /* client side options */
+
+#ifdef SSL_OP_MICROSOFT_SESS_ID_BUG
+    SSL_CTX_set_options(ctx, SSL_OP_MICROSOFT_SESS_ID_BUG);
+#endif
+
+#ifdef SSL_OP_NETSCAPE_CHALLENGE_BUG
+    SSL_CTX_set_options(ctx, SSL_OP_NETSCAPE_CHALLENGE_BUG);
+#endif
+}
+
+static void sys_ssl_ctx_set_server_option(SSL_CTX *ctx) {
+    /* server side options */
+
+#ifdef SSL_OP_SSLREF2_REUSE_CERT_TYPE_BUG
+    SSL_CTX_set_options(ctx, SSL_OP_SSLREF2_REUSE_CERT_TYPE_BUG);
+#endif
+
+#ifdef SSL_OP_MICROSOFT_BIG_SSLV3_BUFFER
+    SSL_CTX_set_options(ctx, SSL_OP_MICROSOFT_BIG_SSLV3_BUFFER);
+#endif
+
+#ifdef SSL_OP_MSIE_SSLV2_RSA_PADDING
+    /* this option allow a potential SSL 2.0 rollback (CAN-2005-2969) */
+    SSL_CTX_set_options(ctx, SSL_OP_MSIE_SSLV2_RSA_PADDING);
+#endif
+
+#ifdef SSL_OP_SSLEAY_080_CLIENT_DH_BUG
+    SSL_CTX_set_options(ctx, SSL_OP_SSLEAY_080_CLIENT_DH_BUG);
+#endif
+
+#ifdef SSL_OP_TLS_D5_BUG
+    SSL_CTX_set_options(ctx, SSL_OP_TLS_D5_BUG);
+#endif
+
+#ifdef SSL_OP_TLS_BLOCK_PADDING_BUG
+    SSL_CTX_set_options(ctx, SSL_OP_TLS_BLOCK_PADDING_BUG);
+#endif
+
+#ifdef SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS
+    SSL_CTX_set_options(ctx, SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS);
+#endif
+
+    SSL_CTX_set_options(ctx, SSL_OP_SINGLE_DH_USE);
+
+#if OPENSSL_VERSION_NUMBER >= 0x009080dfL
+    /* only in 0.9.8m+ */
+    SSL_CTX_clear_options(ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1);
+#endif
+
+#ifdef SSL_CTX_set_min_proto_version
+    SSL_CTX_set_min_proto_version(ctx, 0);
+    SSL_CTX_set_max_proto_version(ctx, TLS1_2_VERSION);
+#endif
+
+#ifdef TLS1_3_VERSION
+    SSL_CTX_set_min_proto_version(ctx, 0);
+    SSL_CTX_set_max_proto_version(ctx, TLS1_3_VERSION);
+#endif
+
+#ifdef SSL_OP_NO_COMPRESSION
+    SSL_CTX_set_options(ctx, SSL_OP_NO_COMPRESSION);
+#endif
+
+#ifdef SSL_OP_NO_ANTI_REPLAY
+    SSL_CTX_set_options(ctx, SSL_OP_NO_ANTI_REPLAY);
+#endif
+
+#ifdef SSL_OP_NO_CLIENT_RENEGOTIATION
+    SSL_CTX_set_options(ctx, SSL_OP_NO_CLIENT_RENEGOTIATION);
+#endif
+
+#ifdef SSL_MODE_RELEASE_BUFFERS
+    SSL_CTX_set_mode(ctx, SSL_MODE_RELEASE_BUFFERS);
+#endif
+
+#ifdef SSL_MODE_NO_AUTO_CHAIN
+    SSL_CTX_set_mode(ctx, SSL_MODE_NO_AUTO_CHAIN);
+#endif
+}
 void sys_ssl_teardown(void) {
 #if OPENSSL_VERSION_NUMBER < 0x10100003L
 
@@ -89,13 +171,15 @@ SSL_CTX *sys_ssl_ctx_new(SysPointer data) {
   return ctx;
 
 fail:
-  sys_ssl_error();
+  sys_warning_N("%s", sys_ssl_error());
   SSL_CTX_free(ctx);
   return NULL;
 }
 
 SSL_CTX* sys_ssl_create_server_ctx(const SysChar *signed_file, const SysChar *priv_file) {
   SSL_CTX* ctx = SSL_CTX_new(SSLv23_server_method());
+
+  sys_ssl_ctx_set_server_option(ctx);
 
   SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, ssl_verify_callback);
 
@@ -113,7 +197,7 @@ SSL_CTX* sys_ssl_create_server_ctx(const SysChar *signed_file, const SysChar *pr
 
   return ctx;
 fail:
-  sys_ssl_error();
+  sys_warning_N("%s", sys_ssl_error());
   SSL_CTX_free(ctx);
 
   ERR_clear_error();
@@ -122,6 +206,8 @@ fail:
 
 SSL_CTX* sys_ssl_create_client_ctx(const SysChar* ca_file, const SysChar* priv_file) {
   SSL_CTX* ctx = SSL_CTX_new(SSLv23_client_method());
+
+  sys_ssl_ctx_set_client_option(ctx);
 
   SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, ssl_verify_callback);
 
@@ -143,14 +229,14 @@ SSL_CTX* sys_ssl_create_client_ctx(const SysChar* ca_file, const SysChar* priv_f
 
   return ctx;
 fail:
-  sys_ssl_error();
+  sys_warning_N("%s", sys_ssl_error());
   SSL_CTX_free(ctx);
 
   ERR_clear_error();
   return NULL;
 }
 
-void sys_ssl_error(void) {
+const SysChar * sys_ssl_error(void) {
   unsigned long ssl_code = ERR_get_error();
-  sys_warning_N("ssl: %d,%s", ssl_code, ERR_error_string(ssl_code, NULL));
+  return ERR_error_string(ssl_code, NULL);
 }

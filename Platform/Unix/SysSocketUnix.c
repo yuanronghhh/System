@@ -1,12 +1,11 @@
 #include <System/Platform/Common/SysSocketPrivate.h>
 
 
-SysSocket *sys_socket_new_I(int domain, int type, int protocol, SysBool noblocking) {
+SysSocket *sys_socket_real_new_I(int domain, int type, int protocol, SysBool noblocking) {
   SysInt fd;
 
   fd = socket(domain, type, protocol);
   if (fd < 0) {
-    sys_warning_N("socket: %s", sys_socket_error());
 
     return NULL;
   }
@@ -14,12 +13,10 @@ SysSocket *sys_socket_new_I(int domain, int type, int protocol, SysBool noblocki
   return sys_socket_new_fd(fd);
 }
 
-
-void sys_socket_free(SysSocket *s) {
+void sys_socket_real_close(SysSocket *s) {
   sys_return_if_fail(s != NULL);
 
   close(s->fd);
-  sys_free_N(s);
 }
 
 int sys_socket_setopt(SysSocket *s, int level, int optname, const void *optval, socklen_t optlen) {
@@ -34,7 +31,7 @@ int sys_socket_listen(SysSocket *s, int backlog) {
   return listen(s->fd, backlog);
 }
 
-SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *addrlen) {
+SysSocket* sys_socket_real_accept(SysSocket *s, struct sockaddr *addr, socklen_t *addrlen) {
   sys_return_val_if_fail(s != NULL, NULL);
   SysInt fd;
 
@@ -47,7 +44,7 @@ SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *add
   return sys_socket_new_fd(fd);
 }
 
-int sys_socket_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
+int sys_socket_real_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
   sys_return_val_if_fail(s != NULL, -1);
 
   return bind(s->fd, addr, addrlen);
@@ -70,13 +67,7 @@ SysInt sys_socket_real_connect(SysSocket *s, const struct sockaddr *addr, sockle
   return (SysInt)connect(s->fd, addr, addrlen);
 }
 
-SysInt sys_socket_get_fd(SysSocket *s) {
-  sys_return_val_if_fail(s != NULL, -1);
-
-  return s->fd;
-}
-
-SysInt sys_socket_recv(SysSocket *s, void *buf, size_t len, int flags) {
+SysInt sys_socket_real_recv(SysSocket *s, void *buf, size_t len, int flags) {
   sys_return_val_if_fail(s != NULL, -1);
 
   return (SysInt)recv(s->fd, buf, len, flags);
@@ -88,15 +79,10 @@ SysInt sys_socket_send(SysSocket *s, const void *buf, size_t len, int flags) {
   return (SysInt)send(s->fd, buf, len, flags);
 }
 
-SysInt sys_socket_ioctl(SysSocket *s, long cmd, u_long * argp) {
+SysInt sys_socket_real_ioctl(SysSocket *s, long cmd, u_long * argp) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  int r = ioctl(s->fd, cmd, argp);
-  if (r < 0) {
-
-    sys_warning_N("ioctlsocket: %s", sys_socket_error());
-  }
-  return r;
+  return ioctl(s->fd, cmd, argp);
 }
 
 const char * sys_socket_strerror(int err) {
