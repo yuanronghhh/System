@@ -1,3 +1,4 @@
+#include "SysSocket.h"
 #include <System/Platform/Common/SysSocketPrivate.h>
 
 #if USE_OPENSSL
@@ -34,8 +35,12 @@ fail:
   return NULL;
 }
 
-  SSL* sys_socket_get_ssl(SysSocket* s) {
+SSL* sys_socket_get_ssl(SysSocket* s) {
   return s->ssl;
+}
+
+void sys_socket_set_ssl(SysSocket* s, SSL* ssl) {
+  s->ssl = ssl;
 }
 #endif
 
@@ -72,11 +77,6 @@ int sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addr
   //   sys_ssl_error();
   //   return -1;
   // }
-
-  if (SSL_get_verify_result(s->ssl) != X509_V_OK) {
-    sys_ssl_error();
-    return -1;
-  }
 #endif
 
   return r;

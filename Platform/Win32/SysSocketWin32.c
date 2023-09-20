@@ -64,13 +64,18 @@ SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *add
     return NULL;
   }
 
+  SysSocket *ns = sys_socket_new_fd((SysInt)fd);
+
 #if USE_OPENSSL
-  if (SSL_accept(s->ssl) <= 0) {
-    return NULL;
-  }
+  sys_socket_set_ssl(ns, s->ssl);
+  SSL_set_accept_state(ns->ssl);
+  // if (SSL_accept(s->ssl) <= 0) {
+  //   sys_ssl_error();
+  //   return NULL;
+  // }
 #endif
 
-  return sys_socket_new_fd((SysInt)fd);
+  return ns;
 }
 
 int sys_socket_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
@@ -105,15 +110,11 @@ int sys_socket_real_connect(SysSocket *s, const struct sockaddr *addr, socklen_t
   }
 
 #if USE_OPENSSL
-    if (SSL_connect(s->ssl) <= 0) {
-      sys_ssl_error();
-      return -1;
-    }
-
-    if (SSL_get_verify_result(s->ssl) != X509_V_OK) {
-      sys_ssl_error();
-      return -1;
-    }
+  SSL_set_connect_state(s->ssl);
+  //if (SSL_connect(s->ssl) <= 0) {
+  //  sys_ssl_error();
+  //  return -1;
+  //}
 #endif
 
   return r;

@@ -14,6 +14,7 @@ typedef struct _SysSocket SysSocket;
 #if USE_OPENSSL
 SYS_API SysSocket *sys_socket_new_ssl(int domain, int type, int protocol, SysBool noblocking, SSL_CTX * ssl_ctx);
 SYS_API SSL* sys_socket_get_ssl(SysSocket* s);
+SYS_API void sys_socket_set_ssl(SysSocket* s, SSL* ssl);
 #endif
 
 SYS_API SysSocket *sys_socket_new_I(int domain, int type, int protocol, SysBool noblocking);
