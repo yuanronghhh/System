@@ -12,8 +12,8 @@ const SysChar *sys_real_strerr(SysInt errnum) {
   SysChar msg[1024] = {0};
   const SysChar *qmsg;
 
-  qmsg = sys_quark_string(&msg);
-  errno_t eno = strerror_s(&msg, sizeof(buff), errnum);
+  qmsg = sys_quark_string(&msg[0]);
+  errno_t eno = strerror_s(&msg[0], sizeof(msg), errnum);
 
   if (eno != 0) {
     sys_abort_N("%s", "strerror_s failed");

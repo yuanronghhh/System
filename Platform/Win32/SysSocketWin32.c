@@ -92,7 +92,6 @@ int sys_socket_real_recv(SysSocket *s, void *buf, size_t len, int flags) {
 
 int sys_socket_real_send(SysSocket *s, const void *buf, size_t len, int flags) {
   sys_return_val_if_fail(s != NULL, -1);
-  int r;
 
   return send(s->fd, buf, (int)len, flags);
 }

@@ -6,7 +6,6 @@ SysSocket *sys_socket_new_ssl(int domain, int type, int protocol, SysBool nobloc
 
   SysSocket *s;
   SSL *ssl;
-  BIO *bio;
 
   s = sys_socket_new_I(domain, type, protocol, noblocking);
   sys_return_val_if_fail(s != NULL, NULL);
@@ -16,14 +15,8 @@ SysSocket *sys_socket_new_ssl(int domain, int type, int protocol, SysBool nobloc
     return NULL;
   }
 
-  bio = BIO_new(BIO_s_fd());
-  if(bio == NULL) {
-    return NULL;
-  }
-
   s->ssl = ssl;
   SSL_set_fd(s->ssl, (int)s->fd);
-  SSL_set_bio(s->ssl, bio);
 
   if (SSL_get_verify_result(ssl) != X509_V_OK) {
     goto fail;
@@ -35,10 +28,6 @@ fail:
   sys_warning_N("%s", sys_socket_error());
   if(ssl != NULL) {
     SSL_free(ssl);
-  }
-
-  if(bio != NULL) {
-    BIO_free(bio);
   }
 
   sys_socket_close(s);
@@ -89,6 +78,12 @@ SysInt sys_socket_set_blocking(SysSocket *s, SysBool bvalue) {
   SysULong ul = bvalue;
 
   return sys_socket_ioctl(s, FIONBIO, &ul);
+}
+
+int sys_socket_send(SysSocket *s, const void *buf, size_t len, int flags) {
+  sys_return_val_if_fail(s != NULL, -1);
+
+  return sys_socket_real_send(s, buf, len, flags);
 }
 
 const char *sys_socket_error(void) {
