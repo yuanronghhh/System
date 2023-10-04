@@ -49,6 +49,9 @@ set(SRC
   ./DataTypes/SysTree.h
   ./DataTypes/SysTree.c
 
+  ./DataTypes/SArray.h
+  ./DataTypes/SArray.c
+
   ./DataTypes/SysBHeap.h
   ./DataTypes/SysBHeap.c
   ./DataTypes/SysHashTable.h

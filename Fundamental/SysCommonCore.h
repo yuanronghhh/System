@@ -1,17 +1,15 @@
-#ifndef __SYS_COMMON_TYPE_H__
-#define __SYS_COMMON_TYPE_H__
+#ifndef __SYS_COMMON_CORE_H__
+#define __SYS_COMMON_CORE_H__
 
 #include <System/Platform/Common/SysAtomic.h>
 #include <System/Platform/Common/SysMem.h>
 #include <System/Platform/Common/SysOs.h>
 #include <System/Utils/SysError.h>
+#include <System/DataTypes/SysTypes.h>
+#include <System/DataTypes/SysArray.h>
 
 #if USE_OPENSSL
 #include <System/Utils/SysOpenSSL.h>
 #endif
-
-typedef struct _SysPtrArray SysPtrArray;
-typedef struct _SysArray SysArray;
-typedef struct _SysByteArray SysByteArray;
 
 #endif
