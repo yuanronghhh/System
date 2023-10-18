@@ -53,6 +53,7 @@ typedef signed char SysInt8;
 typedef signed short SysInt16;
 typedef unsigned int SysUInt32;
 typedef unsigned long SysULong;
+typedef long SysLong;
 typedef signed long long SysInt64;
 typedef unsigned long long SysUInt64;
 typedef uintptr_t SysUIntPtr;
@@ -69,6 +70,11 @@ typedef wchar_t SysWChar;
 #define SYS_ARGS_N const SysChar *_filename, const SysChar *_funcname, const SysInt _line, const SysChar * _callfunc, const SysChar *_ptrstr,
 #define SYS_ARGS_M(func, ptr) SYS_ARGS(func, ptr)
 #define SYS_ARGS_P(func, ptr) _filename, _funcname, _line, _callfunc, _ptrstr,
+
+#define SYS_STRUCT_MEMBER_P(struct_p, struct_offset)   \
+  ((SysPointer) ((SysUInt8*) (struct_p) + (SysLong) (struct_offset)))
+#define SYS_STRUCT_MEMBER(member_type, struct_p, struct_offset)   \
+  (*(member_type*)SYS_STRUCT_MEMBER_P((struct_p), (struct_offset)))
 
 typedef void       (*SysFunc) (SysPointer data, SysPointer user_data);
 typedef SysInt     (*SysCompareFunc) (const void* a, const void* b);

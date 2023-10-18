@@ -10,6 +10,7 @@ SYS_BEGIN_DECLS
 #define sys_bin_new(o, szof) sys_malloc0_N((szof) * 8 + 1)
 #define sys_bin_tostr(buffer, o, szof) sys_bin_str_full(buffer, (szof) * 8 + 1, szof, &o)
 #define sys_strneq(s1, s2, n) (strncmp(s1, s2, (n)) == 0)
+#define sys_str_startswith(s1, s2) (strncmp(s1, s2, sizeof(s2)-1) == 0)
 #define sys_strjoin(delim, ...) _sys_strjoin(delim, __VA_ARGS__, NULL)
 
 SYS_API SysWChar * sys_mbyte_to_wchar(const SysChar * mbyte, int * nsize);

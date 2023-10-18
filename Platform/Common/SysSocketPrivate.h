@@ -28,6 +28,7 @@ int sys_socket_real_bind(SysSocket* s, const struct sockaddr *addr, socklen_t ad
 int sys_socket_real_recv(SysSocket *s, void *buf, size_t len, int flags);
 void sys_socket_real_close(SysSocket *s);
 SysInt sys_socket_real_ioctl(SysSocket *s, long cmd, u_long * argp);
+int sys_socket_real_send(SysSocket *s, const void *buf, size_t len, int flags);
 
 SYS_END_DECLS
 

@@ -49,7 +49,7 @@ SysPointer sys_realloc(void *mem, SysSize size) {
 void sys_free(void *block) {
 #if !defined(NO_FREE_CHECK) || !NO_FREE_CHECK
   if (block == NULL) {
-    sys_warning_N("%s", "sys_free is null.");
+    sys_warning_N("%s", "sys_free block is null.");
     return;
   }
 #endif

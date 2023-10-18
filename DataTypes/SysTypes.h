@@ -1,7 +1,7 @@
 #ifndef __SYS_TYPES_H__
 #define __SYS_TYPES_H__
 
-#include <System/Fundamental/SysCommonCore.h>
+#include <System/Fundamental/SysCommon.h>
 
 SYS_BEGIN_DECLS
 

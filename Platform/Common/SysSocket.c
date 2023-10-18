@@ -80,6 +80,12 @@ SysInt sys_socket_set_blocking(SysSocket *s, SysBool bvalue) {
   return sys_socket_ioctl(s, FIONBIO, &ul);
 }
 
+int sys_socket_send(SysSocket *s, const void *buf, size_t len, int flags) {
+  sys_return_val_if_fail(s != NULL, -1);
+
+  return sys_socket_real_send(s, buf, len, flags);
+}
+
 const char *sys_socket_error(void) {
   return sys_socket_strerror(sys_socket_errno());
 }

@@ -2,6 +2,7 @@
 #define __SYS_JVALUE_H__
 
 #include <System/Fundamental/SysCommonCore.h>
+#include <System/DataTypes/SysArray.h>
 
 SYS_BEGIN_DECLS
 
