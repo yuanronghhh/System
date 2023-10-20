@@ -118,7 +118,7 @@ void* sys_object_new(SysType type, const SysChar * first, ...) {
 
 void _sys_object_ref(SysObject* self) {
   sys_return_if_fail(self != NULL);
-  sys_assert(SYS_REF_CHECK(self, MAX_REF_NODE));
+  sys_return_if_fail(SYS_REF_CHECK(self, MAX_REF_NODE));
 
 #if SYS_DEBUG
 
@@ -134,7 +134,7 @@ void _sys_object_ref(SysObject* self) {
 
 void _sys_object_unref(SysObject* self) {
   sys_return_if_fail(self != NULL);
-  sys_assert(SYS_REF_CHECK(self, MAX_REF_NODE));
+  sys_return_if_fail(SYS_REF_CHECK(self, MAX_REF_NODE));
 
   SysObjectClass *cls;
 
@@ -174,6 +174,7 @@ void * _sys_object_cast_check(SysObject* self, SysType ttype) {
 
   SysType type = sys_type_from_instance(self);
   SysTypeNode *node = sys_type_node(type);
+  SysTypeNode* tnode;
 
   if (sys_atomic_int_get(&node->ref_count) < 0
     || sys_atomic_int_get(&node->n_supers) < 0) {
@@ -183,7 +184,13 @@ void * _sys_object_cast_check(SysObject* self, SysType ttype) {
   }
 
   if (!sys_ref_count_cmp(self, 0)) {
-    sys_return_val_if_fail(sys_type_is_a(type, ttype), NULL);
+    tnode = sys_type_node(ttype);
+
+    if (!sys_type_is_a(type, ttype)) {
+      sys_error_N("Object check node failed: %s", tnode->name);
+      return NULL;
+    }
+
     sys_return_val_if_fail(SYS_REF_CHECK(self, MAX_REF_NODE), NULL);
   }
 
@@ -192,17 +199,19 @@ void * _sys_object_cast_check(SysObject* self, SysType ttype) {
 
 void* _sys_class_cast_check(SysObjectClass* cls, SysType ttype) {
   sys_return_val_if_fail(cls != NULL, NULL);
-
-  sys_assert(cls->dispose != NULL);
+  sys_return_val_if_fail(cls->dispose != NULL, NULL);
 
   SysType type = sys_type_from_class(cls);
-  SysTypeNode *node = sys_type_node(type);
+  SysTypeNode* node = sys_type_node(type);
+  SysTypeNode* tnode;
+  
 
   if (sys_atomic_int_get(&node->ref_count) < 0
     || sys_atomic_int_get(&node->n_supers) < 0
     || !sys_type_is_a(type, ttype)) {
+    tnode = sys_type_node(ttype);
 
-    sys_error_N("%s", "Class check node Failed");
+    sys_error_N("Class check node Failed: %s", tnode->name);
     return NULL;
   }
 
@@ -361,6 +370,8 @@ SysTypeClass *sys_type_class_ref(SysType type) {
 }
 
 SysTypeInstance *sys_type_new_instance(SysType type) {
+  sys_return_val_if_fail(type != 0, NULL);
+
   SysTypeNode *pnode;
   SysTypeNode *node;
   SysTypeInstance *instance;
@@ -397,6 +408,8 @@ SysTypeInstance *sys_type_new_instance(SysType type) {
 }
 
 void sys_type_free_instance(SysTypeInstance *instance) {
+  sys_return_if_fail(instance != NULL);
+
   SysTypeNode *node;
   SysTypeClass *cls;
   SysChar *real_ptr;
@@ -411,6 +424,8 @@ void sys_type_free_instance(SysTypeInstance *instance) {
 }
 
 SysChar *sys_type_name(SysType type) {
+  sys_return_val_if_fail(type != 0, NULL);
+
   const SysTypeNode *info = sys_type_node(type);
   return info->name;
 }
