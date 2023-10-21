@@ -134,7 +134,11 @@ void _sys_object_ref(SysObject* self) {
 
 void _sys_object_unref(SysObject* self) {
   sys_return_if_fail(self != NULL);
-  sys_return_if_fail(SYS_REF_CHECK(self, MAX_REF_NODE));
+
+  if(!SYS_REF_VALID_CHECK(self, MAX_REF_NODE)) {
+    sys_warning_N("object ref check failed: %p", self);
+    return;
+  }
 
   SysObjectClass *cls;
 
