@@ -34,9 +34,6 @@ do {                                         \
   }                                          \
 } while(0)
 
-#define SYS_SUCCESS 0
-#define SYS_FAILED 1
-
 typedef struct _SysError SysError;
 
 typedef enum _SYS_LOG_LEVEL {
