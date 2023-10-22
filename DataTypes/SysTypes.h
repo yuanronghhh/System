@@ -80,6 +80,7 @@ typedef void (*SysTypeInitFunc) (void *self);
 typedef void (*SysTypeFinalizeFunc) (void *self);
 typedef void (*SysInstanceInitFunc) (SysTypeInstance *self);
 typedef void (*SysObjectFunc) (SysObject *o, ...);
+typedef SysObject* (*SysCloneFunc) (SysObject *o);
 typedef void (*SysRefHook) (SysObject *o, const SysChar *name, SysInt ref_count);
 
 struct _SysTypeInfo {
@@ -107,6 +108,7 @@ struct _SysTypeInstance {
 struct _SysObjectClass {
   SysTypeClass parent;
 
+  SysObject *(*dclone) (SysObject *self);
   void (*dispose)(SysObject *self);
   void (*finalize)(SysObject *self);
 };
@@ -123,8 +125,11 @@ SYS_API void* sys_object_new(SysType type, const SysChar * first, ...);
 SYS_API SysType sys_object_get_type(void);
 SYS_API void _sys_object_ref(SysObject* self);
 SYS_API void _sys_object_unref(SysObject* self);
+
 SYS_API void sys_object_set_unref_hook(SysRefHook hook);
 SYS_API void sys_object_set_ref_hook(SysRefHook hook);
+SYS_API void sys_object_set_new_hook(SysRefHook hook);
+
 SYS_API void * _sys_object_cast_check(SysObject* self, SysType ttype);
 SYS_API void * _sys_class_cast_check(SysObjectClass* cls, SysType ttype);
 
@@ -135,6 +140,9 @@ SYS_API void sys_type_setup(void);
 SYS_API void sys_type_teardown(void);
 
 SYS_API SysType sys_type_new(SysType pnode, const SysTypeInfo *info);
+SYS_API SysObject* _sys_object_dclone(SysObject *o);
+#define sys_object_dclone(o) _sys_object_dclone(SYS_OBJECT(o))
+#define sys_object_print_type_name(o) _sys_object_print_type_name(SYS_OBJECT(o))
 
 SYS_API SysChar *sys_type_name(SysType type);
 SYS_API SysType sys_type_get_by_name(const SysChar *name);

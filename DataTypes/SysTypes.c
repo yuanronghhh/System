@@ -38,6 +38,8 @@ struct _SysTypeNode {
 
 static SysRefHook sys_object_unref_debug_func = NULL;
 static SysRefHook sys_object_ref_debug_func = NULL;
+static SysRefHook sys_object_new_debug_func = NULL;
+
 static SysRWLock type_lock;
 
 static SysHashTable *ht = NULL;
@@ -90,6 +92,19 @@ static void sys_object_dispose_i(SysObject *self) {
   sys_return_if_fail(self != NULL);
 }
 
+SysObject* _sys_object_new_from_instance(SysObject *o) {
+  sys_return_val_if_fail(o != NULL, NULL);
+
+  SysType type = sys_type_from_instance(o);
+  return sys_object_new(type, NULL);
+}
+
+static SysObject* sys_object_dclone_i(SysObject *self) {
+  sys_return_val_if_fail(self != NULL, NULL);
+
+  return _sys_object_new_from_instance(self);
+}
+
 static void sys_object_finalize_i(SysObject *self) {
   sys_return_if_fail(self != NULL);
 }
@@ -98,9 +113,20 @@ static void sys_object_base_class_init(SysObjectClass *self) {
   sys_return_if_fail(self != NULL);
 }
 
+SysObject* _sys_object_dclone(SysObject *o) {
+  sys_return_val_if_fail(o != NULL, NULL);
+
+  SysObjectClass *cls = SYS_OBJECT_GET_CLASS(o);
+  sys_return_val_if_fail(cls->dclone != NULL, NULL);
+
+  return cls->dclone(o);
+}
+
 static void sys_object_class_init(SysObjectClass *ocls) {
+  ocls->dclone = sys_object_dclone_i;
   ocls->dispose = sys_object_dispose_i;
   ocls->finalize = sys_object_finalize_i;
+
 }
 
 static void sys_object_init(SysObject *self) {
@@ -112,6 +138,14 @@ void* sys_object_new(SysType type, const SysChar * first, ...) {
   o = (SysObject *)sys_type_new_instance(type);
   if (o == NULL) { return NULL; }
   sys_ref_count_init(o);
+
+
+#if SYS_DEBUG
+  if (sys_object_new_debug_func) {
+    SysTypeNode *node = sys_type_node(type);
+    sys_object_new_debug_func(o, node->name, sys_atomic_int_get(&o->ref_count));
+  }
+#endif
 
   return o;
 }
@@ -171,6 +205,10 @@ void sys_object_set_ref_hook(SysRefHook hook) {
   sys_object_ref_debug_func = hook;
 }
 
+void sys_object_set_new_hook(SysRefHook hook) {
+  sys_object_new_debug_func = hook;
+}
+
 void * _sys_object_cast_check(SysObject* self, SysType ttype) {
   if (self == NULL) {
     return NULL;
@@ -226,6 +264,15 @@ SysBool _sys_object_is_a(SysObject *self, SysType type) {
   SysType otype = sys_type_from_instance(self);
 
   return sys_type_is_a(otype, type);
+}
+
+void _sys_object_print_type_name(SysObject *self) {
+  sys_return_if_fail(self != NULL);
+
+  SysType tp = sys_type_from_instance(self);
+  SysTypeNode* node = sys_type_node(tp);
+
+  sys_debug_N("%s", node->name);
 }
 
 /* SysType */
