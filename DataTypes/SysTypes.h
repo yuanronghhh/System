@@ -120,6 +120,9 @@ struct _SysObject {
 
 #define sys_object_unref(o) _sys_object_unref(SYS_OBJECT(o))
 #define sys_object_ref(o) _sys_object_ref(SYS_OBJECT(o))
+#define sys_object_is_a(o, type) _sys_object_is_a(SYS_OBJECT(o), type)
+#define sys_object_dclone(o) _sys_object_dclone(SYS_OBJECT(o))
+#define sys_object_get_type_name(o) _sys_object_get_type_name(SYS_OBJECT(o))
 
 SYS_API void* sys_object_new(SysType type, const SysChar * first, ...);
 SYS_API SysType sys_object_get_type(void);
@@ -132,8 +135,6 @@ SYS_API void sys_object_set_new_hook(SysRefHook hook);
 
 SYS_API void * _sys_object_cast_check(SysObject* self, SysType ttype);
 SYS_API void * _sys_class_cast_check(SysObjectClass* cls, SysType ttype);
-
-#define sys_object_is_a(o, type) _sys_object_is_a(SYS_OBJECT(o), type)
 SYS_API SysBool _sys_object_is_a(SysObject *self, SysType type);
 
 SYS_API void sys_type_setup(void);
@@ -141,8 +142,8 @@ SYS_API void sys_type_teardown(void);
 
 SYS_API SysType sys_type_new(SysType pnode, const SysTypeInfo *info);
 SYS_API SysObject* _sys_object_dclone(SysObject *o);
-#define sys_object_dclone(o) _sys_object_dclone(SYS_OBJECT(o))
-#define sys_object_print_type_name(o) _sys_object_print_type_name(SYS_OBJECT(o))
+
+SYS_API const SysChar* _sys_object_get_type_name(SysObject* self);
 
 SYS_API SysChar *sys_type_name(SysType type);
 SYS_API SysType sys_type_get_by_name(const SysChar *name);

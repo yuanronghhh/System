@@ -168,18 +168,21 @@ void _sys_object_ref(SysObject* self) {
 
 void _sys_object_unref(SysObject* self) {
   sys_return_if_fail(self != NULL);
+  SysType type;
+  SysTypeNode* node;
+  SysObjectClass* cls;
 
   if(!SYS_REF_VALID_CHECK(self, MAX_REF_NODE)) {
     sys_warning_N("object ref check failed: %p", self);
     return;
   }
+  
 
-  SysObjectClass *cls;
 
 #if SYS_DEBUG
   if (sys_object_unref_debug_func) {
-    SysType type = sys_type_from_instance(self);
-    SysTypeNode *node = sys_type_node(type);
+    type = sys_type_from_instance(self);
+    node = sys_type_node(type);
 
     sys_object_unref_debug_func(self, node->name, sys_atomic_int_get(&self->ref_count));
   }
@@ -261,18 +264,21 @@ void* _sys_class_cast_check(SysObjectClass* cls, SysType ttype) {
 }
 
 SysBool _sys_object_is_a(SysObject *self, SysType type) {
+  sys_return_val_if_fail(SYS_REF_CHECK(self, MAX_REF_NODE), false);
+
   SysType otype = sys_type_from_instance(self);
 
   return sys_type_is_a(otype, type);
 }
 
-void _sys_object_print_type_name(SysObject *self) {
-  sys_return_if_fail(self != NULL);
+const SysChar* _sys_object_get_type_name(SysObject *self) {
+  sys_return_val_if_fail(self != NULL, NULL);
+  sys_return_val_if_fail(SYS_REF_CHECK(self, MAX_REF_NODE), NULL);
 
   SysType tp = sys_type_from_instance(self);
   SysTypeNode* node = sys_type_node(tp);
 
-  sys_debug_N("%s", node->name);
+  return node->name;
 }
 
 /* SysType */
