@@ -126,7 +126,7 @@ struct _SysObject {
 
 SYS_API void* sys_object_new(SysType type, const SysChar * first, ...);
 SYS_API SysType sys_object_get_type(void);
-SYS_API void _sys_object_ref(SysObject* self);
+SYS_API SysObject* _sys_object_ref(SysObject* self);
 SYS_API void _sys_object_unref(SysObject* self);
 
 SYS_API void sys_object_set_unref_hook(SysRefHook hook);

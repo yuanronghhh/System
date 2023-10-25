@@ -1,52 +1,38 @@
 #include <System/DataTypes/SysValue.h>
 #include <System/Utils/SysString.h>
 
-struct _SysJSource {
-  SysChar *string;
-  SysInt startline;
-};
-
-struct _SysJPair {
-  SysChar *key;
-  SysValue *prop;
-  SysValue *value;
-};
-
-struct _SysJObject {
-  SysJPair **pairs;
-  SysInt len;
-};
-
 struct _SysValue {
-  SYS_VALUE_ENUM type;
+  SYS_VALUE_ENUM data_type;
 
   union {
-    SysValue *v_node;
     SysPointer v_pointer;
     SysBool v_bool;
     SysDouble v_double;
     SysInt v_int;
     SysChar* v_string;
-    SysJPair *v_pair;
-    SysJObject *v_object;
-    SysJArray *v_array;
+    SysPtrArray *v_array;
   } v;
 
   SysRef ref_count;
 };
 
-SysInt sys_value_data_type(SysValue *o) {
-  if(o == NULL) { return SYS_NULL; }
+SysInt sys_value_get_data_type(SysValue *self) {
+  sys_return_val_if_fail(self != NULL, -1);
 
-  return o->type;
+  return self->data_type;
 }
 
-const SysChar* sys_value_v_string(SysValue *o) {
-  return o->v.v_string;
+void sys_value_set_v_pointer(SysValue *self, SysPointer v_pointer) {
+  sys_return_if_fail(self != NULL);
+
+  self->data_type = SYS_VALUE_POINTER;
+  self->v.v_pointer = v_pointer;
 }
 
-const SysPointer sys_value_v_pointer(SysValue *o) {
-  return o->v.v_pointer;
+SysPointer sys_value_get_v_pointer(SysValue *self) {
+  sys_return_val_if_fail(self != NULL, NULL);
+
+  return self->v.v_pointer;
 }
 
 SysValue* sys_value_new(void) {
@@ -57,56 +43,101 @@ SysValue* sys_value_new(void) {
   return o;
 }
 
-SysValue *sys_value_copy(SysValue *o) {
-  sys_return_val_if_fail(o != NULL, NULL);
+SysValue *sys_value_copy(SysValue *oself) {
+  sys_return_val_if_fail(oself != NULL, NULL);
 
-  SysValue *n = NULL;
+  SysValue *nself = sys_value_new();
 
-  switch (o->type) {
-    case SYS_STRING:
-      n = sys_value_new_string(o->v.v_string);
+  switch (oself->data_type) {
+    case SYS_VALUE_STRING:
+      sys_value_set_v_string(nself, oself->v.v_string);
+      break;
+    case SYS_VALUE_INT:
+      sys_value_set_v_int(nself, oself->v.v_int);
+      break;
+    case SYS_VALUE_DOUBLE:
+      sys_value_set_v_double(nself, oself->v.v_double);
+      break;
+    case SYS_VALUE_NULL:
+      sys_value_set_v_null(nself);
+      break;
+    case SYS_VALUE_POINTER:
+      sys_value_set_v_pointer(nself, oself->v.v_pointer);
       break;
     default:
       break;
   }
 
-  return n;
+  return nself;
 }
 
-SysValue* sys_value_new_string(const SysChar *s) {
-  sys_return_val_if_fail(s != NULL, NULL);
+void sys_value_set_v_double(SysValue *self, SysDouble v_double) {
+  sys_return_if_fail(self != NULL);
 
-  SysValue *o = sys_value_new();
-
-  o->type = SYS_STRING;
-  o->v.v_string = sys_strdup(s);
-
-  return o;
+  self->data_type = SYS_VALUE_DOUBLE;
+  self->v.v_double = v_double;
 }
 
-SysValue * sys_value_new_pointer(const SysPointer ptr) {
-  sys_return_val_if_fail(ptr != NULL, NULL);
+SysDouble sys_value_get_v_double(SysValue *self) {
+  sys_return_val_if_fail(self != NULL, 0);
 
-  SysValue *o = sys_value_new();
-
-  o->type = SYS_POINTER;
-  o->v.v_pointer = ptr;
-
-  return o;
+  return self->v.v_double;
 }
 
-void sys_value_free(SysValue* value) {
-  sys_return_if_fail(value);
+void sys_value_set_v_int(SysValue *self, SysInt v_int) {
+  sys_return_if_fail(self != NULL);
 
-  switch(value->type) {
-    case SYS_STRING:
-      sys_free_N(value->v.v_string);
+  self->data_type = SYS_VALUE_INT;
+  self->v.v_int = v_int;
+}
+
+SysInt sys_value_get_v_int(SysValue *self) {
+  sys_return_val_if_fail(self != NULL, -1);
+
+  return self->v.v_int;
+}
+
+void sys_value_set_v_null(SysValue *self) {
+  sys_return_if_fail(self != NULL);
+
+  self->data_type = SYS_VALUE_NULL;
+  self->v.v_pointer = NULL;
+}
+
+void sys_value_set_v_string(SysValue *self, const SysChar * v_string) {
+  sys_return_if_fail(self != NULL);
+
+  if(self->v.v_string) {
+    sys_clear_pointer(&self->v.v_string, sys_free);
+  }
+
+  self->v.v_string = sys_strdup(v_string);
+}
+
+const SysChar * sys_value_get_v_string(SysValue *self) {
+  sys_return_val_if_fail(self != NULL, NULL);
+  sys_return_val_if_fail(self->data_type == SYS_VALUE_STRING, NULL);
+
+  return self->v.v_string;
+}
+
+void sys_value_free(SysValue* self) {
+  sys_return_if_fail(self != NULL);
+
+  switch (self->data_type) {
+    case SYS_VALUE_STRING:
+      sys_clear_pointer(&self->v.v_string, sys_free);
+      break;
+    case SYS_VALUE_INT:
+    case SYS_VALUE_DOUBLE:
+    case SYS_VALUE_NULL:
+    case SYS_VALUE_POINTER:
       break;
     default:
       break;
   }
 
-  sys_free_N(value);
+  sys_free_N(self);
 }
 
 void sys_value_ref(SysValue* value) {
@@ -116,13 +147,13 @@ void sys_value_ref(SysValue* value) {
   sys_ref_count_inc(value);
 }
 
-void sys_value_unref(SysValue* value) {
-  sys_return_if_fail(value != NULL);
-  sys_return_if_fail(SYS_REF_VALID_CHECK(value, MAX_REF_NODE));
+void sys_value_unref(SysValue* self) {
+  sys_return_if_fail(self != NULL);
+  sys_return_if_fail(SYS_REF_VALID_CHECK(self, MAX_REF_NODE));
 
-  if (!sys_ref_count_dec(value)) {
+  if (!sys_ref_count_dec(self)) {
     return;
   }
 
-  sys_value_free(value);
+  sys_value_free(self);
 }
