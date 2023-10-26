@@ -36,6 +36,7 @@ void sys_value_set_v_int(SysValue *self, SysInt v_int);
 SysInt sys_value_get_v_int(SysValue *self);
 
 void sys_value_set_v_null(SysValue *self);
+SysInt sys_value_get_data_type(SysValue *self);
 
 SYS_END_DECLS
 
