@@ -190,7 +190,7 @@ SysBool sys_file_get_contents (const SysChar *filename,
     if (nread > 0) {
       offset += nread;
     }
-  } while ((nread > 0 && offset < st.st_size) || (nread == -1 && errno == EINTR));
+  } while ((nread > 0 && offset < (SysSize)st.st_size) || (nread == -1 && errno == EINTR));
 
 #if SYS_OS_WIN32
   *length = offset;

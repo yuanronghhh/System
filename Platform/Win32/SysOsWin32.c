@@ -218,7 +218,7 @@ SysChar **sys_real_backtrace_string(SysInt *size) {
   for (i = 0; i < rsize; i++) {
     DWORD_PTR addr = (DWORD_PTR)stack[i];
 
-    SymGetSymFromAddr(process, addr, 0, symbol);
+    SymGetSymFromAddr64(process, addr, 0, symbol);
     SymGetLineFromAddr(process, addr, (DWORD *)&dp, &lineInfo);
 
     *p++ = sys_strdup_printf("%s:%d:%s - %p\n",  lineInfo.FileName, lineInfo.LineNumber, symbol->Name, symbol->Address);

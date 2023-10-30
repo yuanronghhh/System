@@ -170,8 +170,7 @@ SysObject* _sys_object_ref(SysObject* self) {
 
 void _sys_object_unref(SysObject* self) {
   sys_return_if_fail(self != NULL);
-  SysType type;
-  SysTypeNode* node;
+
   SysObjectClass* cls;
 
   if(!SYS_REF_VALID_CHECK(self, MAX_REF_NODE)) {
@@ -183,6 +182,9 @@ void _sys_object_unref(SysObject* self) {
 
 #if SYS_DEBUG
   if (sys_object_unref_debug_func) {
+    SysType type;
+    SysTypeNode* node;
+
     type = sys_type_from_instance(self);
     node = sys_type_node(type);
 
