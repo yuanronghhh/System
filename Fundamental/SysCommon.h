@@ -76,6 +76,8 @@ typedef wchar_t SysWChar;
 #define SYS_STRUCT_MEMBER(member_type, struct_p, struct_offset)   \
   (*(member_type*)SYS_STRUCT_MEMBER_P((struct_p), (struct_offset)))
 
+#define SYS_CONTAINER_OF(o, TypeName, member) ((TypeName *)((char *)o - offsetof(TypeName, member)))
+
 typedef void       (*SysFunc) (SysPointer data, SysPointer user_data);
 typedef SysInt     (*SysCompareFunc) (const void* a, const void* b);
 typedef SysInt     (*SysCompareDataFunc) (const void* a, const void* b, SysPointer user_data);
@@ -84,5 +86,23 @@ typedef SysInt     (*SysEqualDataFunc) (const void* a, const void* b, void *user
 typedef void       (*SysDestroyFunc) (void* data);
 typedef SysPointer (*SysCopyFunc) (const SysPointer src, SysPointer data);
 
+/* system types */
+typedef enum
+{
+  SYS_TRAVERSE_LEAVES     = 1 << 0,
+  SYS_TRAVERSE_NON_LEAVES = 1 << 1,
+  SYS_TRAVERSE_ALL        = SYS_TRAVERSE_LEAVES | SYS_TRAVERSE_NON_LEAVES,
+  SYS_TRAVERSE_MASK       = 0x03,
+  SYS_TRAVERSE_LEAFS      = SYS_TRAVERSE_LEAVES,
+  SYS_TRAVERSE_NON_LEAFS  = SYS_TRAVERSE_NON_LEAVES
+} SysTraverseFlags;
+
+typedef enum
+{
+  SYS_IN_ORDER,
+  SYS_PRE_ORDER,
+  SYS_POST_ORDER,
+  SYS_LEVEL_ORDER
+} SysTraverseType;
 
 #endif

@@ -46,6 +46,8 @@ set(SRC
 
   ./DataTypes/SysNode.h
   ./DataTypes/SysNode.c
+  ./DataTypes/SysHNode.h
+  ./DataTypes/SysHNode.c
   ./DataTypes/SysTree.h
   ./DataTypes/SysTree.c
 

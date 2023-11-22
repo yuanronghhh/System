@@ -22,6 +22,7 @@
 #include <System/DataTypes/SysQueue.h>
 #include <System/DataTypes/SysBHeap.h>
 #include <System/DataTypes/SysNode.h>
+#include <System/DataTypes/SysHNode.h>
 #include <System/DataTypes/SysTree.h>
 #include <System/DataTypes/SysTypes.h>
 #include <System/DataTypes/SysQueue.h>
