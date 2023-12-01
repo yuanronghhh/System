@@ -25,7 +25,7 @@ SysHNode *_sys_hnode_cast_check(SysHNode* o) {
   return o;
 }
 
-SysPointer _sys_hnode_cast(SysHNode *o, SysSize offsize) {
+SysPointer _sys_hnode_cast_to(SysHNode *o, SysSize offsize) {
   sys_return_val_if_fail(HNODE_CHECK(o), NULL);
 
   return ((char*)o - offsize);
@@ -487,7 +487,7 @@ static SysBool sys_hnode_depth_traverse_level (SysHNode             *hnode,
   SysUInt level;
   SysBool more_levels;
 
-  level = 0;  
+  level = 0;
   while (depth < 0 || level != (SysUInt) depth) {
     more_levels = false;
     if (sys_hnode_traverse_level (hnode, flags, level, func, user_data, &more_levels))
