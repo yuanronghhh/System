@@ -5,6 +5,14 @@
 
 SYS_BEGIN_DECLS
 
+#define  SYS_HNODE_IS_ROOT(hnode) (((SysHNode*) (hnode))->parent == NULL && \
+     ((SysHNode*) (hnode))->prev == NULL && \
+     ((SysHNode*) (hnode))->next == NULL)
+
+#define  SYS_HNODE_IS_LEAF(hnode) (((SysHNode*) (hnode))->children == NULL)
+#define SYS_HNODE_CAST_TO(o, TypeName, member) (TypeName *)_sys_hnode_cast_to(o, offsetof(TypeName, member))
+#define SYS_HNODE(o) _sys_hnode_cast_check(o)
+
 typedef struct _SysHNode  SysHNode;
 
 typedef SysBool (*SysHNodeTraverseFunc) (SysHNode        *hnode,
@@ -15,7 +23,7 @@ typedef SysBool (*SysHNodeFunc) (SysHNode* node, SysPointer user_data);
 
 struct _SysHNode
 {
-  SysInt reserved;
+  SysInt check;
 
   SysHNode   *next;
   SysHNode   *prev;
@@ -23,15 +31,6 @@ struct _SysHNode
   SysHNode   *children;
   SysHNode   *last_child;
 };
-
-#define  SYS_HNODE_IS_ROOT(hnode) (((SysHNode*) (hnode))->parent == NULL && \
-     ((SysHNode*) (hnode))->prev == NULL && \
-     ((SysHNode*) (hnode))->next == NULL)
-
-#define  SYS_HNODE_IS_LEAF(hnode) (((SysHNode*) (hnode))->children == NULL)
-
-#define SYS_HNODE_CAST_TO(o, TypeName, member) (TypeName *)_sys_hnode_cast_to(o, offsetof(TypeName, member))
-#define SYS_HNODE(o) _sys_hnode_cast_check(o)
 
 SYS_API SysBool sys_hnode_has_one_child(SysHNode *self);
 SYS_API SysHNode *_sys_hnode_cast_check(SysHNode* o);
