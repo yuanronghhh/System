@@ -695,34 +695,34 @@ void sys_hnode_handle_bfs_r(SysHNode *self, SysHNodeFunc func, SysPointer user_d
   sys_queue_free(queue);
 }
 
-void sys_hnode_handle_node_ff_r(SysHNode *self, SysHNodeFunc func, SysPointer user_data) {
+void sys_hnode_handle_ff_r(SysHNode *self, SysHNodeFunc func, SysPointer user_data) {
   sys_return_if_fail(HNODE_CHECK(self));
 
   func(self, user_data);
 
   if (self->children) {
 
-    sys_hnode_handle_node_ff_r(self->children, func, user_data);
+    sys_hnode_handle_ff_r(self->children, func, user_data);
   }
 
   if (self->next) {
 
-    sys_hnode_handle_node_ff_r(self->next, func, user_data);
+    sys_hnode_handle_ff_r(self->next, func, user_data);
   }
 }
 
-void sys_hnode_handle_node_ft_r(SysHNode *self, SysHNodeFunc func, SysPointer user_data) {
+void sys_hnode_handle_ft_r(SysHNode *self, SysHNodeFunc func, SysPointer user_data) {
   sys_return_if_fail(self != NULL);
   sys_return_if_fail(HNODE_CHECK(self));
 
   if (self->children) {
 
-    sys_hnode_handle_node_ft_r(self->children, func, user_data);
+    sys_hnode_handle_ft_r(self->children, func, user_data);
   }
 
   if (self->next) {
 
-    sys_hnode_handle_node_ft_r(self->next, func, user_data);
+    sys_hnode_handle_ft_r(self->next, func, user_data);
   }
 
   func(self, user_data);

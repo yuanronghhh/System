@@ -236,7 +236,7 @@ void * _sys_object_cast_check(SysObject* self, SysType ttype) {
     tnode = sys_type_node(ttype);
 
     if (!sys_type_is_a(type, ttype)) {
-      sys_error_N("Object check node failed: %s", tnode->name);
+      sys_error_N("Object check node failed: %p, %s to %s", self, node->name, tnode->name);
       return NULL;
     }
 
@@ -260,7 +260,7 @@ void* _sys_class_cast_check(SysObjectClass* cls, SysType ttype) {
     || !sys_type_is_a(type, ttype)) {
     tnode = sys_type_node(ttype);
 
-    sys_error_N("Class check node Failed: %s", tnode->name);
+    sys_error_N("Class check node Failed: %s to %s", node->name, tnode->name);
     return NULL;
   }
 
