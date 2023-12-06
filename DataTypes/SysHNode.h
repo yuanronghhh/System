@@ -23,13 +23,14 @@ typedef SysBool (*SysHNodeFunc) (SysHNode* node, SysPointer user_data);
 
 struct _SysHNode
 {
-  SysInt check;
-
   SysHNode   *next;
   SysHNode   *prev;
   SysHNode   *parent;
   SysHNode   *children;
   SysHNode   *last_child;
+
+  /* <private> */
+  SysInt check;
 };
 
 SYS_API SysBool sys_hnode_has_one_child(SysHNode *self);
@@ -101,6 +102,7 @@ SYS_API SysHNode * sys_hnode_get_last_child(SysHNode *self);
 SYS_API void sys_hnode_handle_bfs_r(SysHNode *self, SysHNodeFunc func, SysPointer user_data);
 SYS_API void sys_hnode_handle_ff_r(SysHNode *self, SysHNodeFunc func, SysPointer user_data);
 SYS_API void sys_hnode_handle_ft_r(SysHNode *self, SysHNodeFunc func, SysPointer user_data);
+SYS_API void sys_hnode_set_parent(SysHNode *self, SysHNode *parent);
 SYS_API SysHNode* sys_hnode_parent(SysHNode* self);
 SYS_API SysHNode* sys_hnode_children(SysHNode* self);
 SYS_API SysHNode* sys_hnode_next(SysHNode* self);

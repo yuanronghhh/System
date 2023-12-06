@@ -150,7 +150,7 @@ void* sys_object_new(SysType type, const SysChar * first, ...) {
   return o;
 }
 
-SysObject* _sys_object_ref(SysObject* self) {
+SysPointer _sys_object_ref(SysObject* self) {
   sys_return_val_if_fail(self != NULL, NULL);
   sys_return_val_if_fail(SYS_REF_CHECK(self, MAX_REF_NODE), NULL);
 
@@ -165,7 +165,7 @@ SysObject* _sys_object_ref(SysObject* self) {
 
   sys_ref_count_inc(self);
   
-  return self;
+  return (SysPointer)self;
 }
 
 void _sys_object_unref(SysObject* self) {

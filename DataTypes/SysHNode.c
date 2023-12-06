@@ -773,6 +773,13 @@ SysHNode* sys_hnode_prev(SysHNode* self) {
   return self->prev;
 }
 
+void sys_hnode_set_parent(SysHNode *self, SysHNode *parent) {
+  sys_return_if_fail(HNODE_CHECK(self));
+  sys_return_if_fail(HNODE_CHECK(parent));
+
+  self->parent = parent;
+}
+
 SysHNode* sys_hnode_parent(SysHNode* self) {
   sys_return_val_if_fail(HNODE_CHECK(self), NULL);
 
