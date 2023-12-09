@@ -164,7 +164,7 @@ SysPointer _sys_object_ref(SysObject* self) {
 #endif
 
   sys_ref_count_inc(self);
-  
+
   return (SysPointer)self;
 }
 
@@ -177,8 +177,6 @@ void _sys_object_unref(SysObject* self) {
     sys_warning_N("object ref check failed: %p", self);
     return;
   }
-  
-
 
 #if SYS_DEBUG
   if (sys_object_unref_debug_func) {
@@ -253,7 +251,6 @@ void* _sys_class_cast_check(SysObjectClass* cls, SysType ttype) {
   SysType type = sys_type_from_class(cls);
   SysTypeNode* node = sys_type_node(type);
   SysTypeNode* tnode;
-  
 
   if (sys_atomic_int_get(&node->ref_count) < 0
     || sys_atomic_int_get(&node->n_supers) < 0
