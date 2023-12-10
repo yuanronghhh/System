@@ -5,6 +5,14 @@
 
 SYS_BEGIN_DECLS
 
+#define  SYS_HNODE_IS_ROOT(hnode) (((SysHNode*) (hnode))->parent == NULL && \
+     ((SysHNode*) (hnode))->prev == NULL && \
+     ((SysHNode*) (hnode))->next == NULL)
+
+#define  SYS_HNODE_IS_LEAF(hnode) (((SysHNode*) (hnode))->children == NULL)
+#define SYS_HNODE_CAST_TO(o, TypeName, member) (TypeName *)_sys_hnode_cast_to(o, offsetof(TypeName, member))
+#define SYS_HNODE(o) _sys_hnode_cast_check(o)
+
 typedef struct _SysHNode  SysHNode;
 
 typedef SysBool (*SysHNodeTraverseFunc) (SysHNode        *hnode,
@@ -15,23 +23,15 @@ typedef SysBool (*SysHNodeFunc) (SysHNode* node, SysPointer user_data);
 
 struct _SysHNode
 {
-  SysInt reserved;
-
   SysHNode   *next;
   SysHNode   *prev;
   SysHNode   *parent;
   SysHNode   *children;
   SysHNode   *last_child;
+
+  /* <private> */
+  SysInt check;
 };
-
-#define  SYS_HNODE_IS_ROOT(hnode) (((SysHNode*) (hnode))->parent == NULL && \
-     ((SysHNode*) (hnode))->prev == NULL && \
-     ((SysHNode*) (hnode))->next == NULL)
-
-#define  SYS_HNODE_IS_LEAF(hnode) (((SysHNode*) (hnode))->children == NULL)
-
-#define SYS_HNODE_CAST_TO(o, TypeName, member) (TypeName *)_sys_hnode_cast_to(o, offsetof(TypeName, member))
-#define SYS_HNODE(o) _sys_hnode_cast_check(o)
 
 SYS_API SysBool sys_hnode_has_one_child(SysHNode *self);
 SYS_API SysHNode *_sys_hnode_cast_check(SysHNode* o);
@@ -100,8 +100,9 @@ SYS_API void sys_hnode_set_last_child(SysHNode *self, SysHNode * last_child);
 SYS_API SysHNode * sys_hnode_get_last_child(SysHNode *self);
 
 SYS_API void sys_hnode_handle_bfs_r(SysHNode *self, SysHNodeFunc func, SysPointer user_data);
-SYS_API void sys_hnode_handle_node_ff_r(SysHNode *self, SysHNodeFunc func, SysPointer user_data);
-SYS_API void sys_hnode_handle_node_ft_r(SysHNode *self, SysHNodeFunc func, SysPointer user_data);
+SYS_API void sys_hnode_handle_ff_r(SysHNode *self, SysHNodeFunc func, SysPointer user_data);
+SYS_API void sys_hnode_handle_ft_r(SysHNode *self, SysHNodeFunc func, SysPointer user_data);
+SYS_API void sys_hnode_set_parent(SysHNode *self, SysHNode *parent);
 SYS_API SysHNode* sys_hnode_parent(SysHNode* self);
 SYS_API SysHNode* sys_hnode_children(SysHNode* self);
 SYS_API SysHNode* sys_hnode_next(SysHNode* self);
