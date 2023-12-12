@@ -47,9 +47,8 @@ SysSocket* sys_socket_real_accept(SysSocket *s, struct sockaddr *addr, socklen_t
 
     return NULL;
   }
-  s->fd = fd;
 
-  return s;
+  return sys_socket_new_fd(fd);
 }
 
 int sys_socket_real_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {

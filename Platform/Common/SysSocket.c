@@ -6,9 +6,10 @@ SysSocket *sys_socket_new_ssl(int domain, int type, int protocol, SysBool nobloc
 
   SysSocket *s;
   SSL *ssl;
+  BIO *bio;
 
   s = sys_socket_new_I(domain, type, protocol, noblocking);
-  s->bio = BIO_new_socket((int)s->fd, BIO_NOCLOSE);
+  bio = BIO_new_socket((int)s->fd, BIO_NOCLOSE);
 
   SSL_CTX_set_mode(ssl_ctx, SSL_MODE_AUTO_RETRY);
 
@@ -21,7 +22,7 @@ SysSocket *sys_socket_new_ssl(int domain, int type, int protocol, SysBool nobloc
 
   s->ssl = ssl;
   SSL_set_fd(s->ssl, (int)s->fd);
-  SSL_set_bio(ssl, s->bio, s->bio);
+  SSL_set_bio(ssl, bio, bio);
 
   if (SSL_get_verify_result(ssl) != X509_V_OK) {
     goto fail;
@@ -121,23 +122,36 @@ int sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addr
 
 SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *addrlen) {
   sys_return_val_if_fail(s != NULL, NULL);
+  SysSocket* cs;
 
-  SysSocket *ns = sys_socket_real_accept(s, addr, addrlen);
-  if(ns == NULL) {
+  cs = sys_socket_real_accept(s, addr, addrlen);
+  if(cs == NULL) {
 
     sys_warning_N("accept: %s", sys_socket_error());
     return NULL;
   }
 
 #if USE_OPENSSL
-  s->bio = BIO_new(BIO_f_buffer());
-  s->ssl_bio = BIO_new(BIO_f_ssl());
+  BIO *bio, *ssl_bio;
 
-  BIO_set_ssl(s->ssl_bio, ns->ssl, BIO_CLOSE);
-  BIO_push(s->bio, s->ssl_bio);
+  // client
+  bio = BIO_new_socket((int)cs->fd, BIO_NOCLOSE);
+  cs->ssl = SSL_new(SSL_get_SSL_CTX(s->ssl));
+  SSL_set_bio(cs->ssl, bio, bio);
+
+  int ssl_fd = SSL_accept(cs->ssl);
+  if (ssl_fd <= 0) {
+    sys_warning_N("ssl accept: %s", sys_ssl_error());
+    return NULL;
+  }
+
+  ssl_bio = BIO_new(BIO_f_buffer());
+  BIO_set_ssl(ssl_bio, cs->ssl, BIO_CLOSE);
+
+  BIO_push(bio, ssl_bio);
 #endif
 
-  return ns;
+  return cs;
 }
 
 int sys_socket_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
@@ -157,12 +171,11 @@ int sys_socket_recv(SysSocket *s, void *buf, size_t len, int flags) {
   int r;
 
 #if USE_OPENSSL
-  r = BIO_read(s->ssl_bio, buf, (int)len);
+  r = SSL_read(s->ssl, buf, (int)len);
   if (r < 0) {
 
     sys_warning_N("recv: %s", sys_ssl_error());
   }
-  BIO_write(s->bio, buf, (int)len);
 #else
 
   r = sys_socket_real_recv(s, buf, (int)len, flags);
