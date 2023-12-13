@@ -73,7 +73,7 @@ SysInt sys_socket_real_recv(SysSocket *s, void *buf, size_t len, int flags) {
   return (SysInt)recv(s->fd, buf, len, flags);
 }
 
-SysInt sys_socket_send(SysSocket *s, const void *buf, size_t len, int flags) {
+SysInt sys_socket_real_send(SysSocket *s, const void *buf, size_t len, int flags) {
   sys_return_val_if_fail(s != NULL, -1);
 
   return (SysInt)send(s->fd, buf, len, flags);
