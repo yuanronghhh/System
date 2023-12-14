@@ -1,8 +1,6 @@
 #include <System/DataTypes/SysSList.h>
 
 
-#include "SysSList.h"
-
 /**
  * this code from glib slist
  * see: ftp://ftp.gtk.org/pub/gtk/

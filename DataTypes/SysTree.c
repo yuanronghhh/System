@@ -3,9 +3,7 @@
  * see: ftp://ftp.gtk.org/pub/gtk/
  * license under GNU Lesser General Public
  */
-
-#include "SysNode.h"
-#include "SysTree.h"
+#include <System/DataTypes/SysTree.h>
 
 #define MAX_SYSTREE_HEIGHT 40
 
