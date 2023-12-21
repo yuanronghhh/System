@@ -374,9 +374,7 @@ int sys_arg_index(SysSArg *self, const SysChar *key, SysBool is_flag) {
 }
 
 void sys_setup(void) {
-  if(inited) {
-    return;
-  }
+  if(inited) {return;}
 
   sys_console_setup();
   sys_quark_setup();
@@ -390,9 +388,7 @@ void sys_setup(void) {
 }
 
 void sys_teardown(void) {
-  if(!inited) {
-    return;
-  }
+  if(!inited) {return;}
 
   sys_thread_detach();
   sys_real_teardown();

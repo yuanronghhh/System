@@ -1,3 +1,4 @@
+#include "SysHNode.h"
 #include <System/DataTypes/SysHNode.h>
 #include <System/DataTypes/SysQueue.h>
 
@@ -734,8 +735,7 @@ SysHNode* sys_hnode_append(SysHNode *parent, SysHNode *node) {
 
   SysHNode *last_child = sys_hnode_get_last_child(parent);
   sys_hnode_insert_after(parent, last_child, node);
-
-  sys_hnode_set_last_child(parent, node);
+  parent->last_child = node;
 
   return node;
 }

@@ -27,9 +27,9 @@ struct _SysHNode
   SysHNode   *prev;
   SysHNode   *parent;
   SysHNode   *children;
-  SysHNode   *last_child;
 
   /* <private> */
+  SysHNode   *last_child;
   SysInt check;
 };
 
@@ -106,6 +106,7 @@ SYS_API void sys_hnode_set_parent(SysHNode *self, SysHNode *parent);
 SYS_API SysHNode* sys_hnode_parent(SysHNode* self);
 SYS_API SysHNode* sys_hnode_children(SysHNode* self);
 SYS_API SysHNode* sys_hnode_next(SysHNode* self);
+SYS_API SysHNode* sys_hnode_prev(SysHNode* self);
 SYS_API void sys_hnode_init(SysHNode* node);
 
 SYS_END_DECLS
