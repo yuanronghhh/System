@@ -65,6 +65,7 @@ SysValue *sys_value_copy(SysValue *oself) {
       sys_value_set_v_pointer(nself, oself->v.v_pointer);
       break;
     default:
+      sys_warning_N("Not support system value type: %d", oself->data_type);
       break;
   }
 
@@ -106,11 +107,11 @@ void sys_value_set_v_null(SysValue *self) {
 
 void sys_value_set_v_string(SysValue *self, const SysChar * v_string) {
   sys_return_if_fail(self != NULL);
+  sys_return_if_fail(v_string != NULL);
 
-  if(self->v.v_string) {
-    sys_clear_pointer(&self->v.v_string, sys_free);
-  }
+  sys_assert(self->v.v_string == NULL);
 
+  self->data_type = SYS_VALUE_STRING;
   self->v.v_string = sys_strdup(v_string);
 }
 
@@ -134,6 +135,7 @@ void sys_value_free(SysValue* self) {
     case SYS_VALUE_POINTER:
       break;
     default:
+      sys_warning_N("Not support system value type: %d", self->data_type);
       break;
   }
 
