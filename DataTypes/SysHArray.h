@@ -22,6 +22,7 @@ struct _SysHArray {
 SYS_API SysBool sys_harray_init(SysHArray *self);
 SYS_API SysBool sys_harray_init_full(SysHArray* self, SysUInt reserved_size, SysDestroyFunc element_free_func);
 SYS_API SysBool sys_harray_init_with_free_func(SysHArray* self, SysDestroyFunc element_free_func);
+SYS_API void sys_harray_add(SysHArray* self, SysPointer data);
 SYS_API void sys_harray_insert(SysHArray *self, SysInt index_, SysPointer data);
 
 SYS_END_DECLS

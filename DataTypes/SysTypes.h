@@ -58,11 +58,41 @@ SysType type_name##_get_type(void) {                     \
     return type; \
 }
 
+#define SYS_DEFINE_INTERFACE_BEGIN(TypeName, type_name, T_P) \
+static void type_name##_default_init (TypeName##Interface *klass); \
+SysType type_name##_get_type (void)                                \
+{                                                                  \
+  static SysType type = 0;                                         \
+  if(type != 0) {                                                  \
+    return type;                                                   \
+  }                                                                \
+  const SysTypeInfo info = {                                       \
+      sizeof(TypeName##Class),                                     \
+      sizeof(TypeName),                                            \
+      #TypeName,                                                   \
+      NULL,                                                        \
+      NULL,                                                        \
+      (SysTypeInitFunc)type_name##_default_init,                   \
+      NULL,                                                        \
+      NULL                                                         \
+  };                                                               \
+  type = sys_type_new((T_P), &info);                               \
+  return type;                                                     \
+}
+
+#define SYS_DEFINE_INTERFACE_END() \
+  return type;                     \
+}
+
+#define SYS_DEFINE_INTERFACE_WITH_CODE(TypeName, type_name, T_P, _CODE_) SYS_DEFINE_INTERFACE_BEGIN(TypeName, type_name, T_P){_CODE_;}SYS_DEFINE_INTERFACE_END()
+
 #define SYS_DEFINE_WITH_CODE(TypeName, type_name, T_P, _flag_, _CODE_) SYS_DEFINE_BEGIN(TypeName, type_name, T_P, _flag_){_CODE_;}SYS_DEFINE_END()
 
 #define SYS_DEFINE_TYPE_WITH_PRIVATE(TypeName, type_name, T_P) SYS_DEFINE_WITH_CODE(TypeName, type_name, T_P, 0, SYS_ADD_PRIVATE(TypeName))
 
 #define SYS_DEFINE_TYPE(TypeName, type_name, T_P) SYS_DEFINE_WITH_CODE(TypeName, type_name, T_P, 0, {})
+
+#define SYS_DEFINE_INTERFACE(TypeName, type_name, T_P) SYS_DEFINE_INTERFACE_WITH_CODE(TypeName, type_name, T_P, ;)
 
 typedef size_t SysType;
 typedef struct _SysObject SysObject;
