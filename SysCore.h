@@ -14,7 +14,7 @@
 
 #include <System/DataTypes/SysClouse.h>
 #include <System/DataTypes/SysArray.h>
-#include <System/DataTypes/SArray.h>
+#include <System/DataTypes/SysHArray.h>
 #include <System/DataTypes/SysValue.h>
 #include <System/DataTypes/SysHashTable.h>
 #include <System/DataTypes/SysList.h>
