@@ -51,6 +51,7 @@ typedef unsigned char SysUChar;
 typedef unsigned char SysUInt8;
 typedef signed char SysInt8;
 typedef signed short SysInt16;
+typedef unsigned short SysUInt16;
 typedef unsigned int SysUInt32;
 typedef unsigned long SysULong;
 typedef long SysLong;

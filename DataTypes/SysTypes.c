@@ -9,9 +9,10 @@
 #define NODE_IS_ANCESTOR(ancestor, node)                                                    \
         ((ancestor)->n_supers <= (node)->n_supers &&                                        \
         (node)->supers[(node)->n_supers - (ancestor)->n_supers] == NODE_TYPE (ancestor))
-#define	NODE_IS_IFACE(node)			(node->supers[node->n_supers] == SYS_TYPE_INTERFACE)
+#define NODE_IS_IFACE(node)   (node->supers[node->n_supers] == SYS_TYPE_INTERFACE)
 
 typedef struct _InstanceData InstanceData;
+typedef struct _IFaceData IFaceData;
 
 struct _InstanceData {
   SysInt class_size;
@@ -23,14 +24,23 @@ struct _InstanceData {
   void *class_ptr;
 };
 
+struct _IFaceData {
+  SysUInt16 iface_size;
+  SysTypeInitFunc iface_init;
+};
+
 union _SysTypeData {
   InstanceData instance;
+  IFaceData iface;
 };
 
 struct _SysTypeNode {
-  SysChar *name;
   SysTypeData data;
+  SysChar* name;
   SysRef ref_count;
+
+  SysUInt n_ifaces;
+  SysTypeInterface **ifaces;
 
   SysInt n_supers;
   SysType supers[1]; // must be the last field
@@ -40,7 +50,8 @@ static SysRefHook sys_object_unref_debug_func = NULL;
 static SysRefHook sys_object_ref_debug_func = NULL;
 static SysRefHook sys_object_new_debug_func = NULL;
 
-static SysRWLock type_lock;
+static SysRWLock type_rw_lock;
+static SysRecMutex class_init_rec_mutex;
 
 static SysHashTable *ht = NULL;
 
@@ -67,7 +78,7 @@ SysType sys_object_get_type(void) {
     return type;
   }
 
-  const SysTypeInfo info = {
+  const SysTypeInfo type_info = {
       sizeof(SysObjectClass),
       sizeof(SysObject),
       "SysObject",
@@ -80,7 +91,7 @@ SysType sys_object_get_type(void) {
       (SysInstanceInitFunc)sys_object_init
   };
 
-  type = sys_type_new(0, &info);
+  type = sys_type_new(0, &type_info);
   return type;
 }
 
@@ -283,6 +294,18 @@ const SysChar* _sys_object_get_type_name(SysObject *self) {
 }
 
 /* SysType */
+void sys_type_ht_insert(SysTypeNode *node) {
+  sys_return_if_fail(node->name != NULL);
+
+  assert(ht != NULL && "sys types should be initiated before use.");
+
+  sys_hash_table_insert(ht, node->name, node);
+}
+
+void sys_type_ht_remove(SysTypeNode* node) {
+  sys_hash_table_remove(ht, (SysPointer)node->name);
+}
+
 SysType sys_type_new(SysType ptype, const SysTypeInfo *info) {
   SysTypeNode *pnode;
   SysTypeNode *node;
@@ -315,9 +338,7 @@ SysType sys_type_new(SysType ptype, const SysTypeInfo *info) {
 
   sys_ref_count_init(node);
 
-  assert(ht != NULL && "sys types should be initiated before use.");
-
-  sys_hash_table_insert(ht, node->name, node);
+  sys_type_ht_insert(node);
 
   return (SysType)node;
 }
@@ -354,7 +375,7 @@ void sys_type_class_adjust_private_offset (SysTypeClass *cls, SysInt * private_o
   SysTypeNode* node = sys_type_node(cls->type);
   SysTypeNode* pnode = sys_type_node(NODE_PARENT(node));
 
-  sys_rw_lock_writer_lock(&type_lock);
+  sys_rw_lock_writer_lock(&type_rw_lock);
 
   if (*private_offset >= 0) {
     sys_return_if_fail (*private_offset <= 0xffff);
@@ -364,7 +385,7 @@ void sys_type_class_adjust_private_offset (SysTypeClass *cls, SysInt * private_o
     *private_offset = -(SysInt)node->data.instance.private_size;
   }
 
-  sys_rw_lock_writer_unlock(&type_lock);
+  sys_rw_lock_writer_unlock(&type_rw_lock);
 }
 
 void sys_type_class_free(SysTypeClass *cls) {
@@ -509,7 +530,8 @@ void sys_type_teardown(void) {
   sys_hash_table_unref(ht);
   ht = NULL;
 
-  sys_rw_lock_clear(&type_lock);
+  sys_rw_lock_clear(&type_rw_lock);
+  sys_rec_mutex_clear(&class_init_rec_mutex);
 }
 
 void sys_type_setup(void) {
@@ -520,7 +542,8 @@ void sys_type_setup(void) {
       NULL,
       (SysDestroyFunc)sys_type_node_unref);
 
-  sys_rw_lock_init(&type_lock);
+  sys_rw_lock_init(&type_rw_lock);
+  sys_rec_mutex_init(&class_init_rec_mutex);
 }
 
 static SYS_INLINE SysTypeNode* sys_type_node(SysType type) {
@@ -540,11 +563,60 @@ SysBool sys_type_is_a(SysType child, SysType parent) {
   return NODE_IS_ANCESTOR(ancestor, node);
 }
 
-SysPointer _sys_type_get_interface(SysTypeClass *cls, SysType iface_type) {
+SysTypeInterface* sys_type_instance_get_iface(SysTypeNode *o, SysType iface_type) {
+  for (SysUInt i = 0; i < o->n_ifaces; i++) {
+    SysTypeInterface *iface = o->ifaces[i];
+
+    if (iface->type == iface_type) {
+      return iface;
+    }
+  }
+
+  return NULL;
+}
+
+SysTypeInterface* _sys_type_get_interface(SysTypeClass *cls, SysType iface_type) {
   sys_return_val_if_fail(cls != 0, NULL);
 
-  SysTypeNode *node = sys_type_node(cls);
+  SysTypeNode *node = sys_type_node(cls->type);
   SysTypeNode *face_node = sys_type_node(iface_type);
 
   sys_return_val_if_fail(NODE_IS_IFACE(face_node), NULL);
+
+  return sys_type_instance_get_iface(node, iface_type);
+}
+
+/**
+ * simple implementation
+ */
+void sys_type_imp_interface(SysType instance_type, SysType iface_type, const SysInterfaceInfo *info) {
+  sys_rec_mutex_lock(&class_init_rec_mutex);
+  sys_rw_lock_writer_lock (&type_rw_lock);
+
+  SysTypeInterface** impl;
+  SysTypeInterface* iface;
+
+  SysTypeNode *node = sys_type_node (instance_type);
+  SysTypeNode *iface_node = sys_type_node (iface_type);
+
+  if(!info->interface_init) {
+    sys_abort_N("interface init function required: %s,%s", node->name, iface_node->name);
+    return;
+  }
+  iface = sys_new0_N(SysTypeInterface, 1);
+  iface->instance_type = instance_type;
+  iface->type = iface_type;
+
+  impl = sys_new0_N(SysTypeInterface *, node->n_ifaces + 1);
+  impl[0] = iface;
+  sys_memcpy(
+    impl + 1, sizeof(SysTypeInterface*) * node->n_ifaces + 1,
+    node->ifaces, sizeof(SysTypeInterface*) * node->n_ifaces);
+  sys_clear_pointer(&node->ifaces, sys_free);
+
+  node->ifaces = impl;
+  node->n_ifaces += 1;
+
+  sys_rw_lock_writer_unlock(&type_rw_lock);
+  sys_rec_mutex_unlock(&class_init_rec_mutex);
 }

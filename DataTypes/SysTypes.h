@@ -19,8 +19,7 @@ SYS_BEGIN_DECLS
 #define SYS_OBJECT(o) ((SysObject *)sys_object_cast_check(o, SYS_TYPE_OBJECT))
 #define SYS_OBJECT_CLASS(cls) ((SysObjectClass *)sys_class_cast_check(cls, SYS_TYPE_OBJECT))
 #define SYS_OBJECT_GET_CLASS(o) sys_instance_get_class(o, SysObjectClass)
-
-#define SYS_TYPE_OBJECT_GET_INTERFACE(o, iface_type) _sys_type_get_interface((((SysTypeInstance *)o)->type_class), iface_type)
+#define SYS_TYPE_GET_INTERFACE(o, iface_type) _sys_type_get_interface((((SysTypeInstance *)o)->type_class), iface_type)
 
 #define SYS_ADD_PRIVATE(TypeName) \
 { \
@@ -47,7 +46,7 @@ SysType type_name##_get_type(void) {                     \
   if(type != 0) {                                        \
     return type;                                         \
   }                                                      \
-  const SysTypeInfo info = {                             \
+  const SysTypeInfo type_info = {                        \
       sizeof(TypeName##Class),                           \
       sizeof(TypeName),                                  \
       #TypeName,                                         \
@@ -57,7 +56,7 @@ SysType type_name##_get_type(void) {                     \
       NULL,                                              \
       (SysInstanceInitFunc)type_name##_init              \
   }; \
-  type = sys_type_new((T_P), &info);
+  type = sys_type_new((T_P), &type_info);
 
 #define SYS_DEFINE_END() \
     return type; \
@@ -71,9 +70,9 @@ SysType type_name##_get_type (void)                                \
   if(type != 0) {                                                  \
     return type;                                                   \
   }                                                                \
-  const SysTypeInfo info = {                                       \
+  const SysTypeInfo type_info = {                                  \
       sizeof(TypeName##Interface),                                 \
-      sizeof(TypeName),                                            \
+      0,                                                           \
       #TypeName,                                                   \
       NULL,                                                        \
       NULL,                                                        \
@@ -81,22 +80,26 @@ SysType type_name##_get_type (void)                                \
       NULL,                                                        \
       NULL                                                         \
   };                                                               \
-  type = sys_type_new((T_P), &info);                               \
-  return type;                                                     \
-}
+  type = sys_type_new((T_P), &type_info);                          \
 
 #define SYS_DEFINE_INTERFACE_END() \
   return type;                     \
 }
 
+#define SYS_IMPLEMENT_INTERFACE(TYPE_IFACE, iface_init)       { \
+  const SysInterfaceInfo iface_info = {                         \
+    (SysTypeInitFunc)(void (*)(void)) iface_init, NULL, NULL    \
+  };                                                            \
+  sys_type_imp_interface (type, TYPE_IFACE, &iface_info);       \
+}
+
+#define SYS_DEFINE_WITH_CODE(TypeName, type_name, T_P, _CODE_) SYS_DEFINE_BEGIN(TypeName, type_name, T_P, 0){_CODE_;}SYS_DEFINE_END()
+
+#define SYS_DEFINE_TYPE_WITH_PRIVATE(TypeName, type_name, T_P) SYS_DEFINE_WITH_CODE(TypeName, type_name, T_P, SYS_ADD_PRIVATE(TypeName))
+
+#define SYS_DEFINE_TYPE(TypeName, type_name, T_P) SYS_DEFINE_WITH_CODE(TypeName, type_name, T_P, {})
 
 #define SYS_DEFINE_INTERFACE_WITH_CODE(TypeName, type_name, T_P, _CODE_) SYS_DEFINE_INTERFACE_BEGIN(TypeName, type_name, T_P){_CODE_;}SYS_DEFINE_INTERFACE_END()
-
-#define SYS_DEFINE_WITH_CODE(TypeName, type_name, T_P, _flag_, _CODE_) SYS_DEFINE_BEGIN(TypeName, type_name, T_P, _flag_){_CODE_;}SYS_DEFINE_END()
-
-#define SYS_DEFINE_TYPE_WITH_PRIVATE(TypeName, type_name, T_P) SYS_DEFINE_WITH_CODE(TypeName, type_name, T_P, 0, SYS_ADD_PRIVATE(TypeName))
-
-#define SYS_DEFINE_TYPE(TypeName, type_name, T_P) SYS_DEFINE_WITH_CODE(TypeName, type_name, T_P, 0, {})
 
 #define SYS_DEFINE_INTERFACE(TypeName, type_name, T_P) SYS_DEFINE_INTERFACE_WITH_CODE(TypeName, type_name, T_P, ;)
 
@@ -105,8 +108,10 @@ typedef struct _SysObject SysObject;
 
 typedef struct _SysObjectClass SysObjectClass;
 
+typedef struct _SysInterfaceInfo SysInterfaceInfo;
 typedef struct _SysTypeInfo SysTypeInfo;
 typedef struct _SysTypeNode SysTypeNode;
+typedef struct _SysBaseNode SysBaseNode;
 typedef union _SysTypeData SysTypeData;
 typedef struct _SysTypeInstance SysTypeInstance;
 typedef struct _SysTypeInterface SysTypeInterface;
@@ -115,10 +120,17 @@ typedef struct _SysTypeClass SysTypeClass;
 typedef SysType (*SysTypeFunc) (void);
 typedef void (*SysTypeInitFunc) (void *self);
 typedef void (*SysTypeFinalizeFunc) (void *self);
-typedef void (*SysInstanceInitFunc) (SysTypeInstance *self);
+typedef void (*SysInstanceInitFunc) (SysTypeInstance* self);
+typedef void (*SysInterfaceInitFunc) (SysTypeInterface *self);
 typedef void (*SysObjectFunc) (SysObject *o, ...);
 typedef SysObject* (*SysCloneFunc) (SysObject *o);
 typedef void (*SysRefHook) (SysObject *o, const SysChar *name, SysInt ref_count);
+
+struct _SysInterfaceInfo {
+  SysInterfaceInitFunc     interface_init;
+  SysTypeFinalizeFunc      interface_finalize;
+  SysPointer               interface_data;
+};
 
 struct _SysTypeInfo {
   SysInt class_size;
@@ -145,6 +157,7 @@ struct _SysTypeInstance {
 struct _SysTypeInterface {
   SysType type;         /* iface type */
   SysType instance_type;
+  SysPointer vtable;
 };
 
 struct _SysObjectClass {
@@ -186,7 +199,8 @@ SYS_API SysType sys_type_new(SysType pnode, const SysTypeInfo *info);
 SYS_API SysObject* _sys_object_dclone(SysObject *o);
 
 SYS_API const SysChar* _sys_object_get_type_name(SysObject* self);
-SYS_API SysPointer _sys_type_get_interface(SysTypeClass *cls, SysType iface_type);
+SYS_API SysTypeInterface* _sys_type_get_interface(SysTypeClass *cls, SysType iface_type);
+SYS_API void sys_type_imp_interface(SysType instance_type, SysType iface_type, const SysInterfaceInfo* info);
 
 SYS_API SysChar *sys_type_name(SysType type);
 SYS_API SysType sys_type_get_by_name(const SysChar *name);
