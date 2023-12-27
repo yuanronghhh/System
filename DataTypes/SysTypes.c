@@ -9,6 +9,7 @@
 #define NODE_IS_ANCESTOR(ancestor, node)                                                    \
         ((ancestor)->n_supers <= (node)->n_supers &&                                        \
         (node)->supers[(node)->n_supers - (ancestor)->n_supers] == NODE_TYPE (ancestor))
+#define	NODE_IS_IFACE(node)			(node->supers[node->n_supers] == SYS_TYPE_INTERFACE)
 
 typedef struct _InstanceData InstanceData;
 
@@ -32,9 +33,8 @@ struct _SysTypeNode {
   SysRef ref_count;
 
   SysInt n_supers;
-  SysType supers[1]; // must be last field
+  SysType supers[1]; // must be the last field
 };
-
 
 static SysRefHook sys_object_unref_debug_func = NULL;
 static SysRefHook sys_object_ref_debug_func = NULL;
@@ -538,4 +538,13 @@ SysBool sys_type_is_a(SysType child, SysType parent) {
   SysTypeNode *node = sys_type_node(child);
 
   return NODE_IS_ANCESTOR(ancestor, node);
+}
+
+SysPointer _sys_type_get_interface(SysTypeClass *cls, SysType iface_type) {
+  sys_return_val_if_fail(cls != 0, NULL);
+
+  SysTypeNode *node = sys_type_node(cls);
+  SysTypeNode *face_node = sys_type_node(iface_type);
+
+  sys_return_val_if_fail(NODE_IS_IFACE(face_node), NULL);
 }

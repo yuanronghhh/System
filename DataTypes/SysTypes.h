@@ -5,6 +5,9 @@
 
 SYS_BEGIN_DECLS
 
+#define SYS_FUNDAMENTAL_SHIFT 2
+#define SYS_TYPE_INTERFACE ((SysType)(2 << SYS_FUNDAMENTAL_SHIFT))
+
 #define sys_type_from_instance(o) (((SysTypeInstance *)(o))->type_class->type)
 #define sys_type_from_class(o) (((SysTypeClass *)(o))->type)
 #define sys_instance_get_class(o, TypeName) ((TypeName *)((SysTypeInstance *)o)->type_class)
@@ -16,6 +19,8 @@ SYS_BEGIN_DECLS
 #define SYS_OBJECT(o) ((SysObject *)sys_object_cast_check(o, SYS_TYPE_OBJECT))
 #define SYS_OBJECT_CLASS(cls) ((SysObjectClass *)sys_class_cast_check(cls, SYS_TYPE_OBJECT))
 #define SYS_OBJECT_GET_CLASS(o) sys_instance_get_class(o, SysObjectClass)
+
+#define SYS_TYPE_OBJECT_GET_INTERFACE(o, iface_type) _sys_type_get_interface((((SysTypeInstance *)o)->type_class), iface_type)
 
 #define SYS_ADD_PRIVATE(TypeName) \
 { \
@@ -67,7 +72,7 @@ SysType type_name##_get_type (void)                                \
     return type;                                                   \
   }                                                                \
   const SysTypeInfo info = {                                       \
-      sizeof(TypeName##Class),                                     \
+      sizeof(TypeName##Interface),                                 \
       sizeof(TypeName),                                            \
       #TypeName,                                                   \
       NULL,                                                        \
@@ -83,6 +88,7 @@ SysType type_name##_get_type (void)                                \
 #define SYS_DEFINE_INTERFACE_END() \
   return type;                     \
 }
+
 
 #define SYS_DEFINE_INTERFACE_WITH_CODE(TypeName, type_name, T_P, _CODE_) SYS_DEFINE_INTERFACE_BEGIN(TypeName, type_name, T_P){_CODE_;}SYS_DEFINE_INTERFACE_END()
 
@@ -103,6 +109,7 @@ typedef struct _SysTypeInfo SysTypeInfo;
 typedef struct _SysTypeNode SysTypeNode;
 typedef union _SysTypeData SysTypeData;
 typedef struct _SysTypeInstance SysTypeInstance;
+typedef struct _SysTypeInterface SysTypeInterface;
 
 typedef struct _SysTypeClass SysTypeClass;
 typedef SysType (*SysTypeFunc) (void);
@@ -133,6 +140,11 @@ struct _SysTypeClass {
 
 struct _SysTypeInstance {
   SysTypeClass *type_class;
+};
+
+struct _SysTypeInterface {
+  SysType type;         /* iface type */
+  SysType instance_type;
 };
 
 struct _SysObjectClass {
@@ -174,6 +186,7 @@ SYS_API SysType sys_type_new(SysType pnode, const SysTypeInfo *info);
 SYS_API SysObject* _sys_object_dclone(SysObject *o);
 
 SYS_API const SysChar* _sys_object_get_type_name(SysObject* self);
+SYS_API SysPointer _sys_type_get_interface(SysTypeClass *cls, SysType iface_type);
 
 SYS_API SysChar *sys_type_name(SysType type);
 SYS_API SysType sys_type_get_by_name(const SysChar *name);
