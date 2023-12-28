@@ -17,6 +17,7 @@ SYS_BEGIN_DECLS
 #define	TYPE_ID_MASK				((SysType) ((1 << SYS_TYPE_FUNDAMENTAL_SHIFT) - 1))
 
 #define SYS_TYPE_INTERFACE ((SysType)(2 << SYS_TYPE_FUNDAMENTAL_SHIFT))
+#define SYS_TYPE_OBJECT ((SysType)(20 << SYS_TYPE_FUNDAMENTAL_SHIFT))
 
 
 #define sys_type_from_instance(o) (((SysTypeInstance *)(o))->type_class->type)
@@ -26,7 +27,6 @@ SYS_BEGIN_DECLS
 #define sys_object_cast_check(o, stype) _sys_object_cast_check((SysObject *)o, stype)
 #define sys_class_cast_check(cls, stype) _sys_class_cast_check((SysObjectClass *)cls, stype)
 
-#define SYS_TYPE_OBJECT (sys_object_get_type())
 #define SYS_OBJECT(o) ((SysObject *)sys_object_cast_check(o, SYS_TYPE_OBJECT))
 #define SYS_OBJECT_CLASS(cls) ((SysObjectClass *)sys_class_cast_check(cls, SYS_TYPE_OBJECT))
 #define SYS_OBJECT_GET_CLASS(o) sys_instance_get_class(o, SysObjectClass)
@@ -121,7 +121,7 @@ typedef struct _SysObjectClass SysObjectClass;
 
 typedef struct _SysInterfaceInfo SysInterfaceInfo;
 typedef struct _SysTypeInfo SysTypeInfo;
-typedef struct _SysTypeNode SysTypeNode;
+typedef struct _TypeNode TypeNode;
 typedef union _SysTypeData SysTypeData;
 typedef struct _SysTypeInstance SysTypeInstance;
 typedef struct _SysTypeInterface SysTypeInterface;
@@ -215,8 +215,8 @@ SYS_API void sys_type_imp_interface(SysType instance_type, SysType iface_type, c
 SYS_API SysChar *sys_type_name(SysType type);
 SYS_API SysType sys_type_get_by_name(const SysChar *name);
 SYS_API SysTypeClass *sys_type_pclass(SysType type);
-SYS_API void sys_type_node_unref(SysTypeNode *node);
-SYS_API void sys_type_node_free(SysTypeNode *node);
+SYS_API void sys_type_node_unref(TypeNode *node);
+SYS_API void sys_type_node_free(TypeNode *node);
 SYS_API SysTypeInstance *sys_type_new_instance(SysType type);
 SYS_API void sys_type_free_instance(SysTypeInstance *instance);
 SYS_API void *sys_type_get_private(SysTypeInstance *instance, SysType type);
