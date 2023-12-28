@@ -10,6 +10,7 @@
         ((ancestor)->n_supers <= (node)->n_supers &&                                        \
         (node)->supers[(node)->n_supers - (ancestor)->n_supers] == NODE_TYPE (ancestor))
 #define NODE_IS_IFACE(node)   (node->supers[node->n_supers] == SYS_TYPE_INTERFACE)
+#define NODE_FUNDAMENTAL_TYPE(node)		(node->supers[node->n_supers])
 
 typedef struct _InstanceData InstanceData;
 typedef struct _IFaceData IFaceData;
@@ -55,7 +56,7 @@ static SysRWLock type_rw_lock;
 static SysRecMutex class_init_rec_mutex;
 
 static SysHashTable *ht = NULL;
-static SysTypeNode	*static_fundamental_type_nodes[(SYS_TYPE_FUNDAMENTAL_MAX >> SYS_TYPE_FUNDAMENTAL_SHIFT) + 1] = { NULL, };
+static SysTypeNode *static_fundamental_type_nodes[(SYS_TYPE_FUNDAMENTAL_MAX >> SYS_TYPE_FUNDAMENTAL_SHIFT) + 1] = { NULL, };
 
 static void sys_object_base_class_init(SysObjectClass *self);
 static void sys_object_base_finalize(SysObject *self);
@@ -308,39 +309,57 @@ void sys_type_ht_remove(SysTypeNode* node) {
   sys_hash_table_remove(ht, (SysPointer)node->name);
 }
 
-SysType sys_type_new(SysType ptype, const SysTypeInfo *info) {
-  SysTypeNode *pnode;
-  SysTypeNode *node;
+SysTypeNode *type_node_fundamental_new_W(SysType ftype, const SysChar* name, SysInt flags) {
+  return NULL;
+}
+
+SysTypeNode* sys_type_make_node(SysTypeNode* pnode, SysType ftype, const SysChar* name, SysInt flags) {
+  SysTypeNode* node;
   int nodesize = 0;
   int pn_supers = 0;
 
-  pnode = sys_type_node(ptype);
-
   if (pnode) {
+
     pn_supers = pnode->n_supers + 1;
   }
 
   nodesize = (int)sizeof(SysTypeNode) + (int)sizeof(SysType) * (pn_supers + 1);
   node = sys_malloc0_N(nodesize);
-  node->name = sys_strdup(info->name);
+  node->name = sys_strdup(name);
+  node->n_supers = pn_supers;
+  node->supers[0] = (SysType)node;
+  if (pnode) {
+    sys_memcpy(node->supers + 1, sizeof(SysType) * (node->n_supers), pnode->supers, sizeof(SysType) * node->n_supers);
+
+  } else {
+
+    node->supers[1] = 0;
+  }
+
+  sys_ref_count_init(node);
+  sys_type_ht_insert(node);
+
+  return node;
+}
+
+SysType sys_type_new(SysType ptype, const SysTypeInfo *info) {
+  sys_return_val_if_fail(info != NULL, 0);
+
+  sys_rw_lock_writer_lock(&type_rw_lock);
+
+  SysTypeNode* pnode = sys_type_node(ptype);
+  SysTypeNode* node = sys_type_make_node(pnode, NODE_FUNDAMENTAL_TYPE(pnode), info->name, 0);
+  if (node == NULL) {
+    return 0;
+  }
 
   node->data.instance.instance_size = info->instance_size;
   node->data.instance.class_size = info->class_size;
   node->data.instance.class_init = info->class_init;
   node->data.instance.class_finalize = info->class_finalize;
   node->data.instance.instance_init = info->instance_init;
-  node->n_supers = pn_supers;
-
-  node->supers[0] = (SysType)node;
-  if (pnode) {
-    sys_memcpy(node->supers + 1, sizeof(SysType) * (node->n_supers), pnode->supers, sizeof(SysType) * node->n_supers);
-  } else {
-    node->supers[1] = 0;
-  }
-
-  sys_ref_count_init(node);
-
-  sys_type_ht_insert(node);
+  
+  sys_rw_lock_writer_unlock(&type_rw_lock);
 
   return (SysType)node;
 }
@@ -528,6 +547,15 @@ SysTypeClass *sys_type_pclass(SysType type) {
   return (SysTypeClass *)pnode->data.instance.class_ptr;
 }
 
+void sys_type_register_fundanmental(
+  SysType ftype,
+  const SysChar* name,
+  SysInt type_flags) {
+
+
+
+}
+
 void sys_type_teardown(void) {
   sys_hash_table_unref(ht);
   ht = NULL;
@@ -543,6 +571,8 @@ void sys_type_setup(void) {
       (SysEqualFunc)sys_str_equal,
       NULL,
       (SysDestroyFunc)sys_type_node_unref);
+
+  sys_type_register_fundanmental(SYS_TYPE_INTERFACE, "Interface", 0);
 
   sys_rw_lock_init(&type_rw_lock);
   sys_rec_mutex_init(&class_init_rec_mutex);
