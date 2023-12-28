@@ -40,6 +40,7 @@ struct _SysTypeNode {
   SysRef ref_count;
 
   SysUInt n_ifaces;
+  SysUInt iface_size;
   SysTypeInterface **ifaces;
 
   SysInt n_supers;
@@ -54,6 +55,7 @@ static SysRWLock type_rw_lock;
 static SysRecMutex class_init_rec_mutex;
 
 static SysHashTable *ht = NULL;
+static SysTypeNode	*static_fundamental_type_nodes[(SYS_TYPE_FUNDAMENTAL_MAX >> SYS_TYPE_FUNDAMENTAL_SHIFT) + 1] = { NULL, };
 
 static void sys_object_base_class_init(SysObjectClass *self);
 static void sys_object_base_finalize(SysObject *self);
@@ -546,12 +548,11 @@ void sys_type_setup(void) {
   sys_rec_mutex_init(&class_init_rec_mutex);
 }
 
-static SYS_INLINE SysTypeNode* sys_type_node(SysType type) {
-  if (type == 0) {
-    return NULL;
-  }
-
-  return (SysTypeNode *)type;
+static SYS_INLINE SysTypeNode* sys_type_node(SysType utype) {
+  if (utype > SYS_TYPE_FUNDAMENTAL_MAX)
+    return (SysTypeNode*)(utype & ~TYPE_ID_MASK);
+  else
+    return static_fundamental_type_nodes[utype >> SYS_TYPE_FUNDAMENTAL_SHIFT];
 }
 
 SysBool sys_type_is_a(SysType child, SysType parent) {
@@ -590,6 +591,10 @@ SysTypeInterface* _sys_type_get_interface(SysTypeClass *cls, SysType iface_type)
  * simple implementation
  */
 void sys_type_imp_interface(SysType instance_type, SysType iface_type, const SysInterfaceInfo *info) {
+  sys_return_if_fail(instance_type > 0);
+  sys_return_if_fail(iface_type > 0);
+  sys_return_if_fail(info != NULL);
+
   sys_rec_mutex_lock(&class_init_rec_mutex);
   sys_rw_lock_writer_lock (&type_rw_lock);
 
@@ -597,25 +602,42 @@ void sys_type_imp_interface(SysType instance_type, SysType iface_type, const Sys
   SysTypeInterface* iface;
 
   SysTypeNode *node = sys_type_node (instance_type);
-  SysTypeNode *iface_node = sys_type_node (iface_type);
+  if (node == NULL) {
+    sys_warning_N("instance type node not found when implement interface: %d", instance_type);
+    return;
+  }
 
-  if(!info->interface_init) {
+  SysTypeNode *iface_node = sys_type_node (iface_type);
+  if (iface_node == NULL) {
+    sys_warning_N("interface node not found when implement interface: %d", iface_type);
+    return;
+  }
+
+  SysUInt size = iface_node->data.iface.iface_size;
+  if(!info->interface_init || size <= sizeof(SysTypeInterface)) {
     sys_abort_N("interface init function required: %s,%s", node->name, iface_node->name);
     return;
   }
-  iface = sys_new0_N(SysTypeInterface, 1);
+
+  iface = sys_malloc0_N(size);
   iface->instance_type = instance_type;
   iface->type = iface_type;
 
   impl = sys_new0_N(SysTypeInterface *, node->n_ifaces + 1);
   impl[0] = iface;
-  sys_memcpy(
-    impl + 1, sizeof(SysTypeInterface*) * node->n_ifaces + 1,
-    node->ifaces, sizeof(SysTypeInterface*) * node->n_ifaces);
-  sys_clear_pointer(&node->ifaces, sys_free);
+
+  if (node->n_ifaces > 0) {
+    sys_memcpy (
+      impl + 1, sizeof(SysTypeInterface*) * node->n_ifaces + 1,
+      node->ifaces, sizeof(SysTypeInterface*) * node->n_ifaces);
+    sys_clear_pointer(&node->ifaces, sys_free);
+  }
 
   node->ifaces = impl;
   node->n_ifaces += 1;
+  iface->vtable = iface;
+
+  info->interface_init(iface->vtable);
 
   sys_rw_lock_writer_unlock(&type_rw_lock);
   sys_rec_mutex_unlock(&class_init_rec_mutex);

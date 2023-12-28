@@ -1,12 +1,23 @@
 #ifndef __SYS_TYPES_H__
 #define __SYS_TYPES_H__
 
+/**
+ * simple implement gobject for myself
+ * and part of code copy from gobject
+ *
+ * see: ftp://ftp.gtk.org/pub/glib/
+ */
+
 #include <System/Fundamental/SysCommon.h>
 
 SYS_BEGIN_DECLS
 
-#define SYS_FUNDAMENTAL_SHIFT 2
-#define SYS_TYPE_INTERFACE ((SysType)(2 << SYS_FUNDAMENTAL_SHIFT))
+#define SYS_TYPE_FUNDAMENTAL_SHIFT 2
+#define	SYS_TYPE_FUNDAMENTAL_MAX		(255 << SYS_TYPE_FUNDAMENTAL_SHIFT)
+#define	TYPE_ID_MASK				((SysType) ((1 << SYS_TYPE_FUNDAMENTAL_SHIFT) - 1))
+
+#define SYS_TYPE_INTERFACE ((SysType)(2 << SYS_TYPE_FUNDAMENTAL_SHIFT))
+
 
 #define sys_type_from_instance(o) (((SysTypeInstance *)(o))->type_class->type)
 #define sys_type_from_class(o) (((SysTypeClass *)(o))->type)
@@ -80,7 +91,7 @@ SysType type_name##_get_type (void)                                \
       NULL,                                                        \
       NULL                                                         \
   };                                                               \
-  type = sys_type_new((T_P), &type_info);                          \
+  type = sys_type_new(SYS_TYPE_INTERFACE, &type_info);             \
 
 #define SYS_DEFINE_INTERFACE_END() \
   return type;                     \
@@ -111,7 +122,6 @@ typedef struct _SysObjectClass SysObjectClass;
 typedef struct _SysInterfaceInfo SysInterfaceInfo;
 typedef struct _SysTypeInfo SysTypeInfo;
 typedef struct _SysTypeNode SysTypeNode;
-typedef struct _SysBaseNode SysBaseNode;
 typedef union _SysTypeData SysTypeData;
 typedef struct _SysTypeInstance SysTypeInstance;
 typedef struct _SysTypeInterface SysTypeInterface;
