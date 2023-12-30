@@ -34,8 +34,9 @@ struct _ClassNode {
 struct _IFaceNode {
   TypeNode parent;
 
-  SysUInt16 iface_size;
+  SysUInt16 vtable_size;
   SysTypeInitFunc iface_init;
+  SysPointer vtable;
 };
 
 
