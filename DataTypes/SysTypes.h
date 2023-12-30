@@ -122,6 +122,8 @@ typedef struct _SysObjectClass SysObjectClass;
 typedef struct _SysInterfaceInfo SysInterfaceInfo;
 typedef struct _SysTypeInfo SysTypeInfo;
 typedef struct _TypeNode TypeNode;
+typedef struct _ClassNode ClassNode;
+typedef struct _IFaceNode IFaceNode;
 typedef union _SysTypeData SysTypeData;
 typedef struct _SysTypeInstance SysTypeInstance;
 typedef struct _SysTypeInterface SysTypeInterface;
@@ -135,6 +137,14 @@ typedef void (*SysInterfaceInitFunc) (SysTypeInterface *self);
 typedef void (*SysObjectFunc) (SysObject *o, ...);
 typedef SysObject* (*SysCloneFunc) (SysObject *o);
 typedef void (*SysRefHook) (SysObject *o, const SysChar *name, SysInt ref_count);
+typedef enum _SYS_NODE_ENUM SYS_NODE_ENUM;
+
+enum _SYS_NODE_ENUM {
+  SYS_FUNDAMENTAL,
+  SYS_CLASS,
+  SYS_ABSTRACT_CLASS,
+  SYS_INTERFACE,
+};
 
 struct _SysInterfaceInfo {
   SysInterfaceInitFunc     interface_init;
@@ -143,9 +153,10 @@ struct _SysInterfaceInfo {
 };
 
 struct _SysTypeInfo {
+  SysChar *name;
   SysInt class_size;
   SysInt instance_size;
-  SysChar *name;
+  SysInt node_type;
 
   SysTypeInitFunc class_base_init;
   SysTypeFinalizeFunc class_base_finalize;
