@@ -11,6 +11,8 @@ set(INC_SYS
 )
 
 set(SRC
+  ./tests/SysTestIFace2.c
+  ./tests/SysTestIFace2.h
   ./tests/SysTestIFace.c
   ./tests/SysTestIFace.h
   ./tests/SysTestImpl.c

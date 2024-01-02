@@ -12,6 +12,8 @@ static void test_type_basic(void) {
   SysInt width = sys_test_iface_get_width(iface);
   TEST_ASSERT_TRUE_MESSAGE(width > 0, "width > 0 must be true");
   sys_debug_N("[width] %d", width);
+
+  sys_object_unref(o);
 }
 
 void test_type_init(int argc, SysChar* argv[]) {

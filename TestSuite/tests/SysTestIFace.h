@@ -14,6 +14,7 @@ typedef struct _SysTestIFace SysTestIFace;
 typedef struct _SysTestIFaceInterface SysTestIFaceInterface;
 
 struct _SysTestIFaceInterface {
+  SysTypeInterface parent;
 
   SysInt (*get_width) (SysTestIFace *item);
 };
