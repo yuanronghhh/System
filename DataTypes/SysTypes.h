@@ -13,9 +13,11 @@
 SYS_BEGIN_DECLS
 
 #define SYS_TYPE_FUNDAMENTAL_SHIFT 2
-#define	SYS_TYPE_FUNDAMENTAL_MAX		(255 << SYS_TYPE_FUNDAMENTAL_SHIFT)
-#define	TYPE_ID_MASK				((SysType) ((1 << SYS_TYPE_FUNDAMENTAL_SHIFT) - 1))
+#define SYS_TYPE_FUNDAMENTAL_MAX  (255 << SYS_TYPE_FUNDAMENTAL_SHIFT)
+#define TYPE_ID_MASK    ((SysType) ((1 << SYS_TYPE_FUNDAMENTAL_SHIFT) - 1))
 
+#define SYS_TYPE_FNODE			((SysType)(1 << SYS_TYPE_FUNDAMENTAL_SHIFT))
+#define SYS_TYPE_FUNDANMENTAL ((SysType)(2 << SYS_TYPE_FUNDAMENTAL_SHIFT))
 #define SYS_TYPE_INTERFACE ((SysType)(2 << SYS_TYPE_FUNDAMENTAL_SHIFT))
 #define SYS_TYPE_OBJECT ((SysType)(20 << SYS_TYPE_FUNDAMENTAL_SHIFT))
 
@@ -58,6 +60,7 @@ SysType type_name##_get_type(void) {                     \
     return type;                                         \
   }                                                      \
   const SysTypeInfo type_info = {                        \
+      SYS_NODE_CLASS,                                    \
       sizeof(TypeName##Class),                           \
       sizeof(TypeName),                                  \
       #TypeName,                                         \
@@ -82,6 +85,7 @@ SysType type_name##_get_type (void)                                \
     return type;                                                   \
   }                                                                \
   const SysTypeInfo type_info = {                                  \
+      SYS_NODE_INTERFACE,                                          \
       sizeof(TypeName##Interface),                                 \
       0,                                                           \
       #TypeName,                                                   \
@@ -119,12 +123,9 @@ typedef struct _SysObject SysObject;
 
 typedef struct _SysObjectClass SysObjectClass;
 
-typedef struct _SysInterfaceInfo SysInterfaceInfo;
 typedef struct _SysTypeInfo SysTypeInfo;
+typedef struct _SysInterfaceInfo SysInterfaceInfo;
 typedef struct _TypeNode TypeNode;
-typedef struct _ClassNode ClassNode;
-typedef struct _IFaceNode IFaceNode;
-typedef union _SysTypeData SysTypeData;
 typedef struct _SysTypeInstance SysTypeInstance;
 typedef struct _SysTypeInterface SysTypeInterface;
 
@@ -140,10 +141,11 @@ typedef void (*SysRefHook) (SysObject *o, const SysChar *name, SysInt ref_count)
 typedef enum _SYS_NODE_ENUM SYS_NODE_ENUM;
 
 enum _SYS_NODE_ENUM {
-  SYS_FUNDAMENTAL,
-  SYS_CLASS,
-  SYS_ABSTRACT_CLASS,
-  SYS_INTERFACE,
+  SYS_NODE_FUNDAMENTAL = 1 << 0,
+  SYS_NODE_BASE_CLASS = 1 << 1,
+  SYS_NODE_ABSTRACT_CLASS = 1 << 2,
+  SYS_NODE_CLASS = SYS_NODE_BASE_CLASS | SYS_NODE_ABSTRACT_CLASS,
+  SYS_NODE_INTERFACE = 1 << 3,
 };
 
 struct _SysInterfaceInfo {
@@ -153,10 +155,10 @@ struct _SysInterfaceInfo {
 };
 
 struct _SysTypeInfo {
-  SysChar *name;
+  SysInt node_type;
   SysInt class_size;
   SysInt instance_size;
-  SysInt node_type;
+  SysChar *name;
 
   SysTypeInitFunc class_base_init;
   SysTypeFinalizeFunc class_base_finalize;
