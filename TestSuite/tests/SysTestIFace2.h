@@ -20,7 +20,7 @@ struct _SysTestIFace2Interface {
 };
 
 SysType sys_test_iface2_get_type(void);
-SysInt sys_test_iface2_get_width(SysTestIFace2* self);
+SysInt sys_test_iface2_get_height(SysTestIFace2* self);
 
 SYS_END_DECLS
 
