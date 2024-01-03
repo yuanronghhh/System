@@ -18,24 +18,24 @@ static void test_type_basic(void) {
 
   iface = SYS_TEST_IFACE(o);
   width = sys_test_iface_get_width(iface);
-  TEST_ASSERT_TRUE_MESSAGE(width > 0, "width > 0 must be true");
+  TEST_ASSERT_TRUE_MESSAGE(width == 100, "width > 0 must be true");
   sys_debug_N("[impl width] %d", width);
   sys_test_iface_dispose(iface);
 
   iface2 = SYS_TEST_IFACE2(o);
   height = sys_test_iface2_get_height(iface2);
-  TEST_ASSERT_TRUE_MESSAGE(height > 0, "height > 0 must be true");
+  TEST_ASSERT_TRUE_MESSAGE(height == 200, "height > 0 must be true");
   sys_debug_N("[impl height] %d", height);
 
   iface = SYS_TEST_IFACE(o2);
   width = sys_test_iface_get_width(iface);
-  TEST_ASSERT_TRUE_MESSAGE(width > 0, "width > 0 must be true");
+  TEST_ASSERT_TRUE_MESSAGE(width == 300, "width > 0 must be true");
   sys_debug_N("[impl2 width] %d", width);
   sys_test_iface_dispose(iface);
 
   iface2 = SYS_TEST_IFACE2(o2);
   height = sys_test_iface2_get_height(iface2);
-  TEST_ASSERT_TRUE_MESSAGE(height > 0, "height > 0 must be true");
+  TEST_ASSERT_TRUE_MESSAGE(height == 400, "height > 0 must be true");
   sys_debug_N("[impl2 height] %d", height);
 
   sys_object_unref(o);
