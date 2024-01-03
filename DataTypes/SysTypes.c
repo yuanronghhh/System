@@ -166,6 +166,10 @@ static void sys_object_class_init(SysObjectClass *ocls) {
 static void sys_object_init(SysObject *self) {
 }
 
+SysType sys_object_get_type(void) {
+  return SYS_TYPE_OBJECT;
+}
+
 void* sys_object_new(SysType type, const SysChar * first, ...) {
   SysObject *o;
 
@@ -786,6 +790,7 @@ void sys_type_imp_interface(SysType instance_type, SysType iface_type, const Sys
     sys_memcpy (
       nmem + 1, sizeof(SysTypeInterface*) * instance_data->n_ifaces,
       instance_data->ifaces, sizeof(SysTypeInterface*) * instance_data->n_ifaces);
+
     sys_clear_pointer(&instance_data->ifaces, sys_free);
   }
 
