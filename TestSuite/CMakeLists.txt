@@ -17,6 +17,8 @@ set(SRC
   ./tests/SysTestIFace.h
   ./tests/SysTestImpl.c
   ./tests/SysTestImpl.h
+  ./tests/SysTestImpl2.c
+  ./tests/SysTestImpl2.h
 
   ./Main.c
   ./Main.h

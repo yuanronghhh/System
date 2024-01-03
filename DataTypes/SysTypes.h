@@ -60,7 +60,7 @@ SysType type_name##_get_type(void) {                     \
     return type;                                         \
   }                                                      \
   const SysTypeInfo type_info = {                        \
-      SYS_NODE_BASE_CLASS,                               \
+      SYS_NODE_CLASS,                                    \
       sizeof(TypeName##Class),                           \
       sizeof(TypeName),                                  \
       #TypeName,                                         \
@@ -180,6 +180,7 @@ struct _SysTypeInstance {
 struct _SysTypeInterface {
   SysType type;         /* iface type */
   SysType instance_type;
+  SysPointer vtable_ptr;
 };
 
 struct _SysObjectClass {

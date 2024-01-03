@@ -33,7 +33,6 @@ struct _IFaceData {
   SysTypeInitFunc vtable_init;
 
   SysUInt16 vtable_size;
-  SysPointer vtable_ptr;
 };
 
 union _TypeData {
@@ -269,7 +268,6 @@ void * _sys_object_cast_check(SysObject* self, SysType ttype) {
     tnode = sys_type_node(ttype);
 
     if (tnode->node_type & SYS_NODE_INTERFACE) {
-      sys_assert(tnode->data.iface.vtable_ptr != NULL);
 
     } else {
 
@@ -461,6 +459,10 @@ void sys_type_node_free(TypeNode *node) {
       cls = node->data.instance.class_ptr;
 
       if (node->data.instance.n_ifaces > 0) {
+        for (SysInt i = 0; i < node->data.instance.n_ifaces; i++) {
+
+          sys_clear_pointer(&(node->data.instance.ifaces[i]->vtable_ptr), sys_free);
+        }
 
         sys_clear_pointer(&node->data.instance.ifaces, sys_free);
       }
@@ -473,10 +475,6 @@ void sys_type_node_free(TypeNode *node) {
       }
       break;
     case SYS_NODE_INTERFACE:
-      if (node->data.iface.vtable_ptr) {
-
-        sys_clear_pointer(&node->data.iface.vtable_ptr, sys_free);
-      }
       break;
     default:
       sys_abort_N("Not correct declare type when free node: %s", node->name);
@@ -775,16 +773,13 @@ void sys_type_imp_interface(SysType instance_type, SysType iface_type, const Sys
     sys_abort_N("interface must inherit SysTypeInterface: %s,%s", node->name, iface_node->name);
   }
 
-  if (iface_data->vtable_ptr != NULL) {
-    goto done;
-  }
-
   iface = sys_malloc0_N(iface_data->vtable_size);
   iface->instance_type = instance_type;
   iface->type = iface_type;
 
+  iface_data->vtable_init(iface);
   info->interface_init(iface);
-  iface_data->vtable_ptr = iface;
+  iface->vtable_ptr = iface;
 
   SysTypeInterface** nmem = sys_new0_N(SysTypeInterface *, instance_data->n_ifaces + 1);
   if (instance_data->n_ifaces > 0) {
@@ -798,7 +793,6 @@ void sys_type_imp_interface(SysType instance_type, SysType iface_type, const Sys
   instance_data->n_ifaces += 1;
   instance_data->ifaces = nmem;
 
-done:
   sys_rw_lock_writer_unlock(&type_rw_lock);
   sys_rec_mutex_unlock(&class_init_rec_mutex);
 }
