@@ -2,6 +2,40 @@
 
 #define MIN_ARRAY_SIZE  16
 
+SysHArray *sys_harray_new(void) {
+  SysHArray* o = sys_new0_N(SysHArray, 1);
+
+  return o;
+}
+
+SysHArray* sys_harray_new_with_free_func(SysDestroyFunc element_free_func) {
+  SysHArray *self = sys_harray_new();
+  sys_harray_init_with_free_func(self, element_free_func);
+  return self;
+}
+
+void sys_harray_destroy(SysHArray* self) {
+  if (self->element_free_func) {
+    for (SysUInt i = 0; i < self->len; ++i) {
+      self->element_free_func(self->pdata[i]);
+    }
+  }
+}
+
+void sys_harray_free(SysHArray* self, SysBool free_segment) {
+  if (free_segment) {
+
+    sys_harray_destroy(self);
+  }
+  sys_free_N(self);
+}
+
+void sys_harray_copy(SysHArray* dst, SysHArray* src, SysCopyFunc elem_copy, SysPointer copy_user_data) {
+  for (SysUInt i = 0; i < src->len; i++) {
+    sys_harray_add(dst, elem_copy(src->pdata[i], copy_user_data));
+  }
+}
+
 static void harray_maybe_expand(SysHArray *self, SysUInt len) {
   if ((UINT_MAX - self->len) < len) {
     sys_error_N("adding %u to self would overflow", len);
@@ -14,12 +48,12 @@ static void harray_maybe_expand(SysHArray *self, SysUInt len) {
   }
 }
 
-SysBool sys_harray_init(SysHArray *self) {
-  return sys_harray_init_full(self, 0, NULL);
+void sys_harray_init(SysHArray *self) {
+  sys_harray_init_full(self, 0, NULL);
 }
 
-SysBool sys_harray_init_full(SysHArray* self, SysUInt reserved_size, SysDestroyFunc element_free_func) {
-  sys_return_val_if_fail(self != NULL, false);
+void sys_harray_init_full(SysHArray* self, SysUInt reserved_size, SysDestroyFunc element_free_func) {
+  sys_return_if_fail(self != NULL);
 
   self->pdata = NULL;
   self->len = 0;
@@ -28,15 +62,13 @@ SysBool sys_harray_init_full(SysHArray* self, SysUInt reserved_size, SysDestroyF
 
   if (reserved_size != 0)
     harray_maybe_expand(self, reserved_size);
-
-  return true;
 }
 
-SysBool sys_harray_init_with_free_func(SysHArray* self, SysDestroyFunc element_free_func) {
-  sys_return_val_if_fail(self != NULL, false);
-  sys_return_val_if_fail(element_free_func != NULL, false);
+void sys_harray_init_with_free_func(SysHArray* self, SysDestroyFunc element_free_func) {
+  sys_return_if_fail(self != NULL);
+  sys_return_if_fail(element_free_func != NULL);
 
-  return sys_harray_init_full(self, 0, element_free_func);
+  sys_harray_init_full(self, 0, element_free_func);
 }
 
 void sys_harray_add(SysHArray *self, SysPointer data) {

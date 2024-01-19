@@ -211,6 +211,8 @@ void _sys_object_unref(SysObject* self) {
 
   SysObjectClass* cls;
 
+  sys_assert(self->ref_count <= 0xfffffff);
+
   if(!SYS_REF_VALID_CHECK(self, MAX_REF_NODE)) {
     sys_warning_N("object ref check failed: %p", self);
     return;
