@@ -103,7 +103,7 @@ SysType type_name##_get_type (void)                                \
 
 #define SYS_IMPLEMENT_INTERFACE(TYPE_IFACE, iface_init)       { \
   const SysInterfaceInfo iface_info = {                         \
-    (SysTypeInitFunc)(void (*)(void)) iface_init, NULL, NULL    \
+    (SysInterfaceInitFunc)iface_init, NULL, NULL                \
   };                                                            \
   sys_type_imp_interface (type, TYPE_IFACE, &iface_info);       \
 }
@@ -133,8 +133,8 @@ typedef struct _SysTypeClass SysTypeClass;
 typedef SysType (*SysTypeFunc) (void);
 typedef void (*SysTypeInitFunc) (void *self);
 typedef void (*SysTypeFinalizeFunc) (void *self);
-typedef void (*SysInstanceInitFunc) (SysTypeInstance* self);
-typedef void (*SysInterfaceInitFunc) (SysTypeInterface *self);
+typedef void (*SysInstanceInitFunc) (void* self);
+typedef void (*SysInterfaceInitFunc) (void *iface);
 typedef void (*SysObjectFunc) (SysObject *o, ...);
 typedef SysObject* (*SysCloneFunc) (SysObject *o);
 typedef void (*SysRefHook) (SysObject *o, const SysChar *name, SysInt ref_count);
