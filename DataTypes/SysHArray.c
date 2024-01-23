@@ -1,17 +1,34 @@
 #include <System/DataTypes/SysHArray.h>
 
 #define MIN_ARRAY_SIZE  16
+static void harray_maybe_expand(SysHArray *self, SysUInt len);
 
-SysHArray *sys_harray_new(void) {
-  SysHArray* o = sys_new0_N(SysHArray, 1);
 
-  return o;
+static SysHArray * ptr_harray_new(SysUInt reserved_size,
+    SysDestroyFunc element_free_func) {
+    SysHArray *array;
+
+    array = sys_slice_new(SysHArray);
+
+    array->pdata = NULL;
+    array->len = 0;
+    array->alloc = 0;
+    array->element_free_func = element_free_func;
+
+    sys_ref_count_init(array);
+
+    if (reserved_size != 0)
+        harray_maybe_expand(array, reserved_size);
+
+    return array;
+}
+
+SysHArray* sys_harray_new(void) {
+  return ptr_harray_new(0, NULL);
 }
 
 SysHArray* sys_harray_new_with_free_func(SysDestroyFunc element_free_func) {
-  SysHArray *self = sys_harray_new();
-  sys_harray_init_with_free_func(self, element_free_func);
-  return self;
+  return ptr_harray_new(0, element_free_func);
 }
 
 void sys_harray_destroy(SysHArray* self) {
@@ -26,8 +43,30 @@ void sys_harray_free(SysHArray* self, SysBool free_segment) {
   if (free_segment) {
 
     sys_harray_destroy(self);
+  } else {
+
+    self->len = 0;
+    self->pdata = NULL;
+    self->alloc = 0;
   }
   sys_free_N(self);
+}
+
+void sys_harray_unref(SysHArray* self) {
+  sys_return_if_fail(self != NULL);
+
+  if (sys_ref_count_dec(self)) {
+
+    sys_harray_free(self, true);
+  }
+}
+
+SysHArray* sys_harray_ref(SysHArray *self) {
+  sys_return_val_if_fail(self != NULL, NULL);
+
+  sys_ref_count_inc(self);
+
+  return self;
 }
 
 void sys_harray_copy(SysHArray* dst, SysHArray* src, SysCopyFunc elem_copy, SysPointer copy_user_data) {

@@ -23,6 +23,7 @@ struct _SysHArray {
 SYS_API SysHArray* sys_harray_new(void);
 SYS_API void sys_harray_free(SysHArray* self, SysBool free_segment);
 SYS_API void sys_harray_unref(SysHArray* self);
+SYS_API SysHArray* sys_harray_ref(SysHArray *self);
 SYS_API void sys_harray_copy(SysHArray* dst, SysHArray* src, SysCopyFunc elem_copy, SysPointer copy_user_data);
 SYS_API void sys_harray_destroy(SysHArray *self);
 SYS_API SysHArray* sys_harray_new_with_free_func(SysDestroyFunc element_free_func);
