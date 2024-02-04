@@ -17,7 +17,6 @@ SysSocket *sys_socket_real_new_I(int domain, int type, int protocol, SysBool nob
 void sys_socket_real_close(SysSocket *s) {
   sys_return_if_fail(s != NULL);
 
-  shutdown(s->fd, SD_BOTH);
   closesocket(s->fd);
 }
 

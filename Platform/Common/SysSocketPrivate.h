@@ -17,11 +17,6 @@ struct _SysSocket {
 
 #if USE_OPENSSL
   SSL *ssl;
-  // BIO *bio;
-
-  /* maybe NULL */
-  // BIO *ssl_bio;
-  // SysSocket *ssl_s;
 #endif
 };
 
