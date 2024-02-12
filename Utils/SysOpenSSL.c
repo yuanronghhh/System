@@ -1,8 +1,12 @@
 #include <System/Utils/SysOpenSSL.h>
 #include <System/Utils/SysError.h>
+#include <System/Platform/Common/SysMem.h>
 
 static SysInt server_conf_index;
 static SysInt certificate_index;
+
+static SSL_CTX* server_ctx = NULL;
+static SSL_CTX* client_ctx = NULL;
 
 void sys_ssl_setup(void) {
   int n;
@@ -30,89 +34,9 @@ void sys_ssl_setup(void) {
 
     (void)sk_SSL_COMP_pop(ssl_comp_methods);
   }
+
 }
 
-static void sys_ssl_ctx_set_client_option(SSL_CTX *ctx) {
-    /* client side options */
-
-#ifdef SSL_OP_MICROSOFT_SESS_ID_BUG
-    SSL_CTX_set_options(ctx, SSL_OP_MICROSOFT_SESS_ID_BUG);
-#endif
-
-#ifdef SSL_OP_NETSCAPE_CHALLENGE_BUG
-    SSL_CTX_set_options(ctx, SSL_OP_NETSCAPE_CHALLENGE_BUG);
-#endif
-}
-
-static void sys_ssl_ctx_set_server_option(SSL_CTX *ctx) {
-    /* server side options */
-
-#ifdef SSL_OP_SSLREF2_REUSE_CERT_TYPE_BUG
-    SSL_CTX_set_options(ctx, SSL_OP_SSLREF2_REUSE_CERT_TYPE_BUG);
-#endif
-
-#ifdef SSL_OP_MICROSOFT_BIG_SSLV3_BUFFER
-    SSL_CTX_set_options(ctx, SSL_OP_MICROSOFT_BIG_SSLV3_BUFFER);
-#endif
-
-#ifdef SSL_OP_MSIE_SSLV2_RSA_PADDING
-    /* this option allow a potential SSL 2.0 rollback (CAN-2005-2969) */
-    SSL_CTX_set_options(ctx, SSL_OP_MSIE_SSLV2_RSA_PADDING);
-#endif
-
-#ifdef SSL_OP_SSLEAY_080_CLIENT_DH_BUG
-    SSL_CTX_set_options(ctx, SSL_OP_SSLEAY_080_CLIENT_DH_BUG);
-#endif
-
-#ifdef SSL_OP_TLS_D5_BUG
-    SSL_CTX_set_options(ctx, SSL_OP_TLS_D5_BUG);
-#endif
-
-#ifdef SSL_OP_TLS_BLOCK_PADDING_BUG
-    SSL_CTX_set_options(ctx, SSL_OP_TLS_BLOCK_PADDING_BUG);
-#endif
-
-#ifdef SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS
-    SSL_CTX_set_options(ctx, SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS);
-#endif
-
-    SSL_CTX_set_options(ctx, SSL_OP_SINGLE_DH_USE);
-
-#if OPENSSL_VERSION_NUMBER >= 0x009080dfL
-    /* only in 0.9.8m+ */
-    SSL_CTX_clear_options(ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1);
-#endif
-
-#ifdef SSL_CTX_set_min_proto_version
-    SSL_CTX_set_min_proto_version(ctx, 0);
-    SSL_CTX_set_max_proto_version(ctx, TLS1_2_VERSION);
-#endif
-
-#ifdef TLS1_3_VERSION
-    SSL_CTX_set_min_proto_version(ctx, 0);
-    SSL_CTX_set_max_proto_version(ctx, TLS1_3_VERSION);
-#endif
-
-#ifdef SSL_OP_NO_COMPRESSION
-    SSL_CTX_set_options(ctx, SSL_OP_NO_COMPRESSION);
-#endif
-
-#ifdef SSL_OP_NO_ANTI_REPLAY
-    SSL_CTX_set_options(ctx, SSL_OP_NO_ANTI_REPLAY);
-#endif
-
-#ifdef SSL_OP_NO_CLIENT_RENEGOTIATION
-    SSL_CTX_set_options(ctx, SSL_OP_NO_CLIENT_RENEGOTIATION);
-#endif
-
-#ifdef SSL_MODE_RELEASE_BUFFERS
-    SSL_CTX_set_mode(ctx, SSL_MODE_RELEASE_BUFFERS);
-#endif
-
-#ifdef SSL_MODE_NO_AUTO_CHAIN
-    SSL_CTX_set_mode(ctx, SSL_MODE_NO_AUTO_CHAIN);
-#endif
-}
 void sys_ssl_teardown(void) {
 #if OPENSSL_VERSION_NUMBER < 0x10100003L
 
@@ -123,12 +47,96 @@ void sys_ssl_teardown(void) {
 #endif
 }
 
-static int ssl_verify_callback(int ok, X509_STORE_CTX *x509_store)
+static void sys_ssl_ctx_set_client_option(SSL_CTX* ctx) {
+  /* client side options */
+
+#ifdef SSL_OP_MICROSOFT_SESS_ID_BUG
+  SSL_CTX_set_options(ctx, SSL_OP_MICROSOFT_SESS_ID_BUG);
+#endif
+
+#ifdef SSL_OP_NETSCAPE_CHALLENGE_BUG
+  SSL_CTX_set_options(ctx, SSL_OP_NETSCAPE_CHALLENGE_BUG);
+#endif
+}
+
+static void sys_ssl_ctx_set_server_option(SSL_CTX* ctx) {
+  /* server side options */
+
+#ifdef SSL_OP_SSLREF2_REUSE_CERT_TYPE_BUG
+  SSL_CTX_set_options(ctx, SSL_OP_SSLREF2_REUSE_CERT_TYPE_BUG);
+#endif
+
+#ifdef SSL_OP_MICROSOFT_BIG_SSLV3_BUFFER
+  SSL_CTX_set_options(ctx, SSL_OP_MICROSOFT_BIG_SSLV3_BUFFER);
+#endif
+
+#ifdef SSL_OP_MSIE_SSLV2_RSA_PADDING
+  /* this option allow a potential SSL 2.0 rollback (CAN-2005-2969) */
+  SSL_CTX_set_options(ctx, SSL_OP_MSIE_SSLV2_RSA_PADDING);
+#endif
+
+#ifdef SSL_OP_SSLEAY_080_CLIENT_DH_BUG
+  SSL_CTX_set_options(ctx, SSL_OP_SSLEAY_080_CLIENT_DH_BUG);
+#endif
+
+#ifdef SSL_OP_TLS_D5_BUG
+  SSL_CTX_set_options(ctx, SSL_OP_TLS_D5_BUG);
+#endif
+
+#ifdef SSL_OP_TLS_BLOCK_PADDING_BUG
+  SSL_CTX_set_options(ctx, SSL_OP_TLS_BLOCK_PADDING_BUG);
+#endif
+
+#ifdef SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS
+  SSL_CTX_set_options(ctx, SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS);
+#endif
+
+  SSL_CTX_set_options(ctx, SSL_OP_SINGLE_DH_USE);
+
+#if OPENSSL_VERSION_NUMBER >= 0x009080dfL
+  /* only in 0.9.8m+ */
+  SSL_CTX_clear_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_TLSv1);
+#endif
+
+#ifdef SSL_CTX_set_min_proto_version
+  SSL_CTX_set_min_proto_version(ctx, 0);
+  SSL_CTX_set_max_proto_version(ctx, TLS1_2_VERSION);
+#endif
+
+#ifdef TLS1_3_VERSION
+  SSL_CTX_set_min_proto_version(ctx, 0);
+  SSL_CTX_set_max_proto_version(ctx, TLS1_3_VERSION);
+#endif
+
+#ifdef SSL_OP_NO_COMPRESSION
+  SSL_CTX_set_options(ctx, SSL_OP_NO_COMPRESSION);
+#endif
+
+#ifdef SSL_OP_NO_ANTI_REPLAY
+  SSL_CTX_set_options(ctx, SSL_OP_NO_ANTI_REPLAY);
+#endif
+
+#ifdef SSL_OP_NO_CLIENT_RENEGOTIATION
+  SSL_CTX_set_options(ctx, SSL_OP_NO_CLIENT_RENEGOTIATION);
+#endif
+
+#ifdef SSL_MODE_RELEASE_BUFFERS
+  SSL_CTX_set_mode(ctx, SSL_MODE_RELEASE_BUFFERS);
+#endif
+
+#ifdef SSL_MODE_NO_AUTO_CHAIN
+  SSL_CTX_set_mode(ctx, SSL_MODE_NO_AUTO_CHAIN);
+#endif
+
+  SSL_CTX_set_read_ahead(ctx, 1);
+}
+
+static int ssl_verify_callback(int ok, X509_STORE_CTX* x509_store)
 {
-  char              *subject, *issuer;
+  char* subject, * issuer;
   int                err, depth;
-  X509              *cert;
-  X509_NAME         *sname, *iname;
+  X509* cert;
+  X509_NAME* sname, * iname;
 
   cert = X509_STORE_CTX_get_current_cert(x509_store);
   err = X509_STORE_CTX_get_error(x509_store);
@@ -155,35 +163,14 @@ static int ssl_verify_callback(int ok, X509_STORE_CTX *x509_store)
   return 1;
 }
 
-SSL_CTX *sys_ssl_ctx_new(SysPointer data) {
-  SSL_CTX* ctx = SSL_CTX_new(SSLv23_method());
-
-  if (SSL_CTX_set_ex_data(ctx, server_conf_index, data) == 0) {
-    goto fail;
-  }
-
-  if (SSL_CTX_set_ex_data(ctx, certificate_index, NULL) == 0) {
-    goto fail;
-  }
-
-  SSL_CTX_set_read_ahead(ctx, 1);
-
-  return ctx;
-
-fail:
-  sys_warning_N("%s", sys_ssl_error());
-  SSL_CTX_free(ctx);
-  return NULL;
-}
-
-SSL_CTX* sys_ssl_create_server_ctx(const SysChar *signed_file, const SysChar *priv_file) {
+SSL_CTX* ssl_ctx_create_server(const SysChar* signed_file, const SysChar* priv_file) {
   SSL_CTX* ctx = SSL_CTX_new(SSLv23_server_method());
 
   sys_ssl_ctx_set_server_option(ctx);
-
   SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, ssl_verify_callback);
+  SSL_CTX_set_verify_depth(ctx, 1);
 
-  if (SSL_CTX_use_PrivateKey_file(ctx, priv_file, SSL_FILETYPE_PEM) <= 0) {
+  if (!SSL_CTX_use_certificate_chain_file(ctx, signed_file)) {
     goto fail;
   }
 
@@ -191,6 +178,10 @@ SSL_CTX* sys_ssl_create_server_ctx(const SysChar *signed_file, const SysChar *pr
     goto fail;
   }
 
+  if (SSL_CTX_use_PrivateKey_file(ctx, priv_file, SSL_FILETYPE_PEM) <= 0) {
+    goto fail;
+  }
+
   if (SSL_CTX_check_private_key(ctx) <= 0) {
     goto fail;
   }
@@ -204,28 +195,39 @@ fail:
   return NULL;
 }
 
-SSL_CTX* sys_ssl_create_client_ctx(const SysChar* ca_file, const SysChar* priv_file) {
+SSL_CTX* ssl_ctx_create_client(const SysChar* ca_file, const SysChar* priv_file) {
   SSL_CTX* ctx = SSL_CTX_new(SSLv23_client_method());
+  STACK_OF(X509_NAME)* list = NULL;
 
   sys_ssl_ctx_set_client_option(ctx);
 
   SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, ssl_verify_callback);
+  SSL_CTX_set_verify_depth(ctx, 1);
 
   if (SSL_CTX_load_verify_locations(ctx, ca_file, NULL) <= 0) {
     goto fail;
   }
 
-  if (SSL_CTX_use_PrivateKey_file(ctx, priv_file, SSL_FILETYPE_PEM) <= 0) {
+  list = SSL_load_client_CA_file(ca_file);
+  if (list == NULL) {
+    sys_warning_N("SSL_load_client_CA_file(\"%s\") failed", ca_file);
+    goto fail;
+  }
+  SSL_CTX_set_client_CA_list(ctx, list);
+
+  if (SSL_CTX_use_certificate_file(ctx, ca_file, SSL_FILETYPE_PEM) <= 0) {
     goto fail;
   }
 
-  if (SSL_CTX_use_certificate_file(ctx, ca_file, SSL_FILETYPE_PEM) <= 0) {
+#if 0
+  if (SSL_CTX_use_PrivateKey_file(ctx, priv_file, SSL_FILETYPE_PEM) <= 0) {
     goto fail;
   }
 
   if (SSL_CTX_check_private_key(ctx) <= 0) {
     goto fail;
   }
+#endif
 
   return ctx;
 fail:
@@ -234,6 +236,29 @@ fail:
 
   ERR_clear_error();
   return NULL;
+}
+
+void sys_ssl_ctx_setup(
+  const SysChar *server_crt, 
+  const SysChar* server_priv,
+  const SysChar* client_ca,
+  const SysChar* client_priv) {
+
+  server_ctx = ssl_ctx_create_server(server_crt, server_priv);
+  client_ctx = ssl_ctx_create_client(client_ca, client_priv);
+}
+
+void sys_ssl_ctx_teardown(void) {
+  sys_clear_pointer(&server_ctx, SSL_CTX_free);
+  sys_clear_pointer(&client_ctx, SSL_CTX_free);
+}
+
+SSL_CTX * sys_ssl_ctx_get_client(void) {
+  return client_ctx;
+}
+
+SSL_CTX* sys_ssl_ctx_get_server(void) {
+  return server_ctx;
 }
 
 const SysChar * sys_ssl_error(void) {
