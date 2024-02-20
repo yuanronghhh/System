@@ -1,6 +1,64 @@
 #include <System/Platform/Common/SysSocketPrivate.h>
 
 #if USE_OPENSSL
+static int ssl_verify_callback(int ok, X509_STORE_CTX* x509_store) {
+#if SYS_DEBUG
+  char* subject, * issuer;
+  int                err, depth;
+  X509* cert;
+  X509_NAME* sname, * iname;
+
+  // TODO: SSL_set_ex_data not called
+  SysPointer _ = X509_STORE_CTX_get_ex_data(x509_store,
+    SSL_get_ex_data_X509_STORE_CTX_idx());
+
+  cert = X509_STORE_CTX_get_current_cert(x509_store);
+  err = X509_STORE_CTX_get_error(x509_store);
+  depth = X509_STORE_CTX_get_error_depth(x509_store);
+
+  sname = X509_get_subject_name(cert);
+
+  if (sname) {
+    subject = X509_NAME_oneline(sname, NULL, 0);
+    if (subject == NULL) {
+      sys_error_N("%s", "X509_NAME_oneline() failed");
+    }
+
+  } else {
+    subject = NULL;
+  }
+
+  iname = X509_get_issuer_name(cert);
+
+  if (iname) {
+    issuer = X509_NAME_oneline(iname, NULL, 0);
+    if (issuer == NULL) {
+      sys_error_N("%s", "X509_NAME_oneline() failed");
+    }
+
+  } else {
+    issuer = NULL;
+  }
+
+  sys_debug_N("verify:%d, error:%d, depth:%d, "
+    "subject:\"%s\", issuer:\"%s\"",
+    ok, err, depth,
+    subject ? subject : "(none)",
+    issuer ? issuer : "(none)");
+
+  if (subject) {
+
+    OPENSSL_free(subject);
+  }
+
+  if (issuer) {
+    OPENSSL_free(issuer);
+  }
+#endif
+
+  return 1;
+}
+
 SysSocket *sys_socket_new_ssl(int domain, int type, int protocol, SysBool noblocking, SSL_CTX *ssl_ctx) {
   sys_return_val_if_fail(ssl_ctx != NULL, NULL);
 
@@ -11,18 +69,16 @@ SysSocket *sys_socket_new_ssl(int domain, int type, int protocol, SysBool nobloc
   s = sys_socket_new_I(domain, type, protocol, noblocking);
   bio = BIO_new_socket((int)s->fd, BIO_NOCLOSE);
 
-  SSL_CTX_set_mode(ssl_ctx, SSL_MODE_AUTO_RETRY);
-
   sys_return_val_if_fail(s != NULL, NULL);
 
   ssl = SSL_new(ssl_ctx);
   if(ssl == NULL) {
     return NULL;
   }
+  SSL_set_bio(ssl, bio, bio);
 
   s->ssl = ssl;
   SSL_set_fd(s->ssl, (int)s->fd);
-  SSL_set_bio(ssl, bio, bio);
 
   if (SSL_get_verify_result(ssl) != X509_V_OK) {
     goto fail;
@@ -72,9 +128,8 @@ void sys_socket_close(SysSocket *s) {
 
   SSL_shutdown(s->ssl);
   SSL_free(s->ssl);
-#else
-  sys_socket_real_close(s);
 #endif
+  sys_socket_real_close(s);
 
   sys_free_N(s);
 }
@@ -132,18 +187,20 @@ SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *add
   }
 
 #if USE_OPENSSL
+
   BIO *bio, *ssl_bio;
 
   // client
   bio = BIO_new_socket((int)cs->fd, BIO_NOCLOSE);
-  cs->ssl = SSL_new(SSL_get_SSL_CTX(s->ssl));
+  cs->ssl = SSL_new(sys_ssl_ctx_get_client());
   SSL_set_bio(cs->ssl, bio, bio);
 
-  int ssl_fd = SSL_accept(cs->ssl);
-  if (ssl_fd <= 0) {
-    sys_warning_N("ssl accept: %s", sys_ssl_error());
-    return NULL;
-  }
+   int ssl_fd = SSL_accept(cs->ssl);
+   if (ssl_fd <= 0) {
+     sys_socket_close(cs);
+     sys_warning_N("ssl accept: %s", sys_ssl_error());
+     return NULL;
+   }
 
   ssl_bio = BIO_new(BIO_f_buffer());
   BIO_set_ssl(ssl_bio, cs->ssl, BIO_CLOSE);

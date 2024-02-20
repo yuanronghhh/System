@@ -110,7 +110,7 @@ void _sys_interface_init_type(void) {
     NULL,
     NULL,
 
-    (SysInterfaceInitFunc)interface_default_init,
+    (SysTypeInitFunc)interface_default_init,
     NULL,
     NULL
   };

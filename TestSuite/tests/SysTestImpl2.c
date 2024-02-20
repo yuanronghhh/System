@@ -2,8 +2,8 @@
 #include <System/TestSuite/tests/SysTestIFace.h>
 #include <System/TestSuite/tests/SysTestIFace2.h>
 
-void sys_test_impl2_default(SysTestIFaceInterface* iface);
-void sys_test_impl2_default2(SysTestIFace2Interface* iface);
+static void sys_test_impl2_default(SysTestIFaceInterface* iface);
+static void sys_test_impl2_default2(SysTestIFace2Interface* iface);
 
 SYS_DEFINE_WITH_CODE(SysTestImpl2, sys_test_impl2, SYS_TYPE_OBJECT,
   SYS_IMPLEMENT_INTERFACE(SYS_TYPE_TEST_IFACE, sys_test_impl2_default)
@@ -39,7 +39,6 @@ SysInt sys_test_impl2_get_width(SysTestImpl2* self) {
 
 /* object api */
 static void sys_test_impl2_dispose(SysObject* o) {
-  SysTestImpl2* self = SYS_TEST_IMPL2(o);
 
   SYS_OBJECT_CLASS(sys_test_impl2_parent_class)->dispose(o);
 }
