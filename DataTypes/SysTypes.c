@@ -712,6 +712,7 @@ static SYS_INLINE TypeNode* sys_type_node(SysType utype) {
 
 SysBool sys_type_is_a(SysType child, SysType parent) {
   sys_return_val_if_fail(child != 0, false);
+  sys_return_val_if_fail(parent != 0, false);
 
   TypeNode *ancestor = sys_type_node(parent);
   TypeNode *node = sys_type_node(child);
