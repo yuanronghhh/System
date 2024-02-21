@@ -5,22 +5,45 @@
 
 SYS_BEGIN_DECLS
 
+#define SYS_TYPE_SOCKET (sys_socket_get_type())
+#define SYS_SOCKET(o) ((SysSocket* )sys_object_cast_check(o, SYS_TYPE_SOCKET))
+#define SYS_SOCKET_CLASS(o) ((SysSocketClass *)sys_class_cast_check(o, SYS_TYPE_SOCKET))
+#define SYS_SOCKET_GET_CLASS(o) sys_instance_get_class(o, SysSocketClass)
+
 typedef struct _SysSocket SysSocket;
+typedef struct _SysSocketClass SysSocketClass;
 
 #if SYS_OS_UNIX
 #define SOCKET SysInt
 #endif
 
-#if USE_OPENSSL
+struct _SysSocketClass {
+  SysObjectClass parent;
+};
+
+struct _SysSocket {
+  SysObject parent;
+  /* < private > */
+#if SYS_OS_WIN32
+  SOCKET fd;
+#elif SYS_OS_UNIX
+  SysInt fd;
+#endif
+
+  SysBool noblocking;
+  SSL *ssl;
+};
+
 SYS_API SysSocket *sys_socket_new_ssl(int domain, int type, int protocol, SysBool noblocking, SSL_CTX * ssl_ctx);
 SYS_API SSL* sys_socket_get_ssl(SysSocket* s);
 SYS_API void sys_socket_set_ssl(SysSocket* s, SSL* ssl);
-#endif
+
+SYS_API SysType sys_socket_get_type(void);
+SYS_API SysSocket* sys_socket_new(void);
 
 SYS_API SysSocket *sys_socket_new_I(int domain, int type, int protocol, SysBool noblocking);
 SYS_API SysSocket *sys_socket_new_fd(SOCKET fd);
 SYS_API SysInt sys_socket_set_blocking(SysSocket *s, SysBool bvalue);
-SYS_API void sys_socket_close(SysSocket *s);
 SYS_API int sys_socket_setopt(SysSocket *s, int level, int optname, const void *optval, socklen_t optlen);
 SYS_API int sys_socket_listen(SysSocket *s, int backlog);
 SYS_API SysSocket* sys_socket_accept(SysSocket* s, struct sockaddr* addr, socklen_t* addrlen);

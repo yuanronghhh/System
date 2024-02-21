@@ -231,12 +231,15 @@ SysChar **sys_real_backtrace_string(SysInt *size) {
 }
 
 void sys_real_setup(void) {
+  SYS_LEAK_IGNORE_BEGIN;
   WSADATA info;
   if (WSAStartup(MAKEWORD(1, 1), &info) != 0) {
     sys_abort_N("%s", "WSAStartup() init for sockect failed");
   }
+  SYS_LEAK_IGNORE_END;
 }
 
 void sys_real_teardown(void) {
+  WSACleanup();
 }
 

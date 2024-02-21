@@ -5,21 +5,6 @@
 
 SYS_BEGIN_DECLS
 
-struct _SysSocket {
-  /* < private > */
-#if SYS_OS_WIN32
-  SOCKET fd;
-#elif SYS_OS_UNIX
-  SysInt fd;
-#endif
-
-  SysBool noblocking;
-
-#if USE_OPENSSL
-  SSL *ssl;
-#endif
-};
-
 SysSocket *sys_socket_real_new_I(int domain, int type, int protocol, SysBool noblocking);
 int sys_socket_real_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen);
 SysSocket* sys_socket_real_accept(SysSocket *s, struct sockaddr *addr, socklen_t *addrlen);

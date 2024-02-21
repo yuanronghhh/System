@@ -1,7 +1,9 @@
 #include <System/Utils/SysOpenSSL.h>
 #include <System/Utils/SysError.h>
 #include <System/Platform/Common/SysMem.h>
+#include <System/Platform/Common/SysThread.h>
 
+static SysMutex ssl_ctx_mlock;
 static SysInt server_conf_index;
 static SysInt certificate_index;
 
@@ -164,8 +166,10 @@ static int ssl_verify_callback(int ok, X509_STORE_CTX* x509_store)
 }
 
 SSL_CTX* ssl_ctx_create_server(const SysChar* signed_file, const SysChar* priv_file) {
+  SYS_LEAK_IGNORE_BEGIN;
   SSL_CTX* ctx = SSL_CTX_new(SSLv23_server_method());
-
+  SYS_LEAK_IGNORE_END;
+  
   sys_ssl_ctx_set_server_option(ctx);
   SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, ssl_verify_callback);
   SSL_CTX_set_verify_depth(ctx, 1);
@@ -196,7 +200,10 @@ fail:
 }
 
 SSL_CTX* ssl_ctx_create_client(const SysChar* ca_file, const SysChar* priv_file) {
+  SYS_LEAK_IGNORE_BEGIN;
   SSL_CTX* ctx = SSL_CTX_new(SSLv23_client_method());
+  SYS_LEAK_IGNORE_END;
+
   STACK_OF(X509_NAME)* list = NULL;
 
   sys_ssl_ctx_set_client_option(ctx);
@@ -244,6 +251,8 @@ void sys_ssl_ctx_setup(
   const SysChar* client_ca,
   const SysChar* client_priv) {
 
+  sys_mutex_init(&ssl_ctx_mlock);
+
   server_ctx = ssl_ctx_create_server(server_crt, server_priv);
   client_ctx = ssl_ctx_create_client(client_ca, client_priv);
 }
@@ -251,14 +260,28 @@ void sys_ssl_ctx_setup(
 void sys_ssl_ctx_teardown(void) {
   sys_clear_pointer(&server_ctx, SSL_CTX_free);
   sys_clear_pointer(&client_ctx, SSL_CTX_free);
+
+  sys_mutex_clear(&ssl_ctx_mlock);
 }
 
 SSL_CTX * sys_ssl_ctx_get_client(void) {
-  return client_ctx;
+  SSL_CTX* lctx;
+
+  sys_mutex_lock(&ssl_ctx_mlock);
+  lctx = client_ctx;
+  sys_mutex_unlock(&ssl_ctx_mlock);
+
+  return lctx;
 }
 
 SSL_CTX* sys_ssl_ctx_get_server(void) {
-  return server_ctx;
+  SSL_CTX* lctx;
+
+  sys_mutex_lock(&ssl_ctx_mlock);
+  lctx = server_ctx;
+  sys_mutex_unlock(&ssl_ctx_mlock);
+
+  return lctx;
 }
 
 const SysChar * sys_ssl_error(void) {
