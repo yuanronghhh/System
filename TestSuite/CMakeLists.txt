@@ -24,6 +24,8 @@ set(SRC
   ./Main.h
   ./Type.c
   ./Type.h
+  ./Socket.c
+  ./Socket.h
   ./Common.h
 )
 

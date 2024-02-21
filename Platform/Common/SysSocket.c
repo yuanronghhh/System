@@ -1,6 +1,8 @@
 #include <System/Platform/Common/SysSocketPrivate.h>
 
-#if USE_OPENSSL
+
+SYS_DEFINE_TYPE(SysSocket, sys_socket, SYS_TYPE_OBJECT);
+
 static int ssl_verify_callback(int ok, X509_STORE_CTX* x509_store) {
 #if SYS_DEBUG
   char* subject, * issuer;
@@ -92,7 +94,7 @@ fail:
     SSL_free(ssl);
   }
 
-  sys_socket_close(s);
+  sys_object_unref(s);
   return NULL;
 }
 
@@ -107,10 +109,12 @@ void sys_socket_set_ssl(SysSocket* s, SSL* ssl) {
 
   s->ssl = ssl;
 }
-#endif
 
 SysSocket *sys_socket_new_I(int domain, int type, int protocol, SysBool noblocking) {
+  SYS_LEAK_IGNORE_BEGIN;
   SysSocket *ns = sys_socket_real_new_I(domain, type, protocol, noblocking);
+  SYS_LEAK_IGNORE_END;
+
   if (ns == NULL) {
     sys_warning_N("socket: %s", sys_socket_error());
 
@@ -120,22 +124,8 @@ SysSocket *sys_socket_new_I(int domain, int type, int protocol, SysBool noblocki
   return ns;
 }
 
-void sys_socket_close(SysSocket *s) {
-  sys_return_if_fail(s != NULL);
-
-#if USE_OPENSSL
-  sys_assert(s->ssl != NULL);
-
-  SSL_shutdown(s->ssl);
-  SSL_free(s->ssl);
-#endif
-  sys_socket_real_close(s);
-
-  sys_free_N(s);
-}
-
 SysSocket *sys_socket_new_fd(SOCKET fd) {
-  SysSocket *s = sys_new0_N(SysSocket, 1);
+  SysSocket *s = sys_socket_new();
 
   s->fd = fd;
   s->noblocking = false;
@@ -156,6 +146,7 @@ int sys_socket_send(SysSocket *s, const void *buf, size_t len, int flags) {
 }
 
 const char *sys_socket_error(void) {
+
   return sys_socket_strerror(sys_socket_errno());
 }
 
@@ -167,10 +158,6 @@ int sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addr
 
     sys_warning_N("connect: %s", sys_socket_error());
   }
-
-#if USE_OPENSSL
-
-#endif
 
   return r;
 }
@@ -197,7 +184,7 @@ SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *add
 
    int ssl_fd = SSL_accept(cs->ssl);
    if (ssl_fd <= 0) {
-     sys_socket_close(cs);
+     sys_object_unref(cs);
      sys_warning_N("ssl accept: %s", sys_ssl_error());
      return NULL;
    }
@@ -227,20 +214,21 @@ int sys_socket_recv(SysSocket *s, void *buf, size_t len, int flags) {
   sys_return_val_if_fail(s != NULL, -1);
   int r;
 
-#if USE_OPENSSL
-  r = SSL_read(s->ssl, buf, (int)len);
-  if (r < 0) {
+  if (s->ssl) {
+    r = SSL_read(s->ssl, buf, (int)len);
+    if (r < 0) {
 
-    sys_warning_N("recv: %s", sys_ssl_error());
+      sys_warning_N("recv: %s", sys_ssl_error());
+    }
+
+  } else {
+
+    r = sys_socket_real_recv(s, buf, (int)len, flags);
+    if (r < 0) {
+
+      sys_warning_N("recv: %s", sys_socket_error());
+    }
   }
-#else
-
-  r = sys_socket_real_recv(s, buf, (int)len, flags);
-  if (r < 0) {
-
-    sys_warning_N("recv: %s", sys_socket_error());
-  }
-#endif
 
   return r;
 }
@@ -261,3 +249,31 @@ SOCKET sys_socket_get_fd(SysSocket *s) {
 
   return s->fd;
 }
+
+/* object api */
+SysSocket* sys_socket_new(void) {
+  return sys_object_new(SYS_TYPE_SOCKET, NULL);
+}
+
+static void sys_socket_dispose(SysObject* o) {
+  SysSocket *self = SYS_SOCKET(o);
+
+  if (self->ssl) {
+    SSL_shutdown(self->ssl);
+    SSL_free(self->ssl);
+  }
+
+  sys_socket_real_close(self);
+
+  SYS_OBJECT_CLASS(sys_socket_parent_class)->dispose(o);
+}
+
+static void sys_socket_class_init(SysSocketClass* cls) {
+  SysObjectClass *ocls = SYS_OBJECT_CLASS(cls);
+
+  ocls->dispose = sys_socket_dispose;
+}
+
+void sys_socket_init(SysSocket* self) {
+}
+
