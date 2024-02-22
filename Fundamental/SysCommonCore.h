@@ -7,9 +7,6 @@
 #include <System/Utils/SysError.h>
 #include <System/DataTypes/SysTypes.h>
 #include <System/DataTypes/SysArray.h>
-
-#if USE_OPENSSL
 #include <System/Utils/SysOpenSSL.h>
-#endif
 
 #endif

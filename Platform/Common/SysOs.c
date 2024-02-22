@@ -382,9 +382,7 @@ void sys_setup(void) {
   sys_type_setup();
   sys_real_setup();
   sys_thread_init();
-#if USE_OPENSSL
   sys_ssl_setup();
-#endif
 
   inited = true;
 }

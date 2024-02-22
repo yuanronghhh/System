@@ -170,6 +170,7 @@ SSL_CTX* ssl_ctx_create_server(const SysChar* signed_file, const SysChar* priv_f
   SSL_CTX* ctx = SSL_CTX_new(SSLv23_server_method());
   SYS_LEAK_IGNORE_END;
   
+  SSL_CTX_set_ex_data(ctx, server_conf_index, NULL);
   sys_ssl_ctx_set_server_option(ctx);
   SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, ssl_verify_callback);
   SSL_CTX_set_verify_depth(ctx, 1);

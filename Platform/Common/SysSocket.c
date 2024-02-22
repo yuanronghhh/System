@@ -66,10 +66,10 @@ SysSocket *sys_socket_new_ssl(int domain, int type, int protocol, SysBool nobloc
 
   SysSocket *s;
   SSL *ssl;
-  BIO *bio;
+  // BIO *bio;
 
   s = sys_socket_new_I(domain, type, protocol, noblocking);
-  bio = BIO_new_socket((int)s->fd, BIO_NOCLOSE);
+  // bio = BIO_new_socket((int)s->fd, BIO_NOCLOSE);
 
   sys_return_val_if_fail(s != NULL, NULL);
 
@@ -77,7 +77,7 @@ SysSocket *sys_socket_new_ssl(int domain, int type, int protocol, SysBool nobloc
   if(ssl == NULL) {
     return NULL;
   }
-  SSL_set_bio(ssl, bio, bio);
+  // SSL_set_bio(ssl, bio, bio);
 
   s->ssl = ssl;
   SSL_set_fd(s->ssl, (int)s->fd);
@@ -165,6 +165,8 @@ int sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addr
 SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *addrlen) {
   sys_return_val_if_fail(s != NULL, NULL);
   SysSocket* cs;
+  SSL *ssl;
+  SysInt r;
 
   cs = sys_socket_real_accept(s, addr, addrlen);
   if(cs == NULL) {
@@ -173,27 +175,25 @@ SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *add
     return NULL;
   }
 
-#if USE_OPENSSL
+  if (s->ssl) {
+      // client
+      ssl = SSL_new(sys_ssl_ctx_get_client());
+      SSL_set_fd(ssl, (int)cs->fd);
+      SSL_set_accept_state(ssl);
 
-  BIO *bio, *ssl_bio;
-
-  // client
-  bio = BIO_new_socket((int)cs->fd, BIO_NOCLOSE);
-  cs->ssl = SSL_new(sys_ssl_ctx_get_client());
-  SSL_set_bio(cs->ssl, bio, bio);
-
-   int ssl_fd = SSL_accept(cs->ssl);
-   if (ssl_fd <= 0) {
-     sys_object_unref(cs);
-     sys_warning_N("ssl accept: %s", sys_ssl_error());
-     return NULL;
-   }
-
-  ssl_bio = BIO_new(BIO_f_buffer());
-  BIO_set_ssl(ssl_bio, cs->ssl, BIO_CLOSE);
-
-  BIO_push(bio, ssl_bio);
+#ifdef SSL_OP_NO_RENEGOTIATION
+      SSL_set_options(ssl, SSL_OP_NO_RENEGOTIATION);
 #endif
+
+      r = SSL_accept(ssl);
+      if (r <= 0) {
+          sys_object_unref(cs);
+          sys_warning_N("ssl accept: %s", sys_ssl_error());
+          return NULL;
+      }
+
+      cs->ssl = ssl;
+  }
 
   return cs;
 }

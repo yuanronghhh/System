@@ -86,6 +86,8 @@ set(SRC
   ./Utils/SysError.c
   ./Utils/SysTextIO.h
   ./Utils/SysTextIO.c
+  ./Utils/SysOpenSSL.h
+  ./Utils/SysOpenSSL.c
 
   ./Platform/Common/SysMemPrivate.h
   ./Platform/Common/SysMem.h
@@ -114,13 +116,6 @@ set(SRC
   ./SysConfig.h.in
   ./SysCore.h  # for expose api
 )
-
-if(USE_OPENSSL)
-  LIST(APPEND SRC
-    ./Utils/SysOpenSSL.h
-    ./Utils/SysOpenSSL.c)
-endif()
-
 
 add_dep_libs(System "${SRC}" "${INC}" "${INC_SYS}")
 add_subdirectory(TestSuite)
