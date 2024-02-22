@@ -66,10 +66,8 @@ SysSocket *sys_socket_new_ssl(int domain, int type, int protocol, SysBool nobloc
 
   SysSocket *s;
   SSL *ssl;
-  // BIO *bio;
 
   s = sys_socket_new_I(domain, type, protocol, noblocking);
-  // bio = BIO_new_socket((int)s->fd, BIO_NOCLOSE);
 
   sys_return_val_if_fail(s != NULL, NULL);
 
@@ -77,10 +75,7 @@ SysSocket *sys_socket_new_ssl(int domain, int type, int protocol, SysBool nobloc
   if(ssl == NULL) {
     return NULL;
   }
-  // SSL_set_bio(ssl, bio, bio);
-
-  s->ssl = ssl;
-  SSL_set_fd(s->ssl, (int)s->fd);
+  sys_socket_set_ssl(s, ssl);
 
   if (SSL_get_verify_result(ssl) != X509_V_OK) {
     goto fail;
@@ -108,6 +103,7 @@ void sys_socket_set_ssl(SysSocket* s, SSL* ssl) {
   sys_return_if_fail(s != NULL);
 
   s->ssl = ssl;
+  SSL_set_fd(ssl, (int)s->fd);
 }
 
 SysSocket *sys_socket_new_I(int domain, int type, int protocol, SysBool noblocking) {
@@ -152,11 +148,21 @@ const char *sys_socket_error(void) {
 
 int sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen) {
   sys_return_val_if_fail(s != NULL, -1);
+  int r, nr;
 
-  int r = sys_socket_real_connect(s, addr, addrlen);
+  r = sys_socket_real_connect(s, addr, addrlen);
   if (r < 0) {
 
     sys_warning_N("connect: %s", sys_socket_error());
+  }
+
+  if (s->ssl) {
+    nr = SSL_connect(s->ssl);
+
+    if (nr < 0) {
+      sys_warning_N("ssl accept: %s", sys_ssl_error());
+      return -1;
+    }
   }
 
   return r;
@@ -176,22 +182,15 @@ SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *add
   }
 
   if (s->ssl) {
-      // client
-      ssl = SSL_new(sys_ssl_ctx_get_client());
-      SSL_set_fd(ssl, (int)cs->fd);
-      SSL_set_accept_state(ssl);
-
-#ifdef SSL_OP_NO_RENEGOTIATION
-      SSL_set_options(ssl, SSL_OP_NO_RENEGOTIATION);
-#endif
-
-      r = SSL_accept(ssl);
+      r = SSL_accept(s->ssl);
       if (r <= 0) {
-          sys_object_unref(cs);
           sys_warning_N("ssl accept: %s", sys_ssl_error());
+          sys_object_unref(cs);
           return NULL;
       }
 
+      ssl = SSL_new(sys_ssl_ctx_get_client());
+      sys_socket_set_ssl(cs, ssl);
       cs->ssl = ssl;
   }
 
