@@ -47,6 +47,13 @@ void sys_warning(SYS_ARGS_N const SysChar* format, ...) {
   va_start(args, format);
   sys_vlog(SYS_ARGS_P(sys_vlog, format) stderr, SYS_LOG_WARNING, format, args);
   va_end(args);
+
+#if SYS_DEBUG
+  const SysChar* err = sys_strerror(errno);
+  UNUSED(err);
+
+  sys_break();
+#endif
 }
 
 void sys_abort(SYS_ARGS_N const SysChar* format, ...) {
