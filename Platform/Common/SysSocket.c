@@ -168,6 +168,27 @@ int sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addr
   return r;
 }
 
+static SysInt sys_ssl_renegotiate(SSL *ssl) {
+    SysInt r;
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
+    if (SSL_version(ssl) >= TLS1_3_VERSION) {
+
+        r = SSL_key_update(ssl, SSL_KEY_UPDATE_REQUESTED);
+    } else if (SSL_get_secure_renegotiation_support(ssl) && !(SSL_get_options(ssl) & SSL_OP_NO_RENEGOTIATION)) {
+
+        /* remote and local peers both can rehandshake */
+        r = SSL_renegotiate(ssl);
+    } else {
+        
+        sys_warning_N("%s", "Secure renegotiation is not supported");
+    }
+#else
+    ret = SSL_renegotiate(ssl);
+#endif
+
+    return r;
+}
+
 SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *addrlen) {
   sys_return_val_if_fail(s != NULL, NULL);
   SysSocket* cs;
@@ -182,8 +203,10 @@ SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *add
   }
 
   if (s->ssl) {
-      r = SSL_accept(s->ssl);
-      if (r <= 0) {
+      SSL_set_accept_state(s->ssl);
+      r = sys_ssl_renegotiate(s->ssl);
+      // r = SSL_accept(s->ssl);
+      if (r < 0) {
           sys_warning_N("ssl accept: %s", sys_ssl_error());
           sys_object_unref(cs);
           return NULL;

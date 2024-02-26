@@ -173,7 +173,7 @@ SSL_CTX* ssl_ctx_create_server(const SysChar* signed_file, const SysChar* priv_f
   SSL_CTX_set_ex_data(ctx, server_conf_index, NULL);
   sys_ssl_ctx_set_server_option(ctx);
   SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, ssl_verify_callback);
-  SSL_CTX_set_verify_depth(ctx, 1);
+  SSL_CTX_set_verify_depth(ctx, 0);
 
   if (!SSL_CTX_use_certificate_chain_file(ctx, signed_file)) {
     goto fail;
