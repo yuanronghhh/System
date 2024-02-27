@@ -2,7 +2,7 @@
 #include <System/DataTypes/SysQuark.h>
 #include <System/Utils/SysString.h>
 
-SysSocket *sys_socket_real_new_I(int domain, int type, int protocol, SysBool noblocking) {
+SysSocket *sys_socket_real_new_I(SysInt domain, SysInt type, SysInt protocol, SysBool noblocking) {
   SOCKET fd;
 
   fd = socket(domain, type, protocol);
@@ -20,10 +20,10 @@ void sys_socket_real_close(SysSocket *s) {
   closesocket(s->fd);
 }
 
-int sys_socket_setopt(SysSocket *s, int level, int optname, void *optval, socklen_t optlen) {
+SysInt sys_socket_setopt(SysSocket *s, SysInt level, SysInt optname, void *optval, socklen_t optlen) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  int r = setsockopt(s->fd, level, optname, (char *)optval, optlen);
+  SysInt r = setsockopt(s->fd, level, optname, (char *)optval, optlen);
   if (r < 0) {
 
   }
@@ -31,7 +31,7 @@ int sys_socket_setopt(SysSocket *s, int level, int optname, void *optval, sockle
   return r;
 }
 
-int sys_socket_listen(SysSocket *s, int backlog) {
+SysInt sys_socket_listen(SysSocket *s, SysInt backlog) {
   sys_return_val_if_fail(s != NULL, -1);
 
   return listen(s->fd, backlog);
@@ -50,10 +50,10 @@ SysSocket* sys_socket_real_accept(SysSocket *s, struct sockaddr *addr, socklen_t
   return sys_socket_new_fd(fd);
 }
 
-int sys_socket_real_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
+SysInt sys_socket_real_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  int r = bind(s->fd, addr, addrlen);
+  SysInt r = bind(s->fd, addr, addrlen);
   if (r < 0) {
 
   }
@@ -61,7 +61,7 @@ int sys_socket_real_bind(SysSocket* s, const struct sockaddr *addr, socklen_t ad
   return r;
 }
 
-int sys_getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res) {
+SysInt sys_getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res) {
   return getaddrinfo (node, service, hints, res);
 }
 
@@ -71,10 +71,10 @@ void sys_freeaddrinfo(struct addrinfo *res) {
   freeaddrinfo(res);
 }
 
-int sys_socket_real_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen) {
+SysInt sys_socket_real_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  int r = connect(s->fd, addr, addrlen);
+  SysInt r = connect(s->fd, addr, addrlen);
   if (r == SOCKET_ERROR) {
 
   }
@@ -82,13 +82,13 @@ int sys_socket_real_connect(SysSocket *s, const struct sockaddr *addr, socklen_t
   return r;
 }
 
-int sys_socket_real_recv(SysSocket *s, void *buf, size_t len, int flags) {
+SysInt sys_socket_real_recv(SysSocket *s, void *buf, size_t len, SysInt flags) {
   sys_return_val_if_fail(s != NULL, -1);
 
   return recv(s->fd, buf, (int)len, flags);
 }
 
-int sys_socket_real_send(SysSocket *s, const void *buf, size_t len, int flags) {
+SysInt sys_socket_real_send(SysSocket *s, const void *buf, size_t len, SysInt flags) {
   sys_return_val_if_fail(s != NULL, -1);
 
   return send(s->fd, buf, (int)len, flags);
@@ -104,7 +104,7 @@ SysInt sys_socket_errno(void) {
   return WSAGetLastError();
 }
 
-const char* sys_socket_strerror(int err) {
+const char* sys_socket_strerror(SysInt err) {
   char *umsg;
   const char *qmsg;
   wchar_t *msg;

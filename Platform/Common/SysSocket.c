@@ -3,10 +3,10 @@
 
 SYS_DEFINE_TYPE(SysSocket, sys_socket, SYS_TYPE_OBJECT);
 
-static int ssl_verify_callback(int ok, X509_STORE_CTX* x509_store) {
+static SysInt ssl_verify_callback(SysInt ok, X509_STORE_CTX* x509_store) {
 #if SYS_DEBUG
   char* subject, * issuer;
-  int                err, depth;
+  SysInt                err, depth;
   X509* cert;
   X509_NAME* sname, * iname;
 
@@ -61,7 +61,32 @@ static int ssl_verify_callback(int ok, X509_STORE_CTX* x509_store) {
   return 1;
 }
 
-SysSocket *sys_socket_new_ssl(int domain, int type, int protocol, SysBool noblocking, SSL_CTX *ssl_ctx) {
+static SysInt sys_ssl_renegotiate(SSL* ssl) {
+  SysInt r;
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
+  if (SSL_version(ssl) >= TLS1_3_VERSION) {
+
+    r = SSL_key_update(ssl, SSL_KEY_UPDATE_REQUESTED);
+  }
+  else if (SSL_get_secure_renegotiation_support(ssl) && !(SSL_get_options(ssl) & SSL_OP_NO_RENEGOTIATION)) {
+
+    /* remote and local peers both can rehandshake */
+    r = SSL_renegotiate(ssl);
+  }
+  else {
+
+    sys_warning_N("%s", "Secure renegotiation is not supported");
+  }
+#else
+  ret = SSL_renegotiate(ssl);
+#endif
+
+  return r;
+}
+
+
+
+SysSocket *sys_socket_new_ssl(SysInt domain, SysInt type, SysInt protocol, SysBool noblocking, SSL_CTX *ssl_ctx) {
   sys_return_val_if_fail(ssl_ctx != NULL, NULL);
 
   SysSocket *s;
@@ -106,7 +131,7 @@ void sys_socket_set_ssl(SysSocket* s, SSL* ssl) {
   SSL_set_fd(ssl, (int)s->fd);
 }
 
-SysSocket *sys_socket_new_I(int domain, int type, int protocol, SysBool noblocking) {
+SysSocket *sys_socket_new_I(SysInt domain, SysInt type, SysInt protocol, SysBool noblocking) {
   SYS_LEAK_IGNORE_BEGIN;
   SysSocket *ns = sys_socket_real_new_I(domain, type, protocol, noblocking);
   SYS_LEAK_IGNORE_END;
@@ -135,7 +160,7 @@ SysInt sys_socket_set_blocking(SysSocket *s, SysBool bvalue) {
   return sys_socket_ioctl(s, FIONBIO, &ul);
 }
 
-int sys_socket_send(SysSocket *s, const void *buf, size_t len, int flags) {
+SysInt sys_socket_send(SysSocket *s, const void *buf, size_t len, SysInt flags) {
   sys_return_val_if_fail(s != NULL, -1);
 
   return sys_socket_real_send(s, buf, len, flags);
@@ -146,9 +171,10 @@ const char *sys_socket_error(void) {
   return sys_socket_strerror(sys_socket_errno());
 }
 
-int sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen) {
+
+SysInt sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen) {
   sys_return_val_if_fail(s != NULL, -1);
-  int r, nr;
+  SysInt r, nr;
 
   r = sys_socket_real_connect(s, addr, addrlen);
   if (r < 0) {
@@ -157,7 +183,7 @@ int sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addr
   }
 
   if (s->ssl) {
-    nr = SSL_connect(s->ssl);
+    nr = sys_ssl_renegotiate(s->ssl);
 
     if (nr < 0) {
       sys_warning_N("ssl accept: %s", sys_ssl_error());
@@ -166,27 +192,6 @@ int sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addr
   }
 
   return r;
-}
-
-static SysInt sys_ssl_renegotiate(SSL *ssl) {
-    SysInt r;
-#if OPENSSL_VERSION_NUMBER >= 0x10101000L
-    if (SSL_version(ssl) >= TLS1_3_VERSION) {
-
-        r = SSL_key_update(ssl, SSL_KEY_UPDATE_REQUESTED);
-    } else if (SSL_get_secure_renegotiation_support(ssl) && !(SSL_get_options(ssl) & SSL_OP_NO_RENEGOTIATION)) {
-
-        /* remote and local peers both can rehandshake */
-        r = SSL_renegotiate(ssl);
-    } else {
-        
-        sys_warning_N("%s", "Secure renegotiation is not supported");
-    }
-#else
-    ret = SSL_renegotiate(ssl);
-#endif
-
-    return r;
 }
 
 SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *addrlen) {
@@ -220,10 +225,10 @@ SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *add
   return cs;
 }
 
-int sys_socket_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
+SysInt sys_socket_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  int r = bind(s->fd, addr, addrlen);
+  SysInt r = bind(s->fd, addr, addrlen);
   if (r < 0) {
 
     sys_warning_N("bind: %s", sys_socket_error());
@@ -232,9 +237,9 @@ int sys_socket_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen
   return r;
 }
 
-int sys_socket_recv(SysSocket *s, void *buf, size_t len, int flags) {
+SysInt sys_socket_recv(SysSocket *s, void *buf, size_t len, SysInt flags) {
   sys_return_val_if_fail(s != NULL, -1);
-  int r;
+  SysInt r;
 
   if (s->ssl) {
     r = SSL_read(s->ssl, buf, (int)len);
@@ -258,7 +263,7 @@ int sys_socket_recv(SysSocket *s, void *buf, size_t len, int flags) {
 SysInt sys_socket_ioctl(SysSocket *s, long cmd, u_long * argp) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  int r = sys_socket_real_ioctl(s, cmd, argp);
+  SysInt r = sys_socket_real_ioctl(s, cmd, argp);
   if (r < 0) {
 
     sys_warning_N("ioctlsocket: %s", sys_socket_error());

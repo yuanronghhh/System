@@ -1,7 +1,7 @@
 #include <System/Platform/Common/SysSocketPrivate.h>
 
 
-SysSocket *sys_socket_real_new_I(int domain, int type, int protocol, SysBool noblocking) {
+SysSocket *sys_socket_real_new_I(SysInt domain, SysInt type, SysInt protocol, SysBool noblocking) {
   SysInt fd;
 
   fd = socket(domain, type, protocol);
@@ -19,13 +19,13 @@ void sys_socket_real_close(SysSocket *s) {
   close(s->fd);
 }
 
-int sys_socket_setopt(SysSocket *s, int level, int optname, const void *optval, socklen_t optlen) {
+SysInt sys_socket_setopt(SysSocket *s, SysInt level, SysInt optname, const void *optval, socklen_t optlen) {
   sys_return_val_if_fail(s != NULL, -1);
 
   return setsockopt(s->fd, level, optname, optval, optlen);
 }
 
-int sys_socket_listen(SysSocket *s, int backlog) {
+SysInt sys_socket_listen(SysSocket *s, SysInt backlog) {
   sys_return_val_if_fail(s != NULL, -1);
 
   return listen(s->fd, backlog);
@@ -44,13 +44,13 @@ SysSocket* sys_socket_real_accept(SysSocket *s, struct sockaddr *addr, socklen_t
   return sys_socket_new_fd(fd);
 }
 
-int sys_socket_real_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
+SysInt sys_socket_real_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
   sys_return_val_if_fail(s != NULL, -1);
 
   return bind(s->fd, addr, addrlen);
 }
 
-int sys_getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res) {
+SysInt sys_getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res) {
 
   return getaddrinfo (node, service, hints, res);
 }
@@ -67,13 +67,13 @@ SysInt sys_socket_real_connect(SysSocket *s, const struct sockaddr *addr, sockle
   return (SysInt)connect(s->fd, addr, addrlen);
 }
 
-SysInt sys_socket_real_recv(SysSocket *s, void *buf, size_t len, int flags) {
+SysInt sys_socket_real_recv(SysSocket *s, void *buf, size_t len, SysInt flags) {
   sys_return_val_if_fail(s != NULL, -1);
 
   return (SysInt)recv(s->fd, buf, len, flags);
 }
 
-SysInt sys_socket_real_send(SysSocket *s, const void *buf, size_t len, int flags) {
+SysInt sys_socket_real_send(SysSocket *s, const void *buf, size_t len, SysInt flags) {
   sys_return_val_if_fail(s != NULL, -1);
 
   return (SysInt)send(s->fd, buf, len, flags);
@@ -85,7 +85,7 @@ SysInt sys_socket_real_ioctl(SysSocket *s, long cmd, u_long * argp) {
   return ioctl(s->fd, cmd, argp);
 }
 
-const char * sys_socket_strerror(int err) {
+const char * sys_socket_strerror(SysInt err) {
   return sys_strerror(err);
 }
 
