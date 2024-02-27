@@ -6,6 +6,16 @@ static void test_socket_basic(void) {
   sys_object_unref(s);
 }
 
+static void test_ssl_error_leak(void) {
+    sys_ssl_ctx_setup(
+        SIGNED_CRT_FILE, PRIVATE_KEY_FILE,
+        CA_CRT_FILE, PRIVATE_KEY_FILE);
+
+    sys_debug_N("%s", sys_ssl_error());
+
+    sys_ssl_ctx_teardown();
+}
+
 static void test_ssl_leak(void) {
   sys_ssl_ctx_setup(
     SIGNED_CRT_FILE, PRIVATE_KEY_FILE,
@@ -18,7 +28,8 @@ void test_socket_init(int argc, SysChar* argv[]) {
   UNITY_BEGIN();
   {
     // RUN_TEST(test_ssl_leak);
-    RUN_TEST(test_socket_basic);
+    RUN_TEST(test_ssl_error_leak);
+    // RUN_TEST(test_socket_basic);
   }
   UNITY_END();
 }

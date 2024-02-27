@@ -32,6 +32,10 @@ set(SRC
 add_executable(SystemTestSuite "${SRC}")
 set_property(TARGET SystemTestSuite PROPERTY FOLDER CstProject)
 
+configure_file(${CMAKE_CURRENT_LIST_DIR}/Common.h.in
+  ${CMAKE_CURRENT_LIST_DIR}/Common.h)
+
+
 target_link_libraries(SystemTestSuite
   System
   ${OPENSSL_LIBRARIES}

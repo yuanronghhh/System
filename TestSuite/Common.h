@@ -6,10 +6,10 @@
 
 SYS_BEGIN_DECLS
 
-#define PRIVATE_KEY_FILE "D:/GreyHound/PRIVATE/Git/CstDemo/Cst/CstDemo/server/server-privkey.pem"
-#define PUBLIC_KEY_FILE "D:/GreyHound/PRIVATE/Git/CstDemo/Cst/CstDemo/server/server-pubkey.pem"
-#define SIGNED_CRT_FILE  "D:/GreyHound/PRIVATE/Git/CstDemo/Cst/CstDemo/server/server-crt.pem"
-#define CA_CRT_FILE  "D:/GreyHound/PRIVATE/Git/CstDemo/Cst/CstDemo/ca/ca-crt.pem"
+#define PRIVATE_KEY_FILE "F:/Codes/REPOSITORY/Cst/Cst/System/TestSuite/server/server-privkey.pem"
+#define PUBLIC_KEY_FILE "F:/Codes/REPOSITORY/Cst/Cst/System/TestSuite/server/server-pubkey.pem"
+#define SIGNED_CRT_FILE  "F:/Codes/REPOSITORY/Cst/Cst/System/TestSuite/server/server-crt.pem"
+#define CA_CRT_FILE  "F:/Codes/REPOSITORY/Cst/Cst/System/TestSuite/ca/ca-crt.pem"
 
 SYS_END_DECLS
 
