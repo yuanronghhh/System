@@ -63,6 +63,7 @@ SYS_API void sys_memcpy(
 
 
 SYS_API SysPointer sys_realloc(void *block, SysSize size);
+SYS_API SysPointer sys_calloc(SysSize count, SysSize size);
 SYS_API SysPointer sys_malloc(SysSize size);
 SYS_API void sys_free(void *block);
 SYS_API SysPointer sys_malloc0(SysSize size);

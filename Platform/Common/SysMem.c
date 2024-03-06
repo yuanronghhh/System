@@ -57,11 +57,21 @@ void sys_free(void *block) {
   free(block);
 }
 
+SysPointer sys_calloc(SysSize count, SysSize size) {
+  void* b = calloc(count, size);
+
+  if (b == NULL) {
+    sys_error_N("%s", "sys_calloc run failed.");
+  }
+
+  return b;
+}
+
 SysPointer sys_malloc(SysSize size) {
   void *b = malloc(size);
 
   if(b == NULL) {
-    sys_abort_N("%s", "sys_malloc run failed.");
+    sys_error_N("%s", "sys_malloc run failed.");
   }
 
   return b;

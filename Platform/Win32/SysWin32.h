@@ -22,6 +22,7 @@ extern "C" {
 #define PATH_SEP '\\'
 typedef SSIZE_T ssize_t;
 #define fileno _fileno
+#define __builtin_frame_address(x)  ((void)(x), _AddressOfReturnAddress())
 
 #ifdef __cplusplus
 }
