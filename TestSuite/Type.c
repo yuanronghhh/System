@@ -51,6 +51,11 @@ static void test_param_basic(void) {
     SysParam *param = array->pdata[i];
 
     sys_debug_N("%s,%d", sys_param_get_name(param), sys_param_get_offset(param));
+
+    SysValue *v = sys_value_new_int(123);
+
+    if(!sys_param_set_value(param, SYS_OBJECT(o), v)) {
+    }
   }
 
   sys_object_unref(o);

@@ -6,11 +6,11 @@ struct _SysValue {
 
   union {
     SysPointer v_pointer;
+    SysObject* v_object;
     SysBool v_bool;
     SysDouble v_double;
     SysInt v_int;
     SysChar* v_string;
-    SysPtrArray *v_array;
   } v;
 
   SysRef ref_count;
@@ -20,6 +20,18 @@ SysInt sys_value_get_data_type(SysValue *self) {
   sys_return_val_if_fail(self != NULL, -1);
 
   return self->data_type;
+}
+
+void sys_value_set_v_object(SysValue *self, SysObject * v_object) {
+  sys_return_if_fail(self != NULL);
+
+  self->v.v_object = v_object;
+}
+
+SysObject * sys_value_get_v_object(SysValue *self) {
+  sys_return_val_if_fail(self != NULL, NULL);
+
+  return self->v.v_object;
 }
 
 void sys_value_set_v_pointer(SysValue *self, SysPointer v_pointer) {
@@ -35,11 +47,101 @@ SysPointer sys_value_get_v_pointer(SysValue *self) {
   return self->v.v_pointer;
 }
 
+const SysChar *sys_value_get_type_name(SysInt data_type) {
+  switch (data_type) {
+    case SYS_VALUE_STRING:
+      return "string";
+    case SYS_VALUE_INT:
+      return "int";
+    case SYS_VALUE_DOUBLE:
+      return "double";
+    case SYS_VALUE_NULL:
+      return "null";
+    case SYS_VALUE_POINTER:
+      return "pointer";
+    case SYS_VALUE_OBJECT:
+      return "object";
+    default:
+      sys_warning_N("Not support system value type: %d", data_type);
+      return NULL;
+  }
+}
+
+SysBool sys_value_set_value(SysValue *self, SysPointer *p) {
+  switch (self->data_type) {
+    case SYS_VALUE_STRING:
+      *((SysChar **)p) = self->v.v_string;
+      break;
+    case SYS_VALUE_INT:
+      *((SysInt *)p) = self->v.v_int;
+      break;
+    case SYS_VALUE_DOUBLE:
+      *((SysDouble *)p) = self->v.v_double;
+      break;
+    case SYS_VALUE_NULL:
+      *p = NULL;
+      break;
+    case SYS_VALUE_POINTER:
+      *p = self->v.v_pointer;
+      break;
+    case SYS_VALUE_OBJECT:
+      *((SysObject **)p) = self->v.v_object;
+      break;
+    default:
+      sys_warning_N("Not support system value type: %d", self->data_type);
+      return false;
+  }
+
+  return true;
+}
+
 SysValue* sys_value_new(void) {
   SysValue *o = sys_new0_N(SysValue, 1);
 
   sys_ref_count_init(o);
 
+  return o;
+}
+
+SysValue *sys_value_new_int(SysInt v) {
+  SysValue *o = sys_value_new();
+  sys_value_set_v_int(o, v);
+  return o;
+}
+
+SysValue *sys_value_new_string(const SysChar *v) {
+  SysValue *o = sys_value_new();
+  sys_value_set_v_string(o, v);
+  return o;
+}
+
+SysValue *sys_value_new_poininter(const SysPointer v) {
+  SysValue *o = sys_value_new();
+  sys_value_set_v_pointer(o, v);
+  return o;
+}
+
+SysValue *sys_value_new_object(SysObject* v) {
+  SysValue *o = sys_value_new();
+  sys_value_set_v_object(o, v);
+  return o;
+}
+
+SysValue *sys_value_new_bool(SysBool v) {
+  SysValue *o = sys_value_new();
+  sys_value_set_v_bool(o, v);
+  return o;
+}
+
+SysValue *sys_value_new_double(SysDouble v) {
+  SysValue *o = sys_value_new();
+  sys_value_set_v_double(o, v);
+  return o;
+}
+
+SysValue *sys_value_new_null(void) {
+  SysValue *o = sys_value_new();
+  sys_value_set_v_null(o);
   return o;
 }
 
@@ -63,6 +165,9 @@ SysValue *sys_value_copy(SysValue *oself) {
       break;
     case SYS_VALUE_POINTER:
       sys_value_set_v_pointer(nself, oself->v.v_pointer);
+      break;
+    case SYS_VALUE_OBJECT:
+      sys_value_set_v_object(nself, oself->v.v_object);
       break;
     default:
       sys_warning_N("Not support system value type: %d", oself->data_type);
@@ -96,6 +201,18 @@ SysInt sys_value_get_v_int(SysValue *self) {
   sys_return_val_if_fail(self != NULL, -1);
 
   return self->v.v_int;
+}
+
+void sys_value_set_v_bool(SysValue *self, SysBool v_bool) {
+  sys_return_if_fail(self != NULL);
+
+  self->v.v_bool = v_bool;
+}
+
+SysBool sys_value_get_v_bool(SysValue *self) {
+  sys_return_val_if_fail(self != NULL, NULL);
+
+  return self->v.v_bool;
 }
 
 void sys_value_set_v_null(SysValue *self) {
@@ -133,6 +250,9 @@ void sys_value_free(SysValue* self) {
     case SYS_VALUE_DOUBLE:
     case SYS_VALUE_NULL:
     case SYS_VALUE_POINTER:
+      break;
+    case SYS_VALUE_OBJECT:
+      sys_clear_pointer(&self->v.v_object, _sys_object_unref);
       break;
     default:
       sys_warning_N("Not support system value type: %d", self->data_type);

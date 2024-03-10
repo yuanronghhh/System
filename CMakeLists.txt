@@ -113,6 +113,7 @@ set(SRC
 
   ./Fundamental/SysCommonCore.h
   ./Fundamental/SysCommon.h
+  ./Fundamental/SysCommon.c
 
   ./SysConfig.h
   ./SysConfig.h.in

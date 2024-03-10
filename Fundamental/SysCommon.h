@@ -113,5 +113,9 @@ typedef struct _SysPtrArray SysPtrArray;
 typedef struct _SysArray SysArray;
 typedef struct _SysByteArray SysByteArray;
 typedef struct _SysHArray SysHArray;
+typedef struct _SysValue SysValue;
+
+const SysChar* sys_get_name_by_type(const SysChar *names[], SysInt len, SysInt type);
+SysInt sys_get_type_by_name(const SysChar *names[], SysInt len, const SysChar *name);
 
 #endif

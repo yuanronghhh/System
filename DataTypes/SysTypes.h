@@ -19,9 +19,12 @@ SYS_BEGIN_DECLS
 #define SYS_TYPE_MAKE_FUNDAMENTAL(x)               ((SysType) ((x) << SYS_TYPE_FUNDAMENTAL_SHIFT))
 #define  SYS_TYPE_FNODE                            SYS_TYPE_MAKE_FUNDAMENTAL(1)
 #define  SYS_TYPE_INTERFACE                        SYS_TYPE_MAKE_FUNDAMENTAL(2)
-#define  SYS_TYPE_OBJECT                           SYS_TYPE_MAKE_FUNDAMENTAL(20)
+#define  SYS_TYPE_BOOL                             SYS_TYPE_MAKE_FUNDAMENTAL(5)
 #define  SYS_TYPE_INT                              SYS_TYPE_MAKE_FUNDAMENTAL(6)
 #define  SYS_TYPE_DOUBLE                           SYS_TYPE_MAKE_FUNDAMENTAL(15)
+#define  SYS_TYPE_STRING                           SYS_TYPE_MAKE_FUNDAMENTAL(16)
+#define  SYS_TYPE_POINTER                          SYS_TYPE_MAKE_FUNDAMENTAL(17)
+#define  SYS_TYPE_OBJECT                           SYS_TYPE_MAKE_FUNDAMENTAL(20)
 
 #define sys_type_from_instance(o) (((SysTypeInstance *)(o))->type_class->type)
 #define sys_type_from_class(o) (((SysTypeClass *)(o))->type)

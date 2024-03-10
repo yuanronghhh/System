@@ -13,6 +13,7 @@ static SysInt ssl_verify_callback(SysInt ok, X509_STORE_CTX* x509_store) {
   // TODO: SSL_set_ex_data not called
   SysPointer _ = X509_STORE_CTX_get_ex_data(x509_store,
     SSL_get_ex_data_X509_STORE_CTX_idx());
+  UNUSED(_);
 
   cert = X509_STORE_CTX_get_current_cert(x509_store);
   err = X509_STORE_CTX_get_error(x509_store);

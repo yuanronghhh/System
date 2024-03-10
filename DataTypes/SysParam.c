@@ -1,7 +1,7 @@
 #include <System/DataTypes/SysParam.h>
 
 #include <System/Utils/SysError.h>
-
+#include <System/DataTypes/SysValue.h>
 
 SYS_DEFINE_TYPE(SysParam, sys_param, SYS_TYPE_OBJECT);
 
@@ -14,6 +14,24 @@ SysInt sys_param_get_offset(SysParam *self) {
   sys_return_val_if_fail(self != NULL, -1);
 
   return self->offset;
+}
+
+SysBool sys_param_set_value(SysParam *self, SysObject *o, SysValue *value) {
+  sys_return_if_fail(self != NULL);
+  sys_return_if_fail(o != NULL);
+  sys_return_if_fail(value != NULL);
+
+  SysInt vtype = sys_value_get_data_type(value);
+  if(self->field_type != sys_value_get_data_type(value)) {
+    sys_warning_N("failed to set property \"%s\": %s,%s",
+        self->field_name,
+        sys_value_get_type_name(self->field_type),
+        sys_value_get_type_name(vtype));
+    return false;
+  }
+
+  SysPointer p = ((SysUInt8 *)o) + self->offset;
+  return sys_value_set_value(value, p);
 }
 
 /* object api */

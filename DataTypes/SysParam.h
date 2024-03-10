@@ -36,6 +36,7 @@ SYS_API SysParam *sys_param_new_I(
 
 SYS_API const SysChar *sys_param_get_name(SysParam *self);
 SYS_API SysInt sys_param_get_offset(SysParam *self);
+SYS_API SysBool sys_param_set_value(SysParam *self, SysObject *o, SysValue *value);
 
 SYS_END_DECLS
 
