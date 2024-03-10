@@ -71,6 +71,8 @@ set(SRC
   ./DataTypes/SysValue.c
   ./DataTypes/SysTypes.h
   ./DataTypes/SysTypes.c
+  ./DataTypes/SysParam.h
+  ./DataTypes/SysParam.c
   ./DataTypes/SysQuark.h
   ./DataTypes/SysQuark.c
 

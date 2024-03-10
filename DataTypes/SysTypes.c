@@ -1,5 +1,7 @@
 #include <System/DataTypes/SysTypes.h>
 #include <System/DataTypes/SysHashTable.h>
+#include <System/DataTypes/SysHArray.h>
+#include <System/DataTypes/SysParam.h>
 #include <System/Utils/SysString.h>
 #include <System/Platform/Common/SysThread.h>
 
@@ -23,6 +25,7 @@ struct _InstanceData {
   SysTypeInitFunc class_init;  // set class_intern_init
   SysInstanceInitFunc instance_init;
   SysTypeFinalizeFunc class_finalize;
+  SysHArray props;
   void* class_ptr;
 
   SysUInt16 n_ifaces;
@@ -56,6 +59,7 @@ static SysRefHook sys_object_ref_debug_func = NULL;
 static SysRefHook sys_object_new_debug_func = NULL;
 
 static SysRWLock type_rw_lock;
+static SysMutex param_lock;
 static SysRecMutex class_init_rec_mutex;
 
 static SysHashTable* ht = NULL;
@@ -328,6 +332,92 @@ const SysChar* _sys_object_get_type_name(SysObject *self) {
   return node->name;
 }
 
+/* props */
+static void object_prop_set(TypeNode *node, SysParam *param) {
+  SysHArray *parray;
+
+  sys_mutex_lock(&param_lock);
+
+  parray = &node->data.instance.props;
+  sys_harray_add(parray, param);
+
+  sys_mutex_unlock(&param_lock);
+}
+
+static SysParam* object_prop_get(TypeNode *node, const SysChar *name) {
+  sys_return_val_if_fail(node != NULL, NULL);
+  sys_return_val_if_fail(name != NULL, NULL);
+
+  SysHArray *parray;
+  SysParam *param;
+
+  sys_mutex_lock(&param_lock);
+
+  parray = &node->data.instance.props;
+  for(SysUInt i = 0; i < parray->len; i++) {
+    param = parray->pdata[i];
+
+    if(sys_strcmp(sys_param_get_name(param), name)) {
+      break;
+    }
+  }
+
+  sys_mutex_unlock(&param_lock);
+
+  return param;
+}
+
+void _sys_object_add_property(
+    SysType type,
+    const SysChar *full_type,
+    SysInt field_type,
+    const SysChar *field_name,
+    SysInt offset) {
+
+  sys_return_if_fail(type != 0);
+  sys_return_if_fail(full_type != NULL);
+  sys_return_if_fail(field_name != NULL);
+  sys_return_if_fail(offset >= 0);
+
+  SysParam *param = sys_param_new_I(full_type, field_type, field_name, offset);
+  if(param == NULL) {
+    return;
+  }
+
+  TypeNode *node = sys_type_node(type);
+  if (node == NULL) {
+    sys_warning_N("Not found TypeNode: %d", type);
+    return;
+  }
+
+  object_prop_set(node, param);
+}
+
+SysParam *sys_object_get_property(SysType type, const SysChar *name) {
+  sys_return_val_if_fail(name != NULL, NULL);
+  sys_return_val_if_fail(type != 0, NULL);
+
+  TypeNode *node = sys_type_node(type);
+  if (node) {
+    sys_warning_N("Not found TypeNode: %d", type);
+    return NULL;
+  }
+
+  return object_prop_get(node, name);
+}
+
+SysHArray *sys_object_get_properties(SysType type) {
+  sys_return_val_if_fail(type != 0, NULL);
+
+  TypeNode *node = sys_type_node(type);
+  if (node == NULL) {
+    sys_warning_N("Not found TypeNode: %d", type);
+    return NULL;
+  }
+
+  return &node->data.instance.props;
+}
+
 /* SysType */
 void sys_type_ht_insert(TypeNode *node) {
   sys_return_if_fail(node->name != NULL);
@@ -390,6 +480,7 @@ TypeNode* sys_type_make_node(const TypeNode* pnode, const SysTypeInfo *info, Sys
       node->data.instance.class_init = info->class_init;
       node->data.instance.class_finalize = info->class_finalize;
       node->data.instance.instance_init = info->instance_init;
+      sys_harray_init_with_free_func(&node->data.instance.props, (SysDestroyFunc)_sys_object_unref);
       break;
     case SYS_NODE_INTERFACE:
       node->data.iface.vtable_init = info->class_init;
@@ -467,16 +558,20 @@ void sys_type_node_free(TypeNode *node) {
       if (node->data.instance.n_ifaces > 0) {
         for (SysInt i = 0; i < node->data.instance.n_ifaces; i++) {
 
-          sys_clear_pointer(&(node->data.instance.ifaces[i]->vtable_ptr), sys_free);
+          sys_free(node->data.instance.ifaces[i]->vtable_ptr);
         }
 
-        sys_clear_pointer(&node->data.instance.ifaces, sys_free);
+        sys_free(node->data.instance.ifaces);
+      }
+
+      if (node->data.instance.props.len > 0) {
+
+        sys_harray_destroy(&node->data.instance.props);
       }
 
       if (cls != NULL) {
         sys_type_class_free(cls);
-      }
-      else {
+      } else {
         sys_debug_N("type class is null, maybe useless type: \"%s\" ?", node->name);
       }
       break;
@@ -682,7 +777,6 @@ SysTypeClass *sys_type_pclass(SysType type) {
 void sys_type_teardown(void) {
   sys_hash_table_unref(ht);
   ht = NULL;
-
   sys_rw_lock_clear(&type_rw_lock);
   sys_rec_mutex_clear(&class_init_rec_mutex);
 }
@@ -692,6 +786,7 @@ void sys_type_setup(void) {
 
   sys_rw_lock_init(&type_rw_lock);
   sys_rec_mutex_init(&class_init_rec_mutex);
+  sys_mutex_init(&param_lock);
 
   ht = sys_hash_table_new_full(sys_str_hash,
       (SysEqualFunc)sys_str_equal,

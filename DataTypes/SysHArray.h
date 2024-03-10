@@ -5,8 +5,6 @@
 
 SYS_BEGIN_DECLS
 
-typedef struct _SysHArray SysHArray;
-
 struct _SysHArray {
   SysPointer* pdata;
   SysUInt   len;

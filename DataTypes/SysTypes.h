@@ -16,11 +16,12 @@ SYS_BEGIN_DECLS
 #define SYS_TYPE_FUNDAMENTAL_MAX  (255 << SYS_TYPE_FUNDAMENTAL_SHIFT)
 #define TYPE_ID_MASK    ((SysType) ((1 << SYS_TYPE_FUNDAMENTAL_SHIFT) - 1))
 
-#define SYS_TYPE_FNODE			((SysType)(1 << SYS_TYPE_FUNDAMENTAL_SHIFT))
-#define SYS_TYPE_FUNDANMENTAL ((SysType)(2 << SYS_TYPE_FUNDAMENTAL_SHIFT))
-#define SYS_TYPE_INTERFACE ((SysType)(2 << SYS_TYPE_FUNDAMENTAL_SHIFT))
-#define SYS_TYPE_OBJECT ((SysType)(20 << SYS_TYPE_FUNDAMENTAL_SHIFT))
-
+#define SYS_TYPE_MAKE_FUNDAMENTAL(x)               ((SysType) ((x) << SYS_TYPE_FUNDAMENTAL_SHIFT))
+#define  SYS_TYPE_FNODE                            SYS_TYPE_MAKE_FUNDAMENTAL(1)
+#define  SYS_TYPE_INTERFACE                        SYS_TYPE_MAKE_FUNDAMENTAL(2)
+#define  SYS_TYPE_OBJECT                           SYS_TYPE_MAKE_FUNDAMENTAL(20)
+#define  SYS_TYPE_INT                              SYS_TYPE_MAKE_FUNDAMENTAL(6)
+#define  SYS_TYPE_DOUBLE                           SYS_TYPE_MAKE_FUNDAMENTAL(15)
 
 #define sys_type_from_instance(o) (((SysTypeInstance *)(o))->type_class->type)
 #define sys_type_from_class(o) (((SysTypeClass *)(o))->type)
@@ -214,6 +215,18 @@ SYS_API void sys_object_set_new_hook(SysRefHook hook);
 SYS_API void * _sys_object_cast_check(SysObject* self, SysType ttype);
 SYS_API void * _sys_class_cast_check(SysObjectClass* cls, SysType ttype);
 SYS_API SysBool _sys_object_is_a(SysObject *self, SysType type);
+
+#define sys_object_add_property(TYPE, TypeName, full_type, field_type, field_name) \
+  _sys_object_add_property(TYPE, full_type, field_type, #field_name, offsetof(TypeName, field_name))
+
+SYS_API void _sys_object_add_property(
+    SysType type,
+    const SysChar *full_type,
+    SysInt field_type,
+    const SysChar *field_name,
+    SysInt offset);
+SYS_API SysParam *sys_object_get_property(SysType type, const SysChar *name);
+SYS_API SysHArray *sys_object_get_properties(SysType type);
 
 SYS_API void sys_type_setup(void);
 SYS_API void sys_type_teardown(void);

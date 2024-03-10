@@ -36,6 +36,12 @@ void sys_harray_destroy(SysHArray* self) {
     for (SysUInt i = 0; i < self->len; ++i) {
       self->element_free_func(self->pdata[i]);
     }
+
+    SysPointer *sp = sys_steal_pointer(&self->pdata);
+
+    if(sp != NULL) {
+      sys_free(sp);
+    }
   }
 }
 

@@ -51,6 +51,10 @@ static void sys_test_impl_class_init(SysTestImplClass* cls) {
   SysObjectClass *ocls = SYS_OBJECT_CLASS(cls);
 
   ocls->dispose = sys_test_impl_dispose;
+
+  sys_object_add_property(SYS_TYPE_TEST_IMPL, SysTestImpl, "SysObject", SYS_TYPE_OBJECT, parent);
+  sys_object_add_property(SYS_TYPE_TEST_IMPL, SysTestImpl, "SysInt", SYS_TYPE_INT, width);
+  sys_object_add_property(SYS_TYPE_TEST_IMPL, SysTestImpl, "SysInt", SYS_TYPE_INT, height);
 }
 
 static void sys_test_impl_init(SysTestImpl *self) {

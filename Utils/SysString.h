@@ -31,7 +31,7 @@ SYS_API int sys_asprintf(SysChar** str, const SysChar* format, ...);
 SYS_API SysChar* sys_strdup_printf(const SysChar* format, ...);
 SYS_API void sys_print(const SysChar* str);
 SYS_API void sys_strcpy(SysChar* __restrict dst, const SysChar* __restrict src);
-SYS_API SysChar* sys_strncpy(SysChar* __restrict dst, SysSize n, const SysChar* __restrict src);
+SYS_API SysChar* sys_strncpy(SysChar* __restrict dst, const SysChar* __restrict src, SysSize n);
 SYS_API SysSize sys_strlen(const SysChar* s, SysSize max);
 SYS_API bool sys_str_equal(const SysChar* s1, const SysChar* s2);
 SYS_API int sys_strcmp(const SysChar* s1, const SysChar* s2);

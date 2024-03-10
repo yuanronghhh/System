@@ -7,10 +7,6 @@ SYS_BEGIN_DECLS
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
-typedef struct _SysPtrArray SysPtrArray;
-typedef struct _SysArray SysArray;
-typedef struct _SysByteArray SysByteArray;
-
 struct _SysArray {
   void** pdata;
   SysUInt len;

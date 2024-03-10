@@ -42,10 +42,26 @@ static void test_type_basic(void) {
   sys_object_unref(o2);
 }
 
+static void test_param_basic(void) {
+  SysTestImpl *o = sys_test_impl_new();
+  TEST_ASSERT_NOT_NULL(o);
+
+  SysHArray *array = sys_object_get_properties(SYS_TYPE_TEST_IMPL);
+  for(SysUInt i = 0; i < array->len; i++) {
+    SysParam *param = array->pdata[i];
+
+    sys_debug_N("%s,%d", sys_param_get_name(param), sys_param_get_offset(param));
+  }
+
+  sys_object_unref(o);
+}
+
 void test_type_init(int argc, SysChar* argv[]) {
   UNITY_BEGIN();
   {
-    RUN_TEST(test_type_basic);
+    // RUN_TEST(test_type_basic);
+    RUN_TEST(test_param_basic);
+
   }
   UNITY_END();
 }

@@ -106,4 +106,12 @@ typedef enum
   SYS_LEVEL_ORDER
 } SysTraverseType;
 
+typedef struct _SysParam SysParam;
+typedef struct _SysParamClass SysParamClass;
+
+typedef struct _SysPtrArray SysPtrArray;
+typedef struct _SysArray SysArray;
+typedef struct _SysByteArray SysByteArray;
+typedef struct _SysHArray SysHArray;
+
 #endif

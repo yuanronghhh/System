@@ -17,7 +17,7 @@ void sys_strcpy(SysChar* __restrict dst, const SysChar* __restrict src) {
   strcpy(dst, src);
 }
 
-SysChar* sys_strncpy(SysChar* __restrict dst, SysSize n, const SysChar* __restrict src) {
+SysChar* sys_strncpy(SysChar* __restrict dst, const SysChar* __restrict src, SysSize n) {
   return strncpy(dst, src, n);
 }
 

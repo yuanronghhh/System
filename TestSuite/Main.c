@@ -46,7 +46,7 @@ int main(int argc, SysChar* argv[]) {
   sys_object_set_unref_hook(object_unref_debug);
   sys_object_set_new_hook(object_new_debug);
 
-  test_socket_init(argc, argv);
+  test_type_init(argc, argv);
 
   sys_teardown();
   return 0;
