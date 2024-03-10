@@ -26,14 +26,15 @@ void sys_value_free(SysValue* self);
 
 SysValue *sys_value_new_int(SysInt v);
 SysValue *sys_value_new_string(const SysChar *v);
-SysValue *sys_value_new_poininter(const SysPointer v);
+SysValue *sys_value_new_pointer(const SysPointer v);
 SysValue *sys_value_new_bool(SysBool v);
 SysValue *sys_value_new_double(SysDouble v);
 SysValue *sys_value_new_null(void);
 SysValue *sys_value_new_object(SysObject* v);
 
+SysValue* sys_value_cast_value(SysPointer *p, SysType data_type);
 SysBool sys_value_set_value(SysValue *self, SysPointer *p);
-const SysChar *sys_value_get_type_name(SysInt data_type);
+const SysChar *sys_value_get_type_name(SysType data_type);
 
 void sys_value_set_v_string(SysValue *self, const SysChar * v_string);
 const SysChar * sys_value_get_v_string(SysValue *self);
@@ -48,7 +49,7 @@ void sys_value_set_v_int(SysValue *self, SysInt v_int);
 SysInt sys_value_get_v_int(SysValue *self);
 
 void sys_value_set_v_null(SysValue *self);
-SysInt sys_value_get_data_type(SysValue *self);
+SysType sys_value_get_data_type(SysValue *self);
 
 void sys_value_set_v_bool(SysValue *self, SysBool v_bool);
 SysBool sys_value_get_v_bool(SysValue *self);

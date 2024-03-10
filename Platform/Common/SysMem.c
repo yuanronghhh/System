@@ -20,8 +20,8 @@ void _sys_clear_pointer(void **pp, SysDestroyFunc destroy) {
 
   _p = *pp;
   if (_p) {
-    destroy(_p);
     *pp = NULL;
+    destroy(_p);
   }
 }
 

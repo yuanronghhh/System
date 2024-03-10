@@ -42,23 +42,48 @@ static void test_type_basic(void) {
   sys_object_unref(o2);
 }
 
-static void test_param_basic(void) {
-  SysTestImpl *o = sys_test_impl_new();
-  TEST_ASSERT_NOT_NULL(o);
+static void reflect_o1_to_o2(SysObject *o1, SysObject *o2, SysType type1, SysType type2) {
+  SysHArray *props1 = sys_object_get_properties(type1);
+  SysValue *v1 = NULL;
 
-  SysHArray *array = sys_object_get_properties(SYS_TYPE_TEST_IMPL);
-  for(SysUInt i = 0; i < array->len; i++) {
-    SysParam *param = array->pdata[i];
+  for(SysUInt i = 0; i < props1->len; i++) {
+    SysParam *p1 = props1->pdata[i];
+    const SysChar *name = sys_param_get_field_name(p1);
 
-    sys_debug_N("%s,%d", sys_param_get_name(param), sys_param_get_offset(param));
-
-    SysValue *v = sys_value_new_int(123);
-
-    if(!sys_param_set_value(param, SYS_OBJECT(o), v)) {
+    if(sys_str_equal(name, "parent")) {
+      continue;
     }
-  }
 
-  sys_object_unref(o);
+    SysParam *p2 = sys_object_get_property(type2, name);
+    if (p2 == NULL) {
+      continue;
+    }
+
+    if(!sys_param_get_value(p1, o1, &v1)) {
+      continue;
+    }
+
+    if(!sys_param_set_value(p2, o2, v1)) {
+    }
+
+    sys_clear_pointer(&v1, sys_value_free);
+  }
+}
+
+static void test_param_basic(void) {
+  SysTestImpl *o1 = sys_test_impl_new();
+  TEST_ASSERT_NOT_NULL(o1);
+  o1->width = 1;
+  o1->height = 2;
+
+  SysTestImpl *o2 = sys_test_impl_new();
+  TEST_ASSERT_NOT_NULL(o2);
+  o2->width = 11;
+  o2->height = 12;
+
+  reflect_o1_to_o2(SYS_OBJECT(o1), SYS_OBJECT(o2), SYS_TYPE_TEST_IMPL, SYS_TYPE_TEST_IMPL);
+  sys_object_unref(o1);
+  sys_object_unref(o2);
 }
 
 void test_type_init(int argc, SysChar* argv[]) {

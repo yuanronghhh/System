@@ -2,7 +2,7 @@
 #include <System/Utils/SysString.h>
 
 struct _SysValue {
-  SYS_VALUE_ENUM data_type;
+  SysType data_type;
 
   union {
     SysPointer v_pointer;
@@ -16,8 +16,8 @@ struct _SysValue {
   SysRef ref_count;
 };
 
-SysInt sys_value_get_data_type(SysValue *self) {
-  sys_return_val_if_fail(self != NULL, -1);
+SysType sys_value_get_data_type(SysValue *self) {
+  sys_return_val_if_fail(self != NULL, 0);
 
   return self->data_type;
 }
@@ -47,7 +47,7 @@ SysPointer sys_value_get_v_pointer(SysValue *self) {
   return self->v.v_pointer;
 }
 
-const SysChar *sys_value_get_type_name(SysInt data_type) {
+const SysChar *sys_value_get_type_name(SysType data_type) {
   switch (data_type) {
     case SYS_VALUE_STRING:
       return "string";
@@ -65,6 +65,28 @@ const SysChar *sys_value_get_type_name(SysInt data_type) {
       sys_warning_N("Not support system value type: %d", data_type);
       return NULL;
   }
+}
+
+SysValue* sys_value_cast_value(SysPointer *p, SysType data_type) {
+  switch (data_type) {
+    case SYS_VALUE_STRING:
+      return sys_value_new_string(*((SysChar **)p));
+    case SYS_VALUE_INT:
+      return sys_value_new_int(*((SysInt *)p));
+    case SYS_VALUE_DOUBLE:
+      return sys_value_new_double(*((SysDouble *)p));
+    case SYS_VALUE_NULL:
+      return sys_value_new_null();
+    case SYS_VALUE_POINTER:
+      return sys_value_new_pointer(*p);
+    case SYS_VALUE_OBJECT:
+      return sys_value_new_object(*p);
+    default:
+      sys_warning_N("Not support system value type: %d", data_type);
+      return NULL;
+  }
+
+  return NULL;
 }
 
 SysBool sys_value_set_value(SysValue *self, SysPointer *p) {
@@ -115,7 +137,7 @@ SysValue *sys_value_new_string(const SysChar *v) {
   return o;
 }
 
-SysValue *sys_value_new_poininter(const SysPointer v) {
+SysValue *sys_value_new_pointer(const SysPointer v) {
   SysValue *o = sys_value_new();
   sys_value_set_v_pointer(o, v);
   return o;

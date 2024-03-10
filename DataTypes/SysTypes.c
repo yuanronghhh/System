@@ -357,7 +357,7 @@ static SysParam* object_prop_get(TypeNode *node, const SysChar *name) {
   for(SysUInt i = 0; i < parray->len; i++) {
     param = parray->pdata[i];
 
-    if(sys_strcmp(sys_param_get_name(param), name)) {
+    if(sys_str_equal(sys_param_get_field_name(param), name)) {
       break;
     }
   }
@@ -379,7 +379,7 @@ void _sys_object_add_property(
   sys_return_if_fail(field_name != NULL);
   sys_return_if_fail(offset >= 0);
 
-  SysParam *param = sys_param_new_I(full_type, field_type, field_name, offset);
+  SysParam *param = sys_param_new_I(type, full_type, field_type, field_name, offset);
   if(param == NULL) {
     return;
   }
@@ -398,7 +398,7 @@ SysParam *sys_object_get_property(SysType type, const SysChar *name) {
   sys_return_val_if_fail(type != 0, NULL);
 
   TypeNode *node = sys_type_node(type);
-  if (node) {
+  if (node == NULL) {
     sys_warning_N("Not found TypeNode: %d", type);
     return NULL;
   }
