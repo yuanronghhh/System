@@ -25,6 +25,7 @@ SysType sys_value_get_data_type(SysValue *self) {
 void sys_value_set_v_object(SysValue *self, SysObject * v_object) {
   sys_return_if_fail(self != NULL);
 
+  self->data_type = SYS_VALUE_OBJECT;
   self->v.v_object = v_object;
 }
 
@@ -232,7 +233,7 @@ void sys_value_set_v_bool(SysValue *self, SysBool v_bool) {
 }
 
 SysBool sys_value_get_v_bool(SysValue *self) {
-  sys_return_val_if_fail(self != NULL, NULL);
+  sys_return_val_if_fail(self != NULL, false);
 
   return self->v.v_bool;
 }

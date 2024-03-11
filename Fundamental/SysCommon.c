@@ -1,6 +1,7 @@
 #include <System/Fundamental/SysCommon.h>
 
 #include <System/Utils/SysError.h>
+#include <System/Utils/SysString.h>
 
 
 SysInt sys_get_type_by_name(const SysChar *names[], SysInt len, const SysChar *name) {
