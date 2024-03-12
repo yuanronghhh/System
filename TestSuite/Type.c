@@ -42,46 +42,95 @@ static void test_type_basic(void) {
   sys_object_unref(o2);
 }
 
-static void reflect_o1_to_o2(SysObject *o1, SysObject *o2, SysType type1, SysType type2) {
+typedef struct _SysPMap SysPMap;
+struct _SysPMap {
+  SysInt p1;
+  SysInt p2;
+};
+
+static SysHArray *reflect_create_pmap(SysType type1, SysType type2) {
+  SysHArray *pmaps = sys_harray_new_with_free_func(sys_free);
   SysHArray *props1 = sys_object_get_properties(type1);
-  SysValue *v1 = NULL;
+  SysParam *p1;
+  SysPMap *pmap;
 
   for(SysUInt i = 0; i < props1->len; i++) {
-    SysParam *p1 = props1->pdata[i];
-    const SysChar *name = sys_param_get_field_name(p1);
+    p1 = props1->pdata[i];
 
-    if(sys_str_equal(name, "parent")) {
+    if (sys_str_equal(p1->field_name, "parent")) {
       continue;
     }
 
-    SysParam *p2 = sys_object_get_property(type2, name);
-    if (p2 == NULL) {
-      continue;
-    }
+    pmap = sys_new0_N(SysPMap, 1);
+    pmap->p1 = p1->offset;
+    pmap->p2 = p1->offset;
 
-    if(!sys_param_get_value(p1, o1, &v1)) {
-      continue;
-    }
+    sys_harray_add(pmaps, pmap);
+  }
 
-    if(!sys_param_set_value(p2, o2, v1)) {
-    }
+  return pmaps;
+}
 
-    sys_clear_pointer(&v1, sys_value_free);
+static inline void reflect_o1_to_o2(SysObject *o1, SysObject *o2, SysHArray *pmaps) {
+  SysPMap *map;
+
+  for(SysUInt i = 0; i < pmaps->len; i++) {
+    map = pmaps->pdata[i];
+
+    *((SysUInt8 *)o2 + map->p1) = *((SysUInt8 *)o1 + map->p1);
   }
 }
 
 static void test_param_basic(void) {
+  SysUInt64 start, end, reflect_tm, direct_tm;
+  SysHArray *pmaps;
+
   SysTestImpl *o1 = sys_test_impl_new();
   TEST_ASSERT_NOT_NULL(o1);
   o1->width = 1;
   o1->height = 2;
+  o1->height2 = 2;
+  o1->height3 = 2;
+  o1->height4 = 2;
+  o1->height5 = 2;
+  o1->height6 = 2;
 
   SysTestImpl *o2 = sys_test_impl_new();
   TEST_ASSERT_NOT_NULL(o2);
   o2->width = 11;
   o2->height = 12;
 
-  reflect_o1_to_o2(SYS_OBJECT(o1), SYS_OBJECT(o2), SYS_TYPE_TEST_IMPL, SYS_TYPE_TEST_IMPL);
+  SysPMap *map;
+
+  pmaps = reflect_create_pmap(SYS_TYPE_TEST_IMPL, SYS_TYPE_TEST_IMPL);
+  start = sys_get_monotonic_time();
+  for(SysUInt j = 0; j < pmaps->len; j++) {
+    map = pmaps->pdata[j];
+
+    for(SysInt i = 0; i < 100000000; i++) {
+      *((SysUInt8 *)o2 + map->p1) = *((SysUInt8 *)o1 + map->p1);
+    }
+  }
+  end = sys_get_monotonic_time();
+  reflect_tm = end - start;
+
+  start = sys_get_monotonic_time();
+  for(SysInt i = 0; i < 100000000; i++) {
+    o2->width = o1->width;
+    o2->height = o1->height;
+    o2->height1 = o1->height1;
+    o2->height2 = o1->height2;
+    o2->height3 = o1->height3;
+    o2->height4 = o1->height4;
+    o2->height5 = o1->height5;
+    o2->height6 = o1->height6;
+  }
+  end = sys_get_monotonic_time();
+  direct_tm = end - start;
+
+  sys_debug_N("%d,%d", reflect_tm, direct_tm);
+  sys_debug_N("%d", o2->height6);
+
   sys_object_unref(o1);
   sys_object_unref(o2);
 }

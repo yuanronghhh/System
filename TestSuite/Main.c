@@ -42,9 +42,11 @@ static void object_unref_debug(SysObject *o, const SysChar *name, SysInt ref_cou
 int main(int argc, SysChar* argv[]) {
   sys_setup();
 
+#if 0
   sys_object_set_ref_hook(object_ref_debug);
   sys_object_set_unref_hook(object_unref_debug);
   sys_object_set_new_hook(object_new_debug);
+#endif
 
   test_type_init(argc, argv);
 

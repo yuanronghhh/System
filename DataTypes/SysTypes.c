@@ -356,8 +356,9 @@ static SysParam* object_prop_get(TypeNode *node, const SysChar *name) {
   parray = &node->data.instance.props;
   for(SysUInt i = 0; i < parray->len; i++) {
     param = parray->pdata[i];
+    const SysChar *nname = sys_param_get_field_name(param);
 
-    if(sys_str_equal(sys_param_get_field_name(param), name)) {
+    if(sys_str_equal(nname, name)) {
       break;
     }
   }

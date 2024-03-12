@@ -55,6 +55,12 @@ static void sys_test_impl_class_init(SysTestImplClass* cls) {
   sys_object_add_property(SYS_TYPE_TEST_IMPL, SysTestImpl, "SysObject", SYS_TYPE_OBJECT, parent);
   sys_object_add_property(SYS_TYPE_TEST_IMPL, SysTestImpl, "SysInt", SYS_TYPE_INT, width);
   sys_object_add_property(SYS_TYPE_TEST_IMPL, SysTestImpl, "SysInt", SYS_TYPE_INT, height);
+  sys_object_add_property(SYS_TYPE_TEST_IMPL, SysTestImpl, "SysInt", SYS_TYPE_INT, height1);
+  sys_object_add_property(SYS_TYPE_TEST_IMPL, SysTestImpl, "SysInt", SYS_TYPE_INT, height2);
+  sys_object_add_property(SYS_TYPE_TEST_IMPL, SysTestImpl, "SysInt", SYS_TYPE_INT, height3);
+  sys_object_add_property(SYS_TYPE_TEST_IMPL, SysTestImpl, "SysInt", SYS_TYPE_INT, height4);
+  sys_object_add_property(SYS_TYPE_TEST_IMPL, SysTestImpl, "SysInt", SYS_TYPE_INT, height5);
+  sys_object_add_property(SYS_TYPE_TEST_IMPL, SysTestImpl, "SysInt", SYS_TYPE_INT, height6);
 }
 
 static void sys_test_impl_init(SysTestImpl *self) {

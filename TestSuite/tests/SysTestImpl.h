@@ -18,6 +18,12 @@ struct _SysTestImpl {
   /* < private > */
   SysInt width;
   SysInt height;
+  SysInt height1;
+  SysInt height2;
+  SysInt height3;
+  SysInt height4;
+  SysInt height5;
+  SysInt height6;
 };
 
 struct _SysTestImplClass {
