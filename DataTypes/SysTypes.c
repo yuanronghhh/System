@@ -387,7 +387,7 @@ void _sys_object_add_property(
 
   TypeNode *node = sys_type_node(type);
   if (node == NULL) {
-    sys_warning_N("Not found TypeNode: %d", type);
+    sys_warning_N("Not found TypeNode: %p", type);
     return;
   }
 
@@ -400,7 +400,7 @@ SysParam *sys_object_get_property(SysType type, const SysChar *name) {
 
   TypeNode *node = sys_type_node(type);
   if (node == NULL) {
-    sys_warning_N("Not found TypeNode: %d", type);
+    sys_warning_N("Not found TypeNode: %p", type);
     return NULL;
   }
 
@@ -412,7 +412,7 @@ SysHArray *sys_object_get_properties(SysType type) {
 
   TypeNode *node = sys_type_node(type);
   if (node == NULL) {
-    sys_warning_N("Not found TypeNode: %d", type);
+    sys_warning_N("Not found TypeNode: %p", type);
     return NULL;
   }
 
@@ -857,12 +857,16 @@ void sys_type_imp_interface(SysType instance_type, SysType iface_type, const Sys
 
   TypeNode *node = sys_type_node (instance_type);
   if (node == NULL || !(node->node_type & SYS_NODE_CLASS)) {
-    sys_warning_N("instance type node not found when implement interface: %d", instance_type);
+    sys_warning_N("instance type node not found when implement interface: %p", instance_type);
   }
 
   TypeNode *iface_node = sys_type_node (iface_type);
-  if (iface_node == NULL || !(iface_node->node_type & SYS_NODE_INTERFACE)) {
-    sys_abort_N("interface node not found when implement interface: %d", iface_type);
+  if (iface_node == NULL) {
+    sys_abort_N("interface node not found when implements interface: %p", iface_type);
+  }
+
+  if (!(iface_node->node_type & SYS_NODE_INTERFACE)) {
+    sys_abort_N("node is not interface type: %s,%s,%p", node->name, iface_node->name, iface_type);
   }
 
   instance_data = &node->data.instance;

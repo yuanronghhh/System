@@ -26,7 +26,7 @@ void _sys_clear_pointer(void **pp, SysDestroyFunc destroy) {
 }
 
 SysPointer sys_realloc(void *mem, SysSize size) {
-  void *nmem;
+  void *nmem = NULL;
 
   if (size) {
     nmem = realloc(mem, size);
