@@ -132,6 +132,7 @@ static void sys_object_dispose_i(SysObject *self) {
 
 SysObject* _sys_object_new_from_instance(SysObject *o) {
   sys_return_val_if_fail(o != NULL, NULL);
+  sys_return_val_if_fail(SYS_REF_CHECK(o, MAX_REF_NODE), NULL);
 
   SysType type = sys_type_from_instance(o);
   return sys_object_new(type, NULL);
@@ -214,8 +215,6 @@ void _sys_object_unref(SysObject* self) {
 
   SysObjectClass* cls;
 
-  sys_assert(self->ref_count <= 0xffffff);
-
   if(!SYS_REF_VALID_CHECK(self, MAX_REF_NODE)) {
     sys_warning_N("object ref check failed: %p", self);
     return;
@@ -259,6 +258,7 @@ void sys_object_set_new_hook(SysRefHook hook) {
 
 void * _sys_object_cast_check(SysObject* self, SysType ttype) {
   if (self == NULL) { return NULL; }
+  sys_return_val_if_fail(SYS_REF_CHECK(self, MAX_REF_NODE), NULL);
 
   SysType type = sys_type_from_instance(self);
   TypeNode *node = sys_type_node(type);

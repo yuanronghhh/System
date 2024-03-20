@@ -5,7 +5,7 @@
 
 SYS_BEGIN_DECLS
 
-#define MAX_REF_NODE (1 << 30)
+#define MAX_REF_NODE 0xffffff
 
 #define sys_atomic_int_get(x) _sys_atomic_int_get((const volatile SysInt *)x)
 #define sys_atomic_int_set(x, n) _sys_atomic_int_set((const volatile SysInt *)x, n)
@@ -23,11 +23,11 @@ SYS_API void sys_atomic_pointer_set(SysPointer o, SysPointer n);
 #define SYS_REF_INIT_VALUE 1
 #define SYS_REF_CHECK(o, max_ref) \
   (_sys_atomic_int_get(&(o)->ref_count) >= 0 \
-   && _sys_atomic_int_get(&(o)->ref_count) < max_ref)
+   && _sys_atomic_int_get(&(o)->ref_count) < (max_ref))
 
 #define SYS_REF_VALID_CHECK(o, max_ref) \
-  (_sys_atomic_int_get(&(o)->ref_count) > 0 \
-   && _sys_atomic_int_get(&(o)->ref_count) < max_ref)
+  (_sys_atomic_int_get(&((SysObject *)o)->ref_count) > 0 \
+   && _sys_atomic_int_get(&((SysObject *)o)->ref_count) < (max_ref))
 
 #define sys_ref_count_init(o) ((o)->ref_count = (SYS_REF_INIT_VALUE))
 #define sys_ref_count_inc(o) sys_atomic_int_inc(&((o)->ref_count))
