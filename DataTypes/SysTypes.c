@@ -181,7 +181,6 @@ void* sys_object_new(SysType type, const SysChar * first, ...) {
   if (o == NULL) { return NULL; }
   sys_ref_count_init(o);
 
-
 #if SYS_DEBUG
   if (sys_object_new_debug_func) {
     TypeNode *node = sys_type_node(type);
@@ -215,7 +214,7 @@ void _sys_object_unref(SysObject* self) {
 
   SysObjectClass* cls;
 
-  sys_assert(self->ref_count <= 0xfffffff);
+  sys_assert(self->ref_count <= 0xffffff);
 
   if(!SYS_REF_VALID_CHECK(self, MAX_REF_NODE)) {
     sys_warning_N("object ref check failed: %p", self);
@@ -259,9 +258,7 @@ void sys_object_set_new_hook(SysRefHook hook) {
 }
 
 void * _sys_object_cast_check(SysObject* self, SysType ttype) {
-  if (self == NULL) {
-    return NULL;
-  }
+  if (self == NULL) { return NULL; }
 
   SysType type = sys_type_from_instance(self);
   TypeNode *node = sys_type_node(type);

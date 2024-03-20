@@ -139,12 +139,7 @@ SysInt sys_fprintf(FILE* const fp,SysChar const* const format, ...) {
 }
 
 SysInt sys_vfprintf(FILE* const fp, SysChar const* const format,va_list args) {
-  SysInt len;
-  SYS_LEAK_IGNORE_BEGIN;
-    len = vfprintf(fp, format, args);
-  SYS_LEAK_IGNORE_END;
-
-  return len;
+  return vfprintf(fp, format, args);
 }
 
 void sys_fclose(FILE* fp) {
