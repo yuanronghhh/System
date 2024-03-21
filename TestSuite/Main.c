@@ -1,6 +1,7 @@
 #include <System/TestSuite/Main.h>
 #include <System/TestSuite/Type.h>
 #include <System/TestSuite/Socket.h>
+#include <System/TestSuite/BHeap.h>
 
 
 #define CHECK_TYPE SYS_TYPE_OBJECT
@@ -42,13 +43,13 @@ static void object_unref_debug(SysObject *o, const SysChar *name, SysInt ref_cou
 int main(int argc, SysChar* argv[]) {
   sys_setup();
 
-#if 0
+#if 1
   sys_object_set_ref_hook(object_ref_debug);
   sys_object_set_unref_hook(object_unref_debug);
   sys_object_set_new_hook(object_new_debug);
 #endif
 
-  test_type_init(argc, argv);
+  test_bheap_init(argc, argv);
 
   sys_teardown();
   return 0;

@@ -22,6 +22,8 @@ set(SRC
 
   ./Main.c
   ./Main.h
+  ./BHeap.c
+  ./BHeap.h
   ./Type.c
   ./Type.h
   ./Socket.c

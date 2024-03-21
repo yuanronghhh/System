@@ -166,13 +166,13 @@ SysPointer sys_bheap_pop(SysBHeap *hp) {
   sys_return_val_if_fail(hp != NULL, NULL);
 
   SysPtrArray *array = hp->array;
+  if (array->len == 0) { return NULL; }
+
   SysPointer result = array->pdata[0];
   SysPointer end = sys_ptr_array_steal_index(array, array->len - 1);
 
-  if (array->len > 0) {
-    array->pdata[0] = end;
-    sys_bheap_sinkdown(hp, 0);
-  }
+  array->pdata[0] = end;
+  sys_bheap_sinkdown(hp, 0);
 
   return result;
 }

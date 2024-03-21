@@ -6,7 +6,7 @@
 SYS_BEGIN_DECLS
 
 typedef struct _SysBHeap SysBHeap;
-typedef SysDouble(*SysBHeapFunc)(SysPointer node);
+typedef SysDouble (*SysBHeapFunc)(SysPointer node);
 
 SYS_API SysBHeap *sys_bheap_new(SysBHeapFunc func, SysDestroyFunc node_free);
 SYS_API void sys_bheap_free(SysBHeap *hp, SysBool free_segment);
