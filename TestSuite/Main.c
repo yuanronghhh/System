@@ -48,7 +48,6 @@ int main(int argc, SysChar* argv[]) {
   sys_object_set_unref_hook(object_unref_debug);
   sys_object_set_new_hook(object_new_debug);
 #endif
-
   test_bheap_init(argc, argv);
 
   sys_teardown();

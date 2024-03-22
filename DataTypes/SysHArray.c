@@ -27,6 +27,37 @@ SysHArray* sys_harray_new(void) {
   return ptr_harray_new(0, NULL);
 }
 
+static SysPointer harray_remove_index(SysHArray* array,
+  SysUInt      index_,
+  SysBool   fast,
+  SysBool   free_element) {
+  SysPointer result;
+
+  sys_return_val_if_fail(array, NULL);
+  sys_return_val_if_fail(array->len == 0 || (array->len != 0 && array->pdata != NULL), NULL);
+
+  sys_return_val_if_fail(index_ < array->len, NULL);
+
+  result = array->pdata[index_];
+
+  if (array->element_free_func != NULL && free_element)
+    array->element_free_func(array->pdata[index_]);
+
+  if (index_ != array->len - 1 && !fast)
+    memmove(array->pdata + index_, array->pdata + index_ + 1,
+      sizeof(SysPointer) * (array->len - index_ - 1));
+  else if (index_ != array->len - 1)
+    array->pdata[index_] = array->pdata[array->len - 1];
+
+  array->len -= 1;
+
+  return result;
+}
+
+SysPointer sys_harray_steal_index(SysHArray* array, SysUInt index_) {
+  return harray_remove_index(array, index_, FALSE, FALSE);
+}
+
 SysHArray* sys_harray_new_with_free_func(SysDestroyFunc element_free_func) {
   return ptr_harray_new(0, element_free_func);
 }

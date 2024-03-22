@@ -1002,3 +1002,16 @@ SysByteArray* sys_byte_array_remove_range(SysByteArray *array,
 
     return (SysByteArray *)sys_array_remove_range((SysArray *)array, index_, length);
 }
+
+
+void sys_ptr_array_sort(SysPtrArray* array, SysCompareFunc  compare_func) {
+  sys_return_if_fail(array != NULL);
+
+  /* Don't use qsort as we want a guaranteed stable sort */
+  if (array->len > 0)
+    sys_qsort_with_data(array->pdata,
+      array->len,
+      sizeof(SysPointer),
+      (SysCompareDataFunc)compare_func,
+      NULL);
+}

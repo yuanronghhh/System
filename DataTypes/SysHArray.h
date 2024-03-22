@@ -24,6 +24,7 @@ SYS_API void sys_harray_unref(SysHArray* self);
 SYS_API SysHArray* sys_harray_ref(SysHArray *self);
 SYS_API void sys_harray_copy(SysHArray* dst, SysHArray* src, SysCopyFunc elem_copy, SysPointer copy_user_data);
 SYS_API void sys_harray_destroy(SysHArray *self);
+SYS_API SysPointer sys_harray_steal_index(SysHArray* array, SysUInt index_);
 SYS_API SysHArray* sys_harray_new_with_free_func(SysDestroyFunc element_free_func);
 SYS_API void sys_harray_init(SysHArray *self);
 SYS_API void sys_harray_init_full(SysHArray* self, SysUInt reserved_size, SysDestroyFunc element_free_func);
