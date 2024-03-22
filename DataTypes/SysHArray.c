@@ -55,7 +55,7 @@ static SysPointer harray_remove_index(SysHArray* array,
 }
 
 SysPointer sys_harray_steal_index(SysHArray* array, SysUInt index_) {
-  return harray_remove_index(array, index_, FALSE, FALSE);
+  return harray_remove_index(array, index_, false, false);
 }
 
 SysHArray* sys_harray_new_with_free_func(SysDestroyFunc element_free_func) {
