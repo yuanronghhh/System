@@ -15,6 +15,7 @@ struct _SysBHeap {
 };
 
 struct _SysBHeapIter {
+  /* <private> */
   SysUInt position;
   SysUInt len;
   SysPointer pdata[1];
