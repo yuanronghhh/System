@@ -37,6 +37,7 @@ SYS_API SysBool sys_bheap_remove(SysBHeap *hp, SysPointer node);
 SYS_API SysInt sys_bheap_size(SysBHeap *hp);
 SYS_API SysPointer sys_bheap_pop(SysBHeap *hp);
 SYS_API SysHArray *sys_bheap_array(SysBHeap *hp);
+SYS_API SysPointer sys_bheap_parent(SysBHeap *hp, SysPointer node);
 
 SYS_END_DECLS
 
