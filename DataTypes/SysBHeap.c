@@ -243,3 +243,27 @@ SysHArray *sys_bheap_array(SysBHeap *hp) {
 
    return array;
 }
+
+static SysInt bheap_index_node(SysBHeap *hp, SysPointer node) {
+  SysHArray *array = &hp->array;
+
+  for(SysUInt i = 0; i < array->len; i++) {
+    if (array->pdata[i] == node) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+SysPointer sys_bheap_parent(SysBHeap *hp, SysPointer node) {
+  SysInt index = bheap_index_node(hp, node);
+  if (index == -1) { return NULL; }
+  SysInt pindex = (SysInt)floor((index - 1) / 2.0);
+
+  if(pindex < 0) {
+    return NULL;
+  }
+
+  return hp->array.pdata[index];
+}
