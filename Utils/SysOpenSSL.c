@@ -1,6 +1,4 @@
 #include <System/Utils/SysOpenSSL.h>
-#include <System/Utils/SysError.h>
-#include <System/Platform/Common/SysMem.h>
 #include <System/Platform/Common/SysThread.h>
 
 static SysMutex ssl_ctx_mlock;

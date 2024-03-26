@@ -1,5 +1,8 @@
+#include <System/Platform/Common/SysOs.h>
+
 #include <System/Utils/SysString.h>
 #include <System/Utils/SysError.h>
+#include <System/Utils/SysOpenSSL.h>
 #include <System/DataTypes/SysQuark.h>
 #include <System/DataTypes/SysArray.h>
 #include <System/DataTypes/SysTypes.h>

@@ -1,7 +1,9 @@
 #ifndef __SYS_SOCKET_H__
 #define __SYS_SOCKET_H__
 
-#include <System/Fundamental/SysCommonCore.h>
+#include <System/Utils/SysOpenSSL.h>
+#include <System/DataTypes/SysTypes.h>
+
 
 SYS_BEGIN_DECLS
 
