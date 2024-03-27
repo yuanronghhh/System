@@ -39,7 +39,7 @@ static void test_bheap_iter(void) {
 static void test_bheap_basic(void) {
   SysPointer v;
   SysBHeap* hp = sys_bheap_new(score_func, node_destroy_cb);
-  int sz = sizeof(double);
+  // int sz = sizeof(double);
 
   for (SysUInt64 i = 3; i < 100; i++) {
     v = (SysPointer)(SysUInt64)(i % 11);
