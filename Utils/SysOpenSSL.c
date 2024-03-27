@@ -3,7 +3,7 @@
 
 static SysMutex ssl_ctx_mlock;
 static SysInt server_conf_index;
-static SysInt certificate_index;
+// static SysInt certificate_index;
 
 static SSL_CTX* server_ctx = NULL;
 static SSL_CTX* client_ctx = NULL;
