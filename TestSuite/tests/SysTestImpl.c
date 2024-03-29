@@ -3,11 +3,9 @@
 #include <System/TestSuite/tests/SysTestIFace2.h>
 
 static void sys_test_impl_default(SysTestIFaceInterface* iface);
-static void sys_test_impl_default2(SysTestIFace2Interface* iface);
 
 SYS_DEFINE_WITH_CODE(SysTestImpl, sys_test_impl, SYS_TYPE_OBJECT,
-  SYS_IMPLEMENT_INTERFACE(SYS_TYPE_TEST_IFACE, sys_test_impl_default)
-  SYS_IMPLEMENT_INTERFACE(SYS_TYPE_TEST_IFACE2, sys_test_impl_default2));
+  SYS_IMPLEMENT_INTERFACE(SYS_TYPE_TEST_IFACE, sys_test_impl_default));
 
 static SysInt get_width_i(SysTestIFace *iface) {
   SysTestImpl* self = SYS_TEST_IMPL(iface);
@@ -23,14 +21,6 @@ static  SysInt get_height_i(SysTestIFace2 *iface) {
 
 static void sys_test_impl_default(SysTestIFaceInterface *iface) {
   iface->get_width = get_width_i;
-}
-
-static  void sys_test_impl_default2(SysTestIFace2Interface *iface) {
-  iface->get_height = get_height_i;
-}
-
-SysInt sys_test_impl_get_height(SysTestImpl* self) {
-  return self->height;
 }
 
 SysInt sys_test_impl_get_width(SysTestImpl* self) {

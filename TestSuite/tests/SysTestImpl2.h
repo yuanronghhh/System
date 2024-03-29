@@ -1,7 +1,7 @@
 #ifndef __SYS_TEST_IMPL2__
 #define __SYS_TEST_IMPL2__
 
-#include <System/TestSuite/Common.h>
+#include <System/TestSuite/tests/SysTestImpl.h>
 
 SYS_BEGIN_DECLS
 
@@ -14,20 +14,18 @@ typedef struct _SysTestImpl2 SysTestImpl2;
 typedef struct _SysTestImpl2Class SysTestImpl2Class;
 
 struct _SysTestImpl2 {
-  SysObject parent;
+  SysTestImpl parent;
   /* < private > */
   SysInt width;
   SysInt height;
 };
 
 struct _SysTestImpl2Class {
-  SysObjectClass parent;
+  SysTestImplClass parent;
 };
 
 SysType sys_test_impl2_get_type(void);
 SysTestImpl2 *sys_test_impl2_new(void);
-SysInt sys_test_impl2_get_height(SysTestImpl2* self);
-SysInt sys_test_impl2_get_width(SysTestImpl2 *self);
 
 SYS_END_DECLS
 

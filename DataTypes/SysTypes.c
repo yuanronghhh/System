@@ -27,9 +27,6 @@ struct _InstanceData {
   SysTypeFinalizeFunc class_finalize;
   SysHArray props;
   void* class_ptr;
-
-  SysUInt16 n_ifaces;
-  SysTypeInterface** ifaces;
 };
 
 struct _IFaceData {
@@ -50,7 +47,10 @@ struct _TypeNode {
   SysUInt node_type;
   TypeData data;
 
-  SysInt n_supers;
+  SysUInt16 n_ifaces;
+  SysTypeInterface** ifaces;
+
+  SysUInt n_supers;
   SysType supers[1]; // must be the last field
 };
 
@@ -165,7 +165,6 @@ static void sys_object_class_init(SysObjectClass *ocls) {
   ocls->dclone = sys_object_dclone_i;
   ocls->dispose = sys_object_dispose_i;
   ocls->finalize = sys_object_finalize_i;
-
 }
 
 static void sys_object_init(SysObject *self) {
@@ -553,13 +552,13 @@ void sys_type_node_free(TypeNode *node) {
     case SYS_NODE_BASE_CLASS:
       cls = node->data.instance.class_ptr;
 
-      if (node->data.instance.n_ifaces > 0) {
-        for (SysInt i = 0; i < node->data.instance.n_ifaces; i++) {
+      if (node->n_ifaces > 0) {
+        for (SysInt i = 0; i < node->n_ifaces; i++) {
 
-          sys_free(node->data.instance.ifaces[i]->vtable_ptr);
+          sys_free(node->ifaces[i]->vtable_ptr);
         }
 
-        sys_free(node->data.instance.ifaces);
+        sys_free(node->ifaces);
       }
 
       if (node->data.instance.props.len > 0) {
@@ -813,12 +812,28 @@ SysBool sys_type_is_a(SysType child, SysType parent) {
   return NODE_IS_ANCESTOR(ancestor, node);
 }
 
-SysTypeInterface* sys_type_instance_get_iface(TypeNode *node, SysType iface_type) {
-  InstanceData *o = &node->data.instance;
-  for (SysUInt i = 0; i < o->n_ifaces; i++) {
-    SysTypeInterface *iface = o->ifaces[i];
+static SysTypeInterface *node_get_interface(TypeNode *node, SysType iface_type) {
+  for (SysUInt j = 0; j < node->n_ifaces; j++) {
+    SysTypeInterface* iface = node->ifaces[j];
 
     if (iface->type == iface_type) {
+      return iface;
+    }
+  }
+
+  return NULL;
+}
+
+SysTypeInterface* sys_type_instance_get_iface(TypeNode *node, SysType iface_type) {
+  SysTypeInterface* iface;
+  TypeNode* nnode;
+
+  for (SysUInt i = 0; i < node->n_supers; i++) {
+    nnode = sys_type_node(node->supers[i]);
+    iface = node_get_interface(nnode, iface_type);
+
+    if (iface != NULL) {
+
       return iface;
     }
   }
@@ -850,7 +865,6 @@ void sys_type_imp_interface(SysType instance_type, SysType iface_type, const Sys
 
   SysTypeInterface* iface;
   IFaceData* iface_data;
-  InstanceData *instance_data;
 
   TypeNode *node = sys_type_node (instance_type);
   if (node == NULL || !(node->node_type & SYS_NODE_CLASS)) {
@@ -866,7 +880,6 @@ void sys_type_imp_interface(SysType instance_type, SysType iface_type, const Sys
     sys_abort_N("node is not interface type: %s,%s,%p", node->name, iface_node->name, iface_type);
   }
 
-  instance_data = &node->data.instance;
   iface_data = &iface_node->data.iface;
 
   if(!info->interface_init) {
@@ -885,18 +898,18 @@ void sys_type_imp_interface(SysType instance_type, SysType iface_type, const Sys
   info->interface_init(iface);
   iface->vtable_ptr = iface;
 
-  SysTypeInterface** nmem = sys_new0_N(SysTypeInterface *, instance_data->n_ifaces + 1);
-  if (instance_data->n_ifaces > 0) {
+  SysTypeInterface** nmem = sys_new0_N(SysTypeInterface *, node->n_ifaces + 1);
+  if (node->n_ifaces > 0) {
     sys_memcpy (
-      nmem + 1, sizeof(SysTypeInterface*) * instance_data->n_ifaces,
-      instance_data->ifaces, sizeof(SysTypeInterface*) * instance_data->n_ifaces);
+      nmem + 1, sizeof(SysTypeInterface*) * node->n_ifaces,
+      node->ifaces, sizeof(SysTypeInterface*) * node->n_ifaces);
 
-    sys_clear_pointer(&instance_data->ifaces, sys_free);
+    sys_clear_pointer(&node->ifaces, sys_free);
   }
 
   nmem[0] = iface;
-  instance_data->n_ifaces += 1;
-  instance_data->ifaces = nmem;
+  node->n_ifaces += 1;
+  node->ifaces = nmem;
 
   sys_rw_lock_writer_unlock(&type_rw_lock);
   sys_rec_mutex_unlock(&class_init_rec_mutex);

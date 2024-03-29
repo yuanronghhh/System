@@ -32,7 +32,6 @@ struct _SysTestImplClass {
 
 SysType sys_test_impl_get_type(void);
 SysTestImpl *sys_test_impl_new(void);
-SysInt sys_test_impl_get_height(SysTestImpl* self);
 SysInt sys_test_impl_get_width(SysTestImpl *self);
 
 SYS_END_DECLS

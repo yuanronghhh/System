@@ -22,7 +22,6 @@ struct _SysTestIFaceInterface {
 
 SysType sys_test_iface_get_type(void);
 SysInt sys_test_iface_get_width(SysTestIFace* self);
-void sys_test_iface_dispose(SysTestIFace* self);
 
 SYS_END_DECLS
 
