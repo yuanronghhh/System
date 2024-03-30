@@ -132,6 +132,7 @@ typedef struct _SysInterfaceInfo SysInterfaceInfo;
 typedef struct _TypeNode TypeNode;
 typedef struct _SysTypeInstance SysTypeInstance;
 typedef struct _SysTypeInterface SysTypeInterface;
+typedef struct _IFaceEntry IFaceEntry;
 
 typedef struct _SysTypeClass SysTypeClass;
 typedef SysType (*SysTypeFunc) (void);
@@ -175,6 +176,10 @@ struct _SysTypeInfo {
 
 struct _SysTypeClass {
   SysType type;
+
+  /* limit 255 interface count for class */
+  SysUInt8 n_ifaces;
+  IFaceEntry **ifaces;
 };
 
 struct _SysTypeInstance {
@@ -184,15 +189,23 @@ struct _SysTypeInstance {
 struct _SysTypeInterface {
   SysType type;         /* iface type */
   SysType instance_type;
-  SysPointer vtable_ptr;
+};
+
+/* interface entry store on instance */
+struct  _IFaceEntry {
+  SysType iface_type;
+  SysType instance_type;
+
+  /* pointer to interface on class */
+  SysTypeInterface* iface_ptr;
 };
 
 struct _SysObjectClass {
   SysTypeClass parent;
 
   SysObject *(*dclone) (SysObject *self);
-  void (*dispose)(SysObject *self);
-  void (*finalize)(SysObject *self);
+  void (*dispose) (SysObject *self);
+  void (*finalize) (SysObject *self);
 };
 
 struct _SysObject {

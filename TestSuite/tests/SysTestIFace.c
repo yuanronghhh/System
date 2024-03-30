@@ -1,6 +1,6 @@
 #include <System/TestSuite/tests/SysTestIFace.h>
 
-void sys_test_iface_default_init(SysTestIFaceInterface* iface);
+static void sys_test_iface_default_init(SysTestIFaceInterface* iface);
 
 SYS_DEFINE_INTERFACE(SysTestIFace, sys_test_iface, SYS_TYPE_OBJECT);
 
