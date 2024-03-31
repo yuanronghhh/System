@@ -878,9 +878,6 @@ SysTypeInterface* _sys_type_get_interface(SysTypeClass *cls, SysType iface_type)
   TypeNode *iface_node = sys_type_node(iface_type);
   sys_return_val_if_fail(NODE_IS_IFACE(iface_node), NULL);
 
-  if(iface_node) {
-  }
-
   return sys_type_class_get_iface(cls, iface_type);
 }
 

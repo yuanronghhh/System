@@ -45,6 +45,26 @@ static void test_type_basic(void) {
   sys_object_unref(o2);
 }
 
+static void test_mutiple_imp_interface(void) {
+  // when SysTestImpl2 inherit SysTestImpl
+  SysTestImpl2* o2 = sys_test_impl2_new();
+  TEST_ASSERT_NOT_NULL(o2);
+  o2->width = 301;
+
+  SysTestImpl* o1 = SYS_TEST_IMPL(o2);
+  TEST_ASSERT_NOT_NULL(o1);
+  SysTestIFace* iface1 = SYS_TEST_IFACE(o1);
+
+  SysTestIFaceInterface* iface = SYS_TEST_IFACE_GET_IFACE(o2);
+  TEST_ASSERT_NOT_NULL(iface);
+  TEST_ASSERT_NOT_NULL(iface->get_width);
+
+  SysInt height = iface->get_width(iface1);
+  TEST_ASSERT_EQUAL_INT(301, height);
+
+  sys_object_unref(o2);
+}
+
 static void test_interface_inherit(void) {
   // when SysTestImpl2 inherit SysTestImpl
   SysTestImpl2* o2 = sys_test_impl2_new();
@@ -157,7 +177,8 @@ void test_type_init(int argc, SysChar* argv[]) {
   {
     // RUN_TEST(test_type_basic);
     // RUN_TEST(test_param_basic);
-    RUN_TEST(test_interface_inherit);
+    // RUN_TEST(test_interface_inherit);
+    RUN_TEST(test_mutiple_imp_interface);
   }
   UNITY_END();
 }
