@@ -4,7 +4,7 @@
 #include <System/TestSuite/BHeap.h>
 
 
-#define CHECK_TYPE SYS_TYPE_OBJECT
+#define CHECK_TYPE SYS_TYPE_FNODE
 
 
 void setUp(void) {

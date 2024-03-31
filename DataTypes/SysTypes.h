@@ -188,16 +188,6 @@ struct _SysTypeInstance {
 
 struct _SysTypeInterface {
   SysType type;         /* iface type */
-  SysType instance_type;
-};
-
-/* interface entry store on instance */
-struct  _IFaceEntry {
-  SysType iface_type;
-  SysType instance_type;
-
-  /* pointer to interface on class */
-  SysTypeInterface* iface_ptr;
 };
 
 struct _SysObjectClass {

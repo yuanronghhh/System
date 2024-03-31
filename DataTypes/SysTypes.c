@@ -2,6 +2,7 @@
 #include <System/DataTypes/SysHashTable.h>
 #include <System/DataTypes/SysHArray.h>
 #include <System/DataTypes/SysParam.h>
+#include <System/DataTypes/SysSList.h>
 #include <System/Utils/SysString.h>
 #include <System/Platform/Common/SysThread.h>
 
@@ -47,11 +48,16 @@ struct _TypeNode {
   SysUInt node_type;
   TypeData data;
 
-  SysUInt16 n_ifaces;
-  SysTypeInterface** ifaces;
-
   SysUInt n_supers;
   SysType supers[1]; // must be the last field
+};
+
+/* interface entry store on instance */
+struct  _IFaceEntry {
+  SysType iface_type;
+  SysType instance_type;
+  /* pointer to interface on class */
+  SysTypeInterface* iface_ptr;
 };
 
 static SysRefHook sys_object_unref_debug_func = NULL;
@@ -63,6 +69,8 @@ static SysMutex param_lock;
 static SysRecMutex class_init_rec_mutex;
 
 static SysHashTable* ht = NULL;
+static SysSList *g_iface_entries = NULL;
+
 static TypeNode* static_fundamental_type_nodes[(SYS_TYPE_FUNDAMENTAL_MAX >> SYS_TYPE_FUNDAMENTAL_SHIFT) + 1] = { NULL, };
 TypeNode * sys_make_fundamental_node(const TypeNode * pnode, SysType ftype, const SysTypeInfo * info);
 
@@ -431,25 +439,15 @@ void sys_type_ht_remove(TypeNode* node) {
 TypeNode* sys_type_make_node(const TypeNode* pnode, const SysTypeInfo *info, SysInt flags) {
   TypeNode* node;
   SysInt nodesize = 0;
-  SysInt pn_supers = 0;
+  SysUInt pn_supers = 0;
 
   if (pnode) {
+
     pn_supers = pnode->n_supers + 1;
   }
 
-  if (info->node_type & SYS_NODE_CLASS) {
-    if (info->class_size <= 0) {
-      sys_warning_N("class size must bigger than zero: %s", info->name);
-      return NULL;
-    }
-
-    if (info->class_init == NULL) {
-      sys_warning_N("class init must set: %s", info->name);
-      return NULL;
-    }
-  }
-
   nodesize = (SysInt)sizeof(TypeNode) + (SysInt)sizeof(SysType) * (pn_supers + 1);
+
   node = sys_malloc0_N(nodesize);
   node->node_type = info->node_type;
   node->name = sys_strdup(info->name);
@@ -469,9 +467,18 @@ TypeNode* sys_type_make_node(const TypeNode* pnode, const SysTypeInfo *info, Sys
     case SYS_NODE_FUNDAMENTAL:
       break;
     case SYS_NODE_ABSTRACT_CLASS:
-      break;
     case SYS_NODE_CLASS:
     case SYS_NODE_BASE_CLASS:
+      if (info->class_size <= 0) {
+        sys_warning_N("class size must bigger than zero: %s", info->name);
+        return NULL;
+      }
+
+      if (info->class_init == NULL) {
+        sys_warning_N("class init must set: %s", info->name);
+        return NULL;
+      }
+
       node->data.instance.instance_size = info->instance_size;
       node->data.instance.class_size = info->class_size;
       node->data.instance.class_init = info->class_init;
@@ -480,6 +487,16 @@ TypeNode* sys_type_make_node(const TypeNode* pnode, const SysTypeInfo *info, Sys
       sys_harray_init_with_free_func(&node->data.instance.props, (SysDestroyFunc)_sys_object_unref);
       break;
     case SYS_NODE_INTERFACE:
+      if (info->class_size < sizeof(SysTypeInterface)) {
+        sys_warning_N("interface must inherit SysTypeInterface: %s", info->name);
+        return NULL;
+      }
+
+      if (info->class_init == NULL) {
+        sys_warning_N("interface init must set: %s", info->name);
+        return NULL;
+      }
+
       node->data.iface.vtable_init = info->class_init;
       node->data.iface.vtable_size = info->class_size;
       break;
@@ -564,15 +581,6 @@ void sys_type_node_free(TypeNode *node) {
       }
       break;
     case SYS_NODE_INTERFACE:
-      if (node->n_ifaces > 0) {
-        for (SysInt i = 0; i < node->n_ifaces; i++) {
-
-          sys_clear_pointer(&node->ifaces[i], sys_free);
-        }
-
-        sys_free(node->ifaces);
-      }
-
       break;
     default:
       sys_abort_N("Not correct declare type when free node: %s", node->name);
@@ -615,6 +623,18 @@ void sys_type_class_adjust_private_offset (SysTypeClass *cls, SysInt * private_o
   sys_rw_lock_writer_unlock(&type_rw_lock);
 }
 
+static void iface_entry_add(IFaceEntry *entry) {
+
+  g_iface_entries = sys_slist_prepend(g_iface_entries, entry);
+}
+
+static void iface_entry_free(IFaceEntry *entry) {
+  sys_return_if_fail(entry != NULL);
+
+  sys_free_N(entry->iface_ptr);
+  sys_free_N(entry);
+}
+
 void sys_type_class_free(SysTypeClass *cls) {
   sys_return_if_fail(cls != NULL);
 
@@ -625,6 +645,11 @@ void sys_type_class_free(SysTypeClass *cls) {
   }
 
   if (cls != NULL) {
+    if(cls->n_ifaces > 0) {
+
+      sys_clear_pointer(&cls->ifaces, sys_free);
+    }
+
     sys_free_N(node->data.instance.class_ptr);
   }
 }
@@ -675,7 +700,6 @@ TypeNode *sys_type_node_ref(TypeNode *node) {
       }
       break;
     case SYS_NODE_INTERFACE:
-      sys_debug_N("%s", "ref interface");
       break;
     default:
       sys_abort_N("Not correct declare type for node: %s", node->name);
@@ -780,6 +804,9 @@ void sys_type_teardown(void) {
   ht = NULL;
   sys_rw_lock_clear(&type_rw_lock);
   sys_rec_mutex_clear(&class_init_rec_mutex);
+
+  sys_slist_free_full(g_iface_entries, (SysDestroyFunc)iface_entry_free);
+  g_iface_entries = NULL;
 }
 
 void sys_type_setup(void) {
@@ -816,11 +843,13 @@ SysBool sys_type_is_a(SysType child, SysType parent) {
   return NODE_IS_ANCESTOR(ancestor, node);
 }
 
-static SysTypeInterface *instance_get_interface(IFaceEntry **entries, SysUInt len, SysType iface_type) {
-  for (SysUInt j = 0; j < entries->n_ifaces; j++) {
-    SysTypeInterface* iface = node->ifaces[j];
+/* interface */
 
-    if (iface->type == iface_type) {
+static IFaceEntry* instance_get_interface(IFaceEntry **ifaces, SysUInt n_ifaces, SysType iface_type) {
+  for (SysUInt j = 0; j < n_ifaces; j++) {
+    IFaceEntry* iface = ifaces[j];
+
+    if (iface->iface_type == iface_type) {
       return iface;
     }
   }
@@ -828,17 +857,15 @@ static SysTypeInterface *instance_get_interface(IFaceEntry **entries, SysUInt le
   return NULL;
 }
 
-SysTypeInterface* sys_type_instance_get_iface(TypeNode *node, SysType iface_type) {
-  SysTypeInterface* iface;
-  TypeNode* nnode;
+SysTypeInterface* sys_type_class_get_iface(SysTypeClass *cls, SysType iface_type) {
+  IFaceEntry* entry;
 
-  for (SysUInt i = 0; i < node->n_supers; i++) {
-    nnode = sys_type_node(node->supers[i]);
-    iface = instance_get_interface(node->iface, iface_type);
+  for (SysUInt i = 0; i < cls->n_ifaces; i++) {
+    entry = instance_get_interface(cls->ifaces, cls->n_ifaces, iface_type);
 
-    if (iface != NULL) {
+    if (entry != NULL) {
 
-      return iface;
+      return entry->iface_ptr;
     }
   }
 
@@ -848,12 +875,13 @@ SysTypeInterface* sys_type_instance_get_iface(TypeNode *node, SysType iface_type
 SysTypeInterface* _sys_type_get_interface(SysTypeClass *cls, SysType iface_type) {
   sys_return_val_if_fail(cls != 0, NULL);
 
-  TypeNode *node = sys_type_node(cls->type);
-  TypeNode *face_node = sys_type_node(iface_type);
+  TypeNode *iface_node = sys_type_node(iface_type);
+  sys_return_val_if_fail(NODE_IS_IFACE(iface_node), NULL);
 
-  sys_return_val_if_fail(NODE_IS_IFACE(face_node), NULL);
+  if(iface_node) {
+  }
 
-  return sys_type_instance_get_iface(node, iface_type);
+  return sys_type_class_get_iface(cls, iface_type);
 }
 
 /**
@@ -864,19 +892,27 @@ void sys_type_imp_interface(SysType instance_type, SysType iface_type, const Sys
   sys_return_if_fail(iface_type > 0);
   sys_return_if_fail(info != NULL);
 
-  sys_rec_mutex_lock(&class_init_rec_mutex);
-  sys_rw_lock_writer_lock (&type_rw_lock);
-
-  SysTypeInterface* iface;
-  IFaceData* iface_data;
+  IFaceEntry* entry;
+  IFaceEntry** nmem;
   TypeNode *nnode;
+  TypeNode *iface_node;
+  TypeNode *node;
+  SysTypeInterface *iface_ptr;
+  SysTypeClass *cls, *pcls;
+  SysUInt8 n_entries;
 
-  TypeNode *node = sys_type_node (instance_type);
+  sys_rec_mutex_lock(&class_init_rec_mutex);
+  cls = sys_type_class_ref(instance_type);
+
+  sys_rw_lock_writer_lock (&type_rw_lock);
+  node = sys_type_node (instance_type);
   if (node == NULL || !(node->node_type & SYS_NODE_CLASS)) {
     sys_warning_N("instance type node not found when implement interface: %p", instance_type);
   }
+  pcls = sys_type_class_ref(NODE_PARENT(node));
+  n_entries = pcls->n_ifaces + cls->n_ifaces;
 
-  TypeNode *iface_node = sys_type_node (iface_type);
+  iface_node = sys_type_node (iface_type);
   if (iface_node == NULL) {
     sys_abort_N("interface node not found when implements interface: %p", iface_type);
   }
@@ -885,50 +921,53 @@ void sys_type_imp_interface(SysType instance_type, SysType iface_type, const Sys
     sys_abort_N("node is not interface type: %s,%s,%p", node->name, iface_node->name, iface_type);
   }
 
-  iface_data = &iface_node->data.iface;
-
   if(!info->interface_init) {
     sys_abort_N("interface init function required: %s,%s", node->name, iface_node->name);
   }
 
-  if (iface_data->vtable_size < sizeof(SysTypeInterface)) {
-    sys_abort_N("interface must inherit SysTypeInterface: %s,%s", node->name, iface_node->name);
-  }
-
-  iface_node = sys_type_node_ref(iface_node);
-
-  iface = sys_malloc0_N(iface_data->vtable_size);
-  iface->instance_type = instance_type;
-  iface->type = iface_type;
+  iface_ptr = sys_malloc0_N(iface_node->data.iface.vtable_size);
+  iface_ptr->type = iface_type;
 
   for(SysUInt i = 1; i < iface_node->n_supers; i++) {
     nnode = sys_type_node(iface_node->supers[i]);
 
     sys_assert((nnode->node_type & SYS_NODE_INTERFACE) && "iface inherit must be interface");
 
-    sys_type_node_ref(nnode);
-    sys_type_node_unref(nnode);
+    /* interface default init in parent. */
+    nnode->data.iface.vtable_init(iface_ptr);
   }
 
-  iface_data->vtable_init(iface);
-  info->interface_init(iface);
-  iface->vtable_ptr = iface;
+  iface_node->data.iface.vtable_init(iface_ptr);
 
-  sys_type_node_unref(iface_node);
+  entry = sys_malloc0_N(sizeof(IFaceEntry));
+  entry->instance_type = instance_type;
+  entry->iface_type = iface_type;
+  entry->iface_ptr = iface_ptr;
 
-  SysTypeInterface** nmem = sys_new0_N(SysTypeInterface *, node->n_ifaces + 1);
-  if (node->n_ifaces > 0) {
-    sys_memcpy (
-      nmem + 1, sizeof(SysTypeInterface*) * node->n_ifaces,
-      node->ifaces, sizeof(SysTypeInterface*) * node->n_ifaces);
+  nmem = sys_malloc0_N(sizeof(IFaceEntry *) * (n_entries + 1));
+  if (cls->n_ifaces > 0) {
+    /* ifaces = Ic + Iself + Iparent */
+    sys_memcpy(nmem + 1, sizeof(IFaceEntry *) * cls->n_ifaces, cls->ifaces, sizeof(IFaceEntry *) * cls->n_ifaces);
 
-    sys_clear_pointer(&node->ifaces, sys_free);
+    sys_clear_pointer(&cls->ifaces, sys_free);
   }
 
-  nmem[0] = iface;
-  node->n_ifaces += 1;
-  node->ifaces = nmem;
+  if (pcls->n_ifaces > 0) {
 
-  sys_rw_lock_writer_unlock(&type_rw_lock);
+    sys_memcpy(nmem + cls->n_ifaces + 1, sizeof(IFaceEntry *) * pcls->n_ifaces, pcls->ifaces, sizeof(IFaceEntry *) * pcls->n_ifaces);
+  }
+
+  cls->ifaces = nmem;
+  cls->ifaces[0] = entry;
+  cls->n_ifaces = n_entries + 1;
+  iface_entry_add(entry);
+
+  /* implements interface */
+  info->interface_init(iface_ptr);
+
+  sys_type_class_unref(cls);
+  sys_type_class_unref(pcls);
+
   sys_rec_mutex_unlock(&class_init_rec_mutex);
+  sys_rw_lock_writer_unlock(&type_rw_lock);
 }
