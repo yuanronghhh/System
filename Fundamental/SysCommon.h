@@ -33,7 +33,6 @@
 #include <stddef.h>
 #include <assert.h>
 #include <math.h>
-#include <pthread.h>
 #include <signal.h>
 
 #define UNUSED(o) ((void)o)
