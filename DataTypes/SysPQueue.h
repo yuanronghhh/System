@@ -18,8 +18,8 @@ struct _SysPNode {
 
 #define sys_pqueue_foreach(queue, node) sys_queue_foreach(queue, node)
 #define sys_pqueue_peek_head(queue) sys_queue_peek_head(queue)
-#define sys_pnode_next(o) (SYS_P_NODE(o)->parent.next)
-#define sys_pnode_prev(o) (SYS_P_NODE(o)->parent.prev)
+#define sys_pnode_next(o) ((SysPNode *)(SYS_P_NODE(o)->parent.next))
+#define sys_pnode_prev(o) ((SysPNode *)(SYS_P_NODE(o)->parent.prev))
 
 SysPQueue *sys_pqueue_new(void);
 void sys_pqueue_init(SysPQueue *queue);

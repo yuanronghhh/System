@@ -748,7 +748,7 @@ void sys_hnode_set_last_child(SysHNode *self, SysHNode * last_child) {
 }
 
 SysHNode * sys_hnode_get_last_child(SysHNode *self) {
-  sys_return_val_if_fail(self != NULL, NULL);
+  if (self == NULL) { return NULL; }
   sys_return_val_if_fail(HNODE_CHECK(self), NULL);
 
   return self->last_child;
@@ -781,6 +781,7 @@ void sys_hnode_set_parent(SysHNode *self, SysHNode *parent) {
 }
 
 SysHNode* sys_hnode_parent(SysHNode* self) {
+  if(self == NULL) { return NULL; }
   sys_return_val_if_fail(HNODE_CHECK(self), NULL);
 
   return self->parent;
