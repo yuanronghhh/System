@@ -26,6 +26,7 @@ extern "C" {
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <pthread.h>
 
 #define PATH_SEP "/"
 #ifndef MAX_PATH
