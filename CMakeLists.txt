@@ -123,7 +123,7 @@ set(SRC
 )
 
 add_dep_libs(System "${SRC}" "${INC}" "${INC_SYS}")
-add_subdirectory(TestSuite)
+target_copy_release_files(System)
 
 configure_file(${CMAKE_CURRENT_LIST_DIR}/SysConfig.h.in
   ${CMAKE_CURRENT_LIST_DIR}/SysConfig.h)
@@ -132,7 +132,7 @@ target_link_libraries(System
   ${OPENSSL_LIBRARIES}
   ${ADDTIONAL_LIBRARIES}
   ${DBG_LIBRAREIS}
-  ${VLD_LIBRAREIS}
+  ${VLD_LIBRARIES}
   ${UNITY_LIBRARIES}
 )
 set_property(TARGET System PROPERTY FOLDER CstProject)

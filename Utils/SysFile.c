@@ -117,12 +117,7 @@ SysInt sys_ungetc(SysInt c, FILE* fp) {
 }
 
 SysInt sys_fputs(FILE* const fp, SysChar const* s) {
-  SysInt len;
-  SYS_LEAK_IGNORE_BEGIN;
-    len = fputs(s, fp);
-  SYS_LEAK_IGNORE_END;
-
-  return len;
+  return fputs(s, fp);
 }
 
 SysInt sys_fprintf(FILE* const fp,SysChar const* const format, ...) {

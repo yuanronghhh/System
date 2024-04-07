@@ -168,13 +168,25 @@ SysPointer sys_real_dlopen(const SysChar *filename) {
   return handle;
 }
 
+SysPointer sys_real_dlmodule(const SysChar* name) {
+  sys_return_val_if_fail(name != NULL, NULL);
+
+  HMODULE handle = GetModuleHandle(name);
+  if (!handle) {
+    sys_warning_N("get module failed: %s.", name);
+    return NULL;
+  }
+
+  return handle;
+}
+
 SysPointer sys_real_dlsymbol(void *handle, const SysChar *symbol) {
   sys_return_val_if_fail(handle != NULL, NULL);
   sys_return_val_if_fail(symbol != NULL, NULL);
 
   SysPointer p = (SysPointer)GetProcAddress(handle, symbol);
   if (!p) {
-    sys_warning_N("dlsymbol failed: %s.", symbol);
+    sys_warning_N("dlsymbol failed: %p,%s.", handle, symbol);
     return NULL;
   }
 
@@ -184,7 +196,9 @@ SysPointer sys_real_dlsymbol(void *handle, const SysChar *symbol) {
 void sys_real_dlclose(void* handle) {
   sys_return_if_fail(handle != NULL);
 
-  FreeLibrary(handle);
+  if (!FreeLibrary(handle)) {
+    sys_warning_N("dlclose failed: %p", handle);
+  }
 }
 
 SysChar **sys_real_backtrace_string(SysInt *size) {
@@ -231,12 +245,10 @@ SysChar **sys_real_backtrace_string(SysInt *size) {
 }
 
 void sys_real_setup(void) {
-  SYS_LEAK_IGNORE_BEGIN;
   WSADATA info;
   if (WSAStartup(MAKEWORD(1, 1), &info) != 0) {
     sys_abort_N("%s", "WSAStartup() init for sockect failed");
   }
-  SYS_LEAK_IGNORE_END;
 }
 
 void sys_real_teardown(void) {

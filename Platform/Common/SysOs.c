@@ -295,6 +295,10 @@ void* sys_dlopen(const char *filename) {
   return sys_real_dlopen(filename);
 }
 
+void* sys_dlmodule(const char *name) {
+  return sys_real_dlmodule(name);
+}
+
 void* sys_dlsymbol(void *handle, const char *symbol) {
   return sys_real_dlsymbol(handle, symbol);
 }

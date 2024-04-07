@@ -131,9 +131,7 @@ void sys_socket_set_ssl(SysSocket* s, SSL* ssl) {
 }
 
 SysSocket *sys_socket_new_I(SysInt domain, SysInt type, SysInt protocol, SysBool noblocking) {
-  SYS_LEAK_IGNORE_BEGIN;
   SysSocket *ns = sys_socket_real_new_I(domain, type, protocol, noblocking);
-  SYS_LEAK_IGNORE_END;
 
   if (ns == NULL) {
     sys_warning_N("socket: %s", sys_socket_error());
