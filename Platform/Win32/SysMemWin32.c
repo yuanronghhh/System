@@ -17,7 +17,7 @@ void sys_real_memcpy(
 }
 
 void sys_real_leaks_init(void) {
-#if SYS_DEBUG && SYS_OS_WIN32
+#if SYS_OS_WIN32
   VLDSetOptions(VLD_OPT_SKIP_CRTSTARTUP_LEAKS
       | VLD_OPT_AGGREGATE_DUPLICATES
       | VLD_OPT_VALIDATE_HEAPFREE
@@ -26,7 +26,7 @@ void sys_real_leaks_init(void) {
 }
 
 void sys_real_leaks_report(void) {
-#if SYS_DEBUG && SYS_OS_WIN32
+#if SYS_OS_WIN32
   sys_print("Closing file handle for leak report.\n");
   sys_fcloseall();
 #if defined(SYS_LEAK_FILE)

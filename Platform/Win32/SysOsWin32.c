@@ -1,7 +1,7 @@
+#include <System/Platform/Common/SysOsPrivate.h>
 #include <System/Utils/SysString.h>
 #include <System/DataTypes/SysArray.h>
-#include <System/Platform/Common/SysThreadWin32.h>
-#include <System/Platform/Common/SysOsPrivate.h>
+#include <System/Platform/Common/SysThread.h>
 
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL,
@@ -11,14 +11,16 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,
 HMODULE win32dll;
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL,DWORD fdwReason, LPVOID lpvReserved) {
+  UNUSED(lpvReserved);
+
   switch (fdwReason) {
     case DLL_PROCESS_ATTACH:
       win32dll = hinstDLL;
-      sys_thread_win32_init();
+      sys_thread_init();
       break;
 
     case DLL_THREAD_DETACH:
-      sys_thread_win32_thread_detach ();
+      sys_thread_detach ();
       break;
 
     case DLL_PROCESS_DETACH:
@@ -28,10 +30,12 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,DWORD fdwReason, LPVOID lpvReserved) {
       break;
   }
 
-  return TRUE;
+  return true;
 }
 
 void sys_real_init_console(void) {
+  SetConsoleOutputCP(65001);
+
   CONSOLE_FONT_INFOEX cfi;
   cfi.cbSize = sizeof(cfi);
   cfi.nFont = 0;
@@ -40,9 +44,7 @@ void sys_real_init_console(void) {
   cfi.FontFamily = FF_DONTCARE;
   cfi.FontWeight = FW_NORMAL;
   wcscpy_s(cfi.FaceName, 9, L"Consolas");
-  SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi);
-
-  SetConsoleOutputCP(65001);
+  SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), false, &cfi);
 
   /* enable ansci color */
   SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), 7);
@@ -79,7 +81,7 @@ const SysChar *sys_real_get_env(const SysChar *var) {
   const SysChar *value;
   int len;
 
-  wname = sys_ansi_to_wchar(var);
+  wname = sys_mbyte_to_wchar(var, NULL);
   len = GetEnvironmentVariableW(wname, tmp, 2);
   if (len == 0) {
     sys_free_N(wname);
@@ -92,13 +94,13 @@ const SysChar *sys_real_get_env(const SysChar *var) {
 
   wvalue = sys_new_N(wchar_t, len);
 
-  if (GetEnvironmentVariableW(wname, wvalue, len) != len - 1) {
+  if ((int)GetEnvironmentVariableW(wname, wvalue, len) != (len - 1)) {
     sys_free_N(wname);
     sys_free_N(wvalue);
     return NULL;
   }
 
-  value = sys_wchar_to_ansi(wvalue);
+  value = sys_wchar_to_mbyte(wvalue, NULL);
 
   sys_free_N(wname);
   sys_free_N(wvalue);
@@ -115,13 +117,13 @@ bool sys_real_set_env(const SysChar *var, const SysChar *value) {
 
   vlen = strlen(var);
 
-  wname = sys_ansi_to_wchar(var);
-  wvalue = sys_ansi_to_wchar(value);
+  wname = sys_mbyte_to_wchar(var, NULL);
+  wvalue = sys_mbyte_to_wchar(value, NULL);
   nvar = sys_new0_N(SysChar, vlen + 2);
   sys_memcpy(nvar, vlen + 2, var, vlen);
   sys_memcpy(nvar + vlen, vlen + 2, "=", 1);
 
-  wvar = sys_ansi_to_wchar(nvar);
+  wvar = sys_mbyte_to_wchar(nvar, NULL);
   _wputenv(wvar);
 
   ret = (SetEnvironmentVariableW(wname, wvalue) != 0);
@@ -135,7 +137,7 @@ bool sys_real_set_env(const SysChar *var, const SysChar *value) {
   return ret;
 }
 
-SysUInt64 sys_real_get_monoic_time(void) {
+SysUInt64 sys_real_get_monotonic_time(void) {
   SysUInt64 ticks;
 
   ticks = GetTickCount64();
@@ -148,13 +150,13 @@ void sys_real_usleep(unsigned long mseconds) {
   Sleep(mseconds ? (1 + (mseconds - 1) / 1000) : 0);
 }
 
-void* sys_real_dlopen(const SysChar *filename) {
+SysPointer sys_real_dlopen(const SysChar *filename) {
   sys_return_val_if_fail(filename != NULL, NULL);
 
   HINSTANCE handle;
   wchar_t *wname;
 
-  wname = sys_ansi_to_wchar(filename);
+  wname = sys_mbyte_to_wchar(filename, NULL);
   handle = LoadLibraryW(wname);
   sys_free_N(wname);
 
@@ -166,11 +168,11 @@ void* sys_real_dlopen(const SysChar *filename) {
   return handle;
 }
 
-void* sys_real_dlsymbol(void *handle, const SysChar *symbol) {
+SysPointer sys_real_dlsymbol(void *handle, const SysChar *symbol) {
   sys_return_val_if_fail(handle != NULL, NULL);
   sys_return_val_if_fail(symbol != NULL, NULL);
 
-  void *p = GetProcAddress(handle, symbol);
+  SysPointer p = (SysPointer)GetProcAddress(handle, symbol);
   if (!p) {
     sys_warning_N("dlsymbol failed: %s.", symbol);
     return NULL;
@@ -198,7 +200,7 @@ SysChar **sys_real_backtrace_string(SysInt *size) {
   IMAGEHLP_LINE lineInfo = { sizeof(IMAGEHLP_LINE) };
   process = GetCurrentProcess();
 
-  SymInitialize(process, NULL, TRUE);
+  SymInitialize(process, NULL, true);
 
   frame_size = CaptureStackBackTrace(2, SYS_BACKTRACE_SIZE, stack, NULL);
   if (frame_size < 4) {
@@ -216,7 +218,7 @@ SysChar **sys_real_backtrace_string(SysInt *size) {
   for (i = 0; i < rsize; i++) {
     DWORD_PTR addr = (DWORD_PTR)stack[i];
 
-    SymGetSymFromAddr(process, addr, 0, symbol);
+    SymGetSymFromAddr64(process, addr, 0, symbol);
     SymGetLineFromAddr(process, addr, (DWORD *)&dp, &lineInfo);
 
     *p++ = sys_strdup_printf("%s:%d:%s - %p\n",  lineInfo.FileName, lineInfo.LineNumber, symbol->Name, symbol->Address);
@@ -229,8 +231,15 @@ SysChar **sys_real_backtrace_string(SysInt *size) {
 }
 
 void sys_real_setup(void) {
-  sys_thread_init();
+  SYS_LEAK_IGNORE_BEGIN;
+  WSADATA info;
+  if (WSAStartup(MAKEWORD(1, 1), &info) != 0) {
+    sys_abort_N("%s", "WSAStartup() init for sockect failed");
+  }
+  SYS_LEAK_IGNORE_END;
 }
 
 void sys_real_teardown(void) {
+  WSACleanup();
 }
+

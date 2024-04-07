@@ -1,7 +1,12 @@
+#include <System/Platform/Common/SysOs.h>
+
 #include <System/Utils/SysString.h>
 #include <System/Utils/SysError.h>
+#include <System/Utils/SysOpenSSL.h>
+#include <System/DataTypes/SysQuark.h>
 #include <System/DataTypes/SysArray.h>
 #include <System/DataTypes/SysTypes.h>
+#include <System/Platform/Common/SysThread.h>
 #include <System/Platform/Common/SysOsPrivate.h>
 
 #define  ALIGNOF_GUINT32 SYS_ALIGNOF (uint32_t)
@@ -45,8 +50,6 @@ struct msort_param
   void *arg;
   char *t;
 };
-
-static void msort_with_tmp(const struct msort_param *p, void *b, size_t n);
 
 static void msort_with_tmp(const struct msort_param *p, void *b, size_t n)
 {
@@ -173,7 +176,6 @@ static void msort_with_tmp(const struct msort_param *p, void *b, size_t n)
   memcpy(b, p->t, (n - n2) * s);
 }
 
-
 static void msort_r(void *b, size_t n, size_t s, SysCompareDataFunc cmp, void *arg)
 {
   size_t size = n * s;
@@ -269,7 +271,6 @@ void sys_qsort_with_data(const SysPointer  pbase,
   msort_r((SysPointer)pbase, total_elems, size, compare_func, user_data);
 }
 
-
 bool sys_console_is_utf8(void) {
   return sys_real_console_is_utf8();
 }
@@ -282,8 +283,8 @@ const char* sys_get_env(const char *var) {
   return sys_real_get_env(var);
 }
 
-SysUInt64 sys_get_monoic_time(void) {
-  return sys_real_get_monoic_time();
+SysUInt64 sys_get_monotonic_time(void) {
+  return sys_real_get_monotonic_time();
 }
 
 void sys_usleep(unsigned long mseconds) {
@@ -303,8 +304,7 @@ void sys_dlclose(void* handle) {
 }
 
 /**
- * sys_backtrace_string:
- *    get call stack at runtime, only works in debug mode.
+ * sys_backtrace_string: get call stack at runtime, only works in debug mode.
  *
  * @size: the stack size.
  *
@@ -314,26 +314,90 @@ SysChar **sys_backtrace_string(SysInt *size) {
   return sys_real_backtrace_string(size);
 }
 
-void sys_setup(void) {
-  if(inited) {
-    return;
+void sys_arg_init(SysSArg *self, SysInt argc, const SysChar* argv[]) {
+  sys_return_if_fail(self != NULL);
+  sys_return_if_fail(argv != NULL);
+
+  self->argc = argc;
+  self->argv = (SysChar **)argv;
+}
+
+static SysBool pflag_equal(const SysChar *pflag, const SysChar *key) {
+  sys_return_val_if_fail(pflag != NULL, false);
+  sys_return_val_if_fail(key != NULL, false);
+
+  if (*pflag != '-') {
+    return false;
   }
 
+  if (*(pflag + 1) == '-') {
+
+    return sys_strcmp(key, pflag + 2) == 0;
+  } else {
+
+    return sys_strcmp(key, pflag + 1) == 0;
+  }
+}
+
+int sys_arg_index(SysSArg *self, const SysChar *key, SysBool is_flag) {
+  sys_return_val_if_fail(self != NULL, -1);
+  sys_return_val_if_fail(key != NULL, -1);
+
+  const SysChar* arg;
+  if (self->argc < 2) {
+    return -1;
+  }
+
+  for (int i = 1; i < self->argc; i++) {
+    arg = self->argv[i];
+    if (!pflag_equal(arg, key)) {
+      continue;
+    }
+
+    if (is_flag) {
+      return i;
+    }
+
+    if (i >= self->argc) {
+      return -1;
+    }
+
+    if (self->argv[i + 1] == NULL) {
+      return -1;
+    }
+
+    if(*self->argv[i + 1] == '-') {
+      return -1;
+    }
+
+    return i + 1;
+  }
+
+  return -1;
+}
+
+void sys_setup(void) {
+  if(inited) {return;}
+
   sys_console_setup();
+  sys_quark_setup();
   sys_leaks_setup();
   sys_type_setup();
   sys_real_setup();
+  sys_thread_init();
+  sys_ssl_setup();
 
   inited = true;
 }
 
 void sys_teardown(void) {
-  if(!inited) {
-    return;
-  }
+  if(!inited) {return;}
 
+  sys_thread_detach();
   sys_real_teardown();
   sys_type_teardown();
+  sys_quark_teardown();
   sys_leaks_report();
+
   inited = false;
 }

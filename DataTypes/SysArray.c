@@ -371,27 +371,32 @@ SysBool sys_array_binary_search(SysArray        *array,
     sys_return_val_if_fail(_array != NULL, false);
     sys_return_val_if_fail(compare_func != NULL, false);
 
-    if (_array->len)
-    {
+    if (_array->len) {
         left = 0;
         right = _array->len - 1;
+        middle = 0;
 
-        while (left <= right)
-        {
+        while (left <= right) {
             middle = left + (right - left) / 2;
 
             val = compare_func(_array->data + (_array->elt_size * middle), target);
-            if (val == 0)
-            {
-                result = true;
-                break;
+            if (val == 0) {
+              result = true;
+              break;
+
+            } else if (val < 0) {
+              left = middle + 1;
+
+            } else if (/* val > 0 && */ middle > 0) {
+              right = middle - 1;
+
+            } else {
+              break;
             }
-            else if (val < 0)
-                left = middle + 1;
-            else if (/* val > 0 && */ middle > 0)
-                right = middle - 1;
-            else
-                break;          }
+        }
+
+    } else {
+      middle = 0;
     }
 
     if (result && out_match_index != NULL)
@@ -517,7 +522,7 @@ SysArray * sys_array_copy(SysArray *array) {
     sys_return_val_if_fail(rarray != NULL, NULL);
 
     new_rarray =
-        (SysRealArray *)sys_array_sized_new(rarray->zero_terminated, rarray->clear,
+        (SysRealArray *)sys_array_sized_new((SysBool)rarray->zero_terminated, (SysBool)rarray->clear,
             rarray->elt_size, rarray->alloc / rarray->elt_size);
     new_rarray->len = rarray->len;
     if (rarray->len > 0)
@@ -996,4 +1001,17 @@ SysByteArray* sys_byte_array_remove_range(SysByteArray *array,
     sys_return_val_if_fail(index_ + length <= array->len, NULL);
 
     return (SysByteArray *)sys_array_remove_range((SysArray *)array, index_, length);
+}
+
+
+void sys_ptr_array_sort(SysPtrArray* array, SysCompareFunc  compare_func) {
+  sys_return_if_fail(array != NULL);
+
+  /* Don't use qsort as we want a guaranteed stable sort */
+  if (array->len > 0)
+    sys_qsort_with_data(array->pdata,
+      array->len,
+      sizeof(SysPointer),
+      (SysCompareDataFunc)compare_func,
+      NULL);
 }

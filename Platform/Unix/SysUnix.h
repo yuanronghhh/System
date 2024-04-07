@@ -5,7 +5,10 @@
 extern "C" {
 #endif
 
+#if !defined(_GNU_SOURCE)
 #define _GNU_SOURCE
+#endif
+
 #include <features.h>
 #include <signal.h>
 #include <spawn.h>
@@ -18,6 +21,12 @@ extern "C" {
 #include <libintl.h>
 #include <X11/Xlib.h>
 #include <execinfo.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <pthread.h>
 
 #define PATH_SEP "/"
 #ifndef MAX_PATH

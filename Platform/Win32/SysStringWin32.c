@@ -1,49 +1,58 @@
 #include <System/Utils/SysError.h>
-#include <System/Utils/SysStringPrivate.h>
+#include <System/Utils/SysString.h>
 
-SysChar *sys_real_wchar_to_ansi(const SysWChar *uni) {
+SysChar *sys_wchar_to_mbyte(const SysWChar *wchar, int *nsize) {
   int size;
   SysChar *nstr;
 
-  size = WideCharToMultiByte(CP_ACP, 0, uni, -1, NULL, 0, NULL, NULL);
-  nstr = (SysChar *)malloc(size * sizeof(SysChar));
-  WideCharToMultiByte(CP_ACP, 0, uni, -1, nstr, size, NULL, NULL);
+  size = WideCharToMultiByte(CP_UTF8, 0, wchar, -1, NULL, 0, NULL, NULL);
+  nstr = (SysChar *)malloc((size + 1) + sizeof(SysChar));
+  nstr[size] = '\0';
+
+  WideCharToMultiByte(CP_UTF8, 0, wchar, -1, nstr, size, NULL, NULL);
+  if (nsize) {
+    *nsize = size + 1;
+  }
 
   return nstr;
 }
 
-SysWChar *sys_real_ansi_to_wchar(const SysChar *ansi) {
+SysWChar *sys_mbyte_to_wchar(const SysChar *mbyte, int *nsize) {
   int size;
   SysWChar *wstr;
 
-  size = MultiByteToWideChar(CP_ACP, 0, ansi, -1, NULL, 0);
-  wstr = (SysWChar *)malloc(size * sizeof(SysWChar));
-  MultiByteToWideChar(CP_ACP, 0, ansi, -1, wstr, size);
+  size = MultiByteToWideChar(CP_UTF8, 0, mbyte, -1, NULL, 0);
+  wstr = (SysWChar *)malloc((size + 1) * sizeof(SysWChar));
+  MultiByteToWideChar(CP_UTF8, 0, mbyte, -1, wstr, size);
+
+  if (nsize) {
+    *nsize = size + 1;
+  }
 
   return wstr;
 }
 
-void sys_real_strcpy(SysChar *__restrict dst, const SysChar *__restrict src) {
-	SysSize n = strlen(src);
-	memcpy(dst, src, n);
-	dst[n] = '\0';
+void sys_strcpy(SysChar *__restrict dst, const SysChar *__restrict src) {
+  SysSize n = strlen(src);
+  memcpy(dst, src, n);
+  dst[n] = '\0';
 }
 
-SysChar *sys_real_strncpy(SysChar *dst, SysSize n, const SysChar *src) {
-	memcpy(dst, src, n);
-	dst[n] = '0';
-	return dst;
+SysChar *sys_strncpy(SysChar * __restrict dst, const SysChar * __restrict src, SysSize n) {
+  memcpy(dst, src, n);
+  dst[n] = '\0';
+  return dst;
 }
 
-int sys_real_vsprintf(SysChar *str, SysSize size, const SysChar *format, va_list args) {
+int sys_vsprintf(SysChar *str, SysSize size, const SysChar *format, va_list args) {
   return vsprintf_s(str, size, format, args);
 }
 
-int sys_real_vprintf(const SysChar *format, va_list va) {
+int sys_vprintf(const SysChar *format, va_list va) {
   return vprintf_s(format, va);
 }
 
-int sys_real_vasprintf(SysChar **ptr, const SysChar *format, va_list va) {
+int sys_vasprintf(SysChar **ptr, const SysChar *format, va_list va) {
   int len;
 
   len = _vscprintf_p(format, va) + 1;

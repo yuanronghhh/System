@@ -20,8 +20,8 @@ void _sys_clear_pointer(void **pp, SysDestroyFunc destroy) {
 
   _p = *pp;
   if (_p) {
-    destroy(_p);
     *pp = NULL;
+    destroy(_p);
   }
 }
 
@@ -32,9 +32,7 @@ SysPointer sys_realloc(void *mem, SysSize size) {
     nmem = realloc(mem, size);
     if (nmem) { return nmem; }
 
-    if (nmem == NULL) {
-      sys_abort_N("%s", "realloc failed.");
-    }
+    sys_error_N("%s", "realloc failed.");
   }
 
   if (mem) {
@@ -49,7 +47,7 @@ SysPointer sys_realloc(void *mem, SysSize size) {
 void sys_free(void *block) {
 #if !defined(NO_FREE_CHECK) || !NO_FREE_CHECK
   if (block == NULL) {
-    sys_warning_N("%s", "sys_free is null.");
+    sys_warning_N("%s", "sys_free block is null.");
     return;
   }
 #endif
@@ -57,11 +55,21 @@ void sys_free(void *block) {
   free(block);
 }
 
+SysPointer sys_calloc(SysSize count, SysSize size) {
+  void* b = calloc(count, size);
+
+  if (b == NULL) {
+    sys_error_N("%s", "sys_calloc run failed.");
+  }
+
+  return b;
+}
+
 SysPointer sys_malloc(SysSize size) {
   void *b = malloc(size);
 
   if(b == NULL) {
-    sys_abort_N("%s", "sys_malloc run failed.");
+    sys_error_N("%s", "sys_malloc run failed.");
   }
 
   return b;

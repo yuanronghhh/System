@@ -5,26 +5,18 @@
 
 SYS_BEGIN_DECLS
 
-#if SYS_DEBUG
-  #if SYS_OS_WIN32
-    #define _DEBUG 1
-    #include "vld.h"
-    #define SYS_LEAK_IGNORE_BEGIN VLDGlobalDisable()
-    #define SYS_LEAK_IGNORE_END VLDGlobalEnable()
-
-    #define SYS_LEAK_DISABLE VLDGlobalDisable()
-    #define SYS_LEAK_ENABLE VLDGlobalEnable()
-  #else
-    #define SYS_LEAK_IGNORE_BEGIN
-    #define SYS_LEAK_IGNORE_END
-    #define SYS_LEAK_DISABLE
-    #define SYS_LEAK_ENABLE
-  #endif
+#if SYS_OS_WIN32
+  #define _DEBUG 1
+  #include "vld.h"
+  #define SYS_LEAK_IGNORE_BEGIN VLDGlobalDisable()
+  #define SYS_LEAK_IGNORE_END VLDGlobalEnable()
+  #define SYS_LEAK_DISABLE VLDDisable()
+  #define SYS_LEAK_ENABLE VLDRestore()
 #else
-    #define SYS_LEAK_IGNORE_BEGIN
-    #define SYS_LEAK_IGNORE_END
-    #define SYS_LEAK_DISABLE
-    #define SYS_LEAK_ENABLE
+  #define SYS_LEAK_IGNORE_BEGIN
+  #define SYS_LEAK_IGNORE_END
+  #define SYS_LEAK_DISABLE
+  #define SYS_LEAK_ENABLE
 #endif
 
 #define sys_align_up(o, base) (((o)+ (base - 1)) & ~((base) - 1))
@@ -64,6 +56,7 @@ SYS_API void sys_memcpy(
 
 
 SYS_API SysPointer sys_realloc(void *block, SysSize size);
+SYS_API SysPointer sys_calloc(SysSize count, SysSize size);
 SYS_API SysPointer sys_malloc(SysSize size);
 SYS_API void sys_free(void *block);
 SYS_API SysPointer sys_malloc0(SysSize size);

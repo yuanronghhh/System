@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-void sys_thread_win32_init (void);
+void sys_thread_win32_thread_detach (void);
 
 #ifdef __cplusplus
 }

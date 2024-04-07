@@ -17,80 +17,73 @@ static SYS_INLINE SysChar* get_color(SYS_LOG_LEVEL level) {
 
 void sys_break(void) {
 
-#if SYS_DEBUG
-  #if SYS_OS_WIN32
-    DebugBreak();
-  #endif
+#if SYS_OS_WIN32
+  DebugBreak();
+#endif
 
-  #if SYS_OS_UNIX
-    // __asm__ __volatile__("int $03");
-    raise(SIGTRAP);
-  #endif
+#if SYS_OS_UNIX
+  // __asm__ __volatile__("int $03");
+  raise(SIGTRAP);
 #endif
 }
 
-static void sys_vlog(SYS_ARGS_N FILE* std, SYS_LOG_LEVEL level, const SysChar* format, va_list args) {
+static void sys_vlog(SYS_LOG_ARGS_N FILE* std, SYS_LOG_LEVEL level, const SysChar* format, va_list args) {
+  SYS_LEAK_IGNORE_BEGIN;
   sys_fprintf(std, "%s[%s:%d] ", get_color(level), _funcname, _line);
   sys_vfprintf(std, format, args);
   sys_fprintf(std, "%s\n", get_color(SYS_LOG_RESET));
+  SYS_LEAK_IGNORE_END;
 }
 
-void sys_log(SYS_ARGS_N FILE* std, SYS_LOG_LEVEL level, const SysChar* format, ...) {
+void sys_log(SYS_LOG_ARGS_N FILE* std, SYS_LOG_LEVEL level, const SysChar* format, ...) {
   va_list args;
   va_start(args, format);
-  sys_vlog(SYS_ARGS_P(sys_vlog, format) std, level, format, args);
+  sys_vlog(SYS_LOG_ARGS_P(sys_vlog, format) std, level, format, args);
   va_end(args);
 }
 
-void sys_warning(SYS_ARGS_N const SysChar* format, ...) {
+void sys_warning(SYS_LOG_ARGS_N const SysChar* format, ...) {
   va_list args;
   va_start(args, format);
-  sys_vlog(SYS_ARGS_P(sys_vlog, format) stderr, SYS_LOG_WARNING, format, args);
+  sys_vlog(SYS_LOG_ARGS_P(sys_vlog, format) stderr, SYS_LOG_WARNING, format, args);
   va_end(args);
 
-#if SYS_DEBUG
   sys_break();
-#endif
 }
 
-void sys_abort(SYS_ARGS_N const SysChar* format, ...) {
+void sys_abort(SYS_LOG_ARGS_N const SysChar* format, ...) {
   va_list args;
   va_start(args, format);
 
-  sys_verror(SYS_ARGS_P(sys_error, format) format, args);
+  sys_verror(SYS_LOG_ARGS_P(sys_error, format) format, args);
   va_end(args);
 
   abort();
 }
 
-void sys_exit(SYS_ARGS_N SysInt exitcode, const SysChar* format, ...) {
+void sys_exit(SYS_LOG_ARGS_N SysInt exitcode, const SysChar* format, ...) {
   va_list args;
   va_start(args, format);
 
-  sys_verror(SYS_ARGS_P(sys_error, format) format, args);
+  sys_verror(SYS_LOG_ARGS_P(sys_error, format) format, args);
   va_end(args);
 
   exit(exitcode);
 }
 
-void sys_error(SYS_ARGS_N const SysChar* format, ...) {
+void sys_error(SYS_LOG_ARGS_N const SysChar* format, ...) {
   va_list args;
   va_start(args, format);
 
-  sys_verror(SYS_ARGS_P(sys_error, format) format, args);
+  sys_verror(SYS_LOG_ARGS_P(sys_error, format) format, args);
 
   va_end(args);
 }
 
-void sys_verror(SYS_ARGS_N const SysChar* format, va_list args) {
-  sys_vlog(SYS_ARGS_P(sys_log, msg) stderr, SYS_LOG_ERROR, format, args);
-
-#if SYS_DEBUG
-  const SysChar *err = sys_strerr(errno);
-  UNUSED(err);
+void sys_verror(SYS_LOG_ARGS_N const SysChar* format, va_list args) {
+  sys_vlog(SYS_LOG_ARGS_P(sys_log, msg) stderr, SYS_LOG_ERROR, format, args);
 
   sys_break();
-#endif
 }
 
 SysError* sys_error_new(void) {
@@ -101,7 +94,7 @@ SysError* sys_error_new(void) {
   return nerror;
 }
 
-void sys_error_set(SYS_ARGS_N SysError* *err, const SysChar* format, ...) {
+void sys_error_set(SYS_LOG_ARGS_N SysError**err, const SysChar* format, ...) {
   sys_return_if_fail(err != NULL);
   sys_return_if_fail(*err == NULL);
 
@@ -111,8 +104,8 @@ void sys_error_set(SYS_ARGS_N SysError* *err, const SysChar* format, ...) {
     sys_free_N((*err)->message);
     nerror = (*err);
   } else {
-      nerror = sys_error_new();
-      *err = nerror;
+    nerror = sys_error_new();
+    *err = nerror;
   }
 
   nerror->func = _funcname;
@@ -137,11 +130,11 @@ void sys_error_free(SysError* err) {
 }
 
 /**
- * sys_strerr: get recognized string from errno.
+ * sys_strerror: get recognized string from errno.
  * @errnum: errno
  *
  * Returns: void
  */
-const SysChar* sys_strerr(SysInt errnum) {
+const SysChar* sys_strerror(SysInt errnum) {
   return sys_real_strerr(errnum);
 }

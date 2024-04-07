@@ -1,5 +1,5 @@
+#include <System/Utils/SysFile.h>
 #include <System/Utils/SysString.h>
-#include <System/Utils/SysFilePrivate.h>
 
 #define LINE_BLOCK 512
 
@@ -116,23 +116,6 @@ SysInt sys_ungetc(SysInt c, FILE* fp) {
   return ungetc(c, fp);
 }
 
-FILE* sys_fopen(const SysChar* filename, const SysChar* mode) {
-  return sys_real_fopen(filename, mode);
-}
-
-SysSize sys_fread(
-    void*  buffer,
-    SysSize bufsize,
-    SysSize elem_size,
-    SysSize elem_count,
-    FILE*  fp) {
-  return sys_real_fread(buffer, bufsize, elem_size, elem_count, fp);
-}
-
-SysInt sys_open(SysChar* filename, SysInt flags, SysInt mode) {
-  return sys_real_open(filename, flags, mode);
-}
-
 SysInt sys_fputs(FILE* const fp, SysChar const* s) {
   SysInt len;
   SYS_LEAK_IGNORE_BEGIN;
@@ -156,12 +139,7 @@ SysInt sys_fprintf(FILE* const fp,SysChar const* const format, ...) {
 }
 
 SysInt sys_vfprintf(FILE* const fp, SysChar const* const format,va_list args) {
-  SysInt len;
-  SYS_LEAK_IGNORE_BEGIN;
-    len = vfprintf(fp, format, args);
-  SYS_LEAK_IGNORE_END;
-
-  return len;
+  return vfprintf(fp, format, args);
 }
 
 void sys_fclose(FILE* fp) {
@@ -170,10 +148,60 @@ void sys_fclose(FILE* fp) {
   fclose(fp);
 }
 
-void sys_fcloseall(void) {
-  sys_real_fcloseall();
-}
+SysBool sys_file_get_contents (const SysChar *filename,
+                     SysChar       **contents,
+                     SysSize       *length,
+                     SysError      **error) {
 
-const SysChar* sys_exe_path(void) {
-  return sys_real_exe_path();
+  sys_return_val_if_fail (filename != NULL, false);
+  sys_return_val_if_fail (length != NULL, false);
+
+  struct stat st;
+  int fd;
+  SysSize offset;
+  SysSSize nread;
+  SysChar *content = NULL;
+
+  fd = sys_open(filename, O_RDONLY, S_IREAD);
+  if(fd == -1) {
+    sys_error_set_N(error, "open file failed: %s", filename);
+    goto fail;
+  }
+
+  if (fstat(fd, &st) != 0) {
+    sys_error_set_N(error, "fstate failed: %s", filename);
+    goto fail;
+  }
+
+  content = sys_malloc_N(st.st_size + 1);
+  offset = 0;
+  do {
+    nread = sys_read(fd, content + offset, st.st_size - offset);
+
+    if (nread < 0) {
+      goto fail;
+    }
+    
+    if (nread > 0) {
+      offset += nread;
+    }
+  } while ((nread > 0 && offset < (SysSize)st.st_size) || (nread == -1 && errno == EINTR));
+
+#if SYS_OS_WIN32
+  *length = offset;
+  content[offset] = '\0';
+#else
+  *length = st.st_size;
+  content[st.st_size] = '\0';
+#endif
+
+  *contents = content;
+  return true;
+fail:
+  if(content != NULL) {
+    sys_free_N(content);
+  }
+
+  sys_close(fd);
+  return false;
 }

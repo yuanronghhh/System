@@ -17,7 +17,7 @@ SysChar *sys_getcwd(void) {
  *
  * Returns: void
  */
-bool sys_path_escape(SysChar *buf) {
+SysBool sys_path_escape(SysChar *buf) {
   // FIXME: better escape function
   return sys_str_override_c(buf, '\\', '/');
 }
@@ -35,7 +35,7 @@ SysChar* sys_path_dirname(const SysChar *path) {
   return sys_strndup(path, len - 1);
 }
 
-bool sys_path_exists(const SysChar *path) {
+SysBool sys_path_exists(const SysChar *path) {
   return sys_real_path_exists(path);
 }
 
@@ -94,4 +94,8 @@ SysChar* sys_path_purename(const SysChar *path) {
   SysInt len = (SysInt)(sys_path_extension(path) - path);
 
   return sys_strndup(path, len - 1);
+}
+
+SysBool sys_path_is_absolute(const SysChar *path) {
+  return sys_real_path_is_absolute(path);
 }

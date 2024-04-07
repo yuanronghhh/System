@@ -1,7 +1,7 @@
+#include <System/Utils/SysString.h>
 #include <System/Utils/SysError.h>
 #include <System/Platform/Common/SysOs.h>
 #include <System/Platform/Common/SysMem.h>
-#include <System/Utils/SysStringPrivate.h>
 
 #define SYS_BYTE_INIT_SIZE 4096
 
@@ -23,7 +23,7 @@ SysChar **sys_strsplit(SysChar * s, const SysChar *delim, int * count) {
     delLen = strlen(delim);
   *count = 1;
 
-  while ((_s = strstr(_s, delim))) {
+  while ((_s = strstr(_s, delim)) != NULL) {
     _s += delLen;
     ++*count;
   }
@@ -35,7 +35,7 @@ SysChar **sys_strsplit(SysChar * s, const SysChar *delim, int * count) {
     *ptrs = _s = ((SysChar *)data) + ptrsSize;
 
     if (*count > 1) {
-      while ((_s = strstr(_s, delim))) {
+      while ((_s = strstr(_s, delim)) != NULL) {
         *_s = '\0';
         _s += delLen;
         *++ptrs = _s;
@@ -196,9 +196,6 @@ SysChar* sys_strndup(const SysChar *s, SysSize len) {
  *
  * Returns: void
  */
-int sys_vasprintf(SysChar **str, const SysChar *format, va_list va) {
-  return sys_real_vasprintf(str, format, va);
-}
 
 /**
  * sys_asprintf: create new format string, *str must NULL.
@@ -219,14 +216,6 @@ int sys_asprintf(SysChar **str, const SysChar *format, ...) {
 
   va_end(args);
 
-  return len;
-}
-
-int sys_vprintf(const SysChar *format, va_list va) {
-  int len;
-  SYS_LEAK_IGNORE_BEGIN;
-      len = sys_real_vprintf(format, va);
-  SYS_LEAK_IGNORE_END;
   return len;
 }
 
@@ -280,26 +269,11 @@ int sys_snprintf(SysChar *str, SysSize size, const SysChar *format, ...) {
   va_list args;
   va_start(args, format);
 
-  len = sys_real_vsprintf(str, size, format, args);
+  len = sys_vsprintf(str, size, format, args);
 
   va_end(args);
 
   return len;
-}
-
-/**
- * sys_strcpy: copy str to dst
- * @dst: dst string.
- * @src: src string.
- *
- * Returns: void
- */
-void sys_strcpy(SysChar *__restrict dst, const SysChar *__restrict src) {
-  sys_real_strcpy(dst, src);
-}
-
-void sys_strncpy(SysChar *__restrict dst, SysSize n, const SysChar *__restrict src) {
-  sys_real_strncpy(dst, n, src);
 }
 
 /**
@@ -487,7 +461,7 @@ SysChar *sys_strupper(SysChar *s) {
 
   SysUChar *ns = (SysUChar *)s;
   for (; *ns; ns++) {
-    *ns = toupper(*ns);
+    *ns = (SysUChar)toupper(*ns);
   }
 
   return s;
@@ -498,7 +472,7 @@ SysChar *sys_strlower(SysChar *s) {
 
   SysUChar *ns = (SysUChar *)s;
   for (;*ns; ns++) {
-    *ns = tolower(*ns);
+    *ns = (SysUChar)tolower(*ns);
   }
 
   return s;
@@ -551,18 +525,6 @@ SysInt64 sys_str_to_int64(const SysChar *str) {
   sys_return_val_if_fail(str != NULL, 0);
 
   return strtol(str, NULL, 10);
-}
-
-SysChar *sys_wchar_to_ansi(const SysWChar *uni) {
-  sys_return_val_if_fail(uni != NULL, NULL);
-
-  return sys_real_wchar_to_ansi(uni);
-}
-
-SysWChar *sys_ansi_to_wchar(const SysChar *ansi) {
-  sys_return_val_if_fail(ansi != NULL, NULL);
-
-  return sys_real_ansi_to_wchar(ansi);
 }
 
 /**

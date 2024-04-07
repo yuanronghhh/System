@@ -4,7 +4,9 @@ set(INC
 
 set(INC_SYS
   ${PTHREAD_INCLUDE_DIRS}
+  ${UNITY_INCLUDE_DIRS}
   ${VLD_INCLUDE_DIRS}
+  ${OPENSSL_INCLUDE_DIRS}
 )
 
 set(UNIX_SYS_SRC
@@ -18,6 +20,7 @@ set(UNIX_SYS_SRC
   ./Platform/Unix/SysAtomicUnix.c
   ./Platform/Unix/SysProcessUnix.c
   ./Platform/Unix/SysPathUnix.c
+  ./Platform/Unix/SysSocketUnix.c
 )
 set(WIN32_SYS_SRC
   ./Platform/Win32/SysFileWin32.c
@@ -30,6 +33,7 @@ set(WIN32_SYS_SRC
   ./Platform/Win32/SysThreadWin32.c
   ./Platform/Win32/SysWin32.h
   ./Platform/Win32/SysProcessWin32.c
+  ./Platform/Win32/SysSocketWin32.c
 )
 
 if(UNIX)
@@ -43,8 +47,13 @@ set(SRC
 
   ./DataTypes/SysNode.h
   ./DataTypes/SysNode.c
+  ./DataTypes/SysHNode.h
+  ./DataTypes/SysHNode.c
   ./DataTypes/SysTree.h
   ./DataTypes/SysTree.c
+
+  ./DataTypes/SysHArray.h
+  ./DataTypes/SysHArray.c
 
   ./DataTypes/SysBHeap.h
   ./DataTypes/SysBHeap.c
@@ -58,15 +67,19 @@ set(SRC
   ./DataTypes/SysSList.c
   ./DataTypes/SysQueue.h
   ./DataTypes/SysQueue.c
+  ./DataTypes/SysPQueue.h
+  ./DataTypes/SysPQueue.c
   ./DataTypes/SysValue.h
   ./DataTypes/SysValue.c
   ./DataTypes/SysTypes.h
   ./DataTypes/SysTypes.c
+  ./DataTypes/SysParam.h
+  ./DataTypes/SysParam.c
+  ./DataTypes/SysQuark.h
+  ./DataTypes/SysQuark.c
 
   ./Utils/SysFile.h
-  ./Utils/SysFilePrivate.h
   ./Utils/SysFile.c
-  ./Utils/SysStringPrivate.h
   ./Utils/SysString.h
   ./Utils/SysString.c
   ./Utils/SysPathPrivate.h
@@ -77,6 +90,8 @@ set(SRC
   ./Utils/SysError.c
   ./Utils/SysTextIO.h
   ./Utils/SysTextIO.c
+  ./Utils/SysOpenSSL.h
+  ./Utils/SysOpenSSL.c
 
   ./Platform/Common/SysMemPrivate.h
   ./Platform/Common/SysMem.h
@@ -86,13 +101,13 @@ set(SRC
   ./Platform/Common/SysOs.h
   ./Platform/Common/SysOs.c
   ./Platform/Common/SysAtomic.h
-  ./Platform/Common/SysAtomicPrivate.h
   ./Platform/Common/SysAtomic.c
-
-  # thread not worked
-  ./Platform/Common/SysThread.h
-  ./Platform/Common/SysThreadPrivate.h
   ./Platform/Common/SysThread.c
+  ./Platform/Common/SysThread.h
+  ./Platform/Common/SysSocket.c
+  ./Platform/Common/SysSocket.h
+  ./Platform/Common/SysSocketPrivate.h
+  ./Platform/Common/SysThreadPrivate.h
 
   ./Platform/Common/SysProcess.c
   ./Platform/Common/SysProcess.h
@@ -100,6 +115,7 @@ set(SRC
 
   ./Fundamental/SysCommonCore.h
   ./Fundamental/SysCommon.h
+  ./Fundamental/SysCommon.c
 
   ./SysConfig.h
   ./SysConfig.h.in
@@ -107,12 +123,16 @@ set(SRC
 )
 
 add_dep_libs(System "${SRC}" "${INC}" "${INC_SYS}")
+add_subdirectory(TestSuite)
 
 configure_file(${CMAKE_CURRENT_LIST_DIR}/SysConfig.h.in
   ${CMAKE_CURRENT_LIST_DIR}/SysConfig.h)
 
 target_link_libraries(System
-  ${PTHREAD_LIBRARIES}
+  ${OPENSSL_LIBRARIES}
+  ${ADDTIONAL_LIBRARIES}
   ${DBG_LIBRAREIS}
+  ${VLD_LIBRAREIS}
+  ${UNITY_LIBRARIES}
 )
 set_property(TARGET System PROPERTY FOLDER CstProject)

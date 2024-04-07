@@ -14,7 +14,7 @@ SysList* sys_list_new(void) {
 void sys_list_free_full(SysList  *list, SysDestroyFunc func) {
   sys_list_foreach(list, node) {
     func(node->data);
-  };
+  }
 
   sys_list_free(list);
 }

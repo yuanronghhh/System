@@ -3,9 +3,7 @@
  * see: ftp://ftp.gtk.org/pub/gtk/
  * license under GNU Lesser General Public
  */
-
-#include "SysNode.h"
-#include "SysTree.h"
+#include <System/DataTypes/SysTree.h>
 
 #define MAX_SYSTREE_HEIGHT 40
 
@@ -1006,17 +1004,17 @@ static SysTreeNode* sys_tree_node_rotate_left (SysTreeNode *node) {
 
   if (b_bal <= 0) {
       if (a_bal >= 1)
-        right->balance = b_bal - 1;
+        right->balance = (SysInt8)(b_bal - 1);
       else
-        right->balance = a_bal + b_bal - 2;
-      node->balance = a_bal - 1;
+        right->balance = (SysInt8)(a_bal + b_bal - 2);
+      node->balance = (SysInt8)(a_bal - 1);
     }
   else {
       if (a_bal <= b_bal)
-        right->balance = a_bal - 2;
+        right->balance = (SysInt8)a_bal - 2;
       else
-        right->balance = b_bal - 1;
-      node->balance = a_bal - b_bal - 1;
+        right->balance = (SysInt8)b_bal - 1;
+      node->balance = (SysInt8)(a_bal - b_bal - 1);
     }
 
   return right;
@@ -1043,17 +1041,17 @@ static SysTreeNode* sys_tree_node_rotate_right (SysTreeNode *node) {
 
   if (b_bal <= 0) {
       if (b_bal > a_bal)
-        left->balance = b_bal + 1;
+        left->balance = (SysInt8)(b_bal + 1);
       else
-        left->balance = a_bal + 2;
-      node->balance = a_bal - b_bal + 1;
+        left->balance = (SysInt8)a_bal + 2;
+      node->balance = (SysInt8)(a_bal - b_bal + 1);
     }
   else {
       if (a_bal <= -1)
-        left->balance = b_bal + 1;
+        left->balance = (SysInt8)b_bal + 1;
       else
-        left->balance = a_bal + b_bal + 2;
-      node->balance = a_bal + 1;
+        left->balance = (SysInt8)(a_bal + b_bal + 2);
+      node->balance = (SysInt8)a_bal + 1;
     }
 
   return left;

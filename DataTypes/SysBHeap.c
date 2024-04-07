@@ -1,4 +1,4 @@
-#include <System/DataTypes/SysArray.h>
+#include <System/DataTypes/SysHArray.h>
 #include <System/DataTypes/SysBHeap.h>
 
 /**
@@ -6,34 +6,94 @@
  * http://eloquentjavascript.net/appendix2.html
  */
 
-struct _SysBHeap {
-  SysPtrArray *array;
-  SysBHeapFunc score_func;
-};
+void sys_bheap_destroy(SysBHeap *hp) {
+  sys_harray_destroy(&hp->array);
+}
 
 void sys_bheap_free(SysBHeap *hp, SysBool free_segment) {
   sys_return_if_fail(hp != NULL);
-  SysPtrArray *array = hp->array;
 
-  sys_ptr_array_free(array, free_segment);
+  sys_bheap_destroy(hp);
 
   sys_free_N(hp);
+}
+
+void sys_bheap_init(SysBHeap *hp, SysBHeapFunc func, SysDestroyFunc node_free) {
+  hp->score_func = func;
+  sys_harray_init_with_free_func(&hp->array, node_free);
 }
 
 SysBHeap *sys_bheap_new(SysBHeapFunc func, SysDestroyFunc node_free) {
   SysBHeap *hp = sys_new0_N(SysBHeap, 1);
 
-  hp->score_func = func;
-  hp->array = sys_ptr_array_new_with_free_func(node_free);
+  sys_bheap_init(hp, func, node_free);
 
   return hp;
+}
+
+static SysInt compare_func(const void* a, const void* b, SysPointer user_data) {
+  SysBHeapFunc score_func = user_data;
+  SysDouble sa = score_func((SysPointer)(*(SysUInt64 *)a));
+  SysDouble sb = score_func((SysPointer)(*(SysUInt64 *)b));
+
+  return (int)(sa - sb);
+}
+
+SysBHeapIter *sys_bheap_iter_new(SysBHeap *hp) {
+  sys_return_val_if_fail(hp != NULL, NULL);
+  sys_return_val_if_fail(hp->array.len > 0, NULL);
+  SysHArray* array = &hp->array;
+
+  SysBHeapIter *iter = sys_malloc_N(sizeof(SysBHeapIter) + sizeof(SysPointer) * array->len - 1);
+  *(&iter->pdata[0]) = ((SysUInt8*)iter) + offsetof(SysBHeapIter, pdata);
+  iter->len = array->len;
+  iter->position = 0;
+
+  memcpy(iter->pdata, array->pdata, sizeof(SysPointer) * array->len);
+
+  sys_qsort_with_data(iter->pdata,
+    iter->len,
+    sizeof(SysPointer),
+    (SysCompareDataFunc)compare_func,
+    hp->score_func);
+
+  return iter;
+}
+
+SysBool sys_bheap_iter_prev(SysBHeapIter* iter, SysPointer* data) {
+  sys_return_val_if_fail(iter != NULL, false);
+  sys_return_val_if_fail(iter->position < iter->len, false);
+  if (iter->position == 0) { return false; }
+
+  --iter->position;
+  *data = iter->pdata[iter->position];
+
+  return true;
+}
+
+SysBool sys_bheap_iter_next(SysBHeapIter* iter, SysPointer *data) {
+  sys_return_val_if_fail(iter != NULL, false);
+  if ((iter->position + 1) >= iter->len) { return false; }
+
+  ++iter->position;
+  *data = iter->pdata[iter->position];
+
+  return true;
+}
+
+void sys_bheap_iter_free(SysBHeapIter* iter) {
+  sys_return_if_fail(iter != NULL);
+  sys_return_if_fail(iter->len > 0);
+  sys_return_if_fail(iter->position < iter->len);
+
+  sys_free_N(iter);
 }
 
 static void sys_bheap_sinkdown(SysBHeap *hp, SysInt n) {
   sys_return_if_fail(hp != NULL);
   sys_return_if_fail(n >= 0);
 
-  SysPtrArray *array = hp->array;
+  SysHArray *array = &hp->array;
 
   SysInt length = array->len;
   SysPointer node = array->pdata[n];
@@ -44,9 +104,9 @@ static void sys_bheap_sinkdown(SysBHeap *hp, SysInt n) {
   SysInt swap;
 
   SysPointer child1;
-  SysDouble child1_score;
   SysPointer child2;
   SysDouble child2_score;
+  SysDouble child1_score = 0;
 
   while(true) {
     child2N = (n + 1) * 2;
@@ -87,7 +147,7 @@ static void sys_bheap_sinkdown(SysBHeap *hp, SysInt n) {
 static void sys_bheap_bubbleup(SysBHeap *hp, SysInt n) {
   sys_return_if_fail(hp != NULL);
 
-  SysPtrArray *array = hp->array;
+  SysHArray *array = &hp->array;
 
   SysInt parentN;
   SysPointer parent;
@@ -110,15 +170,15 @@ static void sys_bheap_bubbleup(SysBHeap *hp, SysInt n) {
 
 void sys_bheap_push(SysBHeap *hp, SysPointer node) {
   sys_return_if_fail(hp != NULL);
-  SysPtrArray *array = hp->array;
+  SysHArray *array = &hp->array;
 
-  sys_ptr_array_add(array, node);
+  sys_harray_add(array, node);
   sys_bheap_bubbleup(hp, array->len - 1);
 }
 
 SysPointer sys_bheap_peek(SysBHeap *hp) {
   sys_return_val_if_fail(hp != NULL, NULL);
-  SysPtrArray *array = hp->array;
+  SysHArray *array = &hp->array;
 
   return array->len > 0 ? array->pdata[0] : NULL;
 }
@@ -127,13 +187,13 @@ SysBool sys_bheap_remove(SysBHeap *hp, SysPointer node) {
   sys_return_val_if_fail(hp != NULL, false);
   sys_return_val_if_fail(node != NULL, false);
 
-  SysPtrArray *array = hp->array;
+  SysHArray *array = &hp->array;
   SysPointer end;
   SysInt len = array->len;
 
   for (SysInt i = 0; i < len; i++) {
     if (array->pdata[i] == node) {
-      end = sys_ptr_array_steal_index(array, array->len - 1);
+      end = sys_harray_steal_index(array, array->len - 1);
 
       if (i != len - 1) {
         array->pdata[i] = end;
@@ -157,7 +217,7 @@ SysBool sys_bheap_remove(SysBHeap *hp, SysPointer node) {
 
 SysInt sys_bheap_size(SysBHeap *hp) {
   sys_return_val_if_fail(hp != NULL, -1);
-  SysPtrArray *array = hp->array;
+  SysHArray *array = &hp->array;
 
   return array->len;
 }
@@ -165,21 +225,45 @@ SysInt sys_bheap_size(SysBHeap *hp) {
 SysPointer sys_bheap_pop(SysBHeap *hp) {
   sys_return_val_if_fail(hp != NULL, NULL);
 
-  SysPtrArray *array = hp->array;
-  SysPointer result = array->pdata[0];
-  SysPointer end = sys_ptr_array_steal_index(array, array->len - 1);
+  SysHArray *array = &hp->array;
+  if (array->len == 0) { return NULL; }
 
-  if (array->len > 0) {
-    array->pdata[0] = end;
-    sys_bheap_sinkdown(hp, 0);
-  }
+  SysPointer result = array->pdata[0];
+  SysPointer end = sys_harray_steal_index(array, array->len - 1);
+
+  array->pdata[0] = end;
+  sys_bheap_sinkdown(hp, 0);
 
   return result;
 }
 
-SysPtrArray *sys_bheap_array(SysBHeap *hp) {
+SysHArray *sys_bheap_array(SysBHeap *hp) {
    sys_return_val_if_fail(hp != NULL, NULL);
-   SysPtrArray *array = hp->array;
+   SysHArray *array = &hp->array;
 
    return array;
+}
+
+static SysInt bheap_index_node(SysBHeap *hp, SysPointer node) {
+  SysHArray *array = &hp->array;
+
+  for(SysUInt i = 0; i < array->len; i++) {
+    if (array->pdata[i] == node) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+SysPointer sys_bheap_parent(SysBHeap *hp, SysPointer node) {
+  SysInt index = bheap_index_node(hp, node);
+  if (index == -1) { return NULL; }
+  SysInt pindex = (SysInt)floor((index - 1) / 2.0);
+
+  if(pindex < 0) {
+    return NULL;
+  }
+
+  return hp->array.pdata[index];
 }

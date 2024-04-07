@@ -60,7 +60,7 @@ struct _SysPrivate {
 
 typedef enum {
   SYS_ONCE_STATUS_NOTCALLED,
-  SYS_ONCE_STATUS_PROSysRESS,
+  SYS_ONCE_STATUS_PROGRESS,
   SYS_ONCE_STATUS_READY
 } SysOnceStatus;
 
@@ -108,7 +108,10 @@ SYS_API SysThread * sys_thread_new (const SysChar *name, SysThreadFunc func, Sys
 SYS_API SysThread * sys_thread_try_new (const SysChar *name, SysThreadFunc func, SysPointer data, SysError **error);
 
 
-SYS_API void sys_thread_init (void);
+SYS_API void sys_thread_init(void);
+SYS_API void sys_thread_detach(void);
+
+
 SYS_API SysThread * sys_thread_self (void);
 SYS_API void sys_thread_exit (SysPointer retval);
 SYS_API SysPointer sys_thread_join (SysThread *thread);
@@ -151,8 +154,8 @@ SYS_API SysPointer sys_private_get (SysPrivate *key);
 SYS_API void sys_private_set (SysPrivate *key, SysPointer value);
 SYS_API void sys_private_replace (SysPrivate *key, SysPointer value);
 SYS_API SysPointer sys_once_impl (SysOnce *once, SysThreadFunc func, SysPointer arg);
-SYS_API SysBool sys_once_init_enter (volatile void *location);
-SYS_API void sys_once_init_leave (volatile void *location, SysSize result);
+SYS_API SysBool _sys_once_init_enter (volatile SysPointer location);
+SYS_API void _sys_once_init_leave (volatile SysPointer location, SysSize result);
 
 #if defined(SYS_ATOMIC_LOCK_FREE) && defined(__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4) && defined(__ATOMIC_SEQ_CST)
 # define sys_once(once, func, arg) \
@@ -179,9 +182,9 @@ SYS_API void sys_once_init_leave (volatile void *location, SysSize result);
   }))
 #else
 # define sys_once_init_enter(location) \
-  (sys_once_init_enter((location)))
+  _sys_once_init_enter((location))
 # define sys_once_init_leave(location, result) \
-  (sys_once_init_leave((location), (SysSize) (result)))
+  _sys_once_init_leave((location), (SysSize) (result))
 #endif
 
 SysUInt  sys_get_num_processors (void);

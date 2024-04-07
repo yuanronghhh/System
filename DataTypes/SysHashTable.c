@@ -752,7 +752,7 @@ SysPointer *sys_hash_table_get_keys_as_array(SysHashTable *hash_table,
     if (HASH_IS_REAL(hash_table->hashes[i]))
       result[j++] = hash_table->keys[i];
   }
-  sys_return_val_if_fail(j == hash_table->nnodes, NULL);
+  sys_return_val_if_fail(j == (SysUInt)hash_table->nnodes, NULL);
 
   result[j] = NULL;
 

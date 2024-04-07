@@ -1,9 +1,9 @@
+#include <System/Utils/SysFile.h>
 #include <System/Utils/SysPath.h>
-#include <System/Utils/SysFilePrivate.h>
 
 static SysChar exepath[MAX_PATH];
 
-FILE *sys_real_fopen(const SysChar *filename, const SysChar * mode) {
+FILE *sys_fopen(const SysChar *filename, const SysChar * mode) {
   FILE *fp;
 
   errno_t eno = fopen_s(&fp, filename, mode);
@@ -11,11 +11,11 @@ FILE *sys_real_fopen(const SysChar *filename, const SysChar * mode) {
     return fp;
   }
 
-  sys_error_N("%s: %s", sys_strerr(errno), filename);
+  sys_error_N("%s: %s", sys_strerror(errno), filename);
   return NULL;
 }
 
-SysSize sys_real_fread(
+SysSize sys_fread(
     void*  buffer,
     SysSize bufsize,
     SysSize elem_size,
@@ -24,7 +24,7 @@ SysSize sys_real_fread(
   return fread_s(buffer, bufsize, elem_size, elem_count, fp);
 }
 
-SysInt sys_real_open(SysChar *filename, SysInt flags, SysInt mode) {
+SysInt sys_open(const SysChar *filename, SysInt flags, SysInt mode) {
   SysInt fp;
   SysInt shareflag = SH_DENYNO;
 
@@ -33,11 +33,19 @@ SysInt sys_real_open(SysChar *filename, SysInt flags, SysInt mode) {
     return fp;
   }
 
-  sys_error_N("%s: %s", sys_strerr(errno), filename);
+  sys_error_N("%s: %s", sys_strerror(errno), filename);
   return -1;
 }
 
-const SysChar *sys_real_exe_path(void) {
+SysInt sys_close(SysInt fd) {
+  return _close(fd);
+}
+
+SysSSize sys_read(SysInt fd, SysPointer buf, SysSize mcount) {
+  return _read(fd, buf, (SysUInt)mcount);
+}
+
+const SysChar *sys_exe_path(void) {
   int nlen;
   SysChar *sp;
 
@@ -49,6 +57,6 @@ const SysChar *sys_real_exe_path(void) {
   return sp;
 }
 
-void sys_real_fcloseall(void) {
+void sys_fcloseall(void) {
   _fcloseall();
 }

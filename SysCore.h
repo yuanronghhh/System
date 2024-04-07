@@ -10,7 +10,11 @@
 #include <System/Platform/Common/SysAtomic.h>
 #include <System/Platform/Common/SysProcess.h>
 #include <System/Platform/Common/SysThread.h>
+#include <System/Platform/Common/SysSocket.h>
 
+#include <System/DataTypes/SysClouse.h>
+#include <System/DataTypes/SysArray.h>
+#include <System/DataTypes/SysHArray.h>
 #include <System/DataTypes/SysValue.h>
 #include <System/DataTypes/SysHashTable.h>
 #include <System/DataTypes/SysList.h>
@@ -18,8 +22,11 @@
 #include <System/DataTypes/SysQueue.h>
 #include <System/DataTypes/SysBHeap.h>
 #include <System/DataTypes/SysNode.h>
+#include <System/DataTypes/SysHNode.h>
 #include <System/DataTypes/SysTree.h>
 #include <System/DataTypes/SysTypes.h>
+#include <System/DataTypes/SysParam.h>
+#include <System/DataTypes/SysPQueue.h>
 
 #include <System/Utils/SysError.h>
 #include <System/Utils/SysError.h>
@@ -27,5 +34,9 @@
 #include <System/Utils/SysString.h>
 #include <System/Utils/SysFile.h>
 #include <System/Utils/SysTextIO.h>
+
+#if USE_OPENSSL
+#include <System/Utils/SysOpenSSL.h>
+#endif
 
 #endif

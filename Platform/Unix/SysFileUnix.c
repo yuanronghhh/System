@@ -1,10 +1,10 @@
 #include <System/Platform/Common/SysMem.h>
-#include <System/Utils/SysFilePrivate.h>
+#include <System/Utils/SysFile.h>
 
 static SysChar exe_path[MAX_PATH];
 
 
-FILE *sys_real_fopen(const SysChar *fpath, const SysChar * mode) {
+FILE *sys_fopen(const SysChar *fpath, const SysChar * mode) {
   FILE *fp = fopen(fpath, mode);
   if (!fp){
     sys_warning_N("failed open file: %s",  fpath);
@@ -14,7 +14,7 @@ FILE *sys_real_fopen(const SysChar *fpath, const SysChar * mode) {
   return fp;
 }
 
-const SysChar *sys_real_exe_path(void) {
+const SysChar *sys_exe_path(void) {
   SysInt bsize;
   SysInt nlen;
   SysChar *self = "/proc/self/exe";
@@ -43,11 +43,18 @@ const SysChar *sys_real_exe_path(void) {
    return buf;
 }
 
-void sys_real_fcloseall(void) {
+void sys_fcloseall(void) {
   fcloseall();
 }
 
-SysInt sys_real_open(SysChar *filename, SysInt flags, SysInt mode) {
+SysInt sys_open(const SysChar *filename, SysInt flags, SysInt mode) {
   return open(filename, flags, mode);
 }
 
+SysSSize sys_read(SysInt fd, SysPointer buf, SysSize mcount) {
+  return read(fd, buf, mcount);
+}
+
+SysInt sys_close(SysInt fd) {
+  return close(fd);
+}

@@ -14,12 +14,16 @@ extern "C" {
 #include <process.h>
 #include <sys/types.h>
 #include <DbgHelp.h>
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+#include <shlobj_core.h>
 
 #define SYS_OS_WIN32 1
 #define SYS_API __declspec(dllexport)
 #define PATH_SEP '\\'
 typedef SSIZE_T ssize_t;
 #define fileno _fileno
+#define __builtin_frame_address(x)  ((void)(x), _AddressOfReturnAddress())
 
 #ifdef __cplusplus
 }
