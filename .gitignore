@@ -17,4 +17,5 @@ lex.yy.c
 src/**/*Config.h
 src/tcc
 tags
-*Config.h
+SysConfig.h
+TestSuite/Common.h
