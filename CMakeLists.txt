@@ -122,7 +122,7 @@ set(SRC
 )
 
 add_dep_libs(System "${SRC}" "${INC}" "${INC_SYS}")
-add_subdirectory(TestSuite)
+target_copy_release_files(System)
 
 configure_file(${CMAKE_CURRENT_LIST_DIR}/SysConfig.h.in
   ${CMAKE_CURRENT_LIST_DIR}/SysConfig.h)
