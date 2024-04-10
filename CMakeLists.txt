@@ -4,7 +4,6 @@ set(INC
 
 set(INC_SYS
   ${PTHREAD_INCLUDE_DIRS}
-  ${UNITY_INCLUDE_DIRS}
   ${VLD_INCLUDE_DIRS}
   ${OPENSSL_INCLUDE_DIRS}
 )
@@ -129,10 +128,10 @@ configure_file(${CMAKE_CURRENT_LIST_DIR}/SysConfig.h.in
   ${CMAKE_CURRENT_LIST_DIR}/SysConfig.h)
 
 target_link_libraries(System
+  ${PTHREAD_LIBRARIES}
   ${OPENSSL_LIBRARIES}
   ${ADDTIONAL_LIBRARIES}
   ${DBG_LIBRAREIS}
   ${VLD_LIBRARIES}
-  ${UNITY_LIBRARIES}
 )
 set_property(TARGET System PROPERTY FOLDER CstProject)
