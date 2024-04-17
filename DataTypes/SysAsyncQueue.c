@@ -2,7 +2,7 @@
 #include <System/Platform/Common/SysThread.h>
 
 /**
- * this code from glib SysAsyncQueue
+ * this code from glib GAsyncQueue
  * see: ftp://ftp.gtk.org/pub/gtk/
  * license under GNU Lesser General Public
  */
@@ -11,8 +11,6 @@
 /*
  * MT safe
  */
-
-#include <System/DataTypes/SysAsyncQueue.h>
 
 /**
  * SysAsyncQueue:
@@ -252,14 +250,6 @@ sys_async_queue_push_unlocked (SysAsyncQueue *queue,
     sys_cond_signal (&queue->cond);
 }
 
-static SysInt
-sys_async_queue_invert_compare (SysPointer  v1,
-                              SysPointer  v2,
-                              SortData *sd)
-{
-  return -sd->func (v1, v2, sd->user_data);
-}
-
 static SysPointer
 sys_async_queue_pop_intern_unlocked (SysAsyncQueue *queue,
                                    SysBool     wait,
@@ -271,15 +261,15 @@ sys_async_queue_pop_intern_unlocked (SysAsyncQueue *queue,
     {
       queue->waitinsys_threads++;
       while (!sys_queue_peek_tail_link (&queue->queue))
+      {
+        if (end_time == -1)
+          sys_cond_wait (&queue->cond, &queue->mutex);
+        else
         {
-	  if (end_time == -1)
-	    sys_cond_wait (&queue->cond, &queue->mutex);
-	  else
-	    {
-	      if (!sys_cond_wait_until (&queue->cond, &queue->mutex, end_time))
-		break;
-	    }
+          if (!sys_cond_wait_until (&queue->cond, &queue->mutex, end_time))
+            break;
         }
+      }
       queue->waitinsys_threads--;
     }
 
@@ -430,91 +420,6 @@ sys_async_queue_timeout_pop_unlocked (SysAsyncQueue *queue,
 
   return sys_async_queue_pop_intern_unlocked (queue, true, end_time);
 }
-
-/**
- * sys_async_queue_timed_pop:
- * @queue: a #SysAsyncQueue
- * @end_time: a #GTimeVal, determining the final time
- *
- * Pops data from the @queue. If the queue is empty, blocks until
- * @end_time or until data becomes available.
- *
- * If no data is received before @end_time, %NULL is returned.
- *
- * To easily calculate @end_time, a combination of sys_get_real_time()
- * and sys_time_val_add() can be used.
- *
- * Returns: (nullable): data from the queue or %NULL, when no data is
- *   received before @end_time.
- *
- * Deprecated: use sys_async_queue_timeout_pop().
- */
-SYS_GNUC_BEGIN_IGNORE_DEPRECATIONS
-SysPointer
-sys_async_queue_timed_pop (SysAsyncQueue *queue,
-                         GTimeVal    *end_time)
-{
-  SysInt64 m_end_time;
-  SysPointer retval;
-
-  sys_return_val_if_fail (queue, NULL);
-
-  if (end_time != NULL)
-    {
-      m_end_time = sys_get_monotonic_time () +
-        ((SysInt64) end_time->tv_sec * SYS_USEC_PER_SEC + end_time->tv_usec - sys_get_real_time ());
-    }
-  else
-    m_end_time = -1;
-
-  sys_mutex_lock (&queue->mutex);
-  retval = sys_async_queue_pop_intern_unlocked (queue, true, m_end_time);
-  sys_mutex_unlock (&queue->mutex);
-
-  return retval;
-}
-SYS_GNUC_END_IGNORE_DEPRECATIONS
-
-/**
- * sys_async_queue_timed_pop_unlocked:
- * @queue: a #SysAsyncQueue
- * @end_time: a #GTimeVal, determining the final time
- *
- * Pops data from the @queue. If the queue is empty, blocks until
- * @end_time or until data becomes available.
- *
- * If no data is received before @end_time, %NULL is returned.
- *
- * To easily calculate @end_time, a combination of sys_get_real_time()
- * and sys_time_val_add() can be used.
- *
- * This function must be called while holding the @queue's lock.
- *
- * Returns: (nullable): data from the queue or %NULL, when no data is
- *   received before @end_time.
- *
- * Deprecated: use sys_async_queue_timeout_pop_unlocked().
- */
-SYS_GNUC_BEGIN_IGNORE_DEPRECATIONS
-SysPointer
-sys_async_queue_timed_pop_unlocked (SysAsyncQueue *queue,
-                                  GTimeVal    *end_time)
-{
-  SysInt64 m_end_time;
-
-  sys_return_val_if_fail (queue, NULL);
-
-  if (end_time != NULL)
-    {
-      m_end_time = sys_get_monotonic_time () +
-        ((SysInt64) end_time->tv_sec * SYS_USEC_PER_SEC + end_time->tv_usec - sys_get_real_time ());
-    }
-  else
-    m_end_time = -1;
-
-  return sys_async_queue_pop_intern_unlocked (queue, true, m_end_time);
-}
-SYS_GNUC_END_IGNORE_DEPRECATIONS
 
 /**
  * sys_async_queue_length:
