@@ -29,7 +29,7 @@ void sys_break(void) {
 #endif
 }
 
-static void sys_vlog(SYS_LOG_ARGS_N FILE* std, SYS_LOG_LEVEL level, const SysChar* format, va_list args) {
+void sys_vlog(SYS_LOG_ARGS_N FILE* std, SYS_LOG_LEVEL level, const SysChar* format, va_list args) {
   SYS_LEAK_IGNORE_BEGIN;
   sys_fprintf(std, "%s[%s:%d] ", get_color(level), _funcname, _line);
   sys_vfprintf(std, format, args);
@@ -40,14 +40,14 @@ static void sys_vlog(SYS_LOG_ARGS_N FILE* std, SYS_LOG_LEVEL level, const SysCha
 void sys_log(SYS_LOG_ARGS_N FILE* std, SYS_LOG_LEVEL level, const SysChar* format, ...) {
   va_list args;
   va_start(args, format);
-  sys_vlog(SYS_LOG_ARGS_P(sys_vlog, format) std, level, format, args);
+  sys_vlog(SYS_LOG_ARGS_P std, level, format, args);
   va_end(args);
 }
 
 void sys_warning(SYS_LOG_ARGS_N const SysChar* format, ...) {
   va_list args;
   va_start(args, format);
-  sys_vlog(SYS_LOG_ARGS_P(sys_vlog, format) stderr, SYS_LOG_WARNING, format, args);
+  sys_vlog(SYS_LOG_ARGS_P stderr, SYS_LOG_WARNING, format, args);
   va_end(args);
 
 #if SYS_DEBUG
@@ -62,7 +62,7 @@ void sys_abort(SYS_LOG_ARGS_N const SysChar* format, ...) {
   va_list args;
   va_start(args, format);
 
-  sys_verror(SYS_LOG_ARGS_P(sys_error, format) format, args);
+  sys_verror(SYS_LOG_ARGS_P format, args);
   va_end(args);
 
   abort();
@@ -72,7 +72,7 @@ void sys_exit(SYS_LOG_ARGS_N SysInt exitcode, const SysChar* format, ...) {
   va_list args;
   va_start(args, format);
 
-  sys_verror(SYS_LOG_ARGS_P(sys_error, format) format, args);
+  sys_verror(SYS_LOG_ARGS_P format, args);
   va_end(args);
 
   exit(exitcode);
@@ -82,13 +82,13 @@ void sys_error(SYS_LOG_ARGS_N const SysChar* format, ...) {
   va_list args;
   va_start(args, format);
 
-  sys_verror(SYS_LOG_ARGS_P(sys_error, format) format, args);
+  sys_verror(SYS_LOG_ARGS_P format, args);
 
   va_end(args);
 }
 
 void sys_verror(SYS_LOG_ARGS_N const SysChar* format, va_list args) {
-  sys_vlog(SYS_LOG_ARGS_P(sys_log, msg) stderr, SYS_LOG_ERROR, format, args);
+  sys_vlog(SYS_LOG_ARGS_P stderr, SYS_LOG_ERROR, format, args);
 
 #if SYS_DEBUG
   const SysChar *err = sys_strerror(errno);

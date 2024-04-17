@@ -25,7 +25,9 @@ SysBool sys_param_get_value(SysParam *self, SysObject *o, SysValue** value) {
 
   SysType tp = sys_type_from_instance(o);
   if(tp != self->type) {
-    sys_warning_N("param is not object property: %s,%s", self->field_name, sys_object_get_type_name(o));
+    sys_warning_N("param is not object property: %s,%s",
+        self->field_name, 
+        sys_object_get_type_name(o));
     return false;
   }
 

@@ -69,7 +69,7 @@ typedef wchar_t SysWChar;
 #define SYS_LOG_ARGS(func, ptr) __FILE__, __func__, __LINE__, #func, #ptr,
 #define SYS_LOG_ARGS_N const SysChar *_filename, const SysChar *_funcname, const SysInt _line, const SysChar * _callfunc, const SysChar *_ptrstr,
 #define SYS_LOG_ARGS_M(func, ptr) SYS_LOG_ARGS(func, ptr)
-#define SYS_LOG_ARGS_P(func, ptr) _filename, _funcname, _line, _callfunc, _ptrstr,
+#define SYS_LOG_ARGS_P _filename, _funcname, _line, _callfunc, _ptrstr,
 
 #define SYS_STRUCT_MEMBER_P(struct_p, struct_offset)   \
   ((SysPointer) ((SysUInt8*) (struct_p) + (SysLong) (struct_offset)))

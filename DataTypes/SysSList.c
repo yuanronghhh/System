@@ -222,7 +222,9 @@ SysSList* sys_slist_copy (SysSList *list) {
   return sys_slist_copy_deep (list, NULL, NULL);
 }
 
-SysSList* sys_slist_copy_deep (SysSList *list, SysCopyFunc func, SysPointer user_data) {
+SysSList* sys_slist_copy_deep (SysSList *list,
+    SysCopyFunc func, 
+    SysPointer user_data) {
   SysSList *new_list = NULL;
 
   if (list)
@@ -494,10 +496,11 @@ static SysSList * sys_slist_sort_real (SysSList   *list,
   l2 = l1->next;
   l1->next = NULL;
 
-  return sys_slist_sort_merge (sys_slist_sort_real (list, compare_func, user_data),
-                             sys_slist_sort_real (l2, compare_func, user_data),
-                             compare_func,
-                             user_data);
+  return sys_slist_sort_merge (
+      sys_slist_sort_real (list, compare_func, user_data),
+      sys_slist_sort_real (l2, compare_func, user_data),
+      compare_func,
+      user_data);
 }
 
 SysSList * sys_slist_sort (SysSList       *list,

@@ -78,7 +78,9 @@ SysList *sys_queue_find(SysQueue *queue, const SysPointer  data) {
   return sys_list_find(queue->head, data);
 }
 
-SysList *sys_queue_find_custom(SysQueue *queue, const SysPointer  data, SysCompareFunc   func) {
+SysList *sys_queue_find_custom(SysQueue *queue,
+    const SysPointer  data, 
+    SysCompareFunc   func) {
   sys_return_val_if_fail(queue != NULL, NULL);
   sys_return_val_if_fail(func != NULL, NULL);
 
@@ -146,7 +148,9 @@ void sys_queue_push_tail_link(SysQueue *queue, SysList *link) {
   queue->length++;
 }
 
-void sys_queue_push_nth_link(SysQueue *queue, SysUInt    n, SysList *link_) {
+void sys_queue_push_nth_link(SysQueue *queue,
+    SysUInt n,
+    SysList *link_) {
   SysList *next;
   SysList *prev;
 
@@ -419,7 +423,9 @@ SysUInt sys_queue_remove_all(SysQueue *queue, const SysPointer  data) {
   return (old_length - queue->length);
 }
 
-void sys_queue_insert_before(SysQueue *queue, SysList *sibling, SysPointer  data) {
+void sys_queue_insert_before(SysQueue *queue,
+    SysList *sibling, 
+    SysPointer  data) {
   sys_return_if_fail(queue != NULL);
 
   if (sibling == NULL) {
@@ -430,7 +436,9 @@ void sys_queue_insert_before(SysQueue *queue, SysList *sibling, SysPointer  data
   }
 }
 
-void sys_queue_insert_after(SysQueue *queue, SysList *sibling, SysPointer  data) {
+void sys_queue_insert_after(SysQueue *queue,
+    SysList *sibling, 
+    SysPointer  data) {
   sys_return_if_fail(queue != NULL);
 
   if (sibling == NULL)
