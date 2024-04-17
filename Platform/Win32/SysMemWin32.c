@@ -1,8 +1,11 @@
 #include <System/Utils/SysFile.h>
 #include <System/Utils/SysString.h>
+#include <System/DataTypes/SysArray.h>
 #include <System/Platform/Common/SysThread.h>
 #include <System/Platform/Common/SysOs.h>
 #include <System/Platform/Common/SysMemPrivate.h>
+
+#define MAXMODULELISTLENGTH 512
 
 void sys_real_memcpy(
   void*       const dst,
@@ -19,9 +22,10 @@ void sys_real_memcpy(
 void sys_real_leaks_init(void) {
 #if SYS_DEBUG && SYS_OS_WIN32
   VLDSetOptions(VLD_OPT_SKIP_CRTSTARTUP_LEAKS
-      | VLD_OPT_AGGREGATE_DUPLICATES
-      | VLD_OPT_VALIDATE_HEAPFREE
-      ,0, 0);
+    | VLD_OPT_AGGREGATE_DUPLICATES
+    | VLD_OPT_MODULE_LIST_INCLUDE
+    | VLD_OPT_VALIDATE_HEAPFREE
+    , 0, 0);
 #endif
 }
 
@@ -35,7 +39,7 @@ void sys_real_leaks_report(void) {
   sys_free_N(wname);
 #else
   VLDReportLeaks();
-#endif
   getchar();
+#endif
 #endif
 }

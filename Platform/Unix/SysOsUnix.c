@@ -72,6 +72,19 @@ void sys_real_teardown(void) {
 void* sys_real_dlopen(const char *filename) {
   void *handle = dlopen (filename, RTLD_GLOBAL | RTLD_LAZY);
   if (!handle) {
+    sys_warning_N("dlopen failed: %s.", filename);
+    return NULL;
+  }
+
+  return handle;
+}
+
+SysPointer sys_real_dlmodule(const SysChar* name) {
+  sys_return_val_if_fail(name != NULL, NULL);
+
+  SysPointer handle = dlopen(name, RTLD_LAZY);
+  if (!handle) {
+    sys_warning_N("get module failed: %s.", name);
     return NULL;
   }
 

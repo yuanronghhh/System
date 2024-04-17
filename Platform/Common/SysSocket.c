@@ -4,7 +4,6 @@
 SYS_DEFINE_TYPE(SysSocket, sys_socket, SYS_TYPE_OBJECT);
 
 static SysInt ssl_verify_callback(SysInt ok, X509_STORE_CTX* x509_store) {
-#if SYS_DEBUG
   char* subject, * issuer;
   SysInt                err, depth;
   X509* cert;
@@ -57,13 +56,12 @@ static SysInt ssl_verify_callback(SysInt ok, X509_STORE_CTX* x509_store) {
   if (issuer) {
     OPENSSL_free(issuer);
   }
-#endif
 
   return 1;
 }
 
 static SysInt sys_ssl_renegotiate(SSL* ssl) {
-  SysInt r;
+  SysInt r = false;
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
   if (SSL_version(ssl) >= TLS1_3_VERSION) {
 
@@ -79,7 +77,7 @@ static SysInt sys_ssl_renegotiate(SSL* ssl) {
     sys_warning_N("%s", "Secure renegotiation is not supported");
   }
 #else
-  ret = SSL_renegotiate(ssl);
+  r = SSL_renegotiate(ssl);
 #endif
 
   return r;
@@ -133,9 +131,7 @@ void sys_socket_set_ssl(SysSocket* s, SSL* ssl) {
 }
 
 SysSocket *sys_socket_new_I(SysInt domain, SysInt type, SysInt protocol, SysBool noblocking) {
-  SYS_LEAK_IGNORE_BEGIN;
   SysSocket *ns = sys_socket_real_new_I(domain, type, protocol, noblocking);
-  SYS_LEAK_IGNORE_END;
 
   if (ns == NULL) {
     sys_warning_N("socket: %s", sys_socket_error());

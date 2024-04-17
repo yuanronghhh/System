@@ -164,10 +164,8 @@ static int ssl_verify_callback(int ok, X509_STORE_CTX* x509_store)
 }
 
 SSL_CTX* ssl_ctx_create_server(const SysChar* signed_file, const SysChar* priv_file) {
-  SYS_LEAK_IGNORE_BEGIN;
   SSL_CTX* ctx = SSL_CTX_new(SSLv23_server_method());
-  SYS_LEAK_IGNORE_END;
-  
+
   SSL_CTX_set_ex_data(ctx, server_conf_index, NULL);
   sys_ssl_ctx_set_server_option(ctx);
   SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, ssl_verify_callback);
@@ -199,9 +197,7 @@ fail:
 }
 
 SSL_CTX* ssl_ctx_create_client(const SysChar* ca_file, const SysChar* priv_file) {
-  SYS_LEAK_IGNORE_BEGIN;
   SSL_CTX* ctx = SSL_CTX_new(SSLv23_client_method());
-  SYS_LEAK_IGNORE_END;
 
   STACK_OF(X509_NAME)* list = NULL;
 

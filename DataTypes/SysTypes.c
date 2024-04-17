@@ -189,12 +189,10 @@ void* sys_object_new(SysType type, const SysChar * first, ...) {
   if (o == NULL) { return NULL; }
   sys_ref_count_init(o);
 
-#if SYS_DEBUG
   if (sys_object_new_debug_func) {
     TypeNode *node = sys_type_node(type);
     sys_object_new_debug_func(o, node->name, sys_atomic_int_get(&o->ref_count));
   }
-#endif
 
   return o;
 }
@@ -203,14 +201,11 @@ SysPointer _sys_object_ref(SysObject* self) {
   sys_return_val_if_fail(self != NULL, NULL);
   sys_return_val_if_fail(SYS_REF_CHECK(self, MAX_REF_NODE), NULL);
 
-#if SYS_DEBUG
-
   if (sys_object_ref_debug_func) {
     SysType type = sys_type_from_instance(self);
     TypeNode *node = sys_type_node(type);
     sys_object_ref_debug_func(self, node->name, sys_atomic_int_get(&self->ref_count));
   }
-#endif
 
   sys_ref_count_inc(self);
 
@@ -227,7 +222,6 @@ void _sys_object_unref(SysObject* self) {
     return;
   }
 
-#if SYS_DEBUG
   if (sys_object_unref_debug_func) {
     SysType type;
     TypeNode* node;
@@ -237,7 +231,6 @@ void _sys_object_unref(SysObject* self) {
 
     sys_object_unref_debug_func(self, node->name, sys_atomic_int_get(&self->ref_count));
   }
-#endif
 
   if(!sys_ref_count_dec(self)) {
     return;

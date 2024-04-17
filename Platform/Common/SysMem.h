@@ -5,18 +5,14 @@
 
 SYS_BEGIN_DECLS
 
+#define _DEBUG SYS_DEBUG
 #if SYS_DEBUG && SYS_OS_WIN32
-  #define _DEBUG 1
   #include "vld.h"
   #define SYS_LEAK_IGNORE_BEGIN VLDGlobalDisable()
   #define SYS_LEAK_IGNORE_END VLDGlobalEnable()
-  #define SYS_LEAK_DISABLE VLDDisable()
-  #define SYS_LEAK_ENABLE VLDRestore()
 #else
   #define SYS_LEAK_IGNORE_BEGIN
   #define SYS_LEAK_IGNORE_END
-  #define SYS_LEAK_DISABLE
-  #define SYS_LEAK_ENABLE
 #endif
 
 #define sys_align_up(o, base) (((o)+ (base - 1)) & ~((base) - 1))

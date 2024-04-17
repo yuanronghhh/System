@@ -37,6 +37,7 @@ SYS_API const char *sys_get_env(const char *var);
 SYS_API SysUInt64 sys_get_monotonic_time(void);
 SYS_API void sys_usleep(unsigned long mseconds);
 SYS_API void* sys_dlopen(const char *filename);
+SYS_API void* sys_dlmodule(const char *name);
 SYS_API void* sys_dlsymbol(void *handle, const char *symbol);
 SYS_API void sys_dlclose(void* handle);
 SYS_API SysUInt sys_nearest_pow(SysUInt num);
