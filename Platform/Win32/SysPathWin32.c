@@ -10,7 +10,7 @@ SysChar *sys_real_getcwd(void) {
 
   len = GetCurrentDirectoryW(ARRAY_SIZE(wbuf), wbuf);
   if (len >= ARRAY_SIZE(wbuf)) {
-    sys_warning_N("sys_getcwd GetCurrentDirectoryW Failed.");
+    sys_warning_N("%s", "sys_getcwd GetCurrentDirectoryW Failed.");
     return NULL;
   }
 

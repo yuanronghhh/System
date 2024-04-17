@@ -17,7 +17,7 @@ SYS_BEGIN_DECLS
 #define TYPE_ID_MASK    ((SysType) ((1 << SYS_TYPE_FUNDAMENTAL_SHIFT) - 1))
 
 #define SYS_TYPE_MAKE_FUNDAMENTAL(x)               ((SysType) ((x) << SYS_TYPE_FUNDAMENTAL_SHIFT))
-#define  SYS_TYPE_FNODE                            SYS_TYPE_MAKE_FUNDAMENTAL(1)
+#define  SYS_TYPE_FUNDAMENTAL_NODE                            SYS_TYPE_MAKE_FUNDAMENTAL(1)
 #define  SYS_TYPE_INTERFACE                        SYS_TYPE_MAKE_FUNDAMENTAL(2)
 #define  SYS_TYPE_BOOL                             SYS_TYPE_MAKE_FUNDAMENTAL(5)
 #define  SYS_TYPE_INT                              SYS_TYPE_MAKE_FUNDAMENTAL(6)

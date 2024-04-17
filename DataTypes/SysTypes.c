@@ -530,7 +530,7 @@ void _sys_fnode_init_type(void) {
     NULL
   };
 
-  sys_make_fundamental_node(NULL, SYS_TYPE_FNODE, &type_info);
+  sys_make_fundamental_node(NULL, SYS_TYPE_FUNDAMENTAL_NODE, &type_info);
 }
 
 SysType sys_type_new(SysType ptype, const SysTypeInfo *info) {
