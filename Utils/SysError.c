@@ -27,7 +27,7 @@ void sys_break(void) {
 #endif
 }
 
-static void sys_vlog(SYS_LOG_ARGS_N FILE* std, SYS_LOG_LEVEL level, const SysChar* format, va_list args) {
+void sys_vlog(SYS_LOG_ARGS_N FILE* std, SYS_LOG_LEVEL level, const SysChar* format, va_list args) {
   sys_fprintf(std, "%s[%s:%d] ", get_color(level), _funcname, _line);
   sys_vfprintf(std, format, args);
   sys_fprintf(std, "%s\n", get_color(SYS_LOG_RESET));
