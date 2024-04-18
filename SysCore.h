@@ -20,6 +20,7 @@
 #include <System/DataTypes/SysList.h>
 #include <System/DataTypes/SysSList.h>
 #include <System/DataTypes/SysQueue.h>
+#include <System/DataTypes/SysAsyncQueue.h>
 #include <System/DataTypes/SysBHeap.h>
 #include <System/DataTypes/SysNode.h>
 #include <System/DataTypes/SysHNode.h>
