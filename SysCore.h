@@ -40,4 +40,7 @@
 #include <System/Utils/SysOpenSSL.h>
 #endif
 
+SYS_API void sys_setup(void);
+SYS_API void sys_teardown(void);
+
 #endif

@@ -65,4 +65,7 @@ SYS_API void sys_error_set (SYS_LOG_ARGS_N SysError** err, const SysChar* format
 SYS_API void sys_vlog(SYS_LOG_ARGS_N FILE* std, SYS_LOG_LEVEL level, const SysChar* format, va_list args);
 SYS_API const SysChar* sys_strerror(SysInt errnum);
 
+void sys_error_setup(void);
+void sys_error_teardown(void);
+
 #endif

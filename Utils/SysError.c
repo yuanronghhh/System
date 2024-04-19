@@ -1,6 +1,7 @@
 #include <System/Utils/SysString.h>
 #include <System/Utils/SysFile.h>
 #include <System/Utils/SysErrorPrivate.h>
+#include <System/Platform/Common/SysThread.h>
 
 static SysChar* errColors[] = {
   "\033[0m",
@@ -15,8 +16,10 @@ static SYS_INLINE SysChar* get_color(SYS_LOG_LEVEL level) {
   return errColors[level];
 }
 
-void sys_break(void) {
+static SysMutex g_log_lock;
 
+void sys_break(void) {
+#if SYS_DEBUG
 #if SYS_OS_WIN32
   DebugBreak();
 #endif
@@ -25,12 +28,17 @@ void sys_break(void) {
   // __asm__ __volatile__("int $03");
   raise(SIGTRAP);
 #endif
+#endif
 }
 
 void sys_vlog(SYS_LOG_ARGS_N FILE* std, SYS_LOG_LEVEL level, const SysChar* format, va_list args) {
+  sys_mutex_lock(&g_log_lock);
+
   sys_fprintf(std, "%s[%s:%d] ", get_color(level), _funcname, _line);
   sys_vfprintf(std, format, args);
   sys_fprintf(std, "%s\n", get_color(SYS_LOG_RESET));
+
+  sys_mutex_unlock(&g_log_lock);
 }
 
 void sys_log(SYS_LOG_ARGS_N FILE* std, SYS_LOG_LEVEL level, const SysChar* format, ...) {
@@ -135,4 +143,12 @@ void sys_error_free(SysError* err) {
  */
 const SysChar* sys_strerror(SysInt errnum) {
   return sys_real_strerr(errnum);
+}
+
+void sys_error_setup(void) {
+  sys_mutex_init(&g_log_lock);
+}
+
+void sys_error_teardown(void) {
+  sys_mutex_clear(&g_log_lock);
 }

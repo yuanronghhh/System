@@ -121,6 +121,7 @@ set(SRC
   ./SysConfig.h
   ./SysConfig.h.in
   ./SysCore.h  # for expose api
+  ./SysCore.c
 )
 
 add_dep_libs(System "${SRC}" "${INC}" "${INC_SYS}")

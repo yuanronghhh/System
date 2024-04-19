@@ -48,9 +48,6 @@ SYS_API SysChar **sys_backtrace_string(SysInt *size);
 SYS_API void sys_arg_init(SysSArg *self, SysInt argc, const SysChar* argv[]);
 SYS_API int sys_arg_index(SysSArg *self, const SysChar *key, SysBool is_flag);
 
-SYS_API void sys_setup(void);
-SYS_API void sys_teardown(void);
-
 SYS_END_DECLS
 
 #endif

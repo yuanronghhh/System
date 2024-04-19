@@ -13,9 +13,6 @@
 #define  ALIGNOF_GUINT64 SYS_ALIGNOF (uint64_t)
 #define  ALIGNOF_UNSIGNED_LONG SYS_ALIGNOF (unsigned long)
 
-
-static SysBool inited = false;
-
 void sys_console_setup(void) {
   sys_real_init_console();
 }
@@ -380,28 +377,3 @@ int sys_arg_index(SysSArg *self, const SysChar *key, SysBool is_flag) {
   return -1;
 }
 
-void sys_setup(void) {
-  if(inited) {return;}
-
-  sys_console_setup();
-  sys_quark_setup();
-  sys_leaks_setup();
-  sys_type_setup();
-  sys_real_setup();
-  sys_thread_init();
-  sys_ssl_setup();
-
-  inited = true;
-}
-
-void sys_teardown(void) {
-  if(!inited) {return;}
-
-  sys_thread_detach();
-  sys_real_teardown();
-  sys_type_teardown();
-  sys_quark_teardown();
-  sys_leaks_report();
-
-  inited = false;
-}
