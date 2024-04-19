@@ -7,33 +7,22 @@
  * license under GNU Lesser General Public
  */
 
-
 /*
  * MT safe
  */
 
-/**
- * SysAsyncQueue:
- *
- * An opaque data structure which represents an asynchronous queue.
- *
- * It should only be accessed through the `sys_async_queue_*` functions.
- */
-struct _SysAsyncQueue
-{
-  SysMutex mutex;
-  SysCond cond;
-  SysQueue queue;
-  SysDestroyFunc item_free_func;
-  SysUInt waitinsys_threads;
-  SysInt ref_count;
-};
+void sys_async_queue_init (SysAsyncQueue *queue) {
+  sys_async_queue_init_full(queue, NULL);
+}
 
-typedef struct
-{
-  SysCompareDataFunc func;
-  SysPointer         user_data;
-} SortData;
+void sys_async_queue_init_full (SysAsyncQueue *queue, SysDestroyFunc item_free_func) {
+  sys_mutex_init (&queue->mutex);
+  sys_cond_init (&queue->cond);
+  sys_queue_init (&queue->queue);
+  queue->waitinsys_threads = 0;
+  queue->ref_count = 1;
+  queue->item_free_func = item_free_func;
+}
 
 /**
  * sys_async_queue_new:
@@ -66,12 +55,7 @@ sys_async_queue_new_full (SysDestroyFunc item_free_func)
   SysAsyncQueue *queue;
 
   queue = sys_new_N (SysAsyncQueue, 1);
-  sys_mutex_init (&queue->mutex);
-  sys_cond_init (&queue->cond);
-  sys_queue_init (&queue->queue);
-  queue->waitinsys_threads = 0;
-  queue->ref_count = 1;
-  queue->item_free_func = item_free_func;
+  sys_async_queue_init_full(queue, item_free_func);
 
   return queue;
 }
@@ -146,6 +130,20 @@ sys_async_queue_unref_and_unlock (SysAsyncQueue *queue)
  * to use the @queue afterwards, as it might have disappeared.
  * You do not need to hold the lock to call this function.
  */
+void sys_async_queue_clear(SysAsyncQueue *queue) {
+  sys_return_if_fail (queue);
+  sys_return_if_fail (queue->waitinsys_threads == 0);
+
+  sys_mutex_clear (&queue->mutex);
+  sys_cond_clear (&queue->cond);
+  if (queue->item_free_func) {
+    sys_queue_foreach (&(queue->queue), node) {
+      queue->item_free_func(node->data);
+    }
+  }
+  sys_queue_clear (&queue->queue);
+}
+
 void
 sys_async_queue_unref (SysAsyncQueue *queue)
 {
@@ -153,19 +151,10 @@ sys_async_queue_unref (SysAsyncQueue *queue)
 
   if (sys_atomic_int_dec_and_test (&queue->ref_count))
     {
-      sys_return_if_fail (queue->waitinsys_threads == 0);
-      sys_mutex_clear (&queue->mutex);
-      sys_cond_clear (&queue->cond);
-      if (queue->item_free_func) {
-        sys_queue_foreach (&(queue->queue), node) {
-          queue->item_free_func(node->data);
-        }
-      }
-      sys_queue_clear (&queue->queue);
+      sys_async_queue_clear(queue);
       sys_free (queue);
     }
 }
-
 /**
  * sys_async_queue_lock:
  * @queue: a #SysAsyncQueue
