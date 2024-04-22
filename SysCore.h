@@ -12,6 +12,7 @@
 #include <System/Platform/Common/SysThread.h>
 #include <System/Platform/Common/SysSocket.h>
 
+#include <System/DataTypes/SysQuark.h>
 #include <System/DataTypes/SysClouse.h>
 #include <System/DataTypes/SysArray.h>
 #include <System/DataTypes/SysHArray.h>

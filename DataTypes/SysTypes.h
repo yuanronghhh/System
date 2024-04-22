@@ -193,7 +193,8 @@ struct _SysTypeInterface {
 struct _SysObjectClass {
   SysTypeClass parent;
 
-  SysObject *(*dclone) (SysObject *self);
+  SysObject* (*dclone) (SysObject* self);
+  SysBool (*destroy) (SysObject *self);
   void (*dispose) (SysObject *self);
   void (*finalize) (SysObject *self);
 };
@@ -213,12 +214,12 @@ struct _SysObject {
 
 SYS_API SysType sys_object_get_type(void);
 
-SYS_API void* _sys_object_create(SysObject *o,
+SYS_API SysBool _sys_object_create(SysObject *o,
     SysType type, 
     const SysChar * first, 
     ...);
 
-SYS_API void _sys_object_destroy(SysObject* self);
+SYS_API SysBool _sys_object_destroy(SysObject* self);
 SYS_API void* sys_object_new(SysType type, const SysChar * first, ...);
 SYS_API SysPointer _sys_object_ref(SysObject* self);
 SYS_API void _sys_object_unref(SysObject* self);
