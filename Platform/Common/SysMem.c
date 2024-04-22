@@ -84,6 +84,10 @@ SysPointer sys_malloc0(SysSize size) {
   return b;
 }
 
+SysSize sys_get_msize(void *block) {
+  return sys_real_get_msize(block);
+}
+
 SysPointer sys_memdup(const SysPointer mem, SysUInt byte_size) {
   SysPointer new_mem;
 

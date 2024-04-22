@@ -26,11 +26,7 @@ struct _SysSocketClass {
 struct _SysSocket {
   SysObject parent;
   /* < private > */
-#if SYS_OS_WIN32
   SOCKET fd;
-#elif SYS_OS_UNIX
-  SysInt fd;
-#endif
 
   SysBool noblocking;
   SSL *ssl;

@@ -19,6 +19,11 @@ void sys_real_memcpy(
   }
 }
 
+SysSize sys_real_get_msize(void* block) {
+
+  return _msize(block);
+}
+
 void sys_real_leaks_init(void) {
 #if SYS_DEBUG && SYS_OS_WIN32
   VLDSetOptions(VLD_OPT_SKIP_CRTSTARTUP_LEAKS

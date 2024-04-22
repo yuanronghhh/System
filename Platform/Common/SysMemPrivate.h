@@ -11,6 +11,9 @@ void sys_real_memcpy(
   void        const* const src,
   SysSize         const src_size);
 
+
+SysSize sys_real_get_msize(void* block);
+
 void sys_real_leaks_init(void);
 void sys_real_leaks_report(void);
 

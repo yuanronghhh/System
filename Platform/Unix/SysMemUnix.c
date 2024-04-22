@@ -11,6 +11,11 @@ void sys_real_memcpy(
   memcpy(dst, src, src_size);
 }
 
+SysSize sys_real_get_msize(void* block) {
+
+  return malloc_usable_size(block);
+}
+
 void sys_real_leaks_init(void) {
 }
 

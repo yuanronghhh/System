@@ -27,6 +27,7 @@ extern "C" {
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <pthread.h>
+#include <malloc.h>
 
 #define PATH_SEP "/"
 #ifndef MAX_PATH

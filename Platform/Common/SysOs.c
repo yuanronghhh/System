@@ -1,5 +1,4 @@
 #include <System/Platform/Common/SysOs.h>
-
 #include <System/Utils/SysString.h>
 #include <System/Utils/SysError.h>
 #include <System/Utils/SysOpenSSL.h>
