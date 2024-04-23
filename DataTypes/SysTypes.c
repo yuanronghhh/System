@@ -462,7 +462,7 @@ SysHArray *sys_object_get_properties(SysType type) {
 void sys_type_ht_insert(TypeNode *node) {
   sys_return_if_fail(node->name != NULL);
 
-  assert(ht != NULL && "sys types should be initiated before use.");
+  sys_assert(ht != NULL && "sys types should be initiated before use.");
 
   sys_hash_table_insert(ht, node->name, node);
 }
@@ -859,7 +859,7 @@ SysChar *sys_type_name(SysType type) {
 }
 
 SysType sys_type_get_by_name(const SysChar *name) {
-  assert(ht != NULL && "sys types should be initiated before use.");
+  sys_assert(ht != NULL && "sys types should be initiated before use.");
 
   return (SysType)sys_hash_table_lookup(ht, (const SysPointer)name);
 }
