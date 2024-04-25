@@ -15,6 +15,8 @@
 
 #if _MSC_VER
   #include <System/Platform/Win32/SysWin32.h>
+#elif defined(__MINGW64__) || defined(__MINGW64__)
+  #include <System/Platform/MinGW/SysMinGW.h>
 #elif __GNUC__
   #include <System/Platform/Unix/SysUnix.h>
 #endif
