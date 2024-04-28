@@ -19,15 +19,15 @@ static SYS_INLINE SysChar* get_color(SYS_LOG_LEVEL level) {
 static SysMutex g_log_lock;
 
 void sys_break(void) {
-#if SYS_DEBUG
 #if SYS_OS_WIN32
-  DebugBreak();
+  if (IsDebuggerPresent ()) {
+    DebugBreak();
+  }
 #endif
 
-#if SYS_OS_UNIX
+#if SYS_DEBUG && SYS_OS_UNIX
   // __asm__ __volatile__("int $03");
   raise(SIGTRAP);
-#endif
 #endif
 }
 
