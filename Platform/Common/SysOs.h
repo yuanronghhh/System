@@ -5,14 +5,11 @@
 
 SYS_BEGIN_DECLS
 
-typedef enum _SYS_IO_ENUM {
-  SYS_IO_INVALID,
-  SYS_IO_PIPE,
-  SYS_IO_STDOUT,
-  SYS_IO_DEV_NULL
-} SYS_IO_ENUM;
-
-typedef struct _SysSArg SysSArg;
+struct _SysElapse {
+  SysUInt64 start;
+  SysUInt64 end;
+  const SysChar *name;
+};
 
 struct _SysSArg {
   int argc;
@@ -47,6 +44,9 @@ SYS_API SysChar **sys_backtrace_string(SysInt *size);
 
 SYS_API void sys_arg_init(SysSArg *self, SysInt argc, const SysChar* argv[]);
 SYS_API int sys_arg_index(SysSArg *self, const SysChar *key, SysBool is_flag);
+
+SYS_API void sys_elapse_begin(SysElapse *self, const SysChar *name);
+SYS_API void sys_elapse_end(SysElapse *self);
 
 SYS_END_DECLS
 

@@ -376,3 +376,11 @@ int sys_arg_index(SysSArg *self, const SysChar *key, SysBool is_flag) {
   return -1;
 }
 
+void sys_elapse_begin(SysElapse *self, const SysChar *name) {
+  self->start = sys_get_monotonic_time();
+  self->name = name;
+}
+
+void sys_elapse_end(SysElapse *self) {
+  self->end = sys_get_monotonic_time();
+}
