@@ -6,45 +6,57 @@
 #define SYS_BYTE_INIT_SIZE 4096
 
 /**
- * sys_strsplit: split with delimiter
+ * sys_strsplit: split with delimiter, free it only once
  * @s: dst string
  * @delim: seperate char
  * @count: split count.
  *
- * Returns: void
+ * Returns: new points + string copy, just free returned pointer.
  */
 SysChar **sys_strsplit(SysChar * s, const SysChar *delim, int * count) {
-  void *data;
-  SysChar* _s = (SysChar*)s;
-  const SysChar ** ptrs;
-  SysSize
-    ptrsSize,
-    sLen = strlen(s),
-    delLen = strlen(delim);
-  *count = 1;
+  sys_return_val_if_fail(s != NULL, NULL);
+  sys_return_val_if_fail(delim != NULL, NULL);
+  sys_return_val_if_fail(*count == 0, NULL);
 
-  while ((_s = strstr(_s, delim)) != NULL) {
-    _s += delLen;
-    ++*count;
+  SysChar **ptrs;
+  SysChar* sp, *nsp;
+  SysSize sp_size;
+  SysSize s_len;
+  SysSize delim_len;
+  SysInt delim_count;
+
+  sp = (SysChar *)s;
+  s_len = strlen(s);
+  delim_len = strlen(delim);
+  delim_count = 1;
+
+  while ((sp = strstr(sp, delim)) != NULL) {
+    sp += delim_len;
+    delim_count++;
   }
 
-  ptrsSize = (*count + 1) * sizeof(SysChar *);
-  ptrs = data = sys_malloc_N(ptrsSize + sLen + 1);
-  if (data) {
-    sys_strcpy(((SysChar *)data) + ptrsSize, s);
-    *ptrs = _s = ((SysChar *)data) + ptrsSize;
+  sp_size = sizeof(SysChar *) * (delim_count + 1);
 
-    if (*count > 1) {
-      while ((_s = strstr(_s, delim)) != NULL) {
-        *_s = '\0';
-        _s += delLen;
-        *++ptrs = _s;
-      }
+  /* array ptr and str with one malloc  */
+  sp = sys_malloc_N(sp_size + s_len + 1);
+  if(!sp) { return NULL; }
+  ptrs = (SysChar **)sp;
+
+  nsp = sp + sp_size;
+  strcpy(nsp, s);
+  *ptrs++ = nsp;
+
+  if(delim_count > 1) {
+    while ((nsp = strstr(nsp, delim)) != NULL) {
+      *nsp = '\0';
+      nsp += delim_len;
+      *ptrs++ = nsp;
     }
-    *++ptrs = NULL;
   }
+  *count = delim_count;
 
-  return data;
+  return (SysChar **)sp;
+
 }
 
 /**
