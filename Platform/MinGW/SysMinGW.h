@@ -9,19 +9,6 @@ extern "C" {
 #define _GNU_SOURCE
 #endif
 
-// #include <features.h>
-// #include <spawn.h>
-// #include <dlfcn.h>
-// #include <sys/statfs.h>
-// #include <libintl.h>
-// #include <X11/Xlib.h>
-// #include <execinfo.h>
-// #include <sys/socket.h>
-// #include <sys/ioctl.h>
-// #include <netdb.h>
-// #include <netinet/in.h>
-// #include <arpa/inet.h>
-
 #include <signal.h>
 #include <ctype.h>
 #include <unistd.h>
@@ -35,7 +22,7 @@ extern "C" {
   #define MAX_PATH 260
 #endif
 
-#define SYS_HANDLE int
+#define SYS_HANDLE SysInt
 #define SYS_OS_UNIX 1
 #define SYS_API extern __attribute__((visibility("default")))
 

@@ -36,7 +36,7 @@ static SysInt compare_func(const void* a, const void* b, SysPointer user_data) {
   SysDouble sa = score_func((SysPointer)(*(SysUInt64 *)a));
   SysDouble sb = score_func((SysPointer)(*(SysUInt64 *)b));
 
-  return (int)(sa - sb);
+  return (SysInt)(sa - sb);
 }
 
 SysBHeapIter *sys_bheap_iter_new(SysBHeap *hp) {

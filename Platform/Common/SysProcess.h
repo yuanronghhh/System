@@ -26,7 +26,7 @@ SYS_API SysInt sys_pclose(FILE *fp);
 
 SYS_API SysSubProcess* sys_subprocess_new(const SysChar *cmd[]);
 SYS_API SysSubProcess* sys_subprocess_new_option(SysSubProcessOption* option);
-SYS_API bool sys_subprocess_communicate(SysSubProcess *sub,
+SYS_API SysBool sys_subprocess_communicate(SysSubProcess *sub,
     SysChar*         stdin_buf,
     SysChar**        stdout_buf,
     SysChar**        stderr_buf,

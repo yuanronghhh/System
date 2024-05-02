@@ -9,7 +9,7 @@ SysSize sys_fread(
   return fread(buffer, bufsize, elem_size * elem_count, fp);
 }
 
-int sys_vprintf(const SysChar *format, va_list va) {
+SysInt sys_vprintf(const SysChar *format, va_list va) {
   return vprintf(format, va);
 }
 
@@ -53,13 +53,13 @@ SysInt sys_vsprintf(SysChar* str, SysSize size, const SysChar* format, va_list a
   return vsnprintf(str, size, format, args);
 }
 
-SysChar *sys_wchar_to_mbyte(const SysWChar *wchar, int *nsize) {
+SysChar *sys_wchar_to_mbyte(const SysWChar *wchar, SysInt *nsize) {
   SysInt size;
   SysChar* sz;
 
   setlocale(LC_CTYPE, "");
   size = wcstombs(NULL, wchar, 0) + 1;
-  sz = (SysChar* )malloc(size * sizeof(char));
+  sz = (SysChar* )malloc(size * sizeof(SysChar));
   wcstombs(sz, wchar, size);
   if (nsize) {
     *nsize = size;
@@ -68,7 +68,7 @@ SysChar *sys_wchar_to_mbyte(const SysWChar *wchar, int *nsize) {
   return sz;
 }
 
-SysWChar *sys_mbyte_to_wchar(const SysChar *mbyte, int *nsize) {
+SysWChar *sys_mbyte_to_wchar(const SysChar *mbyte, SysInt *nsize) {
   SysWChar *sz;
   SysSize mbslen;
 

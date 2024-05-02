@@ -4,7 +4,7 @@
 SYS_DEFINE_TYPE(SysSocket, sys_socket, SYS_TYPE_OBJECT);
 
 static SysInt ssl_verify_callback(SysInt ok, X509_STORE_CTX* x509_store) {
-  char* subject, * issuer;
+  SysChar* subject, * issuer;
   SysInt                err, depth;
   X509* cert;
   X509_NAME* sname, * iname;
@@ -127,7 +127,7 @@ void sys_socket_set_ssl(SysSocket* s, SSL* ssl) {
   sys_return_if_fail(s != NULL);
 
   s->ssl = ssl;
-  SSL_set_fd(ssl, (int)s->fd);
+  SSL_set_fd(ssl, (SysInt)s->fd);
 }
 
 SysSocket *sys_socket_new_I(SysInt domain, SysInt type, SysInt protocol, SysBool noblocking) {
@@ -163,7 +163,7 @@ SysInt sys_socket_send(SysSocket *s, const void *buf, size_t len, SysInt flags) 
   return sys_socket_real_send(s, buf, len, flags);
 }
 
-const char *sys_socket_error(void) {
+const SysChar *sys_socket_error(void) {
 
   return sys_socket_strerror(sys_socket_errno());
 }
@@ -239,7 +239,7 @@ SysInt sys_socket_recv(SysSocket *s, void *buf, size_t len, SysInt flags) {
   SysInt r;
 
   if (s->ssl) {
-    r = SSL_read(s->ssl, buf, (int)len);
+    r = SSL_read(s->ssl, buf, (SysInt)len);
     if (r < 0) {
 
       sys_warning_N("recv: %s", sys_ssl_error());
@@ -247,7 +247,7 @@ SysInt sys_socket_recv(SysSocket *s, void *buf, size_t len, SysInt flags) {
 
   } else {
 
-    r = sys_socket_real_recv(s, buf, (int)len, flags);
+    r = sys_socket_real_recv(s, buf, (SysInt)len, flags);
     if (r < 0) {
 
       sys_warning_N("recv: %s", sys_socket_error());

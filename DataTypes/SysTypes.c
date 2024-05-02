@@ -807,7 +807,7 @@ SysTypeInstance *sys_type_new_instance(SysType type) {
   SysTypeClass *cls;
   SysInstanceInitFunc ofunc, nfunc;
 
-  int priv_psize = 0;
+  SysInt priv_psize = 0;
 
   node = sys_type_node(type);
 

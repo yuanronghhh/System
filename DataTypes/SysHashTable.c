@@ -17,11 +17,11 @@
 #define HASH_IS_REAL(h_) ((h_) >= 2)
 
 struct _SysHashTable {
-  int size;
-  int mod;
+  SysInt size;
+  SysInt mod;
   SysUInt mask;
-  int nnodes;
-  int noccupied; /* nnodes + tombstones */
+  SysInt nnodes;
+  SysInt noccupied; /* nnodes + tombstones */
 
   SysPointer *keys;
   SysUInt *hashes;
@@ -39,12 +39,12 @@ typedef struct {
   SysHashTable *hash_table;
   SysPointer dummy1;
   SysPointer dummy2;
-  int position;
-  bool dummy3;
-  int version;
+  SysInt position;
+  SysBool dummy3;
+  SysInt version;
 } RealIter;
 
-static const int prime_mod[] = {
+static const SysInt prime_mod[] = {
     1, /* For 1 << 0 */
     2,         3,          7,         13,       31,        61,
     127,       251,        509,       1021,     2039,      4093,
@@ -54,8 +54,8 @@ static const int prime_mod[] = {
     536870909, 1073741789, 2147483647 /* For 1 << 31 */
 };
 
-static void sys_hash_table_set_shift(SysHashTable *hash_table, int shift) {
-  int i;
+static void sys_hash_table_set_shift(SysHashTable *hash_table, SysInt shift) {
+  SysInt i;
   SysUInt mask = 0;
 
   hash_table->size = 1 << shift;
@@ -69,8 +69,8 @@ static void sys_hash_table_set_shift(SysHashTable *hash_table, int shift) {
   hash_table->mask = mask;
 }
 
-static int sys_hash_table_find_closest_shift(int n) {
-  int i;
+static SysInt sys_hash_table_find_closest_shift(SysInt n) {
+  SysInt i;
 
   for (i = 0; n; i++)
     n >>= 1;
@@ -79,8 +79,8 @@ static int sys_hash_table_find_closest_shift(int n) {
 }
 
 static void sys_hash_table_set_shift_from_size(SysHashTable *hash_table,
-                                               int size) {
-  int shift;
+                                               SysInt size) {
+  SysInt shift;
 
   shift = sys_hash_table_find_closest_shift(size);
   shift = max(shift, HASH_TABLE_MIN_SHIFT);
@@ -95,7 +95,7 @@ static inline SysUInt sys_hash_table_lookup_node(SysHashTable *hash_table,
   SysUInt node_hash;
   SysUInt hash_value;
   SysUInt first_tombstone = 0;
-  bool have_tombstone = false;
+  SysBool have_tombstone = false;
   SysUInt step = 0;
 
   hash_value = hash_table->hash_func(key);
@@ -138,8 +138,8 @@ static inline SysUInt sys_hash_table_lookup_node(SysHashTable *hash_table,
   return node_index;
 }
 
-static void sys_hash_table_remove_node(SysHashTable *hash_table, int i,
-                                       bool notify) {
+static void sys_hash_table_remove_node(SysHashTable *hash_table, SysInt i,
+                                       SysBool notify) {
   SysPointer key;
   SysPointer value;
 
@@ -165,11 +165,11 @@ static void sys_hash_table_remove_node(SysHashTable *hash_table, int i,
 }
 
 static void sys_hash_table_remove_all_nodes(SysHashTable *hash_table,
-                                            bool notify, bool destruction) {
-  int i;
+                                            SysBool notify, SysBool destruction) {
+  SysInt i;
   SysPointer key;
   SysPointer value;
-  int old_size;
+  SysInt old_size;
   SysPointer *old_keys;
   SysPointer *old_values;
   SysUInt *old_hashes;
@@ -246,8 +246,8 @@ static void sys_hash_table_resize(SysHashTable *hash_table) {
   SysPointer *new_keys;
   SysPointer *new_values;
   SysUInt *new_hashes;
-  int old_size;
-  int i;
+  SysInt old_size;
+  SysInt i;
 
   old_size = hash_table->size;
   sys_hash_table_set_shift_from_size(hash_table, hash_table->nnodes * 2);
@@ -294,8 +294,8 @@ static void sys_hash_table_resize(SysHashTable *hash_table) {
 }
 
 static inline void sys_hash_table_maybe_resize(SysHashTable *hash_table) {
-  int noccupied = hash_table->noccupied;
-  int size = hash_table->size;
+  SysInt noccupied = hash_table->noccupied;
+  SysInt size = hash_table->size;
 
   if ((size > hash_table->nnodes * 4 && size > 1 << HASH_TABLE_MIN_SHIFT) ||
       (size <= noccupied + (noccupied / 16)))
@@ -342,10 +342,10 @@ void sys_hash_table_iter_init(SysHashTableIter *iter,
   ri->position = -1;
 }
 
-bool sys_hash_table_iter_next(SysHashTableIter *iter, SysPointer *key,
+SysBool sys_hash_table_iter_next(SysHashTableIter *iter, SysPointer *key,
                               SysPointer *value) {
   RealIter *ri = (RealIter *)iter;
-  int position;
+  SysInt position;
 
   sys_return_val_if_fail(iter != NULL, false);
   sys_return_val_if_fail(ri->position < ri->hash_table->size, false);
@@ -375,7 +375,7 @@ SysHashTable *sys_hash_table_iter_get_hash_table(SysHashTableIter *iter) {
   return ((RealIter *)iter)->hash_table;
 }
 
-static void iter_remove_or_steal(RealIter *ri, bool notify) {
+static void iter_remove_or_steal(RealIter *ri, SysBool notify) {
   sys_return_if_fail(ri != NULL);
   sys_return_if_fail(ri->position >= 0);
   sys_return_if_fail(ri->position < ri->hash_table->size);
@@ -387,11 +387,11 @@ void sys_hash_table_iter_remove(SysHashTableIter *iter) {
   iter_remove_or_steal((RealIter *)iter, true);
 }
 
-static bool sys_hash_table_insert_node(SysHashTable *hash_table,
+static SysBool sys_hash_table_insert_node(SysHashTable *hash_table,
                                        SysUInt node_index, SysUInt key_hash,
                                        SysPointer new_key, SysPointer new_value,
-                                       bool keep_new_key, bool reusinsys_key) {
-  bool already_exists;
+                                       SysBool keep_new_key, SysBool reusinsys_key) {
+  SysBool already_exists;
   SysUInt old_hash;
   SysPointer key_to_free = NULL;
   SysPointer value_to_free = NULL;
@@ -537,7 +537,7 @@ SysPointer sys_hash_table_lookup(SysHashTable *hash_table,
     : NULL;
 }
 
-bool sys_hash_table_lookup_extended(SysHashTable *hash_table,
+SysBool sys_hash_table_lookup_extended(SysHashTable *hash_table,
     const SysPointer lookup_key,
     SysPointer *orisys_key, SysPointer *value) {
   SysUInt node_index;
@@ -559,9 +559,9 @@ bool sys_hash_table_lookup_extended(SysHashTable *hash_table,
   return true;
 }
 
-static bool sys_hash_table_insert_internal(SysHashTable *hash_table,
+static SysBool sys_hash_table_insert_internal(SysHashTable *hash_table,
     SysPointer key, SysPointer value,
-    bool keep_new_key) {
+    SysBool keep_new_key) {
   SysUInt key_hash;
   SysUInt node_index;
 
@@ -573,21 +573,21 @@ static bool sys_hash_table_insert_internal(SysHashTable *hash_table,
       value, keep_new_key, false);
 }
 
-bool sys_hash_table_insert(SysHashTable *hash_table, SysPointer key,
+SysBool sys_hash_table_insert(SysHashTable *hash_table, SysPointer key,
     SysPointer value) {
   return sys_hash_table_insert_internal(hash_table, key, value, false);
 }
 
-bool sys_hash_table_replace(SysHashTable *hash_table, SysPointer key,
+SysBool sys_hash_table_replace(SysHashTable *hash_table, SysPointer key,
     SysPointer value) {
   return sys_hash_table_insert_internal(hash_table, key, value, true);
 }
 
-bool sys_hash_table_add(SysHashTable *hash_table, SysPointer key) {
+SysBool sys_hash_table_add(SysHashTable *hash_table, SysPointer key) {
   return sys_hash_table_insert_internal(hash_table, key, key, true);
 }
 
-bool sys_hash_table_contains(SysHashTable *hash_table, const SysPointer key) {
+SysBool sys_hash_table_contains(SysHashTable *hash_table, const SysPointer key) {
   SysUInt node_index;
   SysUInt node_hash;
 
@@ -598,8 +598,8 @@ bool sys_hash_table_contains(SysHashTable *hash_table, const SysPointer key) {
   return HASH_IS_REAL(hash_table->hashes[node_index]);
 }
 
-static bool sys_hash_table_remove_internal(SysHashTable *hash_table,
-    const SysPointer key, bool notify) {
+static SysBool sys_hash_table_remove_internal(SysHashTable *hash_table,
+    const SysPointer key, SysBool notify) {
   SysUInt node_index;
   SysUInt node_hash;
 
@@ -616,11 +616,11 @@ static bool sys_hash_table_remove_internal(SysHashTable *hash_table,
   return true;
 }
 
-bool sys_hash_table_remove(SysHashTable *hash_table, const SysPointer key) {
+SysBool sys_hash_table_remove(SysHashTable *hash_table, const SysPointer key) {
   return sys_hash_table_remove_internal(hash_table, key, true);
 }
 
-bool sys_hash_table_steal(SysHashTable *hash_table, const SysPointer key) {
+SysBool sys_hash_table_steal(SysHashTable *hash_table, const SysPointer key) {
   return sys_hash_table_remove_internal(hash_table, key, false);
 }
 
@@ -641,9 +641,9 @@ void sys_hash_table_steal_all(SysHashTable *hash_table) {
 static SysUInt sys_hash_table_foreach_remove_or_steal(SysHashTable *hash_table,
     SysHRFunc func,
     SysPointer user_data,
-    bool notify) {
+    SysBool notify) {
   SysUInt deleted = 0;
-  int i;
+  SysInt i;
 
   for (i = 0; i < hash_table->size; i++) {
     SysUInt node_hash = hash_table->hashes[i];
@@ -681,7 +681,7 @@ SysUInt sys_hash_table_foreach_steal(SysHashTable *hash_table, SysHRFunc func,
 
 void sys_hash_table_foreach(SysHashTable *hash_table, SysHFunc func,
     SysPointer user_data) {
-  int i;
+  SysInt i;
 
   sys_return_if_fail(hash_table != NULL);
   sys_return_if_fail(func != NULL);
@@ -698,8 +698,8 @@ void sys_hash_table_foreach(SysHashTable *hash_table, SysHFunc func,
 
 SysPointer sys_hash_table_find(SysHashTable *hash_table, SysHRFunc predicate,
     SysPointer user_data) {
-  int i;
-  bool match;
+  SysInt i;
+  SysBool match;
 
   sys_return_val_if_fail(hash_table != NULL, NULL);
   sys_return_val_if_fail(predicate != NULL, NULL);
@@ -728,7 +728,7 @@ SysUInt sys_hash_table_size(SysHashTable *hash_table) {
 }
 
 SysPtrArray *sys_hash_table_get_keys(SysHashTable *hash_table) {
-  int i;
+  SysInt i;
   SysPtrArray *retval;
 
   sys_return_val_if_fail(hash_table != NULL, NULL);
@@ -763,7 +763,7 @@ SysPointer *sys_hash_table_get_keys_as_array(SysHashTable *hash_table,
 }
 
 SysPtrArray *sys_hash_table_get_values(SysHashTable *hash_table) {
-  int i;
+  SysInt i;
   SysPtrArray *retval;
 
   sys_return_val_if_fail(hash_table != NULL, NULL);
@@ -778,7 +778,7 @@ SysPtrArray *sys_hash_table_get_values(SysHashTable *hash_table) {
 }
 
 SysUInt sys_str_hash(const SysPointer v) {
-  const signed char *p;
+  const SysInt8 *p;
   SysUInt32 h = 5381;
 
   for (p = v; *p != '\0'; p++)
@@ -791,17 +791,17 @@ SysUInt sys_direct_hash(const SysPointer v) {
   return POINTER_TO_UINT(v);
 }
 
-bool sys_direct_equal(const SysPointer v1, const SysPointer v2) {
+SysBool sys_direct_equal(const SysPointer v1, const SysPointer v2) {
   return v1 == v2;
 }
 
-bool sys_int_equal(const SysPointer v1, const SysPointer v2) {
-  return *((const int *)v1) == *((const int *)v2);
+SysBool sys_int_equal(const SysPointer v1, const SysPointer v2) {
+  return *((const SysInt *)v1) == *((const SysInt *)v2);
 }
 
-SysUInt sys_int_hash(const SysPointer v) { return *(const int *)v; }
+SysUInt sys_int_hash(const SysPointer v) { return *(const SysInt *)v; }
 
-bool sys_int64_equal(const SysPointer v1, const SysPointer v2) {
+SysBool sys_int64_equal(const SysPointer v1, const SysPointer v2) {
   return *((const SysInt64 *)v1) == *((const SysInt64 *)v2);
 }
 
@@ -809,7 +809,7 @@ SysUInt sys_int64_hash(const SysPointer v) {
   return (SysUInt) * (const SysInt64 *)v;
 }
 
-bool sys_double_equal(const SysPointer v1, const SysPointer v2) {
+SysBool sys_double_equal(const SysPointer v1, const SysPointer v2) {
   return *((const SysDouble *)v1) == *((const SysDouble *)v2);
 }
 

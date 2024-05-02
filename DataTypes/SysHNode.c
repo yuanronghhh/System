@@ -32,7 +32,7 @@ SysPointer _sys_hnode_cast_to(SysHNode *o, SysSize offsize) {
   if(o == NULL) { return NULL; }
   sys_return_val_if_fail(HNODE_CHECK(o), NULL);
 
-  return ((char*)o - offsize);
+  return ((SysChar*)o - offsize);
 }
 
 static void sys_hnodes_free (SysHNode *hnode) {

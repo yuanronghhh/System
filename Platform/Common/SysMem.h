@@ -21,7 +21,7 @@ SYS_BEGIN_DECLS
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && !defined(__cplusplus)
 #define SYS_ALIGNOF(type) _Alignof (type)
 #else
-#define SYS_ALIGNOF(type) (offsetof (struct { char a; type b; }, b)) 
+#define SYS_ALIGNOF(type) (offsetof (struct { SysChar a; type b; }, b)) 
 #endif
 
 #define sys_realloc_N(ptr, size) sys_realloc(ptr, size)
