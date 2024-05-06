@@ -4,6 +4,7 @@
 /**
  * simple implement gobject for myself
  * and part of code copy from gobject
+ * license under GNU Lesser General Public
  *
  * see: ftp://ftp.gtk.org/pub/glib/
  */
