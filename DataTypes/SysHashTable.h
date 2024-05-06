@@ -23,8 +23,8 @@ struct _SysHashTableIter {
   SysPointer      dummy1;
   SysPointer      dummy2;
   SysPointer      dummy3;
-  int             dummy4;
-  bool            dummy5;
+  SysInt             dummy4;
+  SysBool            dummy5;
   SysPointer      dummy6;
 };
 
@@ -34,18 +34,18 @@ SYS_API SysHashTable *sys_hash_table_new_full(SysHashFunc hash_func,
                                   SysDestroyFunc key_destroy_func,
                                   SysDestroyFunc value_destroy_func);
 SYS_API void sys_hash_table_free(SysHashTable *hash_table);
-SYS_API bool sys_hash_table_insert(SysHashTable *hash_table, SysPointer key,
+SYS_API SysBool sys_hash_table_insert(SysHashTable *hash_table, SysPointer key,
                              SysPointer value);
-SYS_API bool sys_hash_table_replace(SysHashTable *hash_table, SysPointer key,
+SYS_API SysBool sys_hash_table_replace(SysHashTable *hash_table, SysPointer key,
                               SysPointer value);
-SYS_API bool sys_hash_table_add(SysHashTable *hash_table, SysPointer key);
-SYS_API bool sys_hash_table_remove(SysHashTable *hash_table, const SysPointer key);
+SYS_API SysBool sys_hash_table_add(SysHashTable *hash_table, SysPointer key);
+SYS_API SysBool sys_hash_table_remove(SysHashTable *hash_table, const SysPointer key);
 SYS_API void sys_hash_table_remove_all(SysHashTable *hash_table);
-SYS_API bool sys_hash_table_steal(SysHashTable *hash_table, const SysPointer key);
+SYS_API SysBool sys_hash_table_steal(SysHashTable *hash_table, const SysPointer key);
 SYS_API void sys_hash_table_steal_all(SysHashTable *hash_table);
 SYS_API SysPointer sys_hash_table_lookup(SysHashTable *hash_table, const SysPointer key);
-SYS_API bool sys_hash_table_contains(SysHashTable *hash_table, const SysPointer key);
-SYS_API bool sys_hash_table_lookup_extended(SysHashTable *hash_table,
+SYS_API SysBool sys_hash_table_contains(SysHashTable *hash_table, const SysPointer key);
+SYS_API SysBool sys_hash_table_lookup_extended(SysHashTable *hash_table,
                                       const SysPointer lookup_key,
                                       SysPointer *orisys_key, SysPointer *value);
 SYS_API void sys_hash_table_foreach(SysHashTable *hash_table, SysHFunc func,
@@ -62,7 +62,7 @@ SYS_API SysPtrArray *sys_hash_table_get_values(SysHashTable *hash_table);
 SYS_API SysPointer *sys_hash_table_get_keys_as_array(SysHashTable *hash_table, SysUInt *length);
 
 SYS_API void sys_hash_table_iter_init(SysHashTableIter *iter, SysHashTable *hash_table);
-SYS_API bool sys_hash_table_iter_next(SysHashTableIter *iter, SysPointer *key,
+SYS_API SysBool sys_hash_table_iter_next(SysHashTableIter *iter, SysPointer *key,
                                 SysPointer *value);
 SYS_API SysHashTable *sys_hash_table_iter_get_hash_table(SysHashTableIter *iter);
 SYS_API void sys_hash_table_iter_remove(SysHashTableIter *iter);
@@ -77,17 +77,17 @@ SYS_API void sys_hash_table_unref(SysHashTable *hash_table);
  */
 SYS_API SysUInt sys_str_hash(const SysPointer v);
 
-SYS_API bool sys_int_equal(const SysPointer v1, const SysPointer v2);
+SYS_API SysBool sys_int_equal(const SysPointer v1, const SysPointer v2);
 SYS_API SysUInt sys_int_hash(const SysPointer v);
 
-SYS_API bool sys_int64_equal(const SysPointer v1, const SysPointer v2);
+SYS_API SysBool sys_int64_equal(const SysPointer v1, const SysPointer v2);
 SYS_API SysUInt sys_int64_hash(const SysPointer v);
 
-SYS_API bool sys_double_equal(const SysPointer v1, const SysPointer v2);
+SYS_API SysBool sys_double_equal(const SysPointer v1, const SysPointer v2);
 SYS_API SysUInt sys_double_hash(const SysPointer v);
 
 SYS_API SysUInt sys_direct_hash(const SysPointer v);
-SYS_API bool sys_direct_equal(const SysPointer v1, const SysPointer v2);
+SYS_API SysBool sys_direct_equal(const SysPointer v1, const SysPointer v2);
 
 SYS_END_DECLS
 

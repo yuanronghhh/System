@@ -9,7 +9,7 @@ static SSL_CTX* server_ctx = NULL;
 static SSL_CTX* client_ctx = NULL;
 
 void sys_ssl_setup(void) {
-  int n;
+  SysInt n;
   STACK_OF(SSL_COMP) *ssl_comp_methods;
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100003L
@@ -131,10 +131,10 @@ static void sys_ssl_ctx_set_server_option(SSL_CTX* ctx) {
   SSL_CTX_set_read_ahead(ctx, 1);
 }
 
-static int ssl_verify_callback(int ok, X509_STORE_CTX* x509_store)
+static SysInt ssl_verify_callback(SysInt ok, X509_STORE_CTX* x509_store)
 {
-  char* subject, * issuer;
-  int                err, depth;
+  SysChar* subject, * issuer;
+  SysInt                err, depth;
   X509* cert;
   X509_NAME* sname, * iname;
 

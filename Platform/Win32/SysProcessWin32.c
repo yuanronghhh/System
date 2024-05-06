@@ -40,7 +40,7 @@ FILE *sys_real_popen(const SysChar* cmd, const SysChar *mode) {
   return proc;
 }
 
-static bool win32_get_handle(
+static SysBool win32_get_handle(
   PHANDLE rfd0, PHANDLE wfd0,
   PHANDLE rfd1, PHANDLE wfd1,
   PHANDLE rfd2, PHANDLE wfd2,
@@ -134,7 +134,7 @@ static bool win32_get_handle(
   return true;
 }
 
-static bool win32_execute_child(SysSubProcessWin32 *pwin32,
+static SysBool win32_execute_child(SysSubProcessWin32 *pwin32,
     SysSubProcessOption *option,
     HANDLE rfd0, HANDLE wfd0,
     HANDLE rfd1, HANDLE wfd1,

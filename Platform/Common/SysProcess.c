@@ -25,7 +25,7 @@ SysSubProcess* sys_subprocess_new_option(SysSubProcessOption* option) {
   return sub;
 }
 
-SYS_API bool sys_subprocess_communicate(SysSubProcess *sub,
+SYS_API SysBool sys_subprocess_communicate(SysSubProcess *sub,
     SysChar*   stdin_buf,
     SysChar**  stdout_buf,
     SysChar**  stderr_buf,

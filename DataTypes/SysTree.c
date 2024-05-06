@@ -303,7 +303,7 @@ static SysTreeNode* sys_tree_insert_internal (SysTree    *tree,
                         SysBool  replace) {
   SysTreeNode *node, *retnode;
   SysTreeNode *path[MAX_SYSTREE_HEIGHT];
-  int idx;
+  SysInt idx;
 
   sys_return_val_if_fail (tree != NULL, NULL);
 
@@ -318,7 +318,7 @@ static SysTreeNode* sys_tree_insert_internal (SysTree    *tree,
   node = tree->root;
 
   while (1) {
-      int cmp = tree->key_compare (key, node->key, tree->key_compare_data);
+      SysInt cmp = tree->key_compare (key, node->key, tree->key_compare_data);
       
       if (cmp == 0) {
           if (tree->value_destroy_func)
@@ -450,7 +450,7 @@ static SysBool sys_tree_remove_internal (SysTree         *tree,
                         SysBool       steal) {
   SysTreeNode *node, *parent, *balance;
   SysTreeNode *path[MAX_SYSTREE_HEIGHT];
-  int idx;
+  SysInt idx;
   SysBool left_node;
 
   sys_return_val_if_fail (tree != NULL, false);
@@ -463,7 +463,7 @@ static SysBool sys_tree_remove_internal (SysTree         *tree,
   node = tree->root;
 
   while (1) {
-      int cmp = tree->key_compare (key, node->key, tree->key_compare_data);
+      SysInt cmp = tree->key_compare (key, node->key, tree->key_compare_data);
 
       if (cmp == 0)
         break;
@@ -541,7 +541,7 @@ static SysBool sys_tree_remove_internal (SysTree         *tree,
           SysTreeNode *prev = node->left;
           SysTreeNode *next = node->right;
           SysTreeNode *nextp = node;
-          int old_idx = idx + 1;
+          SysInt old_idx = idx + 1;
           idx++;
 
           /* path[idx] == parent */

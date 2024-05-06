@@ -409,7 +409,7 @@ sys_thread_win32_proxy (SysPointer data)
 SysRealThread *
 sys_system_thread_new (SysThreadFunc proxy,
                      SysSize stack_size,
-                     const char *name,
+                     const SysChar *name,
                      SysThreadFunc func,
                      SysPointer data,
                      SysError **error)
@@ -418,7 +418,7 @@ sys_system_thread_new (SysThreadFunc proxy,
   SysRealThread *base_thread;
   SysUInt ignore;
   const SysChar *message = NULL;
-  int thread_prio;
+  SysInt thread_prio;
 
   thread = sys_slice_new0 (SysThreadWin32);
   thread->proxy = proxy;

@@ -180,7 +180,7 @@ fail:
   return 1;
 }
 
-bool sys_tio_write_template(SysTextIO *tio, SysChar *tpl, SysHashTable *map) {
+SysBool sys_tio_write_template(SysTextIO *tio, SysChar *tpl, SysHashTable *map) {
   sys_return_val_if_fail(tio != NULL, false);
   sys_return_val_if_fail(map != NULL, false);
 

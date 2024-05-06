@@ -5,46 +5,74 @@
 
 #define SYS_BYTE_INIT_SIZE 4096
 
+SysChar* sys_strstr(const SysChar *s, const SysChar* delim) {
+  sys_return_val_if_fail(s != NULL, NULL);
+  sys_return_val_if_fail(delim != NULL, NULL);
+
+  return strstr(s, delim);
+}
+
+void sys_str_trim_end(SysChar *s, const SysChar delim) {
+  sys_return_if_fail(s != NULL);
+
+  SysChar * p = strrchr(s, delim);
+  if(!p) { return;}
+
+  *p = '\0';
+}
+
 /**
- * sys_strsplit: split with delimiter
+ * sys_strsplit: split with delimiter, free it only once
  * @s: dst string
  * @delim: seperate char
  * @count: split count.
  *
- * Returns: void
+ * Returns: new points + string copy, just free returned pointer.
  */
-SysChar **sys_strsplit(SysChar * s, const SysChar *delim, int * count) {
-  void *data;
-  SysChar* _s = (SysChar*)s;
-  const SysChar ** ptrs;
-  SysSize
-    ptrsSize,
-    sLen = strlen(s),
-    delLen = strlen(delim);
-  *count = 1;
+SysChar **sys_strsplit(SysChar * s, const SysChar *delim, SysInt * count) {
+  sys_return_val_if_fail(s != NULL, NULL);
+  sys_return_val_if_fail(delim != NULL, NULL);
+  sys_return_val_if_fail(*count == 0, NULL);
 
-  while ((_s = strstr(_s, delim)) != NULL) {
-    _s += delLen;
-    ++*count;
+  SysChar **ptrs;
+  SysChar* sp, *nsp;
+  SysSize sp_size;
+  SysSize s_len;
+  SysSize delim_len;
+  SysInt delim_count;
+
+  sp = (SysChar *)s;
+  s_len = strlen(s);
+  delim_len = strlen(delim);
+  delim_count = 1;
+
+  while ((sp = strstr(sp, delim)) != NULL) {
+    sp += delim_len;
+    delim_count++;
   }
 
-  ptrsSize = (*count + 1) * sizeof(SysChar *);
-  ptrs = data = sys_malloc_N(ptrsSize + sLen + 1);
-  if (data) {
-    sys_strcpy(((SysChar *)data) + ptrsSize, s);
-    *ptrs = _s = ((SysChar *)data) + ptrsSize;
+  sp_size = sizeof(SysChar *) * (delim_count + 1);
 
-    if (*count > 1) {
-      while ((_s = strstr(_s, delim)) != NULL) {
-        *_s = '\0';
-        _s += delLen;
-        *++ptrs = _s;
-      }
+  /* array ptr and str with one malloc  */
+  sp = sys_malloc_N(sp_size + s_len + 1);
+  if(!sp) { return NULL; }
+  ptrs = (SysChar **)sp;
+
+  nsp = sp + sp_size;
+  strcpy(nsp, s);
+  *ptrs++ = nsp;
+
+  if(delim_count > 1) {
+    while ((nsp = strstr(nsp, delim)) != NULL) {
+      *nsp = '\0';
+      nsp += delim_len;
+      *ptrs++ = nsp;
     }
-    *++ptrs = NULL;
   }
+  *count = delim_count;
 
-  return data;
+  return (SysChar **)sp;
+
 }
 
 /**
@@ -54,7 +82,7 @@ SysChar **sys_strsplit(SysChar * s, const SysChar *delim, int * count) {
  *
  *  example:
  *    SysSize mlen = 200, len = 0;
- *    SysChar *s = sys_str_newsize(char, mlen);
+ *    SysChar *s = sys_str_newsize(SysChar, mlen);
  *    sys_strmcat(&s, &mlen, &len, "var");
  *    sys_strmcat(&s, &mlen, &len, "=");
  *    sys_strmcat(&s, &mlen, &len, "foo");
@@ -204,10 +232,10 @@ SysChar* sys_strndup(const SysChar *s, SysSize len) {
  *
  * Returns: length of string
  */
-int sys_asprintf(SysChar **str, const SysChar *format, ...) {
+SysInt sys_asprintf(SysChar **str, const SysChar *format, ...) {
   sys_return_val_if_fail(*str == NULL && "sys_asprintf *str should be NULL", -1);
 
-  int len;
+  SysInt len;
 
   va_list args;
   va_start(args, format);
@@ -225,8 +253,8 @@ int sys_asprintf(SysChar **str, const SysChar *format, ...) {
  *
  * Returns: length of string.
  */
-int sys_printf(const SysChar *format, ...) {
-  int len;
+SysInt sys_printf(const SysChar *format, ...) {
+  SysInt len;
 
   va_list args;
   va_start(args, format);
@@ -260,8 +288,8 @@ void sys_print(const SysChar *str) {
  *
  * Returns: length of string.
  */
-int sys_snprintf(SysChar *str, SysSize size, const SysChar *format, ...) {
-  int len;
+SysInt sys_snprintf(SysChar *str, SysSize size, const SysChar *format, ...) {
+  SysInt len;
 
   va_list args;
   va_start(args, format);
@@ -387,8 +415,8 @@ SysChar *_sys_strjoin(const SysChar *delim, ...) {
  *  use sys_bin_new() for alloc new buffer,
  *  use sys_bin_tostr convet it to string.
  *  example:
- *    int a = 16;
- *    char *buf = sys_bin_new(a, sizeof(a));
+ *    SysInt a = 16;
+ *    SysChar *buf = sys_bin_new(a, sizeof(a));
  *    buf = sys_bin_tostr(buf, a, sizeof(a));
  *
  * @buffer: data store buffer.
@@ -407,8 +435,8 @@ SysChar* sys_bin_str_full(SysChar *buffer, SysSize bufsize, SysSize const sbyte,
     abort();
   }
 
-  int i, j, m = 0;
-  for (i = (int)sbyte - 1; i >= 0; i--) {
+  SysInt i, j, m = 0;
+  for (i = (SysInt)sbyte - 1; i >= 0; i--) {
     for (j = 7; j >= 0; j--) {
       byte = (b[i] >> j) & 1;
       buffer[m++] = byte ? '1' : '0';
@@ -444,7 +472,7 @@ SysBool sys_str_equal(const SysChar *s1, const SysChar *s2) {
   return sys_strcmp(s1, s2) == 0;
 }
 
-int sys_strcmp(const SysChar *s1, const SysChar *s2) {
+SysInt sys_strcmp(const SysChar *s1, const SysChar *s2) {
   if (!s1)
     return -(s1 != s2);
   if (!s2)
@@ -475,7 +503,7 @@ SysChar *sys_strlower(SysChar *s) {
   return s;
 }
 
-int sys_strncmp(const SysChar *s1, const SysChar *s2, int max) {
+SysInt sys_strncmp(const SysChar *s1, const SysChar *s2, SysInt max) {
   sys_return_val_if_fail(s1 != NULL, 0);
   sys_return_val_if_fail(s2 != NULL, 0);
 
@@ -495,7 +523,7 @@ int sys_strncmp(const SysChar *s1, const SysChar *s2, int max) {
  *
  * Returns: void
  */
-bool sys_str_override_c(SysChar *str, char oldchar, char newchar) {
+SysBool sys_str_override_c(SysChar *str, SysChar oldchar, SysChar newchar) {
   sys_return_val_if_fail(str != NULL, false);
 
   SysChar *s = str;

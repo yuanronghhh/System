@@ -23,7 +23,7 @@ void sys_socket_real_close(SysSocket *s) {
 SysInt sys_socket_setopt(SysSocket *s, SysInt level, SysInt optname, void *optval, socklen_t optlen) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  SysInt r = setsockopt(s->fd, level, optname, (char *)optval, optlen);
+  SysInt r = setsockopt(s->fd, level, optname, (SysChar *)optval, optlen);
   if (r < 0) {
 
   }
@@ -61,7 +61,7 @@ SysInt sys_socket_real_bind(SysSocket* s, const struct sockaddr *addr, socklen_t
   return r;
 }
 
-SysInt sys_getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res) {
+SysInt sys_getaddrinfo(const SysChar *node, const SysChar *service, const struct addrinfo *hints, struct addrinfo **res) {
   return getaddrinfo (node, service, hints, res);
 }
 
@@ -85,13 +85,13 @@ SysInt sys_socket_real_connect(SysSocket *s, const struct sockaddr *addr, sockle
 SysInt sys_socket_real_recv(SysSocket *s, void *buf, size_t len, SysInt flags) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  return recv(s->fd, buf, (int)len, flags);
+  return recv(s->fd, buf, (SysInt)len, flags);
 }
 
 SysInt sys_socket_real_send(SysSocket *s, const void *buf, size_t len, SysInt flags) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  return send(s->fd, buf, (int)len, flags);
+  return send(s->fd, buf, (SysInt)len, flags);
 }
 
 SysInt sys_socket_real_ioctl(SysSocket *s, long cmd, u_long * argp) {
@@ -104,9 +104,9 @@ SysInt sys_socket_errno(void) {
   return WSAGetLastError();
 }
 
-const char* sys_socket_strerror(SysInt err) {
-  char *umsg;
-  const char *qmsg;
+const SysChar* sys_socket_strerror(SysInt err) {
+  SysChar *umsg;
+  const SysChar *qmsg;
   wchar_t *msg;
 
   FormatMessageW(

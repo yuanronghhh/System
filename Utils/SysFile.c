@@ -3,8 +3,8 @@
 
 #define LINE_BLOCK 512
 
-bool sys_fstat(FILE* fp, SysFileState* state) {
-  int fno;
+SysBool sys_fstat(FILE* fp, SysFileState* state) {
+  SysInt fno;
   struct stat _fstate;
 
   if (fp == NULL) {
@@ -61,7 +61,7 @@ SysChar* sys_freadline(SysChar** dst, SysSize* len, FILE* fp) {
   ns[total - 2] = '\0';
   ns[total - 1] = '\0';
 
-  while (fgets(se, (int)(ep - se), fp) != NULL) {
+  while (fgets(se, (SysInt)(ep - se), fp) != NULL) {
     SysChar c = *(ep - 2);
 
     if (c != '\0' && c != '\n') {
@@ -152,7 +152,7 @@ SysBool sys_file_get_contents (const SysChar *filename,
   sys_return_val_if_fail (length != NULL, false);
 
   struct stat st;
-  int fd;
+  SysInt fd;
   SysSize offset;
   SysSSize nread;
   SysChar *content = NULL;

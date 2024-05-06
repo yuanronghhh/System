@@ -15,7 +15,7 @@
 
 #if _MSC_VER
   #include <System/Platform/Win32/SysWin32.h>
-#elif defined(__MINGW64__) || defined(__MINGW64__)
+#elif defined(__MINGW64__) || defined(__MINGW32__)
   #include <System/Platform/MinGW/SysMinGW.h>
 #elif __GNUC__
   #include <System/Platform/Unix/SysUnix.h>
@@ -107,6 +107,13 @@ typedef enum
   SYS_LEVEL_ORDER
 } SysTraverseType;
 
+typedef enum _SYS_IO_ENUM {
+  SYS_IO_INVALID,
+  SYS_IO_PIPE,
+  SYS_IO_STDOUT,
+  SYS_IO_DEV_NULL
+} SYS_IO_ENUM;
+
 typedef struct _SysParam SysParam;
 typedef struct _SysParamClass SysParamClass;
 
@@ -115,6 +122,8 @@ typedef struct _SysArray SysArray;
 typedef struct _SysByteArray SysByteArray;
 typedef struct _SysHArray SysHArray;
 typedef struct _SysValue SysValue;
+typedef struct _SysSArg SysSArg;
+typedef struct _SysElapse SysElapse;
 
 const SysChar* sys_get_name_by_type(const SysChar *names[], SysInt len, SysInt type);
 SysInt sys_get_type_by_name(const SysChar *names[], SysInt len, const SysChar *name);
