@@ -202,6 +202,7 @@ void sys_real_dlclose(void* handle) {
 }
 
 SysChar **sys_real_backtrace_string(SysInt *size) {
+#if SYS_DEBUG
   SysInt i;
   SysInt frame_size, rsize;
   SysChar **s, **p;
@@ -240,8 +241,9 @@ SysChar **sys_real_backtrace_string(SysInt *size) {
   sys_free_N(symbol);
 
   *size = rsize;
-
   return s;
+#endif
+  return NULL;
 }
 
 void sys_real_setup(void) {

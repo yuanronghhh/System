@@ -12,20 +12,27 @@ static SysChar* errColors[] = {
   "\033[1;35m",
 };
 
+static SysMutex g_log_lock;
+static SysBool g_use_debugger = USE_DEBUGGER;
+
 static SYS_INLINE SysChar* get_color(SYS_LOG_LEVEL level) {
   return errColors[level];
 }
 
-static SysMutex g_log_lock;
+void sys_use_debugger (SysBool bvalue) {
+  g_use_debugger = bvalue;
+}
 
 void sys_break(void) {
+  if(!g_use_debugger) {
+    return;
+  }
+
 #if SYS_OS_WIN32
   if (IsDebuggerPresent ()) {
     DebugBreak();
   }
-#endif
-
-#if SYS_DEBUG && SYS_OS_UNIX
+#elif SYS_OS_UNIX
   // __asm__ __volatile__("int $03");
   raise(SIGTRAP);
 #endif

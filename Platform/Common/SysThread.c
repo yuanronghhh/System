@@ -215,7 +215,7 @@ SysThread* sys_thread_self (void) {
 
 SysUInt sys_get_num_processors (void) {
 #ifdef SYS_OS_WIN32
-  unsigned SysInt count;
+  SysUInt count;
   SYSTEM_INFO sysinfo;
   DWORD_PTR process_cpus;
   DWORD_PTR system_cpus;
@@ -227,7 +227,7 @@ SysUInt sys_get_num_processors (void) {
   if (GetProcessAffinityMask (GetCurrentProcess (),
                               &process_cpus, &system_cpus))
     {
-      unsigned SysInt af_count;
+      SysUInt af_count;
 
       for (af_count = 0; process_cpus != 0; process_cpus >>= 1)
         if (process_cpus & 1)
