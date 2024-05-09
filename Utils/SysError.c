@@ -13,18 +13,13 @@ static SysChar* errColors[] = {
 };
 
 static SysMutex g_log_lock;
-static SysBool g_use_debugger = USE_DEBUGGER;
 
 static SYS_INLINE SysChar* get_color(SYS_LOG_LEVEL level) {
   return errColors[level];
 }
 
-void sys_use_debugger (SysBool bvalue) {
-  g_use_debugger = bvalue;
-}
-
 void sys_break(void) {
-  if(!g_use_debugger) {
+  if(!sys_get_debugger()) {
     return;
   }
 

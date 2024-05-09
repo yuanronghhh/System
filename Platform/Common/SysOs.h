@@ -48,6 +48,9 @@ SYS_API SysInt sys_arg_index(SysSArg *self, const SysChar *key, SysBool is_flag)
 SYS_API void sys_elapse_begin(SysElapse *self, const SysChar *name);
 SYS_API void sys_elapse_end(SysElapse *self);
 
+SYS_API void sys_set_debugger (SysBool bvalue);
+SYS_API SysBool sys_get_debugger (void);
+
 SYS_END_DECLS
 
 #endif

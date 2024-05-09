@@ -52,7 +52,6 @@ struct _SysError {
   SysInt line;
 };
 
-SYS_API void sys_use_debugger (SysBool value);
 SYS_API void sys_break (void);
 SYS_API void sys_abort (SYS_LOG_ARGS_N const SysChar* format, ...);
 SYS_API void sys_exit (SYS_LOG_ARGS_N SysInt exitcode, const SysChar* format, ...);

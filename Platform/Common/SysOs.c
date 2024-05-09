@@ -12,6 +12,8 @@
 #define  ALIGNOF_GUINT64 SYS_ALIGNOF (uint64_t)
 #define  ALIGNOF_UNSIGNED_LONG SYS_ALIGNOF (unsigned long)
 
+static SysBool g_use_debugger = USE_DEBUGGER;
+
 void sys_console_setup(void) {
   sys_real_init_console();
 }
@@ -384,3 +386,13 @@ void sys_elapse_begin(SysElapse *self, const SysChar *name) {
 void sys_elapse_end(SysElapse *self) {
   self->end = sys_get_monotonic_time();
 }
+
+/* for feature */
+void sys_set_debugger (SysBool bvalue) {
+  g_use_debugger = bvalue;
+}
+
+SysBool sys_get_debugger (void) {
+  return g_use_debugger;
+}
+

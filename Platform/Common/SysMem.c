@@ -110,9 +110,11 @@ void _sys_slice_free_chain(SysSize typesize, SysPointer ptr, SysSize offset) {
 }
 
 void sys_leaks_setup(void) {
+  if(!sys_get_debugger()) { return; }
   sys_real_leaks_init();
 }
 
 void sys_leaks_report(void) {
+  if(!sys_get_debugger()) { return; }
   sys_real_leaks_report();
 }
