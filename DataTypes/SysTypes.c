@@ -804,24 +804,14 @@ SysTypeInstance *sys_type_new_instance(SysType type) {
   TypeNode *node;
   SysTypeInstance *instance;
   SysChar *mp;
-  SysTypeClass *cls;
-  SysInstanceInitFunc ofunc, nfunc;
 
   SysInt priv_psize = 0;
-
   node = sys_type_node(type);
-
-  ofunc = node->data.instance.instance_init;
-  cls = sys_type_class_ref(type);
-  nfunc = node->data.instance.instance_init;
-
-  sys_assert(ofunc == nfunc && "maybe use *_CLASS instead of *_GET_CLASS ? ");
 
   priv_psize = node->data.instance.private_size;
 
   mp = sys_malloc0_N(priv_psize + node->data.instance.instance_size);
   instance = (SysTypeInstance *)(mp + priv_psize);
-  instance_create(instance, cls, node);
 
   return instance;
 }
