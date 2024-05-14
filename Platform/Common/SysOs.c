@@ -12,7 +12,7 @@
 #define  ALIGNOF_GUINT64 SYS_ALIGNOF (uint64_t)
 #define  ALIGNOF_UNSIGNED_LONG SYS_ALIGNOF (unsigned long)
 
-static SysBool g_use_debugger = USE_DEBUGGER;
+static SysBool g_use_debugger = false;
 
 void sys_console_setup(void) {
   sys_real_init_console();
