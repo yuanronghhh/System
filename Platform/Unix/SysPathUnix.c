@@ -10,7 +10,7 @@ SysChar *sys_real_getcwd(void) {
   return cwd;
 }
 
-bool sys_real_path_exists(const SysChar *path) {
+SysBool sys_real_path_exists(const SysChar *path) {
   if(access (path, F_OK) == 0) {
     return true;
   }

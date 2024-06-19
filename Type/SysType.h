@@ -1,14 +1,7 @@
-#ifndef __SYS_TYPES_H__
-#define __SYS_TYPES_H__
+#ifndef __SYS_TYPE_H__
+#define __SYS_TYPE_H__
 
-/**
- * simple implement gobject for myself
- * and part of code copy from gobject
- *
- * see: ftp://ftp.gtk.org/pub/glib/
- */
-
-#include <System/Fundamental/SysCommon.h>
+#include <System/Type/SysGc.h>
 
 SYS_BEGIN_DECLS
 
@@ -16,27 +9,22 @@ SYS_BEGIN_DECLS
 #define SYS_TYPE_FUNDAMENTAL_MAX  (255 << SYS_TYPE_FUNDAMENTAL_SHIFT)
 #define TYPE_ID_MASK    ((SysType) ((1 << SYS_TYPE_FUNDAMENTAL_SHIFT) - 1))
 
-#define SYS_TYPE_MAKE_FUNDAMENTAL(x)               ((SysType) ((x) << SYS_TYPE_FUNDAMENTAL_SHIFT))
-#define  SYS_TYPE_FNODE                            SYS_TYPE_MAKE_FUNDAMENTAL(1)
-#define  SYS_TYPE_INTERFACE                        SYS_TYPE_MAKE_FUNDAMENTAL(2)
-#define  SYS_TYPE_BOOL                             SYS_TYPE_MAKE_FUNDAMENTAL(5)
-#define  SYS_TYPE_INT                              SYS_TYPE_MAKE_FUNDAMENTAL(6)
-#define  SYS_TYPE_DOUBLE                           SYS_TYPE_MAKE_FUNDAMENTAL(15)
-#define  SYS_TYPE_STRING                           SYS_TYPE_MAKE_FUNDAMENTAL(16)
-#define  SYS_TYPE_POINTER                          SYS_TYPE_MAKE_FUNDAMENTAL(17)
-#define  SYS_TYPE_OBJECT                           SYS_TYPE_MAKE_FUNDAMENTAL(20)
+#define SYS_TYPE_MAKE_FUNDAMENTAL(x)              ((SysType) ((x) << SYS_TYPE_FUNDAMENTAL_SHIFT))
+#define SYS_TYPE_FUNDAMENTAL_NODE                 SYS_TYPE_MAKE_FUNDAMENTAL(1)
+#define SYS_TYPE_INTERFACE                        SYS_TYPE_MAKE_FUNDAMENTAL(2)
+#define SYS_TYPE_CHAR                             SYS_TYPE_MAKE_FUNDAMENTAL(3)
+#define SYS_TYPE_BOOL                             SYS_TYPE_MAKE_FUNDAMENTAL(5)
+#define SYS_TYPE_INT                              SYS_TYPE_MAKE_FUNDAMENTAL(6)
+#define SYS_TYPE_DOUBLE                           SYS_TYPE_MAKE_FUNDAMENTAL(15)
+#define SYS_TYPE_STRING                           SYS_TYPE_MAKE_FUNDAMENTAL(16)
+#define SYS_TYPE_POINTER                          SYS_TYPE_MAKE_FUNDAMENTAL(17)
+#define SYS_TYPE_OBJECT                           SYS_TYPE_MAKE_FUNDAMENTAL(20)
 
-#define sys_type_from_instance(o) (((SysTypeInstance *)(o))->type_class->type)
-#define sys_type_from_class(o) (((SysTypeClass *)(o))->type)
+#define sys_type_from_instance(o) sys_type_from_sgc_block(o)
+#define sys_type_from_class(o) sys_type_from_sgc_block(o)
 #define sys_instance_get_class(o, TypeName) ((TypeName *)((SysTypeInstance *)o)->type_class)
 
-#define sys_object_cast_check(o, stype) _sys_object_cast_check((SysObject *)o, stype)
-#define sys_class_cast_check(cls, stype) _sys_class_cast_check((SysObjectClass *)cls, stype)
-
-#define SYS_OBJECT(o) ((SysObject *)sys_object_cast_check(o, SYS_TYPE_OBJECT))
-#define SYS_OBJECT_CLASS(cls) ((SysObjectClass *)sys_class_cast_check(cls, SYS_TYPE_OBJECT))
-#define SYS_OBJECT_GET_CLASS(o) sys_instance_get_class(o, SysObjectClass)
-#define SYS_TYPE_GET_INTERFACE(o, iface_type) _sys_type_get_interface((((SysTypeInstance *)o)->type_class), iface_type)
+#define SYS_TYPE_GET_INTERFACE(o, iface_type) _sys_type_get_interface((((SysTypeInstance *)o)->parent.type), iface_type)
 
 #define SYS_ADD_PRIVATE(TypeName) \
 { \
@@ -122,36 +110,6 @@ SysType type_name##_get_type (void)                                \
 
 #define SYS_DEFINE_INTERFACE(TypeName, type_name, T_P) SYS_DEFINE_INTERFACE_WITH_CODE(TypeName, type_name, T_P, ;)
 
-typedef size_t SysType;
-typedef struct _SysObject SysObject;
-
-typedef struct _SysObjectClass SysObjectClass;
-
-typedef struct _SysTypeInfo SysTypeInfo;
-typedef struct _SysInterfaceInfo SysInterfaceInfo;
-typedef struct _TypeNode TypeNode;
-typedef struct _SysTypeInstance SysTypeInstance;
-typedef struct _SysTypeInterface SysTypeInterface;
-typedef struct _IFaceEntry IFaceEntry;
-
-typedef struct _SysTypeClass SysTypeClass;
-typedef SysType (*SysTypeFunc) (void);
-typedef void (*SysTypeInitFunc) (void *self);
-typedef void (*SysTypeFinalizeFunc) (void *self);
-typedef void (*SysInstanceInitFunc) (void* self);
-typedef void (*SysInterfaceInitFunc) (void *iface);
-typedef void (*SysObjectFunc) (SysObject *o, ...);
-typedef SysObject* (*SysCloneFunc) (SysObject *o);
-typedef void (*SysRefHook) (SysObject *o, const SysChar *name, SysInt ref_count);
-typedef enum _SYS_NODE_ENUM SYS_NODE_ENUM;
-
-enum _SYS_NODE_ENUM {
-  SYS_NODE_FUNDAMENTAL = 1 << 0,
-  SYS_NODE_BASE_CLASS = 1 << 1,
-  SYS_NODE_ABSTRACT_CLASS = 1 << 2,
-  SYS_NODE_CLASS = SYS_NODE_BASE_CLASS | SYS_NODE_ABSTRACT_CLASS,
-  SYS_NODE_INTERFACE = 1 << 3,
-};
 
 struct _SysInterfaceInfo {
   SysInterfaceInitFunc     interface_init;
@@ -175,7 +133,7 @@ struct _SysTypeInfo {
 };
 
 struct _SysTypeClass {
-  SysType type;
+  SgcBlock parent;
 
   /* limit 255 interface count for class */
   SysUInt8 n_ifaces;
@@ -183,6 +141,7 @@ struct _SysTypeClass {
 };
 
 struct _SysTypeInstance {
+  SgcBlock parent;
   SysTypeClass *type_class;
 };
 
@@ -190,73 +149,42 @@ struct _SysTypeInterface {
   SysType type;         /* iface type */
 };
 
-struct _SysObjectClass {
-  SysTypeClass parent;
-
-  SysObject *(*dclone) (SysObject *self);
-  void (*dispose) (SysObject *self);
-  void (*finalize) (SysObject *self);
-};
-
-struct _SysObject {
-  SysTypeInstance instance;
-  SysRef ref_count;
-};
-
-#define sys_object_unref(o) _sys_object_unref(SYS_OBJECT(o))
-#define sys_object_ref(o) _sys_object_ref(SYS_OBJECT(o))
-#define sys_object_is_a(o, type) _sys_object_is_a(SYS_OBJECT(o), type)
-#define sys_object_dclone(o) _sys_object_dclone(SYS_OBJECT(o))
-#define sys_object_get_type_name(o) _sys_object_get_type_name(SYS_OBJECT(o))
-
-SYS_API void* sys_object_new(SysType type, const SysChar * first, ...);
-SYS_API SysType sys_object_get_type(void);
-SYS_API SysPointer _sys_object_ref(SysObject* self);
-SYS_API void _sys_object_unref(SysObject* self);
-
-SYS_API void sys_object_set_unref_hook(SysRefHook hook);
-SYS_API void sys_object_set_ref_hook(SysRefHook hook);
-SYS_API void sys_object_set_new_hook(SysRefHook hook);
-
-SYS_API void * _sys_object_cast_check(SysObject* self, SysType ttype);
-SYS_API void * _sys_class_cast_check(SysObjectClass* cls, SysType ttype);
-SYS_API SysBool _sys_object_is_a(SysObject *self, SysType type);
-
-#define sys_object_add_property(TYPE, TypeName, full_type, field_type, field_name) \
-  _sys_object_add_property(TYPE, full_type, field_type, #field_name, offsetof(TypeName, field_name))
-
-SYS_API void _sys_object_add_property(
-    SysType type,
-    const SysChar *full_type,
-    SysInt field_type,
-    const SysChar *field_name,
-    SysInt offset);
-SYS_API SysParam *sys_object_get_property(SysType type, const SysChar *name);
-SYS_API SysHArray *sys_object_get_properties(SysType type);
-
 SYS_API void sys_type_setup(void);
 SYS_API void sys_type_teardown(void);
 
 SYS_API SysType sys_type_new(SysType pnode, const SysTypeInfo *info);
-SYS_API SysObject* _sys_object_dclone(SysObject *o);
 
 SYS_API const SysChar* _sys_object_get_type_name(SysObject* self);
-SYS_API SysTypeInterface* _sys_type_get_interface(SysTypeClass *cls, SysType iface_type);
+SYS_API SysTypeInterface* _sys_type_get_interface(SysType type, SysType iface_type);
 SYS_API void sys_type_imp_interface(SysType instance_type, SysType iface_type, const SysInterfaceInfo* info);
 
-SYS_API SysChar *sys_type_name(SysType type);
+SYS_API SysTypeNode* sys_type_node(SysType type);
+SYS_API const SysChar *sys_type_node_name(SysTypeNode *node);
+SYS_API SysBool sys_type_node_check(SysTypeNode *node);
+SYS_API SysBool sys_type_node_is(SysTypeNode *node, SYS_NODE_ENUM tp);
+
 SYS_API SysType sys_type_get_by_name(const SysChar *name);
 SYS_API SysTypeClass *sys_type_pclass(SysType type);
-SYS_API void sys_type_node_unref(TypeNode *node);
-SYS_API void sys_type_node_free(TypeNode *node);
-SYS_API SysTypeInstance *sys_type_new_instance(SysType type);
-SYS_API void sys_type_free_instance(SysTypeInstance *instance);
+SYS_API void sys_type_node_unref(SysTypeNode *node);
+SYS_API void sys_type_node_free(SysTypeNode *node);
+
+SYS_API SysBool sys_type_instance_create(SysTypeInstance *instance, SysType type);
+SYS_API SysTypeInstance *sys_type_instance_new(SysType type, SysSize count);
+SYS_API SysBool sys_type_instance_get_size(SysType type,
+    SysSize *size, 
+    SysSize *priv_size);
+SYS_API void sys_type_instance_free(SysTypeInstance *instance);
+
 SYS_API void *sys_type_get_private(SysTypeInstance *instance, SysType type);
 SYS_API void sys_type_class_unref(SysTypeClass *cls);
 SYS_API void sys_type_class_free(SysTypeClass *cls);
 SYS_API void sys_type_class_adjust_private_offset (SysTypeClass *cls, SysInt * private_offset);
 SYS_API SysTypeClass *sys_type_class_ref(SysType type);
 SYS_API SysBool sys_type_is_a(SysType child, SysType parent);
+SYS_API SysTypeNode * sys_type_make_fundamental_node(const SysTypeNode * pnode, SysType ftype, const SysTypeInfo * info);
+SYS_API void sys_type_prop_set(SysType tp, SysParam *param);
+SYS_API SysParam* sys_type_prop_get(SysType tp, const SysChar *name);
+SYS_API SysHArray *sys_type_get_properties(SysType type);
 
 SYS_END_DECLS
 

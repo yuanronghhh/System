@@ -57,7 +57,7 @@ void sys_real_init_console(void) {
 #endif
 }
 
-bool sys_real_console_is_utf8(void) {
+SysBool sys_real_console_is_utf8(void) {
   SysUInt cp = GetConsoleOutputCP();
 
   if (cp == 65001) {
@@ -79,7 +79,7 @@ const SysChar *sys_real_get_env(const SysChar *var) {
   wchar_t tmp[2];
   wchar_t *wname;
   const SysChar *value;
-  int len;
+  SysInt len;
 
   wname = sys_mbyte_to_wchar(var, NULL);
   len = GetEnvironmentVariableW(wname, tmp, 2);
@@ -94,7 +94,7 @@ const SysChar *sys_real_get_env(const SysChar *var) {
 
   wvalue = sys_new_N(wchar_t, len);
 
-  if ((int)GetEnvironmentVariableW(wname, wvalue, len) != (len - 1)) {
+  if ((SysInt)GetEnvironmentVariableW(wname, wvalue, len) != (len - 1)) {
     sys_free_N(wname);
     sys_free_N(wvalue);
     return NULL;
@@ -108,11 +108,11 @@ const SysChar *sys_real_get_env(const SysChar *var) {
   return value;
 }
 
-bool sys_real_set_env(const SysChar *var, const SysChar *value) {
+SysBool sys_real_set_env(const SysChar *var, const SysChar *value) {
   wchar_t *wvar, *wvalue;
   const wchar_t *wname;
   SysChar *nvar;
-  int ret;
+  SysInt ret;
   SysSize vlen;
 
   vlen = strlen(var);
@@ -202,6 +202,7 @@ void sys_real_dlclose(void* handle) {
 }
 
 SysChar **sys_real_backtrace_string(SysInt *size) {
+#if SYS_DEBUG
   SysInt i;
   SysInt frame_size, rsize;
   SysChar **s, **p;
@@ -209,7 +210,7 @@ SysChar **sys_real_backtrace_string(SysInt *size) {
   void *stack[SYS_BACKTRACE_SIZE];
 
   HANDLE         process;
-  int dp = 0;
+  SysInt dp = 0;
 
   IMAGEHLP_LINE lineInfo = { sizeof(IMAGEHLP_LINE) };
   process = GetCurrentProcess();
@@ -225,7 +226,7 @@ SysChar **sys_real_backtrace_string(SysInt *size) {
   s = sys_new_N(SysChar *, rsize);
   p = s;
 
-  symbol = (IMAGEHLP_SYMBOL64 *)sys_malloc_N(sizeof(IMAGEHLP_SYMBOL64) + 256 * sizeof(char));
+  symbol = (IMAGEHLP_SYMBOL64 *)sys_malloc_N(sizeof(IMAGEHLP_SYMBOL64) + 256 * sizeof(SysChar));
   symbol->MaxNameLength = 255;
   symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
 
@@ -240,8 +241,9 @@ SysChar **sys_real_backtrace_string(SysInt *size) {
   sys_free_N(symbol);
 
   *size = rsize;
-
   return s;
+#endif
+  return NULL;
 }
 
 void sys_real_setup(void) {

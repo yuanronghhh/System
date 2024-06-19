@@ -31,7 +31,7 @@ SysInt sys_real_dev_null(void) {
   return dev_null;
 }
 
-SysInt sys_real_execvp(const SysChar* path, SysChar* const args[]) {
+SysInt sys_real_execvp(const SysChar* path, const SysChar* const args[]) {
   return (SysInt)_execvp(path, args);
 }
 
@@ -40,7 +40,7 @@ FILE *sys_real_popen(const SysChar* cmd, const SysChar *mode) {
   return proc;
 }
 
-static bool win32_get_handle(
+static SysBool win32_get_handle(
   PHANDLE rfd0, PHANDLE wfd0,
   PHANDLE rfd1, PHANDLE wfd1,
   PHANDLE rfd2, PHANDLE wfd2,
@@ -134,7 +134,7 @@ static bool win32_get_handle(
   return true;
 }
 
-static bool win32_execute_child(SysSubProcessWin32 *pwin32,
+static SysBool win32_execute_child(SysSubProcessWin32 *pwin32,
     SysSubProcessOption *option,
     HANDLE rfd0, HANDLE wfd0,
     HANDLE rfd1, HANDLE wfd1,
@@ -144,9 +144,9 @@ static bool win32_execute_child(SysSubProcessWin32 *pwin32,
   SysChar *cmdstr;
   SysSize cmdlen = 0;
 
-  ZeroMemory(si, sizeof(si));
+  ZeroMemory(si, sizeof(*si));
   si->cb = sizeof(si);
-  ZeroMemory(pi, sizeof(pi));
+  ZeroMemory(pi, sizeof(*pi));
 
   si->dwFlags |= STARTF_USESTDHANDLES;
   si->hStdInput = rfd0;

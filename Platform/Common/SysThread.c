@@ -215,19 +215,19 @@ SysThread* sys_thread_self (void) {
 
 SysUInt sys_get_num_processors (void) {
 #ifdef SYS_OS_WIN32
-  unsigned int count;
+  SysUInt count;
   SYSTEM_INFO sysinfo;
   DWORD_PTR process_cpus;
   DWORD_PTR system_cpus;
 
   /* This *never* fails, use it as fallback */
   GetNativeSystemInfo (&sysinfo);
-  count = (int) sysinfo.dwNumberOfProcessors;
+  count = (SysInt) sysinfo.dwNumberOfProcessors;
 
   if (GetProcessAffinityMask (GetCurrentProcess (),
                               &process_cpus, &system_cpus))
     {
-      unsigned int af_count;
+      SysUInt af_count;
 
       for (af_count = 0; process_cpus != 0; process_cpus >>= 1)
         if (process_cpus & 1)
@@ -242,7 +242,7 @@ SysUInt sys_get_num_processors (void) {
     return count;
 #elif defined(_SC_NPROCESSORS_ONLN)
   {
-    int count;
+    SysInt count;
 
     count = sysconf (_SC_NPROCESSORS_ONLN);
     if (count > 0)
@@ -250,7 +250,7 @@ SysUInt sys_get_num_processors (void) {
   }
 #elif defined HW_NCPU
   {
-    int mib[2], count = 0;
+    SysInt mib[2], count = 0;
     size_t len;
 
     mib[0] = CTL_HW;

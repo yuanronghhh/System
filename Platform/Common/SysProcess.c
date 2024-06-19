@@ -1,7 +1,7 @@
 #include <System/Utils/SysString.h>
 #include <System/Platform/Common/SysProcessPrivate.h>
 
-SysInt sys_execvp(const SysChar* path, SysChar* const args[]) {
+SysInt sys_execvp(const SysChar* path, const SysChar* const args[]) {
   return sys_real_execvp(path, args);
 }
 
@@ -25,7 +25,7 @@ SysSubProcess* sys_subprocess_new_option(SysSubProcessOption* option) {
   return sub;
 }
 
-SYS_API bool sys_subprocess_communicate(SysSubProcess *sub,
+SYS_API SysBool sys_subprocess_communicate(SysSubProcess *sub,
     SysChar*   stdin_buf,
     SysChar**  stdout_buf,
     SysChar**  stderr_buf,

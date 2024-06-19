@@ -4,7 +4,7 @@
 #include <System/Platform/Common/SysProcess.h>
 
 SysInt sys_real_dev_null(void);
-SysInt sys_real_execvp(const SysChar* path, SysChar* const args[]);
+SysInt sys_real_execvp(const SysChar* path, const SysChar* const args[]);
 FILE *sys_real_popen(const SysChar* cmd, const SysChar *mode);
 SysInt sys_real_pclose(FILE *fp);
 

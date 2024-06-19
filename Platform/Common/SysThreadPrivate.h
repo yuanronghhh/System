@@ -24,7 +24,7 @@ void            sys_system_thread_wait            (SysRealThread  *thread);
 
 SysRealThread *sys_system_thread_new (SysThreadFunc proxy,
                                   SysSize stack_size,
-                                  const char *name,
+                                  const SysChar *name,
                                   SysThreadFunc func,
                                   SysPointer data,
                                   SysError **error);

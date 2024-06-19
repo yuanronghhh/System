@@ -1,8 +1,8 @@
 #include <System/Utils/SysError.h>
 #include <System/Utils/SysString.h>
 
-SysChar *sys_wchar_to_mbyte(const SysWChar *wchar, int *nsize) {
-  int size;
+SysChar *sys_wchar_to_mbyte(const SysWChar *wchar, SysInt *nsize) {
+  SysInt size;
   SysChar *nstr;
 
   size = WideCharToMultiByte(CP_UTF8, 0, wchar, -1, NULL, 0, NULL, NULL);
@@ -17,8 +17,8 @@ SysChar *sys_wchar_to_mbyte(const SysWChar *wchar, int *nsize) {
   return nstr;
 }
 
-SysWChar *sys_mbyte_to_wchar(const SysChar *mbyte, int *nsize) {
-  int size;
+SysWChar *sys_mbyte_to_wchar(const SysChar *mbyte, SysInt *nsize) {
+  SysInt size;
   SysWChar *wstr;
 
   size = MultiByteToWideChar(CP_UTF8, 0, mbyte, -1, NULL, 0);
@@ -44,16 +44,16 @@ SysChar *sys_strncpy(SysChar * __restrict dst, const SysChar * __restrict src, S
   return dst;
 }
 
-int sys_vsprintf(SysChar *str, SysSize size, const SysChar *format, va_list args) {
+SysInt sys_vsprintf(SysChar *str, SysSize size, const SysChar *format, va_list args) {
   return vsprintf_s(str, size, format, args);
 }
 
-int sys_vprintf(const SysChar *format, va_list va) {
+SysInt sys_vprintf(const SysChar *format, va_list va) {
   return vprintf_s(format, va);
 }
 
-int sys_vasprintf(SysChar **ptr, const SysChar *format, va_list va) {
-  int len;
+SysInt sys_vasprintf(SysChar **ptr, const SysChar *format, va_list va) {
+  SysInt len;
 
   len = _vscprintf_p(format, va) + 1;
   *ptr = sys_new_N(SysChar, len);

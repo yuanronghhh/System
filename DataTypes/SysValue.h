@@ -3,8 +3,7 @@
 
 #include <System/Fundamental/SysCommonCore.h>
 #include <System/DataTypes/SysArray.h>
-#include <System/DataTypes/SysTypes.h>
-
+#include <System/Type/SysType.h>
 
 SYS_BEGIN_DECLS
 

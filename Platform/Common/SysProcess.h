@@ -20,13 +20,13 @@ struct _SysSubProcess {
   SysSubProcessOption option;
 };
 
-SYS_API SysInt sys_execvp(const SysChar* path, SysChar* const args[]);
+SYS_API SysInt sys_execvp(const SysChar* path, const SysChar* const args[]);
 SYS_API FILE *sys_popen(const SysChar* cmd, const SysChar *mode);
 SYS_API SysInt sys_pclose(FILE *fp);
 
 SYS_API SysSubProcess* sys_subprocess_new(const SysChar *cmd[]);
 SYS_API SysSubProcess* sys_subprocess_new_option(SysSubProcessOption* option);
-SYS_API bool sys_subprocess_communicate(SysSubProcess *sub,
+SYS_API SysBool sys_subprocess_communicate(SysSubProcess *sub,
     SysChar*         stdin_buf,
     SysChar**        stdout_buf,
     SysChar**        stderr_buf,

@@ -6,11 +6,11 @@
 void sys_real_init_console(void) {
 }
 
-bool sys_real_console_is_utf8(void) {
+SysBool sys_real_console_is_utf8(void) {
   return true;
 }
 
-bool sys_real_set_env(const char *var, const char *value) {
+SysBool sys_real_set_env(const SysChar *var, const SysChar *value) {
   SysInt result;
 
   result = setenv (var, value, true);
@@ -18,7 +18,7 @@ bool sys_real_set_env(const char *var, const char *value) {
   return result == 0;
 }
 
-const char* sys_real_get_env(const char *var) {
+const SysChar* sys_real_get_env(const SysChar *var) {
   sys_return_val_if_fail (var != NULL, NULL);
 
   return getenv(var);
@@ -47,7 +47,7 @@ void sys_real_usleep(unsigned long mseconds) {
   }
 }
 
-void* sys_real_dlsymbol(void *handle, const char *symbol) {
+void* sys_real_dlsymbol(void *handle, const SysChar *symbol) {
   sys_return_val_if_fail(handle != NULL, NULL);
   sys_return_val_if_fail(symbol != NULL, NULL);
 
@@ -69,7 +69,7 @@ void sys_real_setup(void) {
 void sys_real_teardown(void) {
 }
 
-void* sys_real_dlopen(const char *filename) {
+void* sys_real_dlopen(const SysChar *filename) {
   void *handle = dlopen (filename, RTLD_GLOBAL | RTLD_LAZY);
   if (!handle) {
     sys_warning_N("dlopen failed: %s.", filename);

@@ -50,7 +50,7 @@ SysInt sys_socket_real_bind(SysSocket* s, const struct sockaddr *addr, socklen_t
   return bind(s->fd, addr, addrlen);
 }
 
-SysInt sys_getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res) {
+SysInt sys_getaddrinfo(const SysChar *node, const SysChar *service, const struct addrinfo *hints, struct addrinfo **res) {
 
   return getaddrinfo (node, service, hints, res);
 }
@@ -85,7 +85,7 @@ SysInt sys_socket_real_ioctl(SysSocket *s, long cmd, u_long * argp) {
   return ioctl(s->fd, cmd, argp);
 }
 
-const char * sys_socket_strerror(SysInt err) {
+const SysChar * sys_socket_strerror(SysInt err) {
   return sys_strerror(err);
 }
 

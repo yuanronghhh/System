@@ -11,6 +11,11 @@ void sys_real_memcpy(
   void        const* const src,
   SysSize         const src_size);
 
+
+void* sys_real_aligned_malloc(SysSize align, SysSize size);
+void sys_real_aligned_free(void* ptr);
+SysSize sys_real_get_msize(void* block);
+
 void sys_real_leaks_init(void);
 void sys_real_leaks_report(void);
 

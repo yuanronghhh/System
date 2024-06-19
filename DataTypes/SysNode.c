@@ -350,7 +350,11 @@ static SysBool sys_node_depth_traverse_post_order (SysNode     *node,
 
         current = child;
         child = current->next;
-        if (sys_node_depth_traverse_post_order (current, flags, depth, func, data))
+        if (sys_node_depth_traverse_post_order (current,
+              flags, 
+              depth, 
+              func, 
+              data))
           return true;
       }
     }
@@ -453,7 +457,12 @@ static SysBool sys_node_traverse_level (SysNode   *node,
     node = node->children;
 
     while (node) {
-      if (sys_node_traverse_level (node, flags, level - 1, func, data, more_levels))
+      if (sys_node_traverse_level (node,
+            flags, 
+            level - 1, 
+            func, 
+            data, 
+            more_levels))
         return true;
 
       node = node->next;

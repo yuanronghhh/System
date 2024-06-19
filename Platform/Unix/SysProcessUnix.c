@@ -18,8 +18,8 @@ SysInt sys_real_dev_null(void) {
   return dev_null;
 }
 
-SysInt sys_real_execvp(const SysChar* path, SysChar* const args[]) {
-  return (SysInt)execvp(path, args);
+SysInt sys_real_execvp(const SysChar* path, const SysChar* const args[]) {
+  return (SysInt)execvp(path, (SysChar *const *)args);
 }
 
 FILE *sys_real_popen(const SysChar* cmd, const SysChar *mode) {
@@ -27,7 +27,7 @@ FILE *sys_real_popen(const SysChar* cmd, const SysChar *mode) {
   return proc;
 }
 
-static bool posix_get_handle(
+static SysBool posix_get_handle(
   FILE* rfd0, FILE* wfd0,
   FILE* rfd1, FILE* wfd1,
   FILE* rfd2, FILE* wfd2,
@@ -113,7 +113,7 @@ static bool posix_get_handle(
   return true;
 }
 
-static bool posix_execute_child(SysSubProcessPosix *pposix,
+static SysBool posix_execute_child(SysSubProcessPosix *pposix,
     SysSubProcessOption *option,
     FILE * rfd0, FILE * wfd0,
     FILE * rfd1, FILE * wfd1,

@@ -252,6 +252,7 @@ struct _SysPrivateDestructor
 
 static SysPrivateDestructor *sys_private_destructors;  /* (atomic) prepend-only */
 static CRITICAL_SECTION sys_private_lock;
+static SysPrivateDestructor priv_destructor;
 
 static DWORD
 sys_private_get_impl (SysPrivate *key)
@@ -267,7 +268,6 @@ sys_private_get_impl (SysPrivate *key)
           SysPrivateDestructor *destructor;
 
           impl = TlsAlloc ();
-
           if SYS_UNLIKELY (impl == 0)
             {
               /* Ignore TLS index 0 temporarily (as 0 is the indicator that we
@@ -283,9 +283,11 @@ sys_private_get_impl (SysPrivate *key)
 
           if (key->notify != NULL)
             {
-              destructor = malloc (sizeof (SysPrivateDestructor));
-              if SYS_UNLIKELY (destructor == NULL)
+              destructor = &priv_destructor; // malloc (sizeof (SysPrivateDestructor));
+              if SYS_UNLIKELY(destructor == NULL) {
+
                 sys_thread_abort (errno, "malloc");
+              }
               destructor->index = impl;
               destructor->notify = key->notify;
               destructor->next = sys_atomic_pointer_get (&sys_private_destructors);
@@ -296,7 +298,7 @@ sys_private_get_impl (SysPrivate *key)
                *
                * It can double as a sanity check...
                */
-              if (!sys_atomic_pointer_cmpxchg (&sys_private_destructors,
+              if (!sys_atomic_pointer_cmpxchg ((volatile SysPointer *)(&sys_private_destructors),
                                                           destructor->next,
                                                           destructor))
                 sys_thread_abort (0, "sys_private_get_impl(1)");
@@ -322,7 +324,7 @@ void
 sys_private_set (SysPrivate *key,
                SysPointer  value)
 {
-  TlsSetValue (sys_private_get_impl (key), value);
+  TlsSetValue(sys_private_get_impl(key), value);
 }
 
 void
@@ -387,9 +389,7 @@ sys_system_thread_exit (void)
    * should not use glib functions within their thread or they may encounter
    * memory leaks when the thread finishes.
    */
-#ifdef GLIB_STATIC_COMPILATION
-  sys_thread_win32_thread_detach ();
-#endif
+  sys_system_thread_detach();
 
   _endthreadex (0);
 }
@@ -409,7 +409,7 @@ sys_thread_win32_proxy (SysPointer data)
 SysRealThread *
 sys_system_thread_new (SysThreadFunc proxy,
                      SysSize stack_size,
-                     const char *name,
+                     const SysChar *name,
                      SysThreadFunc func,
                      SysPointer data,
                      SysError **error)
@@ -418,7 +418,7 @@ sys_system_thread_new (SysThreadFunc proxy,
   SysRealThread *base_thread;
   SysUInt ignore;
   const SysChar *message = NULL;
-  int thread_prio;
+  SysInt thread_prio;
 
   thread = sys_slice_new0 (SysThreadWin32);
   thread->proxy = proxy;
@@ -470,6 +470,7 @@ sys_system_thread_new (SysThreadFunc proxy,
       message = "Error resuming new thread";
       goto error;
     }
+  UNUSED(message);
 
   return (SysRealThread *) thread;
 
@@ -645,11 +646,10 @@ sys_system_thread_detach (void)
        * Loop until nothing is left.
        */
       dtors_called = false;
-
       for (dtor = sys_atomic_pointer_get (&sys_private_destructors); dtor; dtor = dtor->next)
         {
           SysPointer value;
-
+          
           value = TlsGetValue (dtor->index);
           if (value != NULL && dtor->notify != NULL)
             {

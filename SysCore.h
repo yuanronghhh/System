@@ -12,6 +12,8 @@
 #include <System/Platform/Common/SysThread.h>
 #include <System/Platform/Common/SysSocket.h>
 
+#include <System/DataTypes/SysBit.h>
+#include <System/DataTypes/SysQuark.h>
 #include <System/DataTypes/SysClouse.h>
 #include <System/DataTypes/SysArray.h>
 #include <System/DataTypes/SysHArray.h>
@@ -20,13 +22,18 @@
 #include <System/DataTypes/SysList.h>
 #include <System/DataTypes/SysSList.h>
 #include <System/DataTypes/SysQueue.h>
+#include <System/DataTypes/SysAsyncQueue.h>
 #include <System/DataTypes/SysBHeap.h>
 #include <System/DataTypes/SysNode.h>
 #include <System/DataTypes/SysHNode.h>
 #include <System/DataTypes/SysTree.h>
-#include <System/DataTypes/SysTypes.h>
-#include <System/DataTypes/SysParam.h>
 #include <System/DataTypes/SysPQueue.h>
+
+#include <System/Type/SysType.h>
+#include <System/Type/SysObject.h>
+#include <System/Type/SysParam.h>
+#include <System/Type/SysGc.h>
+#include <System/Type/SysTypeCommon.h>
 
 #include <System/Utils/SysError.h>
 #include <System/Utils/SysError.h>
@@ -38,5 +45,8 @@
 #if USE_OPENSSL
 #include <System/Utils/SysOpenSSL.h>
 #endif
+
+SYS_API void sys_setup(void);
+SYS_API void sys_teardown(void);
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef __SYS_UNIX__
-#define __SYS_UNIX__
+#ifndef __SYS_MINGW__
+#define __SYS_MINGW__
 
 #ifdef __cplusplus
 extern "C" {
@@ -9,23 +9,11 @@ extern "C" {
 #define _GNU_SOURCE
 #endif
 
-#include <features.h>
 #include <signal.h>
-#include <spawn.h>
 #include <ctype.h>
-#include <dlfcn.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/statfs.h>
-#include <libintl.h>
-#include <X11/Xlib.h>
-#include <execinfo.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <pthread.h>
 #include <malloc.h>
 

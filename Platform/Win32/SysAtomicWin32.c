@@ -14,19 +14,20 @@ void _sys_atomic_int_set(volatile SysInt *x, SysInt n) {
   MemoryBarrier();
 }
 
-bool sys_atomic_int_dec_and_test(SysInt *x) {
+SysBool sys_atomic_int_dec_and_test(SysInt *x) {
   return InterlockedDecrement((volatile long*)x) == 0;
 }
 
-bool sys_atomic_int_dec(SysInt *x) {
+SysBool sys_atomic_int_dec(SysInt *x) {
   return sys_atomic_int_dec_and_test(x);
 }
 
-bool sys_atomic_cmpxchg(SysInt *x, SysInt o, SysInt n) {
+SysBool sys_atomic_cmpxchg(SysInt *x, SysInt o, SysInt n) {
   return InterlockedCompareExchange((volatile long*)x, n, o) == o;
 }
 
-bool sys_atomic_pointer_cmpxchg(SysPointer *x, SysPointer o, SysPointer n) {
+SysBool sys_atomic_pointer_cmpxchg(volatile SysPointer* x, SysPointer o, SysPointer n) {
+
   return InterlockedCompareExchangePointer(x, n, o) == o;
 }
 

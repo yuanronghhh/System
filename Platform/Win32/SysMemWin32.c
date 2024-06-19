@@ -19,8 +19,23 @@ void sys_real_memcpy(
   }
 }
 
+void* sys_real_aligned_malloc(SysSize align, SysSize size) {
+
+  return _aligned_malloc(size, align);
+}
+
+void sys_real_aligned_free(void* ptr) {
+
+  return _aligned_free(ptr);
+}
+
+SysSize sys_real_get_msize(void* block) {
+
+  return _msize(block);
+}
+
 void sys_real_leaks_init(void) {
-#if SYS_DEBUG && SYS_OS_WIN32
+#if USE_DEBUGGER
   VLDSetOptions(VLD_OPT_SKIP_CRTSTARTUP_LEAKS
     | VLD_OPT_AGGREGATE_DUPLICATES
     | VLD_OPT_MODULE_LIST_INCLUDE
@@ -30,7 +45,7 @@ void sys_real_leaks_init(void) {
 }
 
 void sys_real_leaks_report(void) {
-#if SYS_DEBUG && SYS_OS_WIN32
+#if USE_DEBUGGER
   sys_print("Closing file handle for leak report.\n");
   sys_fcloseall();
 #if defined(SYS_LEAK_FILE)
@@ -43,3 +58,4 @@ void sys_real_leaks_report(void) {
 #endif
 #endif
 }
+

@@ -1,11 +1,9 @@
 #include <System/Platform/Common/SysOs.h>
-
 #include <System/Utils/SysString.h>
 #include <System/Utils/SysError.h>
 #include <System/Utils/SysOpenSSL.h>
 #include <System/DataTypes/SysQuark.h>
 #include <System/DataTypes/SysArray.h>
-#include <System/DataTypes/SysTypes.h>
 #include <System/Platform/Common/SysThread.h>
 #include <System/Platform/Common/SysOsPrivate.h>
 
@@ -13,8 +11,7 @@
 #define  ALIGNOF_GUINT64 SYS_ALIGNOF (uint64_t)
 #define  ALIGNOF_UNSIGNED_LONG SYS_ALIGNOF (unsigned long)
 
-
-static SysBool inited = false;
+static SysBool g_use_debugger = false;
 
 void sys_console_setup(void) {
   sys_real_init_console();
@@ -48,14 +45,14 @@ struct msort_param
   size_t var;
   SysCompareDataFunc cmp;
   void *arg;
-  char *t;
+  SysChar *t;
 };
 
 static void msort_with_tmp(const struct msort_param *p, void *b, size_t n)
 {
-  char *b1, *b2;
+  SysChar *b1, *b2;
   size_t n1, n2;
-  char *tmp = p->t;
+  SysChar *tmp = p->t;
   const size_t s = p->s;
   SysCompareDataFunc cmp = p->cmp;
   void *arg = p->arg;
@@ -66,7 +63,7 @@ static void msort_with_tmp(const struct msort_param *p, void *b, size_t n)
   n1 = n / 2;
   n2 = n - n1;
   b1 = b;
-  b2 = (char *)b + (n1 * p->s);
+  b2 = (SysChar *)b + (n1 * p->s);
 
   msort_with_tmp(p, b1, n1);
   msort_with_tmp(p, b2, n2);
@@ -179,7 +176,7 @@ static void msort_with_tmp(const struct msort_param *p, void *b, size_t n)
 static void msort_r(void *b, size_t n, size_t s, SysCompareDataFunc cmp, void *arg)
 {
   size_t size = n * s;
-  char *tmp = NULL;
+  SysChar *tmp = NULL;
   struct msort_param p;
 
   /* For large object sizes use indirect sorting.  */
@@ -204,11 +201,11 @@ static void msort_r(void *b, size_t n, size_t s, SysCompareDataFunc cmp, void *a
   if (s > 32)
   {
     /* Indirect sorting.  */
-    char *ip = (char *)b;
+    SysChar *ip = (SysChar *)b;
     void **tp = (void **)(p.t + n * sizeof(void *));
     void **t = tp;
     void *tmp_storage = (void *)(tp + n);
-    char *kp;
+    SysChar *kp;
     size_t i;
 
     while ((void *)t < tmp_storage)
@@ -222,16 +219,16 @@ static void msort_r(void *b, size_t n, size_t s, SysCompareDataFunc cmp, void *a
 
     /* tp[0] .. tp[n - 1] is now sorted, copy around entries of
  the original array.  Knuth vol. 3 (2nd ed.) exercise 5.2-10.  */
-    for (i = 0, ip = (char *)b; i < n; i++, ip += s)
+    for (i = 0, ip = (SysChar *)b; i < n; i++, ip += s)
       if ((kp = tp[i]) != ip)
       {
         size_t j = i;
-        char *jp = ip;
+        SysChar *jp = ip;
         memcpy(tmp_storage, ip, s);
 
         do
         {
-          size_t k = (kp - (char *)b) / s;
+          size_t k = (kp - (SysChar *)b) / s;
           tp[j] = jp;
           memcpy(jp, kp, s);
           j = k;
@@ -246,15 +243,15 @@ static void msort_r(void *b, size_t n, size_t s, SysCompareDataFunc cmp, void *a
   else
   {
     if ((s & (sizeof(SysUInt32) - 1)) == 0
-      && ((char *)b - (char *)0) % ALIGNOF_GUINT32 == 0)
+      && ((SysChar *)b - (SysChar *)0) % ALIGNOF_GUINT32 == 0)
     {
       if (s == sizeof(SysUInt32))
         p.var = 0;
       else if (s == sizeof(SysUInt64)
-        && ((char *)b - (char *)0) % ALIGNOF_GUINT64 == 0)
+        && ((SysChar *)b - (SysChar *)0) % ALIGNOF_GUINT64 == 0)
         p.var = 1;
       else if ((s & (sizeof(unsigned long) - 1)) == 0
-        && ((char *)b - (char *)0)
+        && ((SysChar *)b - (SysChar *)0)
         % ALIGNOF_UNSIGNED_LONG == 0)
         p.var = 2;
     }
@@ -271,15 +268,15 @@ void sys_qsort_with_data(const SysPointer  pbase,
   msort_r((SysPointer)pbase, total_elems, size, compare_func, user_data);
 }
 
-bool sys_console_is_utf8(void) {
+SysBool sys_console_is_utf8(void) {
   return sys_real_console_is_utf8();
 }
 
-bool sys_set_env(const char *var, const char *value) {
+SysBool sys_set_env(const SysChar *var, const SysChar *value) {
   return sys_real_set_env(var, value);
 }
 
-const char* sys_get_env(const char *var) {
+const SysChar* sys_get_env(const SysChar *var) {
   return sys_real_get_env(var);
 }
 
@@ -291,15 +288,15 @@ void sys_usleep(unsigned long mseconds) {
   sys_real_usleep(mseconds);
 }
 
-void* sys_dlopen(const char *filename) {
+void* sys_dlopen(const SysChar *filename) {
   return sys_real_dlopen(filename);
 }
 
-void* sys_dlmodule(const char *name) {
+void* sys_dlmodule(const SysChar *name) {
   return sys_real_dlmodule(name);
 }
 
-void* sys_dlsymbol(void *handle, const char *symbol) {
+void* sys_dlsymbol(void *handle, const SysChar *symbol) {
   return sys_real_dlsymbol(handle, symbol);
 }
 
@@ -343,7 +340,7 @@ static SysBool pflag_equal(const SysChar *pflag, const SysChar *key) {
   }
 }
 
-int sys_arg_index(SysSArg *self, const SysChar *key, SysBool is_flag) {
+SysInt sys_arg_index(SysSArg *self, const SysChar *key, SysBool is_flag) {
   sys_return_val_if_fail(self != NULL, -1);
   sys_return_val_if_fail(key != NULL, -1);
 
@@ -352,7 +349,7 @@ int sys_arg_index(SysSArg *self, const SysChar *key, SysBool is_flag) {
     return -1;
   }
 
-  for (int i = 1; i < self->argc; i++) {
+  for (SysInt i = 1; i < self->argc; i++) {
     arg = self->argv[i];
     if (!pflag_equal(arg, key)) {
       continue;
@@ -380,28 +377,21 @@ int sys_arg_index(SysSArg *self, const SysChar *key, SysBool is_flag) {
   return -1;
 }
 
-void sys_setup(void) {
-  if(inited) {return;}
-
-  sys_console_setup();
-  sys_quark_setup();
-  sys_leaks_setup();
-  sys_type_setup();
-  sys_real_setup();
-  sys_thread_init();
-  sys_ssl_setup();
-
-  inited = true;
+void sys_elapse_begin(SysElapse *self, const SysChar *name) {
+  self->start = sys_get_monotonic_time();
+  self->name = name;
 }
 
-void sys_teardown(void) {
-  if(!inited) {return;}
-
-  sys_thread_detach();
-  sys_real_teardown();
-  sys_type_teardown();
-  sys_quark_teardown();
-  sys_leaks_report();
-
-  inited = false;
+void sys_elapse_end(SysElapse *self) {
+  self->end = sys_get_monotonic_time();
 }
+
+/* for feature */
+void sys_set_debugger (SysBool bvalue) {
+  g_use_debugger = bvalue;
+}
+
+SysBool sys_get_debugger (void) {
+  return g_use_debugger;
+}
+

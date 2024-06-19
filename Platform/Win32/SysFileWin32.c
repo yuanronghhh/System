@@ -46,13 +46,14 @@ SysSSize sys_read(SysInt fd, SysPointer buf, SysSize mcount) {
 }
 
 const SysChar *sys_exe_path(void) {
-  int nlen;
+  SysInt nlen;
   SysChar *sp;
 
   sp = &exepath[0];
 
   nlen = GetModuleFileName(0, sp, MAX_PATH);
   sys_path_escape(sp);
+  UNUSED(nlen);
 
   return sp;
 }

@@ -484,7 +484,7 @@ sys_rw_lock_clear (SysRWLock *rw_lock)
 void
 sys_rw_lock_writer_lock (SysRWLock *rw_lock)
 {
-  int retval = pthread_rwlock_wrlock (sys_rw_lock_get_impl (rw_lock));
+  SysInt retval = pthread_rwlock_wrlock (sys_rw_lock_get_impl (rw_lock));
 
   if (retval != 0)
     sys_abort_N ("Failed to get RW lock %p: %s", rw_lock, sys_strerror (retval));
@@ -554,7 +554,7 @@ sys_rw_lock_writer_unlock (SysRWLock *rw_lock)
 void
 sys_rw_lock_reader_lock (SysRWLock *rw_lock)
 {
-  int retval = pthread_rwlock_rdlock (sys_rw_lock_get_impl (rw_lock));
+  SysInt retval = pthread_rwlock_rdlock (sys_rw_lock_get_impl (rw_lock));
 
   if (retval != 0)
     sys_abort_N ("Failed to get RW lock %p: %s", rw_lock, sys_strerror (retval));
@@ -1042,7 +1042,7 @@ sys_private_replace (SysPrivate *key,
 /* {{{1 SysThread */
 
 #define posix_check_err(err, name) SYS_STMT_START{			\
-  int error = (err); 							\
+  SysInt error = (err); 							\
   if (error)	 		 		 			\
     sys_error_N ("file %s: line %d (%s): error '%s' during '%s'",		\
            sys_strerror (error), name);					\
@@ -1077,7 +1077,7 @@ sys_system_thread_free (SysRealThread *thread)
 SysRealThread *
 sys_system_thread_new (SysThreadFunc proxy,
                      SysULong stack_size,
-                     const char *name,
+                     const SysChar *name,
                      SysThreadFunc func,
                      SysPointer data,
                      SysError **error)
@@ -1402,7 +1402,7 @@ sys_cond_wait_until (SysCond  *cond,
   struct timespec span;
 
   SysUInt sampled;
-  int res;
+  SysInt res;
   SysBool success;
 
   if (end_time < 0)

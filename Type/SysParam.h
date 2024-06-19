@@ -1,7 +1,7 @@
 #ifndef __SYS_PARAM_H__
 #define __SYS_PARAM_H__
 
-#include <System/DataTypes/SysTypes.h>
+#include <System/Type/SysObject.h>
 
 SYS_BEGIN_DECLS
 

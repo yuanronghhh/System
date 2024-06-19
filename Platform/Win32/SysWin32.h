@@ -17,6 +17,7 @@ extern "C" {
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <shlobj_core.h>
+#include <intrin.h>
 
 #define SYS_OS_WIN32 1
 #define SYS_API __declspec(dllexport)
