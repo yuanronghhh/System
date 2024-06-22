@@ -59,7 +59,7 @@ SysChar **sys_strsplit(SysChar * s, const SysChar *delim, SysInt * count) {
   ptrs = (SysChar **)sp;
 
   nsp = sp + sp_size;
-  strcpy(nsp, s);
+  sys_strcpy(nsp, s);
   *ptrs++ = nsp;
 
   if(delim_count > 1) {

@@ -18,8 +18,8 @@ SysInt sys_real_dev_null(void) {
   return dev_null;
 }
 
-SysInt sys_real_execvp(const SysChar* path, SysChar* const args[]) {
-  return (SysInt)execvp(path, args);
+SysInt sys_real_execvp(const SysChar* path, const SysChar* const args[]) {
+  return (SysInt)execvp(path, (SysChar *const *)args);
 }
 
 FILE *sys_real_popen(const SysChar* cmd, const SysChar *mode) {

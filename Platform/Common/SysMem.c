@@ -44,15 +44,14 @@ SysPointer sys_realloc(void *mem, SysSize size) {
   return NULL;
 }
 
-void sys_free(void *block) {
+void sys_free(void *ptr) {
 #if !defined(NO_FREE_CHECK) || !NO_FREE_CHECK
-  if (block == NULL) {
+  if (ptr == NULL) {
     sys_warning_N("%s", "sys_free block is null.");
     return;
   }
 #endif
-
-  free(block);
+  free(ptr);
 }
 
 SysPointer sys_calloc(SysSize count, SysSize size) {
@@ -98,6 +97,16 @@ SysPointer sys_memdup(const SysPointer mem, SysUInt byte_size) {
     new_mem = NULL;
 
   return new_mem;
+}
+
+SysPointer sys_aligned_malloc(SysSize align, SysSize size) {
+
+  return sys_real_aligned_malloc(align, size);
+}
+
+void sys_aligned_free(void *ptr) {
+
+  return sys_real_aligned_free(ptr);
 }
 
 void _sys_slice_free_chain(SysSize typesize, SysPointer ptr, SysSize offset) {

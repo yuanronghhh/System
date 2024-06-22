@@ -4,7 +4,6 @@
 #include <System/Utils/SysOpenSSL.h>
 #include <System/DataTypes/SysQuark.h>
 #include <System/DataTypes/SysArray.h>
-#include <System/DataTypes/SysTypes.h>
 #include <System/Platform/Common/SysThread.h>
 #include <System/Platform/Common/SysOsPrivate.h>
 

@@ -1,6 +1,6 @@
+#include <System/Utils/SysErrorPrivate.h>
 #include <System/Utils/SysString.h>
 #include <System/Utils/SysFile.h>
-#include <System/Utils/SysErrorPrivate.h>
 #include <System/Platform/Common/SysThread.h>
 
 static SysChar* errColors[] = {
@@ -35,11 +35,13 @@ void sys_break(void) {
 
 void sys_vlog(SYS_LOG_ARGS_N FILE* std, SYS_LOG_LEVEL level, const SysChar* format, va_list args) {
   sys_mutex_lock(&g_log_lock);
+  SYS_LEAK_IGNORE_BEGIN;
 
   sys_fprintf(std, "%s[%s:%d] ", get_color(level), _funcname, _line);
   sys_vfprintf(std, format, args);
   sys_fprintf(std, "%s\n", get_color(SYS_LOG_RESET));
 
+  SYS_LEAK_IGNORE_END;
   sys_mutex_unlock(&g_log_lock);
 }
 

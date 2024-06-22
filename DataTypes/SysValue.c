@@ -1,4 +1,5 @@
 #include <System/DataTypes/SysValue.h>
+#include <System/Type/SysObject.h>
 #include <System/Utils/SysString.h>
 
 struct _SysValue {

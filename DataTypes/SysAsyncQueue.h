@@ -21,13 +21,13 @@ struct _SysAsyncQueue
   SysCond cond;
   SysQueue queue;
   SysDestroyFunc item_free_func;
-  SysUInt waitinsys_threads;
+  SysUInt waiting_threads;
   SysInt ref_count;
 };
 
 SYS_API void sys_async_queue_init (SysAsyncQueue *queue);
 SYS_API void sys_async_queue_init_full (SysAsyncQueue *queue, SysDestroyFunc item_free_func);
-SYS_API void sys_async_queue_clear(SysAsyncQueue *queue);
+SYS_API void sys_async_queue_clear_full(SysAsyncQueue *queue);
 
 SYS_API SysAsyncQueue *sys_async_queue_new                  (void);
 SYS_API SysAsyncQueue *sys_async_queue_new_full             (SysDestroyFunc item_free_func);

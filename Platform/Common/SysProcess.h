@@ -20,7 +20,7 @@ struct _SysSubProcess {
   SysSubProcessOption option;
 };
 
-SYS_API SysInt sys_execvp(const SysChar* path, SysChar* const args[]);
+SYS_API SysInt sys_execvp(const SysChar* path, const SysChar* const args[]);
 SYS_API FILE *sys_popen(const SysChar* cmd, const SysChar *mode);
 SYS_API SysInt sys_pclose(FILE *fp);
 

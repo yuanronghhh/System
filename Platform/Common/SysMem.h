@@ -60,6 +60,8 @@ SYS_API SysPointer sys_memdup(const SysPointer mem, SysUInt byte_size);
 SYS_API void _sys_slice_free_chain(SysSize type, SysPointer ptr, SysSize offset);
 SYS_API void _sys_clear_pointer(void **pp, SysDestroyFunc destroy);
 SYS_API SysSize sys_get_msize(void *block);
+SYS_API SysPointer sys_aligned_malloc(SysSize align, SysSize size);
+SYS_API void sys_aligned_free(void *ptr);
 
 SYS_API void sys_leaks_setup(void);
 SYS_API void sys_leaks_report(void);

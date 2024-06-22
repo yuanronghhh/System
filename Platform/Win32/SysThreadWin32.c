@@ -252,6 +252,7 @@ struct _SysPrivateDestructor
 
 static SysPrivateDestructor *sys_private_destructors;  /* (atomic) prepend-only */
 static CRITICAL_SECTION sys_private_lock;
+static SysPrivateDestructor priv_destructor;
 
 static DWORD
 sys_private_get_impl (SysPrivate *key)
@@ -282,7 +283,7 @@ sys_private_get_impl (SysPrivate *key)
 
           if (key->notify != NULL)
             {
-              destructor = malloc (sizeof (SysPrivateDestructor));
+              destructor = &priv_destructor; // malloc (sizeof (SysPrivateDestructor));
               if SYS_UNLIKELY(destructor == NULL) {
 
                 sys_thread_abort (errno, "malloc");
@@ -297,7 +298,7 @@ sys_private_get_impl (SysPrivate *key)
                *
                * It can double as a sanity check...
                */
-              if (!sys_atomic_pointer_cmpxchg (&sys_private_destructors,
+              if (!sys_atomic_pointer_cmpxchg ((volatile SysPointer *)(&sys_private_destructors),
                                                           destructor->next,
                                                           destructor))
                 sys_thread_abort (0, "sys_private_get_impl(1)");
@@ -469,6 +470,7 @@ sys_system_thread_new (SysThreadFunc proxy,
       message = "Error resuming new thread";
       goto error;
     }
+  UNUSED(message);
 
   return (SysRealThread *) thread;
 

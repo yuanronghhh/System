@@ -1,7 +1,7 @@
 #include <System/Utils/SysString.h>
 #include <System/Platform/Common/SysProcessPrivate.h>
 
-SysInt sys_execvp(const SysChar* path, SysChar* const args[]) {
+SysInt sys_execvp(const SysChar* path, const SysChar* const args[]) {
   return sys_real_execvp(path, args);
 }
 

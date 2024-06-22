@@ -2,7 +2,7 @@
 #define __SYS_SOCKET_H__
 
 #include <System/Utils/SysOpenSSL.h>
-#include <System/DataTypes/SysTypes.h>
+#include <System/Type/SysObject.h>
 
 
 SYS_BEGIN_DECLS
@@ -42,7 +42,11 @@ SYS_API SysSocket* sys_socket_new(void);
 SYS_API SysSocket *sys_socket_new_I(SysInt domain, SysInt type, SysInt protocol, SysBool noblocking);
 SYS_API SysSocket *sys_socket_new_fd(SOCKET fd);
 SYS_API SysInt sys_socket_set_blocking(SysSocket *s, SysBool bvalue);
-SYS_API SysInt sys_socket_setopt(SysSocket *s, SysInt level, SysInt optname, const void *optval, socklen_t optlen);
+SYS_API SysInt sys_socket_setopt(SysSocket *s, 
+  SysInt level, 
+  SysInt optname, 
+  const void *optval, 
+  socklen_t optlen);
 SYS_API SysInt sys_socket_listen(SysSocket *s, SysInt backlog);
 SYS_API SysSocket* sys_socket_accept(SysSocket* s, struct sockaddr* addr, socklen_t* addrlen);
 SYS_API SysInt sys_socket_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen);

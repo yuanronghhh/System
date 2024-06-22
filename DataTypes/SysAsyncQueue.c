@@ -19,7 +19,7 @@ void sys_async_queue_init_full (SysAsyncQueue *queue, SysDestroyFunc item_free_f
   sys_mutex_init (&queue->mutex);
   sys_cond_init (&queue->cond);
   sys_queue_init (&queue->queue);
-  queue->waitinsys_threads = 0;
+  queue->waiting_threads = 0;
   queue->ref_count = 1;
   queue->item_free_func = item_free_func;
 }
@@ -120,7 +120,7 @@ sys_async_queue_unref_and_unlock (SysAsyncQueue *queue)
 }
 
 /**
- * sys_async_queue_unref:
+ * sys_async_queue_clear_full:
  * @queue: a #SysAsyncQueue.
  *
  * Decreases the reference count of the asynchronous @queue by 1.
@@ -130,12 +130,12 @@ sys_async_queue_unref_and_unlock (SysAsyncQueue *queue)
  * to use the @queue afterwards, as it might have disappeared.
  * You do not need to hold the lock to call this function.
  */
-void sys_async_queue_clear(SysAsyncQueue *queue) {
+void sys_async_queue_clear_full(SysAsyncQueue *queue) {
   sys_return_if_fail (queue);
-  sys_return_if_fail (queue->waitinsys_threads == 0);
-
+  sys_return_if_fail (queue->waiting_threads == 0);
   sys_mutex_clear (&queue->mutex);
   sys_cond_clear (&queue->cond);
+
   if (queue->item_free_func) {
     sys_queue_foreach (&(queue->queue), node) {
       queue->item_free_func(node->data);
@@ -151,7 +151,9 @@ sys_async_queue_unref (SysAsyncQueue *queue)
 
   if (sys_atomic_int_dec_and_test (&queue->ref_count))
     {
-      sys_async_queue_clear(queue);
+      sys_return_if_fail (queue->waiting_threads == 0);
+
+      sys_async_queue_clear_full(queue);
       sys_free (queue);
     }
 }
@@ -235,7 +237,7 @@ sys_async_queue_push_unlocked (SysAsyncQueue *queue,
   sys_return_if_fail (data);
 
   sys_queue_push_head (&queue->queue, data);
-  if (queue->waitinsys_threads > 0)
+  if (queue->waiting_threads > 0)
     sys_cond_signal (&queue->cond);
 }
 
@@ -248,7 +250,7 @@ sys_async_queue_pop_intern_unlocked (SysAsyncQueue *queue,
 
   if (!sys_queue_peek_tail_link (&queue->queue) && wait)
     {
-      queue->waitinsys_threads++;
+      queue->waiting_threads++;
       while (!sys_queue_peek_tail_link (&queue->queue))
       {
         if (end_time == -1)
@@ -259,7 +261,7 @@ sys_async_queue_pop_intern_unlocked (SysAsyncQueue *queue,
             break;
         }
       }
-      queue->waitinsys_threads--;
+      queue->waiting_threads--;
     }
 
   retval = sys_queue_pop_tail (&queue->queue);
@@ -433,7 +435,7 @@ sys_async_queue_length (SysAsyncQueue *queue)
   sys_return_val_if_fail (queue, 0);
 
   sys_mutex_lock (&queue->mutex);
-  retval = queue->queue.length - queue->waitinsys_threads;
+  retval = queue->queue.length - queue->waiting_threads;
   sys_mutex_unlock (&queue->mutex);
 
   return retval;
@@ -461,7 +463,7 @@ sys_async_queue_length_unlocked (SysAsyncQueue *queue)
 {
   sys_return_val_if_fail (queue, 0);
 
-  return queue->queue.length - queue->waitinsys_threads;
+  return queue->queue.length - queue->waiting_threads;
 }
 
 /**
@@ -560,7 +562,7 @@ sys_async_queue_push_front_unlocked (SysAsyncQueue *queue,
   sys_return_if_fail (item != NULL);
 
   sys_queue_push_tail (&queue->queue, item);
-  if (queue->waitinsys_threads > 0)
+  if (queue->waiting_threads > 0)
     sys_cond_signal (&queue->cond);
 }
 

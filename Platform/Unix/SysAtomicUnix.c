@@ -29,10 +29,10 @@ SysBool sys_atomic_cmpxchg(SysInt *x, SysInt o, SysInt n) {
   return __atomic_compare_exchange_n ((x), (void *) (&(gaicae_oldval)), (n), false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST) ? true : false;
 }
 
-SysBool sys_atomic_pointer_cmpxchg(SysPointer *x, SysPointer o, SysPointer n) {
+SysBool sys_atomic_pointer_cmpxchg(volatile SysPointer* x, SysPointer o, SysPointer n) {
   SysPointer gaicae_oldval = (o);
 
-  return __atomic_compare_exchange_n ((x), &(gaicae_oldval), (n), false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST) ? true : false;
+  return __atomic_compare_exchange_n ((x), (void *) (&(gaicae_oldval)), (n), false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST) ? true : false;
 }
 
 SysPointer sys_atomic_pointer_get(SysPointer x) {

@@ -4,6 +4,14 @@
 #include <System/Fundamental/SysCommon.h>
 
 #define sys_assert(expr) assert(expr)
+#if __GNUC__ >= 5
+  #define sys_assert_not_reached()          SYS_STMT_START { (void) 0; __builtin_unreachable (); } SYS_STMT_END
+#elif defined (_MSC_VER)
+  #define sys_assert_not_reached()          SYS_STMT_START { (void) 0; __assume (0); } SYS_STMT_END
+#else
+  #define sys_assert_not_reached()          SYS_STMT_START { (void) 0; } SYS_STMT_END
+#endif
+
 
 #define sys_debug_N(format, ...) sys_log(SYS_LOG_ARGS(sys_debug, format) stdout, SYS_LOG_DEBUG, format, __VA_ARGS__)
 #define sys_info_N(format, ...) sys_log(SYS_LOG_ARGS(sys_info, format) stdout, SYS_LOG_INFO, format, __VA_ARGS__)

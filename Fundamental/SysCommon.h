@@ -64,8 +64,8 @@ typedef size_t SysSize;
 typedef ssize_t SysSSize;
 typedef wchar_t SysWChar;
 
-#define SYS_STMT_START
-#define SYS_STMT_END
+#define SYS_STMT_START do
+#define SYS_STMT_END while(0)
 #define SYS_UNLIKELY
 #define SYS_LIKELY
 #define SYS_LOG_ARGS(func, ptr) __FILE__, __func__, __LINE__, #func, #ptr,
@@ -113,9 +113,6 @@ typedef enum _SYS_IO_ENUM {
   SYS_IO_STDOUT,
   SYS_IO_DEV_NULL
 } SYS_IO_ENUM;
-
-typedef struct _SysParam SysParam;
-typedef struct _SysParamClass SysParamClass;
 
 typedef struct _SysPtrArray SysPtrArray;
 typedef struct _SysArray SysArray;

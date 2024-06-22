@@ -44,16 +44,15 @@ endif()
 set(SRC
   ${OS_SYS_SRC}
 
+  ./DataTypes/SysBit.h
   ./DataTypes/SysNode.h
   ./DataTypes/SysNode.c
   ./DataTypes/SysHNode.h
   ./DataTypes/SysHNode.c
   ./DataTypes/SysTree.h
   ./DataTypes/SysTree.c
-
   ./DataTypes/SysHArray.h
   ./DataTypes/SysHArray.c
-
   ./DataTypes/SysBHeap.h
   ./DataTypes/SysBHeap.c
   ./DataTypes/SysHashTable.h
@@ -72,12 +71,19 @@ set(SRC
   ./DataTypes/SysPQueue.c
   ./DataTypes/SysValue.h
   ./DataTypes/SysValue.c
-  ./DataTypes/SysTypes.h
-  ./DataTypes/SysTypes.c
-  ./DataTypes/SysParam.h
-  ./DataTypes/SysParam.c
   ./DataTypes/SysQuark.h
   ./DataTypes/SysQuark.c
+
+  ./Type/SysTypeCommon.h
+  ./Type/SysTypeCommon.c
+  ./Type/SysType.h
+  ./Type/SysType.c
+  ./Type/SysGc.h
+  ./Type/SysGc.c
+  ./Type/SysObject.h
+  ./Type/SysObject.c
+  ./Type/SysParam.h
+  ./Type/SysParam.c
 
   ./Utils/SysFile.h
   ./Utils/SysFile.c

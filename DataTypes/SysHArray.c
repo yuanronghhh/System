@@ -34,7 +34,8 @@ static SysPointer harray_remove_index(SysHArray* array,
   SysPointer result;
 
   sys_return_val_if_fail(array, NULL);
-  sys_return_val_if_fail(array->len == 0 || (array->len != 0 && array->pdata != NULL), NULL);
+  sys_return_val_if_fail(array->len == 0
+      || (array->len != 0 && array->pdata != NULL), NULL);
 
   sys_return_val_if_fail(index_ < array->len, NULL);
 
@@ -106,7 +107,10 @@ SysHArray* sys_harray_ref(SysHArray *self) {
   return self;
 }
 
-void sys_harray_copy(SysHArray* dst, SysHArray* src, SysCopyFunc elem_copy, SysPointer copy_user_data) {
+void sys_harray_copy(SysHArray* dst,
+    SysHArray* src, 
+    SysCopyFunc elem_copy, 
+    SysPointer copy_user_data) {
   for (SysUInt i = 0; i < src->len; i++) {
     sys_harray_add(dst, elem_copy(src->pdata[i], copy_user_data));
   }
@@ -128,7 +132,9 @@ void sys_harray_init(SysHArray *self) {
   sys_harray_init_full(self, 0, NULL);
 }
 
-void sys_harray_init_full(SysHArray* self, SysUInt reserved_size, SysDestroyFunc element_free_func) {
+void sys_harray_init_full(SysHArray* self,
+    SysUInt reserved_size, 
+    SysDestroyFunc element_free_func) {
   sys_return_if_fail(self != NULL);
 
   self->pdata = NULL;
@@ -140,7 +146,8 @@ void sys_harray_init_full(SysHArray* self, SysUInt reserved_size, SysDestroyFunc
     harray_maybe_expand(self, reserved_size);
 }
 
-void sys_harray_init_with_free_func(SysHArray* self, SysDestroyFunc element_free_func) {
+void sys_harray_init_with_free_func(SysHArray* self,
+    SysDestroyFunc element_free_func) {
   sys_return_if_fail(self != NULL);
   sys_return_if_fail(element_free_func != NULL);
 
@@ -157,7 +164,6 @@ void sys_harray_add(SysHArray *self, SysPointer data) {
 }
 
 void sys_harray_insert(SysHArray *self, SysInt index_, SysPointer data) {
-
   sys_return_if_fail(self);
   sys_return_if_fail(index_ >= -1);
   sys_return_if_fail(index_ <= (SysInt)self->len);

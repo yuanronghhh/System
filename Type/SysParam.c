@@ -1,4 +1,4 @@
-#include <System/DataTypes/SysParam.h>
+#include <System/Type/SysParam.h>
 
 #include <System/Utils/SysError.h>
 #include <System/DataTypes/SysValue.h>

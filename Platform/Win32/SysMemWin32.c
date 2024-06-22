@@ -19,6 +19,16 @@ void sys_real_memcpy(
   }
 }
 
+void* sys_real_aligned_malloc(SysSize align, SysSize size) {
+
+  return _aligned_malloc(size, align);
+}
+
+void sys_real_aligned_free(void* ptr) {
+
+  return _aligned_free(ptr);
+}
+
 SysSize sys_real_get_msize(void* block) {
 
   return _msize(block);
@@ -48,3 +58,4 @@ void sys_real_leaks_report(void) {
 #endif
 #endif
 }
+

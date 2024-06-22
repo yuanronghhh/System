@@ -1,6 +1,6 @@
-#include <System/Platform/Common/SysAtomic.h>
-#include <System/Utils/SysString.h>
 #include <System/DataTypes/SysHashTable.h>
+#include <System/Utils/SysString.h>
+#include <System/Platform/Common/SysAtomic.h>
 
 /**
  * this code from glib hashtable
@@ -799,7 +799,9 @@ SysBool sys_int_equal(const SysPointer v1, const SysPointer v2) {
   return *((const SysInt *)v1) == *((const SysInt *)v2);
 }
 
-SysUInt sys_int_hash(const SysPointer v) { return *(const SysInt *)v; }
+SysUInt sys_int_hash(const SysPointer v) {
+  return *(const SysInt *)v;
+}
 
 SysBool sys_int64_equal(const SysPointer v1, const SysPointer v2) {
   return *((const SysInt64 *)v1) == *((const SysInt64 *)v2);

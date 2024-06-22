@@ -31,7 +31,7 @@ SysInt sys_real_dev_null(void) {
   return dev_null;
 }
 
-SysInt sys_real_execvp(const SysChar* path, SysChar* const args[]) {
+SysInt sys_real_execvp(const SysChar* path, const SysChar* const args[]) {
   return (SysInt)_execvp(path, args);
 }
 
@@ -144,9 +144,9 @@ static SysBool win32_execute_child(SysSubProcessWin32 *pwin32,
   SysChar *cmdstr;
   SysSize cmdlen = 0;
 
-  ZeroMemory(si, sizeof(si));
+  ZeroMemory(si, sizeof(*si));
   si->cb = sizeof(si);
-  ZeroMemory(pi, sizeof(pi));
+  ZeroMemory(pi, sizeof(*pi));
 
   si->dwFlags |= STARTF_USESTDHANDLES;
   si->hStdInput = rfd0;

@@ -20,7 +20,11 @@ void sys_socket_real_close(SysSocket *s) {
   closesocket(s->fd);
 }
 
-SysInt sys_socket_setopt(SysSocket *s, SysInt level, SysInt optname, void *optval, socklen_t optlen) {
+SysInt sys_socket_setopt(SysSocket *s, 
+  SysInt level, 
+  SysInt optname, 
+  const void *optval, 
+  socklen_t optlen) {
   sys_return_val_if_fail(s != NULL, -1);
 
   SysInt r = setsockopt(s->fd, level, optname, (SysChar *)optval, optlen);

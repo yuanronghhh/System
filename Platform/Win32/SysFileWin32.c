@@ -53,6 +53,7 @@ const SysChar *sys_exe_path(void) {
 
   nlen = GetModuleFileName(0, sp, MAX_PATH);
   sys_path_escape(sp);
+  UNUSED(nlen);
 
   return sp;
 }
