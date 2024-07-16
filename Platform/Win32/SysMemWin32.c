@@ -26,7 +26,7 @@ void* sys_real_aligned_malloc(SysSize align, SysSize size) {
 
 void sys_real_aligned_free(void* ptr) {
 
-  return _aligned_free(ptr);
+  _aligned_free(ptr);
 }
 
 SysSize sys_real_get_msize(void* block) {

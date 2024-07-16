@@ -106,7 +106,7 @@ SysPointer sys_aligned_malloc(SysSize align, SysSize size) {
 
 void sys_aligned_free(void *ptr) {
 
-  return sys_real_aligned_free(ptr);
+  sys_real_aligned_free(ptr);
 }
 
 void _sys_slice_free_chain(SysSize typesize, SysPointer ptr, SysSize offset) {
