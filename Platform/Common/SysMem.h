@@ -65,6 +65,8 @@ SYS_API void sys_aligned_free(void *ptr);
 
 SYS_API void sys_leaks_setup(void);
 SYS_API void sys_leaks_report(void);
+SYS_API const SysChar* sys_leaks_get_file(void);
+SYS_API void sys_leaks_set_file(const SysChar *leakfile);
 
 static inline SysPointer sys_steal_pointer (SysPointer pp) {
   SysPointer *ptr = (SysPointer *)pp;

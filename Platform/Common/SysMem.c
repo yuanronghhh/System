@@ -3,6 +3,8 @@
 #include <System/Utils/SysFile.h>
 #include <System/Utils/SysError.h>
 
+static SysChar* g_leakfile = NULL;
+
 void sys_memcpy(
     SysPointer  const dst,
     SysSize     const dst_size,
@@ -121,6 +123,18 @@ void _sys_slice_free_chain(SysSize typesize, SysPointer ptr, SysSize offset) {
 void sys_leaks_setup(void) {
   if(!sys_get_debugger()) { return; }
   sys_real_leaks_init();
+}
+
+const SysChar* sys_leaks_get_file(void) {
+
+  return g_leakfile;
+}
+
+void sys_leaks_set_file(const SysChar *leakfile) {
+
+  SYS_LEAK_IGNORE_BEGIN;
+  g_leakfile = sys_strdup(leakfile);
+  SYS_LEAK_IGNORE_END;
 }
 
 void sys_leaks_report(void) {

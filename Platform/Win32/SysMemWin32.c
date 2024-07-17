@@ -37,25 +37,37 @@ SysSize sys_real_get_msize(void* block) {
 void sys_real_leaks_init(void) {
 #if USE_DEBUGGER
   VLDSetOptions(VLD_OPT_SKIP_CRTSTARTUP_LEAKS
-    | VLD_OPT_AGGREGATE_DUPLICATES
-    | VLD_OPT_MODULE_LIST_INCLUDE
-    | VLD_OPT_VALIDATE_HEAPFREE
-    , 0, 0);
+      | VLD_OPT_AGGREGATE_DUPLICATES
+      | VLD_OPT_MODULE_LIST_INCLUDE
+      | VLD_OPT_VALIDATE_HEAPFREE
+      , 0, 0);
 #endif
 }
 
 void sys_real_leaks_report(void) {
 #if USE_DEBUGGER
+  wchar_t *wname;
+  SysInt size;
+  const SysChar *leakfile;
+
   sys_print("Closing file handle for leak report.\n");
   sys_fcloseall();
-#if defined(SYS_LEAK_FILE)
-  wchar_t *wname = sys_ansi_to_wchar(SYS_LEAK_FILE);
-  VLDSetReportOptions(VLD_OPT_REPORT_TO_FILE, wname);
-  sys_free_N(wname);
-#else
-  VLDReportLeaks();
-  getchar();
-#endif
+
+  leakfile = sys_leaks_get_file();
+  if(leakfile) {
+
+    SYS_LEAK_IGNORE_BEGIN;
+    wname = sys_mbyte_to_wchar(leakfile, &size);
+    SYS_LEAK_IGNORE_END;
+
+    VLDSetReportOptions(VLD_OPT_REPORT_TO_FILE, wname);
+    VLDReportLeaks();
+    sys_free_N(wname);
+  } else {
+
+    VLDReportLeaks();
+    getchar();
+  }
 #endif
 }
 
