@@ -37,8 +37,8 @@ static void type_name##_class_init(TypeName##Class *o);                \
 static void type_name##_dispose(SysObject *o);                         \
 static SysTypeClass* type_name##_parent_class = NULL;                  \
 static SysInt TypeName##_private_offset = 0;                           \
-static SysType g_type = 0;                                             \
-SysPointer type_name##_get_private(TypeName* o) {              \
+static SysType private_g_type = 0;                                     \
+SysPointer type_name##_get_private(TypeName* o) {                      \
    return (((SysUInt8 *)o) + TypeName##_private_offset); \
 } \
 static void type_name##_class_intern_init (SysPointer kclass) \
@@ -48,11 +48,11 @@ static void type_name##_class_intern_init (SysPointer kclass) \
   type_name##_class_init ((TypeName##Class*) kclass); \
 } \
 void type_name##_set_type(SysType ntype) {               \
-  g_type = ntype;                                        \
+  private_g_type = ntype;                                        \
 }                                                        \
 SysType type_name##_get_type(void) {                     \
-  if(g_type != 0) {                                      \
-    return g_type;                                       \
+  if(private_g_type != 0) {                                      \
+    return private_g_type;                                       \
   }                                                      \
   const SysTypeInfo type_info = {                        \
       SYS_NODE_CLASS,                                    \
@@ -65,19 +65,19 @@ SysType type_name##_get_type(void) {                     \
       NULL,                                              \
       (SysInstanceInitFunc)type_name##_init              \
   }; \
-  g_type = sys_type_new((T_P), &type_info);
+  private_g_type = sys_type_new((T_P), &type_info);
 
 #define SYS_DEFINE_END() \
-    return g_type; \
+    return private_g_type; \
 }
 
 #define SYS_DEFINE_INTERFACE_BEGIN(TypeName, type_name, T_P) \
 static void type_name##_default_init (TypeName##Interface *klass); \
 SysType type_name##_get_type (void)                                \
 {                                                                  \
-  static SysType g_type = 0;                                         \
-  if(g_type != 0) {                                                  \
-    return g_type;                                                   \
+  static SysType private_g_type = 0;                               \
+  if(private_g_type != 0) {                                        \
+    return private_g_type;                                         \
   }                                                                \
   const SysTypeInfo type_info = {                                  \
       SYS_NODE_INTERFACE,                                          \
@@ -90,17 +90,17 @@ SysType type_name##_get_type (void)                                \
       NULL,                                                        \
       NULL                                                         \
   };                                                               \
-  g_type = sys_type_new(SYS_TYPE_INTERFACE, &type_info);           \
+  private_g_type = sys_type_new(SYS_TYPE_INTERFACE, &type_info);   \
 
 #define SYS_DEFINE_INTERFACE_END()                                  \
-  return g_type;                                                    \
+  return private_g_type;                                            \
 }
 
 #define SYS_IMPLEMENT_INTERFACE(TYPE_IFACE, iface_init)       { \
   const SysInterfaceInfo iface_info = {                         \
     (SysInterfaceInitFunc)iface_init, NULL, NULL                \
   };                                                            \
-  sys_type_imp_interface (g_type, TYPE_IFACE, &iface_info);       \
+  sys_type_imp_interface (private_g_type, TYPE_IFACE, &iface_info);       \
 }
 
 #define SYS_DEFINE_WITH_CODE(TypeName, type_name, T_P, _CODE_) SYS_DEFINE_BEGIN(TypeName, type_name, T_P, 0){_CODE_;}SYS_DEFINE_END()
