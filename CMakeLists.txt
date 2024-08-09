@@ -63,6 +63,8 @@ set(SRC
   ./DataTypes/SysList.c
   ./DataTypes/SysSList.h
   ./DataTypes/SysSList.c
+  ./DataTypes/SysHSList.h
+  ./DataTypes/SysHSList.c
   ./DataTypes/SysQueue.h
   ./DataTypes/SysQueue.c
   ./DataTypes/SysAsyncQueue.h

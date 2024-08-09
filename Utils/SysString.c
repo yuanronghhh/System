@@ -274,6 +274,7 @@ SysInt sys_printf(const SysChar *format, ...) {
  */
 void sys_print(const SysChar *str) {
   sys_return_if_fail(str != NULL);
+
   fputs(str, stdout);
   fflush(stdout);
 }

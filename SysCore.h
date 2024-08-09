@@ -21,6 +21,7 @@
 #include <System/DataTypes/SysHashTable.h>
 #include <System/DataTypes/SysList.h>
 #include <System/DataTypes/SysSList.h>
+#include <System/DataTypes/SysHSList.h>
 #include <System/DataTypes/SysQueue.h>
 #include <System/DataTypes/SysAsyncQueue.h>
 #include <System/DataTypes/SysBHeap.h>

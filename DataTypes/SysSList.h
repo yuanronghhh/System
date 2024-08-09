@@ -51,20 +51,20 @@ SysPointer sys_slist_nth_data(SysSList *list, SysUInt n);
 void sys_clear_slist(SysSList **slist_ptr, SysDestroyFunc destroy);
 
 #define sys_clear_slist(slist_ptr, destroy) \
- do { \
- SysSList *_slist; \
- \
- _slist = *(slist_ptr); \
- if (_slist) \
- { \
- *slist_ptr = NULL; \
- \
- if ((destroy) != NULL) \
- sys_slist_free_full (_slist, (destroy)); \
- else \
- sys_slist_free (_slist); \
- } \
- } while(0) \
+  do { \
+    SysSList *_slist; \
+    \
+    _slist = *(slist_ptr); \
+    if (_slist) \
+    { \
+      *slist_ptr = NULL; \
+      \
+      if ((destroy) != NULL) \
+      sys_slist_free_full (_slist, (destroy)); \
+      else \
+      sys_slist_free (_slist); \
+    } \
+  } while(0) \
 
 #define sys_slist_next(slist) ((slist) ? (((SysSList *)(slist))->next) : NULL)
 
