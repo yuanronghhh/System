@@ -8,10 +8,15 @@ SYS_BEGIN_DECLS
 #define sys_hslist_foreach(list, node) \
     for(SysHSList *node = list;node;node = node->next)
 
+#define SYS_HSLIST_CAST_TO(o, TypeName, member) SYS_HDATA_CAST_TO(o, TypeName, member)
+#define SYS_HSLIST(o) SYS_HDATA(o)
+#define SYS_HSLIST_CHECK(o) SYS_HDATA_CHECK(o)
+
 typedef struct _SysHSList SysHSList;
 
 struct _SysHSList {
- SysHSList *next;
+  SysInt check;
+  SysHSList *next;
 };
 
 /**

@@ -9,9 +9,11 @@ SYS_BEGIN_DECLS
      ((SysHNode*) (hnode))->prev == NULL && \
      ((SysHNode*) (hnode))->next == NULL)
 
-#define  SYS_HNODE_IS_LEAF(hnode) (((SysHNode*) (hnode))->children == NULL)
-#define SYS_HNODE_CAST_TO(o, TypeName, member) ((TypeName *)_sys_hnode_cast_to(o, offsetof(TypeName, member)))
-#define SYS_HNODE(o) _sys_hnode_cast_check(o)
+#define SYS_HNODE_IS_LEAF(hnode) (((SysHNode*) (hnode))->children == NULL)
+
+#define SYS_HNODE_CAST_TO(o, TypeName, member) SYS_HDATA_CAST_TO(o, TypeName, member)
+#define SYS_HNODE(o) SYS_HDATA(o, SysHNode)
+#define SYS_HNODE_CHECK(o) SYS_HDATA_CHECK(o)
 
 typedef struct _SysHNode  SysHNode;
 
@@ -34,8 +36,6 @@ struct _SysHNode
 };
 
 SYS_API SysBool sys_hnode_has_one_child(SysHNode *self);
-SYS_API SysHNode *_sys_hnode_cast_check(SysHNode* o);
-SYS_API SysPointer _sys_hnode_cast_to(SysHNode *o, SysSize offsize);
 SYS_API SysHNode*  sys_hnode_new  (void);
 SYS_API void  sys_hnode_destroy  (SysHNode    *root);
 SYS_API void  sys_hnode_unlink  (SysHNode    *hnode);

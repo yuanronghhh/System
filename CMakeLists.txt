@@ -61,6 +61,8 @@ set(SRC
   ./DataTypes/SysArray.c
   ./DataTypes/SysList.h
   ./DataTypes/SysList.c
+  ./DataTypes/SysHCommon.h
+  ./DataTypes/SysHCommon.c
   ./DataTypes/SysSList.h
   ./DataTypes/SysSList.c
   ./DataTypes/SysHSList.h

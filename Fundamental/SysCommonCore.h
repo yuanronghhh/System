@@ -4,6 +4,7 @@
 #include <System/Platform/Common/SysAtomic.h>
 #include <System/Platform/Common/SysMem.h>
 #include <System/Platform/Common/SysOs.h>
+#include <System/DataTypes/SysHCommon.h>
 #include <System/Utils/SysError.h>
 
 #endif

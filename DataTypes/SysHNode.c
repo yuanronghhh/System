@@ -1,12 +1,8 @@
-#include "SysHNode.h"
 #include <System/DataTypes/SysHNode.h>
 #include <System/DataTypes/SysQueue.h>
 
-
-#define CHECK_VALUE 0xdeadbeef
 #define sys_hnode_alloc0()         sys_slice_new0 (SysHNode)
 #define sys_hnode_free(hnode)       sys_slice_free (SysHNode, hnode)
-#define HNODE_CHECK(hnode) (hnode != NULL && (hnode)->check == CHECK_VALUE)
 
 SysHNode* sys_hnode_new (void) {
   SysHNode *hnode = sys_hnode_alloc0 ();
@@ -14,25 +10,11 @@ SysHNode* sys_hnode_new (void) {
 }
 
 void sys_hnode_init(SysHNode* node) {
-  node->check = CHECK_VALUE;
+  node->check = SYS_HDATA_CHECK_VALUE;
   node->children = NULL;
   node->last_child = NULL;
   node->parent = NULL;
   node->prev = NULL;
-}
-
-SysHNode *_sys_hnode_cast_check(SysHNode* self) {
-  if (self == NULL) { return NULL; }
-  sys_return_val_if_fail(HNODE_CHECK(self), NULL);
-
-  return self;
-}
-
-SysPointer _sys_hnode_cast_to(SysHNode *o, SysSize offsize) {
-  if(o == NULL) { return NULL; }
-  sys_return_val_if_fail(HNODE_CHECK(o), NULL);
-
-  return ((SysChar*)o - offsize);
 }
 
 static void sys_hnodes_free (SysHNode *hnode) {
@@ -162,8 +144,8 @@ SysHNode* sys_hnode_insert_before (SysHNode *parent,
 SysHNode* sys_hnode_insert_after (SysHNode *parent,
     SysHNode *sibling,
     SysHNode *hnode) {
-  sys_return_val_if_fail (HNODE_CHECK(parent), hnode);
-  sys_return_val_if_fail (HNODE_CHECK(hnode), hnode);
+  sys_return_val_if_fail (SYS_HNODE_CHECK(parent), hnode);
+  sys_return_val_if_fail (SYS_HNODE_CHECK(hnode), hnode);
   sys_return_val_if_fail (SYS_HNODE_IS_ROOT (hnode), hnode);
   if (sibling)
     sys_return_val_if_fail (sibling->parent == parent, hnode);
@@ -190,7 +172,7 @@ SysHNode* sys_hnode_insert_after (SysHNode *parent,
 
 SysHNode* sys_hnode_prepend (SysHNode *parent,
     SysHNode *hnode) {
-  sys_return_val_if_fail (HNODE_CHECK(parent), hnode);
+  sys_return_val_if_fail (SYS_HNODE_CHECK(parent), hnode);
 
   return sys_hnode_insert_before (parent, parent->children, hnode);
 }
@@ -206,8 +188,8 @@ SysHNode* sys_hnode_get_root (SysHNode *hnode) {
 
 SysBool sys_hnode_is_ancestor (SysHNode *hnode,
     SysHNode *descendant) {
-  sys_return_val_if_fail (HNODE_CHECK(hnode), false);
-  sys_return_val_if_fail (HNODE_CHECK(descendant), false);
+  sys_return_val_if_fail (SYS_HNODE_CHECK(hnode), false);
+  sys_return_val_if_fail (SYS_HNODE_CHECK(descendant), false);
 
   while (descendant) {
     if (descendant->parent == hnode)
@@ -234,7 +216,7 @@ void sys_hnode_reverse_children (SysHNode *hnode) {
   SysHNode *child;
   SysHNode *last;
 
-  sys_return_if_fail (HNODE_CHECK(hnode));
+  sys_return_if_fail (SYS_HNODE_CHECK(hnode));
 
   child = hnode->children;
   last = NULL;
@@ -672,7 +654,7 @@ void sys_hnode_children_foreach (SysHNode    *hnode,
 }
 
 void sys_hnode_handle_bfs_r(SysHNode *self, SysHNodeFunc func, SysPointer user_data) {
-  sys_return_if_fail(HNODE_CHECK(self));
+  sys_return_if_fail(SYS_HNODE_CHECK(self));
 
   SysHNode* node;
   SysHNode* nnode;
@@ -697,7 +679,7 @@ void sys_hnode_handle_bfs_r(SysHNode *self, SysHNodeFunc func, SysPointer user_d
 }
 
 void sys_hnode_handle_ff_r(SysHNode *self, SysHNodeFunc func, SysPointer user_data) {
-  sys_return_if_fail(HNODE_CHECK(self));
+  sys_return_if_fail(SYS_HNODE_CHECK(self));
 
   func(self, user_data);
 
@@ -714,7 +696,7 @@ void sys_hnode_handle_ff_r(SysHNode *self, SysHNodeFunc func, SysPointer user_da
 
 void sys_hnode_handle_ft_r(SysHNode *self, SysHNodeFunc func, SysPointer user_data) {
   sys_return_if_fail(self != NULL);
-  sys_return_if_fail(HNODE_CHECK(self));
+  sys_return_if_fail(SYS_HNODE_CHECK(self));
 
   if (self->children) {
 
@@ -730,8 +712,8 @@ void sys_hnode_handle_ft_r(SysHNode *self, SysHNodeFunc func, SysPointer user_da
 }
 
 SysHNode* sys_hnode_append(SysHNode *parent, SysHNode *node) {
-  sys_return_val_if_fail(HNODE_CHECK(parent), NULL);
-  sys_return_val_if_fail(HNODE_CHECK(node), NULL);
+  sys_return_val_if_fail(SYS_HNODE_CHECK(parent), NULL);
+  sys_return_val_if_fail(SYS_HNODE_CHECK(node), NULL);
 
   SysHNode *last_child = sys_hnode_get_last_child(parent);
   sys_hnode_insert_after(parent, last_child, node);
@@ -742,53 +724,53 @@ SysHNode* sys_hnode_append(SysHNode *parent, SysHNode *node) {
 
 void sys_hnode_set_last_child(SysHNode *self, SysHNode * last_child) {
   sys_return_if_fail(self != NULL);
-  sys_return_if_fail(HNODE_CHECK(self));
+  sys_return_if_fail(SYS_HNODE_CHECK(self));
 
   self->last_child = last_child;
 }
 
 SysHNode * sys_hnode_get_last_child(SysHNode *self) {
   if (self == NULL) { return NULL; }
-  sys_return_val_if_fail(HNODE_CHECK(self), NULL);
+  sys_return_val_if_fail(SYS_HNODE_CHECK(self), NULL);
 
   return self->last_child;
 }
 
 SysHNode* sys_hnode_children(SysHNode* self) {
   if (self == NULL) { return NULL; }
-  sys_return_val_if_fail(HNODE_CHECK(self), NULL);
+  sys_return_val_if_fail(SYS_HNODE_CHECK(self), NULL);
 
   return self->children;
 }
 
 SysHNode* sys_hnode_next(SysHNode* self) {
-  sys_return_val_if_fail(HNODE_CHECK(self), NULL);
+  sys_return_val_if_fail(SYS_HNODE_CHECK(self), NULL);
 
   return self->next;
 }
 
 SysHNode* sys_hnode_prev(SysHNode* self) {
-  sys_return_val_if_fail(HNODE_CHECK(self), NULL);
+  sys_return_val_if_fail(SYS_HNODE_CHECK(self), NULL);
 
   return self->prev;
 }
 
 void sys_hnode_set_parent(SysHNode *self, SysHNode *parent) {
-  sys_return_if_fail(HNODE_CHECK(self));
-  sys_return_if_fail(HNODE_CHECK(parent));
+  sys_return_if_fail(SYS_HNODE_CHECK(self));
+  sys_return_if_fail(SYS_HNODE_CHECK(parent));
 
   self->parent = parent;
 }
 
 SysHNode* sys_hnode_parent(SysHNode* self) {
   if(self == NULL) { return NULL; }
-  sys_return_val_if_fail(HNODE_CHECK(self), NULL);
+  sys_return_val_if_fail(SYS_HNODE_CHECK(self), NULL);
 
   return self->parent;
 }
 
 SysBool sys_hnode_has_one_child(SysHNode *self) {
-  sys_return_val_if_fail(HNODE_CHECK(self), false);
+  sys_return_val_if_fail(SYS_HNODE_CHECK(self), false);
 
   return self->children != NULL && self->next == NULL;
 }
