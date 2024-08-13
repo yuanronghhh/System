@@ -275,8 +275,12 @@ SysInt sys_printf(const SysChar *format, ...) {
 void sys_print(const SysChar *str) {
   sys_return_if_fail(str != NULL);
 
+  SYS_LEAK_IGNORE_BEGIN;
+
   fputs(str, stdout);
   fflush(stdout);
+
+  SYS_LEAK_IGNORE_END;
 }
 
 /**
