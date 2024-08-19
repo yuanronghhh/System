@@ -1,4 +1,5 @@
 #include <System/Type/SysGc.h>
+#include <System/Type/SysObject.h>
 #include <System/Type/SysType.h>
 #include <System/Platform/Common/SysMem.h>
 #include <System/Platform/Common/SysThread.h>
@@ -36,7 +37,7 @@ SgcBlock* sgc_block_malloc0(SysType type, SysSize size) {
   SgcBlock* o =  sys_malloc0_N(size);
 
   o->type = type;
-  sys_ref_count_init(o);
+  sgc_block_ref_init(o);
 
   return o;
 }
@@ -118,7 +119,7 @@ void sgc_block_set_new_hook(SysRefHook hook) {
 SysPointer _sys_block_cast_check(SgcBlock *self) {
   sys_return_val_if_fail(self != NULL, NULL);
 
-  if (!SYS_REF_VALID_CHECK(self, MAX_REF_NODE)) {
+  if (!sgc_block_ref_valid_check(self, MAX_REF_NODE)) {
     sys_warning_N("object ref check failed: %p", self);
     return false;
   }
@@ -173,7 +174,7 @@ void* sgc_block_new(SysType type, const SysChar * first, ...) {
 SysBool block_destroy(SgcBlock* self) {
     sys_return_val_if_fail(self != NULL, false);
 
-    if (!SYS_REF_CHECK(self, MAX_REF_NODE)) {
+    if (!sgc_block_ref_check(self, MAX_REF_NODE)) {
         sys_warning_N("block ref check failed: %p", self);
         return false;
     }
@@ -187,7 +188,7 @@ SysBool block_destroy(SgcBlock* self) {
 
         sgc_block_unref_debug_func(self,
             sys_type_node_name(node),
-            sys_atomic_int_get(&self->ref_count));
+            sgc_block_ref_get(self));
     }
 
     if (!sgc_block_ref_dec(self)) {
@@ -203,7 +204,7 @@ SysBool _sgc_block_destroy(SgcBlock* self) {
 }
 
 SysBool _sgc_block_unref(SgcBlock* self) {
-  if (!SYS_REF_VALID_CHECK(self, MAX_REF_NODE)) {
+  if (!sgc_block_ref_valid_check(self, MAX_REF_NODE)) {
     sys_warning_N("block ref check failed: %p", self);
     return false;
   }
@@ -220,7 +221,7 @@ SysBool _sgc_block_unref(SgcBlock* self) {
 SysPointer _sgc_block_ref(SgcBlock* self) {
   sys_return_val_if_fail(self != NULL, NULL);
 
-  if (!SYS_REF_VALID_CHECK(self, MAX_REF_NODE)) {
+  if (!sgc_block_ref_valid_check(self, MAX_REF_NODE)) {
     sys_warning_N("block ref check failed: %p", self);
     return false;
   }
@@ -230,8 +231,8 @@ SysPointer _sgc_block_ref(SgcBlock* self) {
     SysTypeNode *node = sys_type_node(type);
 
     sgc_block_ref_debug_func(self,
-        sys_type_node_name(node), 
-        sys_atomic_int_get(&self->ref_count));
+        sys_type_node_name(node),
+        sgc_block_ref_get(self));
   }
 
   sgc_block_ref_inc(self);
@@ -244,4 +245,31 @@ void _sgc_block_free(SgcBlock* self) {
   sys_return_if_fail(sgc_block_ref_check(self, MAX_REF_NODE));
 
   sys_free_N(self);
+}
+
+/* auto gc */
+void _sgc_move(
+    SgcBlock *dst,
+    SgcBlock *src,
+    SgcBlock **dst_addr,
+    SgcBlock **src_addr) {
+
+  sys_return_if_fail(dst_addr != NULL);
+  sys_return_if_fail(src_addr != NULL);
+  if(src == NULL) { return; }
+
+  src->addr = dst_addr;
+  dst = src;
+  *src_addr = NULL;
+}
+
+void sgc_cleanup(void *b) {
+  void **o = (void **)b;
+  if(o == NULL) { return; }
+  if(*o == NULL) { return; }
+
+  SgcBlock *p = SGC_BLOCK(o);
+  if(o != p->addr) { return ; }
+
+  sys_object_unref(o);
 }
