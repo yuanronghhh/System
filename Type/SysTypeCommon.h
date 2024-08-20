@@ -33,9 +33,6 @@ typedef struct _SysObject SysObject;
 typedef struct _SysObjectClass SysObjectClass;
 
 typedef struct _SgcBlock SgcBlock;
-typedef struct _SgcArea SgcArea;
-
-typedef struct _SgcCollector SgcCollector;
 
 typedef SysType (*SysTypeFunc) (void);
 typedef void (*SysTypeInitFunc) (void *self);

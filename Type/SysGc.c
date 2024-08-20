@@ -9,27 +9,10 @@ static SysRefHook sgc_block_unref_debug_func = NULL;
 static SysRefHook sgc_block_ref_debug_func = NULL;
 static SysRefHook sgc_block_new_debug_func = NULL;
 
-static SysMutex gc_lock;
-static SysHashTable *g_root_heap;
-
 void sgc_setup(void) {
-  sys_mutex_init(&gc_lock);
-
-  g_root_heap = sys_hash_table_new_full(sys_direct_hash,
-      (SysEqualFunc)sys_direct_equal,
-      NULL,
-      (SysDestroyFunc)sys_free);
 }
 
 void sgc_teardown(void) {
-  sys_clear_pointer(&g_root_heap, sys_hash_table_unref);
-  sys_mutex_clear(&gc_lock);
-}
-
-void sgc_run(SgcCollector *gc) {
-}
-
-void sgc_stop(SgcCollector* gc) {
 }
 
 SgcBlock* sgc_block_malloc0(SysType type, SysSize size) {
@@ -68,40 +51,6 @@ SysPointer sgc_malloc0(SysSize size) {
 void sgc_free(SysPointer ptr) {
 
   sys_free(ptr);
-}
-
-SgcArea *sgc_area_new(SysPointer *addr, SysInt isstack, SgcBlock *block) {
-  SgcArea *area;
-
-  area = sys_new0_N(SgcArea, 1);
-  area->last_addr = addr;
-  area->block = block;
-  area->isstack = isstack;
-
-  return area;
-}
-
-void sgc_set(SysPointer *addr, SysInt isstack, SgcBlock *block) {
-  SysHashTable *block_heap;
-  SgcArea *area;
-
-  block_heap = (SysHashTable *)sys_hash_table_lookup(g_root_heap,
-      (SysPointer)block->type);
-  if(block_heap == NULL) {
-    block_heap = sys_hash_table_new_full(sys_direct_hash,
-        (SysEqualFunc)sys_direct_equal,
-        NULL,
-        (SysDestroyFunc)sys_free);
-  }
-
-  area = sgc_area_new(addr, isstack, block);
-  sys_hash_table_insert(block_heap, addr, area);
-}
-
-void sgc_save(SysPointer *ptr, SysInt isstack) {
-}
-
-void sgc_unsave(SysPointer *ptr) {
 }
 
 void sgc_block_set_unref_hook(SysRefHook hook) {
@@ -245,35 +194,4 @@ void _sgc_block_free(SgcBlock* self) {
   sys_return_if_fail(sgc_block_ref_check(self, MAX_REF_NODE));
 
   sys_free_N(self);
-}
-
-/* auto gc */
-void _sgc_move(
-    SgcBlock *dst,
-    SgcBlock *src,
-    SgcBlock **dst_addr,
-    SgcBlock **src_addr) {
-
-#if USE_SGC_AUTO_PTR
-  sys_return_if_fail(dst_addr != NULL);
-  sys_return_if_fail(src_addr != NULL);
-  if(src == NULL) { return; }
-
-  src->addr = dst_addr;
-  dst = src;
-  *src_addr = NULL;
-#endif
-}
-
-void sgc_cleanup(void *b) {
-#if USE_SGC_AUTO_PTR
-  void **o = (void **)b;
-  if(o == NULL) { return; }
-  if(*o == NULL) { return; }
-
-  SgcBlock *p = SGC_BLOCK(o);
-  if(o != p->addr) { return ; }
-
-  sys_object_unref(o);
-#endif
 }

@@ -113,8 +113,6 @@ SysType type_name##_get_type (void)                                \
 
 #define SYS_DEFINE_INTERFACE(TypeName, type_name, T_P) SYS_DEFINE_INTERFACE_WITH_CODE(TypeName, type_name, T_P, ;)
 
-#define SYS_DEFINE_AUTOPTR_CODE(TypeName) SGC_DEFINE_AUTOPTR_CLEAN_FUNC(TypeName)
-
 struct _SysInterfaceInfo {
   SysInterfaceInitFunc     interface_init;
   SysTypeFinalizeFunc      interface_finalize;

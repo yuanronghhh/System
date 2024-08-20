@@ -6,54 +6,20 @@
 SYS_BEGIN_DECLS
 
 #define SGC_BLOCK(o) ((SgcBlock *)_sys_block_cast_check((SgcBlock *)o))
-#define sgc_type_e(var, tp, dst) do { \
-  (var) = SGC_BLOCK(dst); \
-  sgc_set((SysPointer *)&(var), tp, dst); \
-} while(0)
-
-#define sgc_stack_set(var, dst) sgc_type_e(var, SGC_IN_STACK, dst)
-#define sgc_heap_set(var, dst) sgc_type_e(var, SGC_IN_HEAP, dst)
-
 #define sys_type_from_sgc_block(o) (((SgcBlock *)o)->type)
 
-#if USE_SGC_AUTO_PTR
-  #define sgc_block_ref_init(o)
-  #define sgc_block_ref_check(o, max) true
-  #define sgc_block_ref_valid_check(o, max) true
-  #define sgc_block_ref_get(o) 0
-  #define sgc_block_ref_inc(o) true
-  #define sgc_block_ref_dec(o) true
-  #define sgc_block_ref_cmp(o, n) true
-  #define sgc_cleanup_attr(func) __attribute__((cleanup(func)))
-  #define sgc_autoptr(TypeName) sgc_cleanup_attr(sgc_cleanup) TypeName##_autoptr
-#else
-  #define sgc_block_ref_init(o) sys_ref_count_init((SgcBlock *)o)
-  #define sgc_block_ref_check(o, max) SYS_REF_CHECK((SgcBlock *)o, max)
-  #define sgc_block_ref_valid_check(o, max) SYS_REF_VALID_CHECK((SgcBlock *)o, max)
-  #define sgc_block_ref_get(o) sys_ref_count_get((SgcBlock *)o)
-  #define sgc_block_ref_inc(o) sys_ref_count_inc((SgcBlock *)o)
-  #define sgc_block_ref_dec(o) sys_ref_count_dec((SgcBlock *)o)
-  #define sgc_block_ref_cmp(o, n) sys_ref_count_cmp((SgcBlock *)o, n)
-  #define sgc_cleanup_attr(func)
-#endif
-
-#define sgc_autoptr(TypeName) sgc_cleanup_attr(sgc_cleanup) TypeName##_autoptr
-#define sgc_move(dst, src) _sgc_move((SgcBlock *)dst, (SgcBlock *)src, (SgcBlock **)&(dst), (SgcBlock **)&(src))
+#define sgc_block_ref_init(o) sys_ref_count_init((SgcBlock *)o)
+#define sgc_block_ref_check(o, max) SYS_REF_CHECK((SgcBlock *)o, max)
+#define sgc_block_ref_valid_check(o, max) SYS_REF_VALID_CHECK((SgcBlock *)o, max)
+#define sgc_block_ref_get(o) sys_ref_count_get((SgcBlock *)o)
+#define sgc_block_ref_inc(o) sys_ref_count_inc((SgcBlock *)o)
+#define sgc_block_ref_dec(o) sys_ref_count_dec((SgcBlock *)o)
+#define sgc_block_ref_cmp(o, n) sys_ref_count_cmp((SgcBlock *)o, n)
 
 struct _SgcBlock {
   SysType type;
   /* <private> */
-#if USE_SGC_AUTO_PTR
-  SysPointer addr;
-#else
   SysRef ref_count;
-#endif
-};
-
-struct _SgcArea {
-  SysPointer last_addr;
-  SgcBlock* block;
-  SysBool isstack;
 };
 
 #define sgc_block_create(o, type, ...) _sgc_block_create((SgcBlock *)(o), type, __VA_ARGS__)
@@ -70,9 +36,6 @@ SYS_API void sgc_teardown(void);
 SYS_API void sgc_block_set_unref_hook(SysRefHook hook);
 SYS_API void sgc_block_set_ref_hook(SysRefHook hook);
 SYS_API void sgc_block_set_new_hook(SysRefHook hook);
-
-SYS_API void sgc_run(SgcCollector *gc);
-SYS_API void sgc_stop(SgcCollector *gc);
 
 SYS_API SysPointer sgc_malloc0(SysSize size);
 SYS_API void sgc_free(SysPointer ptr);
@@ -92,17 +55,6 @@ SYS_API SgcBlock* sgc_block_malloc0(SysType type, SysSize size);
 SYS_API void* sgc_block_new(SysType type, const SysChar * first, ...);
 #define sgc_block_free(o) _sgc_block_free((SgcBlock*)(o))
 SYS_API void _sgc_block_free(SgcBlock* self);
-
-/* auto gc */
-#define SGC_DEFINE_AUTOPTR_CLEAN_FUNC(TypeName) \
-  typedef TypeName* TypeName##_autoptr;
-
-void _sgc_move(SgcBlock *dst,
-    SgcBlock *src,
-    SgcBlock **dst_addr,
-    SgcBlock **src_addr);
-
-void sgc_cleanup(void *b);
 
 SYS_END_DECLS
 
