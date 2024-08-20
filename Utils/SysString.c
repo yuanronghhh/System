@@ -257,11 +257,14 @@ SysInt sys_printf(const SysChar *format, ...) {
   SysInt len;
 
   va_list args;
+
+  SYS_LEAK_IGNORE_BEGIN;
+
   va_start(args, format);
-
   len = sys_vprintf(format, args);
-
   va_end(args);
+
+  SYS_LEAK_IGNORE_END;
 
   return len;
 }

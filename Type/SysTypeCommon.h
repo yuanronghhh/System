@@ -13,11 +13,6 @@ typedef enum _SYS_NODE_ENUM {
   SYS_NODE_INTERFACE = 1 << 3,
 } SYS_NODE_ENUM;
 
-typedef enum _SGC_POSITION_ENUM {
-  SGC_IN_STACK,
-  SGC_IN_HEAP,
-} SGC_POSITION_ENUM;
-
 typedef size_t SysType;
 typedef struct _SysTypeInfo SysTypeInfo;
 typedef struct _SysInterfaceInfo SysInterfaceInfo;
@@ -33,9 +28,6 @@ typedef struct _SysObject SysObject;
 typedef struct _SysObjectClass SysObjectClass;
 
 typedef struct _SgcBlock SgcBlock;
-typedef struct _SgcArea SgcArea;
-
-typedef struct _SgcCollector SgcCollector;
 
 typedef SysType (*SysTypeFunc) (void);
 typedef void (*SysTypeInitFunc) (void *self);
