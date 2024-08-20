@@ -254,6 +254,7 @@ void _sgc_move(
     SgcBlock **dst_addr,
     SgcBlock **src_addr) {
 
+#if USE_SGC_AUTO_PTR
   sys_return_if_fail(dst_addr != NULL);
   sys_return_if_fail(src_addr != NULL);
   if(src == NULL) { return; }
@@ -261,9 +262,11 @@ void _sgc_move(
   src->addr = dst_addr;
   dst = src;
   *src_addr = NULL;
+#endif
 }
 
 void sgc_cleanup(void *b) {
+#if USE_SGC_AUTO_PTR
   void **o = (void **)b;
   if(o == NULL) { return; }
   if(*o == NULL) { return; }
@@ -272,4 +275,5 @@ void sgc_cleanup(void *b) {
   if(o != p->addr) { return ; }
 
   sys_object_unref(o);
+#endif
 }

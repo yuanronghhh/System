@@ -16,33 +16,38 @@ SYS_BEGIN_DECLS
 
 #define sys_type_from_sgc_block(o) (((SgcBlock *)o)->type)
 
-#if USE_SGC_REF_COUNT
-#define sgc_block_ref_init(o) sys_ref_count_init((SgcBlock *)o)
-#define sgc_block_ref_check(o, max) SYS_REF_CHECK((SgcBlock *)o, max)
-#define sgc_block_ref_valid_check(o, max) SYS_REF_VALID_CHECK((SgcBlock *)o, max)
-#define sgc_block_ref_get(o) sys_ref_count_get((SgcBlock *)o)
-#define sgc_block_ref_inc(o) sys_ref_count_inc((SgcBlock *)o)
-#define sgc_block_ref_dec(o) sys_ref_count_dec((SgcBlock *)o)
-#define sgc_block_ref_cmp(o, n) sys_ref_count_cmp((SgcBlock *)o, n)
+#if USE_SGC_AUTO_PTR
+  #define sgc_block_ref_init(o)
+  #define sgc_block_ref_check(o, max) true
+  #define sgc_block_ref_valid_check(o, max) true
+  #define sgc_block_ref_get(o) 0
+  #define sgc_block_ref_inc(o) true
+  #define sgc_block_ref_dec(o) true
+  #define sgc_block_ref_cmp(o, n) true
+  #define sgc_cleanup_attr(func) __attribute__((cleanup(func)))
+  #define sgc_autoptr(TypeName) sgc_cleanup_attr(sgc_cleanup) TypeName##_autoptr
 #else
-#define sgc_block_ref_init(o)
-#define sgc_block_ref_check(o, max) true
-#define sgc_block_ref_valid_check(o, max) true
-#define sgc_block_ref_get(o) 0
-#define sgc_block_ref_inc(o) true
-#define sgc_block_ref_dec(o) true
-#define sgc_block_ref_cmp(o, n) true
+  #define sgc_block_ref_init(o) sys_ref_count_init((SgcBlock *)o)
+  #define sgc_block_ref_check(o, max) SYS_REF_CHECK((SgcBlock *)o, max)
+  #define sgc_block_ref_valid_check(o, max) SYS_REF_VALID_CHECK((SgcBlock *)o, max)
+  #define sgc_block_ref_get(o) sys_ref_count_get((SgcBlock *)o)
+  #define sgc_block_ref_inc(o) sys_ref_count_inc((SgcBlock *)o)
+  #define sgc_block_ref_dec(o) sys_ref_count_dec((SgcBlock *)o)
+  #define sgc_block_ref_cmp(o, n) sys_ref_count_cmp((SgcBlock *)o, n)
+  #define sgc_cleanup_attr(func)
 #endif
 
-#define sgc_cleanup_attr(func) __attribute__((cleanup(func)))
-#define sgc_autoptr(TypeName) sgc_cleanup_attr(sgc_cleanup) TypeName*
+#define sgc_autoptr(TypeName) sgc_cleanup_attr(sgc_cleanup) TypeName##_autoptr
 #define sgc_move(dst, src) _sgc_move((SgcBlock *)dst, (SgcBlock *)src, (SgcBlock **)&(dst), (SgcBlock **)&(src))
 
 struct _SgcBlock {
   SysType type;
   /* <private> */
-  // SysRef ref_count;
+#if USE_SGC_AUTO_PTR
   SysPointer addr;
+#else
+  SysRef ref_count;
+#endif
 };
 
 struct _SgcArea {
@@ -91,11 +96,6 @@ SYS_API void _sgc_block_free(SgcBlock* self);
 /* auto gc */
 #define SGC_DEFINE_AUTOPTR_CLEAN_FUNC(TypeName) \
   typedef TypeName* TypeName##_autoptr;
-
-SGC_DEFINE_AUTOPTR_CLEAN_FUNC(SysChar)
-SGC_DEFINE_AUTOPTR_CLEAN_FUNC(SysDouble)
-SGC_DEFINE_AUTOPTR_CLEAN_FUNC(SysInt)
-SGC_DEFINE_AUTOPTR_CLEAN_FUNC(SysPointer)
 
 void _sgc_move(SgcBlock *dst,
     SgcBlock *src,

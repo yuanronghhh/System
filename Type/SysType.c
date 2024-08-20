@@ -95,7 +95,7 @@ SysParam* sys_type_prop_get(SysType tp, const SysChar *name) {
   sys_return_val_if_fail(name != NULL, NULL);
 
   SysHArray *parray;
-  SysParam *param;
+  SysParam *param = NULL;
 
   sys_mutex_lock(&param_lock);
 
