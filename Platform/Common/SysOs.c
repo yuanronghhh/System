@@ -379,11 +379,13 @@ SysInt sys_arg_index(SysSArg *self, const SysChar *key, SysBool is_flag) {
 
 void sys_elapse_begin(SysElapse *self, const SysChar *name) {
   self->start = sys_get_monotonic_time();
+  self->diff = 0;
   self->name = name;
 }
 
 void sys_elapse_end(SysElapse *self) {
   self->end = sys_get_monotonic_time();
+  self->diff = self->end - self->start;
 }
 
 /* for feature */

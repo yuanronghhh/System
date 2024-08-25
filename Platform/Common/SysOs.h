@@ -8,6 +8,7 @@ SYS_BEGIN_DECLS
 struct _SysElapse {
   SysUInt64 start;
   SysUInt64 end;
+  SysUInt64 diff;
   const SysChar *name;
 };
 
