@@ -652,13 +652,15 @@ SysType sys_type_get_by_name(const SysChar *name) {
   return (SysType)sys_hash_table_lookup(ht, (const SysPointer)name);
 }
 
-SysTypeClass *sys_type_pclass(SysType type) {
+SysTypeClass *_sys_type_parent_class(SysType type) {
   SysTypeNode *node, *pnode;
-  SysType pType;
 
   node = sys_type_node(type);
-  pType = node->supers[node->n_supers];
-  pnode = sys_type_node(pType);
+  if(node->n_supers <= 0) {
+    return NULL;
+  }
+
+  pnode = sys_type_node(NODE_PARENT(node));
 
   return (SysTypeClass *)pnode->data.instance.class_ptr;
 }

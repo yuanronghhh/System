@@ -23,6 +23,7 @@ SYS_BEGIN_DECLS
 #define sys_type_from_instance(o) sys_type_from_sgc_block(o)
 #define sys_type_from_class(o) sys_type_from_sgc_block(o)
 #define sys_instance_get_class(o, TypeName) ((TypeName *)((SysTypeInstance *)o)->type_class)
+#define sys_class_get_parent_class(o, TypeName) (TypeName *)_sys_type_parent_class(sys_type_from_class(o))
 
 #define SYS_TYPE_GET_INTERFACE(o, iface_type) _sys_type_get_interface((((SysTypeInstance *)o)->parent.type), iface_type)
 
@@ -166,7 +167,7 @@ SYS_API SysBool sys_type_node_check(SysTypeNode *node);
 SYS_API SysBool sys_type_node_is(SysTypeNode *node, SYS_NODE_ENUM tp);
 
 SYS_API SysType sys_type_get_by_name(const SysChar *name);
-SYS_API SysTypeClass *sys_type_pclass(SysType type);
+SYS_API SysTypeClass *_sys_type_parent_class(SysType type);
 SYS_API void sys_type_node_unref(SysTypeNode *node);
 SYS_API void sys_type_node_free(SysTypeNode *node);
 

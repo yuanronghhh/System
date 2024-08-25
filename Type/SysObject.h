@@ -16,7 +16,6 @@ struct _SysObjectClass {
   SysTypeClass parent;
 
   SysObject* (*dclone) (SysObject* self);
-  SysBool (*destroy) (SysObject *self);
   void (*dispose) (SysObject *self);
   void (*finalize) (SysObject *self);
 };
@@ -30,7 +29,7 @@ struct _SysObject {
 #define sys_object_unref(o) _sys_object_unref(SYS_OBJECT(o))
 #define sys_object_ref(o) _sgc_block_ref(SGC_BLOCK(o))
 SYS_API void _sys_object_unref(SysObject* self);
-SYS_API SysBool _sys_object_destroy(SysObject* self);
+SYS_API void _sys_object_destroy(SysObject* self);
 
 #define sys_object_is_a(o, type) _sys_object_is_a(SYS_OBJECT(o), type)
 #define sys_object_dclone(o) _sys_object_dclone(SYS_OBJECT(o))

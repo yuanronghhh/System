@@ -79,21 +79,32 @@ SysObject* _sys_object_dclone(SysObject *o) {
   return cls->dclone(o);
 }
 
+static void object_destroy(SysObject* self) {
+  sys_return_if_fail(self != NULL);
+  SysObjectClass* cls;
 
-static SysBool sys_object_destroy_i(SysObject* self) {
+  cls = SYS_OBJECT_GET_CLASS(self);
+  while(cls) {
 
-  return _sgc_block_destroy(SGC_BLOCK(self));
+    if(cls->dispose) {
+
+      cls->dispose(self);
+    }
+
+    cls = sys_class_get_parent_class(cls, SysObjectClass);
+  }
 }
 
-SysBool _sys_object_destroy(SysObject* self) {
-  sys_return_val_if_fail(self != NULL, false);
+void _sys_object_destroy(SysObject* self) {
+  if(!sgc_block_destroy_check(self)) {
+    return;
+  }
 
-  return SYS_OBJECT_GET_CLASS(self)->destroy(self);
+  object_destroy(self);
 }
 
 static void sys_object_class_init(SysObjectClass *ocls) {
   ocls->dclone = sys_object_dclone_i;
-  ocls->destroy = sys_object_destroy_i;
   ocls->dispose = sys_object_dispose_i;
   ocls->finalize = sys_object_finalize_i;
 }
@@ -107,18 +118,12 @@ SysType sys_object_get_type(void) {
 
 void _sys_object_unref(SysObject* self) {
   sys_return_if_fail(self != NULL);
-  SysObjectClass* cls;
 
-  if (!sgc_block_destroy(self)) {
+  if(!sgc_block_destroy_check(self)) {
     return;
   }
 
-  cls = SYS_OBJECT_GET_CLASS(self);
-  if (cls->dispose) {
-
-      cls->dispose(self);
-  }
-
+  object_destroy(self);
   sgc_block_free(self);
 }
 
@@ -167,7 +172,7 @@ void* _sys_class_cast_check(SysObjectClass* cls, SysType ttype) {
 
   if(!sys_type_node_check(node)
       || !sys_type_is_a(type, ttype)
-      ) {
+    ) {
     tnode = sys_type_node(ttype);
 
     sys_error_N("Class check node Failed: %s to %s",

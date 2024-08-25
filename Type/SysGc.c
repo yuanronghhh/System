@@ -68,7 +68,7 @@ void sgc_block_set_new_hook(SysRefHook hook) {
 SysPointer _sys_block_cast_check(SgcBlock *self) {
   sys_return_val_if_fail(self != NULL, NULL);
 
-  if (!sgc_block_ref_valid_check(self, MAX_REF_NODE)) {
+  if (!sgc_block_ref_check(self, MAX_REF_NODE)) {
     sys_warning_N("object ref check failed: %p", self);
     return false;
   }
@@ -120,51 +120,44 @@ void* sgc_block_new(SysType type, const SysChar * first, ...) {
   return o;
 }
 
-SysBool block_destroy(SgcBlock* self) {
-    sys_return_val_if_fail(self != NULL, false);
+SysBool _sgc_block_destroy_check(SgcBlock* self) {
+  sys_return_val_if_fail(self != NULL, false);
 
-    if (!sgc_block_ref_check(self, MAX_REF_NODE)) {
-        sys_warning_N("block ref check failed: %p", self);
-        return false;
-    }
-
-    if (sgc_block_unref_debug_func) {
-        SysType type;
-        SysTypeNode* node;
-
-        type = sys_type_from_instance(self);
-        node = sys_type_node(type);
-
-        sgc_block_unref_debug_func(self,
-            sys_type_node_name(node),
-            sgc_block_ref_get(self));
-    }
-
-    if (!sgc_block_ref_dec(self)) {
-        return false;
-    }
-
-    return true;
-}
-
-SysBool _sgc_block_destroy(SgcBlock* self) {
-
-    return block_destroy(self);
-}
-
-SysBool _sgc_block_unref(SgcBlock* self) {
   if (!sgc_block_ref_valid_check(self, MAX_REF_NODE)) {
     sys_warning_N("block ref check failed: %p", self);
     return false;
   }
 
+  if (sgc_block_unref_debug_func) {
+    SysType type;
+    SysTypeNode* node;
+
+    type = sys_type_from_instance(self);
+    node = sys_type_node(type);
+
+    sgc_block_unref_debug_func(self,
+        sys_type_node_name(node),
+        sgc_block_ref_get(self));
+  }
+
+  return sgc_block_ref_dec(self);
+}
+
+void _sgc_block_destroy(SgcBlock* self) {
+
+  sys_ref_count_set(self, 0);
+}
+
+void _sgc_block_unref(SgcBlock* self) {
+  if (!sgc_block_ref_valid_check(self, MAX_REF_NODE)) {
+    sys_warning_N("block ref check failed: %p", self);
+    return;
+  }
   if(!sgc_block_ref_dec(self)) {
-    return false;
+    return;
   }
 
   sgc_block_free(self);
-
-  return true;
 }
 
 SysPointer _sgc_block_ref(SgcBlock* self) {
@@ -172,7 +165,7 @@ SysPointer _sgc_block_ref(SgcBlock* self) {
 
   if (!sgc_block_ref_valid_check(self, MAX_REF_NODE)) {
     sys_warning_N("block ref check failed: %p", self);
-    return false;
+    return NULL;
   }
 
   if (sgc_block_ref_debug_func) {

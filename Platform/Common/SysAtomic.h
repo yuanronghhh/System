@@ -34,6 +34,7 @@ SYS_API void sys_atomic_pointer_set(SysPointer o, SysPointer n);
 #define sys_ref_count_get(o) sys_atomic_int_get(&((o)->ref_count))
 #define sys_ref_count_dec(o) sys_atomic_int_dec_and_test(&((o)->ref_count))
 #define sys_ref_count_cmp(o, n) (_sys_atomic_int_get(&((o)->ref_count)) == n)
+#define sys_ref_count_set(o, n) _sys_atomic_int_set(&((o)->ref_count), 0)
 
 SYS_END_DECLS
 

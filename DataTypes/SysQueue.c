@@ -35,10 +35,7 @@ void sys_queue_init(SysQueue *queue) {
 void sys_queue_clear(SysQueue *queue) {
   sys_return_if_fail(queue != NULL);
 
-  if (queue->head) {
-
-    sys_list_free_1(queue->head);
-  }
+  sys_list_free(queue->head);
   sys_queue_init(queue);
 }
 

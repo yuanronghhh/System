@@ -27,8 +27,10 @@ struct _SgcBlock {
 
 #define sgc_block_ref(o) _sgc_block_ref(SGC_BLOCK(o))
 #define sgc_block_unref(o) _sgc_block_unref((SgcBlock *)(o))
+#define sgc_block_destroy_check(o) _sgc_block_destroy_check((SgcBlock *)(o))
 SYS_API SysPointer _sgc_block_ref(SgcBlock* self);
-SYS_API SysBool _sgc_block_unref(SgcBlock* self);
+SYS_API void _sgc_block_unref(SgcBlock* self);
+SYS_API SysBool _sgc_block_destroy_check(SgcBlock* self);
 
 SYS_API void sgc_setup(void);
 SYS_API void sgc_teardown(void);
@@ -50,7 +52,7 @@ SYS_API SysBool _sgc_block_create(SgcBlock *o,
     SysType type,
     const SysChar * first,
     ...);
-SYS_API SysBool _sgc_block_destroy(SgcBlock* self);
+SYS_API void _sgc_block_destroy(SgcBlock* self);
 SYS_API SgcBlock* sgc_block_malloc0(SysType type, SysSize size);
 SYS_API void* sgc_block_new(SysType type, const SysChar * first, ...);
 #define sgc_block_free(o) _sgc_block_free((SgcBlock*)(o))
