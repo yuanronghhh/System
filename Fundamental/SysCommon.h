@@ -66,8 +66,8 @@ typedef wchar_t SysWChar;
 #define SYS_STMT_END while(0)
 
 #if (__GNUC__ >= 3)
-# define SYS_UNLIKELY(cond) __builtin_expect ((cond), 0)
-# define SYS_LIKELY(cond) __builtin_expect ((cond), 1)
+# define SYS_UNLIKELY(cond) (__builtin_expect ((cond), 0))
+# define SYS_LIKELY(cond) (__builtin_expect ((cond), 1))
 #else
 # define SYS_UNLIKELY(cond) (cond)
 # define SYS_LIKELY(cond) (cond)
