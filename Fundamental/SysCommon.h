@@ -56,8 +56,6 @@ typedef unsigned short SysUInt16;
 typedef unsigned int SysUInt32;
 typedef unsigned long SysULong;
 typedef long SysLong;
-// typedef signed long long SysInt64;
-// typedef unsigned long long SysUInt64;
 typedef uintptr_t SysUIntPtr;
 typedef double SysDouble;
 typedef size_t SysSize;
@@ -66,8 +64,15 @@ typedef wchar_t SysWChar;
 
 #define SYS_STMT_START do
 #define SYS_STMT_END while(0)
-#define SYS_UNLIKELY
-#define SYS_LIKELY
+
+#if (__GNUC__ >= 3)
+# define SYS_UNLIKELY(cond) __builtin_expect ((cond), 0)
+# define SYS_LIKELY(cond) __builtin_expect ((cond), 1)
+#else
+# define SYS_UNLIKELY(cond) (cond)
+# define SYS_LIKELY(cond) (cond)
+#endif
+
 #define SYS_LOG_ARGS(func, ptr) __FILE__, __func__, __LINE__, #func, #ptr,
 #define SYS_LOG_ARGS_N const SysChar *_filename, const SysChar *_funcname, const SysInt _line, const SysChar * _callfunc, const SysChar *_ptrstr,
 #define SYS_LOG_ARGS_M(func, ptr) SYS_LOG_ARGS(func, ptr)
