@@ -145,7 +145,7 @@ void sys_type_ht_remove(SysTypeNode* node) {
 }
 
 SysTypeNode* sys_type_make_node(const SysTypeNode* pnode,
-    const SysTypeInfo *info, 
+    const SysTypeInfo *info,
     SysInt flags) {
   SysTypeNode* node;
   SysInt nodesize = 0;
@@ -158,7 +158,7 @@ SysTypeNode* sys_type_make_node(const SysTypeNode* pnode,
 
   nodesize = (SysInt)sizeof(SysTypeNode) + (SysInt)sizeof(SysType) * (pn_supers + 1);
 
-  node = sgc_malloc0(nodesize);
+  node = sys_malloc0(nodesize);
   node->node_type = info->node_type;
   node->name = sys_strdup(info->name);
   node->n_supers = pn_supers;
@@ -408,12 +408,12 @@ void sys_type_node_free(SysTypeNode *node) {
       break;
   }
 
-  sgc_free(node->name);
-  sgc_free(node);
+  sys_free(node->name);
+  sys_free(node);
 }
 
 void sys_type_node_unref(SysTypeNode *node) {
-  sys_assert(SYS_REF_CHECK(node, MAX_REF_NODE));
+  sys_assert(sys_ref_count_check(node, MAX_REF_NODE));
 
   sys_type_node_free(node);
 }
@@ -455,8 +455,8 @@ static void iface_entry_add(IFaceEntry *entry) {
 static void iface_entry_free(IFaceEntry *entry) {
   sys_return_if_fail(entry != NULL);
 
-  sgc_free(entry->iface_ptr);
-  sgc_free(entry);
+  sys_free(entry->iface_ptr);
+  sys_free(entry);
 }
 
 void sys_type_class_free(SysTypeClass *cls) {
@@ -471,10 +471,10 @@ void sys_type_class_free(SysTypeClass *cls) {
   if (cls != NULL) {
     if(cls->n_ifaces > 0) {
 
-      sys_clear_pointer(&cls->ifaces, sgc_free);
+      sys_clear_pointer(&cls->ifaces, sys_free);
     }
 
-    sgc_free(node->data.instance.class_ptr);
+    sys_free(node->data.instance.class_ptr);
   }
 }
 
@@ -504,7 +504,7 @@ SysTypeNode *sys_type_node_ref(SysTypeNode *node) {
       cls = node->data.instance.class_ptr;
 
       if(cls == NULL) {
-        cls = (SysTypeClass *)sgc_block_malloc0((SysType)node, node->data.instance.class_size);
+        cls = (SysTypeClass *)sys_block_new((SysType)node, node->data.instance.class_size);
         node->data.instance.class_ptr = cls;
 
         for (SysInt i = node->n_supers; i > 0; i--) {
@@ -551,7 +551,6 @@ static SysBool instance_create(
 
   SysTypeNode *pnode;
 
-  instance->type_class = cls;
   for (SysInt i = node->n_supers; i > 0; i--) {
     SysType p = node->supers[i];
     pnode = sys_type_node(p);
@@ -566,11 +565,9 @@ static SysBool instance_create(
   return true;
 }
 
-static SysBool instance_destroy(SysTypeInstance *instance,
-    SysTypeClass *cls) {
+static SysBool instance_destroy(SysTypeInstance *instance, SysTypeClass *cls) {
   sys_return_val_if_fail(instance != NULL, false);
 
-  cls = instance->type_class;
   sys_type_class_unref(cls);
 
   return true;
@@ -602,14 +599,14 @@ SysTypeInstance *sys_type_instance_new(SysType type, SysSize count) {
 
   SysTypeNode *node;
   SysTypeInstance *instance;
-  SgcBlock *mp;
+  SysBlock *mp;
 
   SysInt priv_psize = 0;
   node = sys_type_node(type);
 
   priv_psize = node->data.instance.private_size;
 
-  mp = sgc_block_malloc0(type, (priv_psize + node->data.instance.instance_size) * count);
+  mp = sys_block_new(type, (priv_psize + node->data.instance.instance_size) * count);
   instance = (SysTypeInstance *)((SysChar *)mp + priv_psize);
 
   return instance;
@@ -619,7 +616,8 @@ void sys_instance_destroy(SysTypeInstance *instance) {
   sys_return_if_fail(instance != NULL);
   SysTypeClass *cls;
 
-  cls = instance->type_class;
+  cls = sys_instance_get_class(instance, SysTypeClass);
+
   instance_destroy(instance, cls);
 }
 
@@ -629,7 +627,7 @@ void sys_type_instance_free(SysTypeInstance *instance) {
   SysChar *real_ptr;
   SysTypeClass *cls;
 
-  cls = instance->type_class;
+  cls = sys_instance_get_class(instance, SysTypeClass);
   node = sys_type_node(sys_type_from_class(cls));
 
   if(!instance_destroy(instance, cls)) {
@@ -637,7 +635,7 @@ void sys_type_instance_free(SysTypeInstance *instance) {
   }
 
   real_ptr = ((SysChar*)instance) - node->data.instance.private_size;
-  sgc_block_free(real_ptr);
+  sys_block_free((SysBlock *)real_ptr);
 }
 
 const SysChar *sys_type_node_name(SysTypeNode *node) {
@@ -689,6 +687,7 @@ void sys_type_setup(void) {
       (SysDestroyFunc)sys_type_node_unref);
 
   _sys_fundanmental_node_init_type();
+  _sys_block_init_type();
   _sys_char_node_init_type();
   _sys_double_node_init_type();
   _sys_int_node_init_type();
@@ -828,7 +827,7 @@ void sys_type_imp_interface(SysType instance_type,
         iface_node->name);
   }
 
-  iface_ptr = sgc_malloc0(iface_node->data.iface.vtable_size);
+  iface_ptr = sys_malloc0(iface_node->data.iface.vtable_size);
   iface_ptr->type = iface_type;
 
   for(SysUInt i = 1; i < iface_node->n_supers; i++) {
@@ -842,12 +841,12 @@ void sys_type_imp_interface(SysType instance_type,
   }
   iface_node->data.iface.vtable_init(iface_ptr);
 
-  entry = sgc_malloc0(sizeof(IFaceEntry));
+  entry = sys_malloc0(sizeof(IFaceEntry));
   entry->instance_type = instance_type;
   entry->iface_type = iface_type;
   entry->iface_ptr = iface_ptr;
 
-  nmem = sgc_malloc0(sizeof(IFaceEntry *) * (cls->n_ifaces + 1));
+  nmem = sys_malloc0(sizeof(IFaceEntry *) * (cls->n_ifaces + 1));
   if (cls->n_ifaces > 0) {
     /* ifaces = Inew + Iself */
     sys_memcpy(nmem + 1,
@@ -855,7 +854,7 @@ void sys_type_imp_interface(SysType instance_type,
         cls->ifaces, 
         sizeof(IFaceEntry *) * cls->n_ifaces);
 
-    sys_clear_pointer(&cls->ifaces, sgc_free);
+    sys_clear_pointer(&cls->ifaces, sys_free);
   }
 
   cls->ifaces = nmem;

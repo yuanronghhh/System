@@ -156,7 +156,7 @@ static SysBool posix_execute_child(SysSubProcessPosix *pposix,
 }
 
 static SysSubProcessPosix *sys_real_subprocess_internal(SysSubProcessOption* option) {
-  SysSubProcessPosix *pposix = sys_new0_N(SysSubProcessPosix, 1);
+  SysSubProcessPosix *pposix = sys_new0(SysSubProcessPosix, 1);
 
   FILE* std0read = NULL;
   FILE* std0write = NULL;

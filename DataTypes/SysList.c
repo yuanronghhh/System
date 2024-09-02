@@ -7,7 +7,7 @@
  */
 
 SysList* sys_list_new(void) {
-  SysList *list = sys_new0_N(SysList, 1);
+  SysList *list = sys_new0(SysList, 1);
   return list;
 }
 

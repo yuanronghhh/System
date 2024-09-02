@@ -21,11 +21,11 @@ SYS_API SysPointer sys_atomic_pointer_get(const volatile SysPointer x);
 SYS_API void sys_atomic_pointer_set(SysPointer o, SysPointer n);
 
 #define SYS_REF_INIT_VALUE 1
-#define SYS_REF_CHECK(o, max_ref) \
+#define sys_ref_count_check(o, max_ref) \
   (_sys_atomic_int_get(&(o)->ref_count) >= 0 \
    && _sys_atomic_int_get(&(o)->ref_count) < (max_ref))
 
-#define SYS_REF_VALID_CHECK(o, max_ref) \
+#define sys_ref_count_valid_check(o, max_ref) \
   (_sys_atomic_int_get(&(o)->ref_count) > 0 \
    && _sys_atomic_int_get(&(o)->ref_count) < (max_ref))
 

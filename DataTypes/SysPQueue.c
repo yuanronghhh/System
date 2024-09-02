@@ -2,7 +2,7 @@
 
 /* pqueue api */
 static SysPNode *prio_p_node_new(SysInt prio, SysPointer data) {
-  SysPNode *plink = sys_new0_N(SysPNode, 1);
+  SysPNode *plink = sys_new0(SysPNode, 1);
 
   plink->parent.data = data;
   plink->prio = prio;
@@ -11,7 +11,7 @@ static SysPNode *prio_p_node_new(SysInt prio, SysPointer data) {
 }
 
 static void prio_list_free(SysPNode *plink) {
-  sys_free_N(plink);
+  sys_free(plink);
 }
 
 SysPQueue *sys_pqueue_new(void) {

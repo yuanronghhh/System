@@ -206,9 +206,9 @@ static void sys_hash_table_remove_all_nodes(SysHashTable *hash_table,
    * *will* happen. */
   sys_hash_table_set_shift(hash_table, HASH_TABLE_MIN_SHIFT);
   if (!destruction) {
-    hash_table->keys = sys_new0_N(SysPointer, hash_table->size);
+    hash_table->keys = sys_new0(SysPointer, hash_table->size);
     hash_table->values = hash_table->keys;
-    hash_table->hashes = sys_new0_N(SysUInt, hash_table->size);
+    hash_table->hashes = sys_new0(SysUInt, hash_table->size);
   } else {
     hash_table->keys = NULL;
     hash_table->values = NULL;
@@ -236,10 +236,10 @@ static void sys_hash_table_remove_all_nodes(SysHashTable *hash_table,
 
   /* Destroy old storage space. */
   if (old_keys != old_values)
-    sys_free_N(old_values);
+    sys_free(old_values);
 
-  sys_free_N(old_keys);
-  sys_free_N(old_hashes);
+  sys_free(old_keys);
+  sys_free(old_hashes);
 }
 
 static void sys_hash_table_resize(SysHashTable *hash_table) {
@@ -252,12 +252,12 @@ static void sys_hash_table_resize(SysHashTable *hash_table) {
   old_size = hash_table->size;
   sys_hash_table_set_shift_from_size(hash_table, hash_table->nnodes * 2);
 
-  new_keys = sys_new0_N(SysPointer, hash_table->size);
+  new_keys = sys_new0(SysPointer, hash_table->size);
   if (hash_table->keys == hash_table->values)
     new_values = new_keys;
   else
-    new_values = sys_new0_N(SysPointer, hash_table->size);
-  new_hashes = sys_new0_N(SysUInt, hash_table->size);
+    new_values = sys_new0(SysPointer, hash_table->size);
+  new_hashes = sys_new0(SysUInt, hash_table->size);
 
   for (i = 0; i < old_size; i++) {
     SysUInt node_hash = hash_table->hashes[i];
@@ -281,10 +281,10 @@ static void sys_hash_table_resize(SysHashTable *hash_table) {
   }
 
   if (hash_table->keys != hash_table->values)
-    sys_free_N(hash_table->values);
+    sys_free(hash_table->values);
 
-  sys_free_N(hash_table->keys);
-  sys_free_N(hash_table->hashes);
+  sys_free(hash_table->keys);
+  sys_free(hash_table->hashes);
 
   hash_table->keys = new_keys;
   hash_table->values = new_values;
@@ -322,9 +322,9 @@ SysHashTable *sys_hash_table_new_full(SysHashFunc hash_func,
 
   hash_table->key_destroy_func = key_destroy_func;
   hash_table->value_destroy_func = value_destroy_func;
-  hash_table->keys = sys_new0_N(SysPointer, hash_table->size);
+  hash_table->keys = sys_new0(SysPointer, hash_table->size);
   hash_table->values = hash_table->keys;
-  hash_table->hashes = sys_new0_N(SysUInt, hash_table->size);
+  hash_table->hashes = sys_new0(SysUInt, hash_table->size);
 
   sys_ref_count_init(hash_table);
 
@@ -505,11 +505,11 @@ void sys_hash_table_unref(SysHashTable *hash_table) {
   if (sys_ref_count_dec(hash_table)) {
     sys_hash_table_remove_all_nodes(hash_table, true, true);
     if (hash_table->keys != hash_table->values)
-      sys_free_N(hash_table->values);
+      sys_free(hash_table->values);
 
     if (hash_table->keys != NULL) {
-      sys_free_N(hash_table->keys);
-      sys_free_N(hash_table->hashes);
+      sys_free(hash_table->keys);
+      sys_free(hash_table->hashes);
     }
 
     sys_slice_free(SysHashTable, hash_table);
@@ -747,7 +747,7 @@ SysPointer *sys_hash_table_get_keys_as_array(SysHashTable *hash_table,
   SysPointer *result;
   SysUInt i, j = 0;
 
-  result = sys_new_N(SysPointer, hash_table->nnodes + 1);
+  result = sys_new(SysPointer, hash_table->nnodes + 1);
   for (i = 0; i < (SysUInt)hash_table->size; i++) {
     if (HASH_IS_REAL(hash_table->hashes[i]))
       result[j++] = hash_table->keys[i];

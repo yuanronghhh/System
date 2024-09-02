@@ -97,7 +97,7 @@ void sys_verror(SYS_LOG_ARGS_N const SysChar* format, va_list args) {
 }
 
 SysError* sys_error_new(void) {
-  SysError* nerror = sys_new0_N(SysError, 1);
+  SysError* nerror = sys_new0(SysError, 1);
 
   nerror->message = NULL;
 
@@ -111,7 +111,7 @@ void sys_error_set(SYS_LOG_ARGS_N SysError**err, const SysChar* format, ...) {
   SysError* nerror = NULL;
   if ((*err) != NULL) {
     sys_warning_N("Error was set but bot handle: %s\n", (*err)->message);
-    sys_free_N((*err)->message);
+    sys_free((*err)->message);
     nerror = (*err);
   } else {
     nerror = sys_error_new();
@@ -133,10 +133,10 @@ void sys_error_free(SysError* err) {
   sys_return_if_fail(err != NULL);
 
   if (err->message != NULL) {
-    sys_free_N(err->message);
+    sys_free(err->message);
   }
 
-  sys_free_N(err);
+  sys_free(err);
 }
 
 /**

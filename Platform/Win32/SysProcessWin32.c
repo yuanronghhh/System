@@ -170,7 +170,7 @@ static SysBool win32_execute_child(SysSubProcessWin32 *pwin32,
     return false;
   }
   
-  sys_free_N(cmdstr);
+  sys_free(cmdstr);
   WaitForSingleObject(pi->hProcess, INFINITE);
 
   return true;
@@ -179,7 +179,7 @@ static SysBool win32_execute_child(SysSubProcessWin32 *pwin32,
 static SysSubProcessWin32 *sys_real_subprocess_internal(SysSubProcessOption* option) {
   sys_return_val_if_fail(option != NULL, NULL);
 
-  SysSubProcessWin32 *pwin32 = sys_new0_N(SysSubProcessWin32, 1);
+  SysSubProcessWin32 *pwin32 = sys_new0(SysSubProcessWin32, 1);
 
   HANDLE std0read = NULL, std0write = NULL;
   HANDLE std1read = NULL, std1write = NULL;
@@ -234,7 +234,7 @@ void sys_real_subprocess_terminate(SysSubProcess *sub) {
   CloseHandle_N(pwin32->s_pi.hProcess);
   CloseHandle_N(pwin32->s_pi.hThread);
 
-  sys_free_N(pwin32);
+  sys_free(pwin32);
 }
 
 SysInt sys_real_pclose(FILE *fp) {

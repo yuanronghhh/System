@@ -38,7 +38,7 @@ SysPointer sys_realloc(void *mem, SysSize size) {
   }
 
   if (mem) {
-    sys_free_N(mem);
+    sys_free(mem);
   }
 
   sys_assert(nmem == NULL);
@@ -115,7 +115,7 @@ void _sys_slice_free_chain(SysSize typesize, SysPointer ptr, SysSize offset) {
   SysUInt8 *node = ptr;
   while (node) {
     SysUInt8 *next = *(SysPointer *)(node + offset);
-    sys_free_N(node);
+    sys_free(node);
     node = next;
   }
 }

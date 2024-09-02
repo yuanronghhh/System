@@ -3,7 +3,6 @@
 
 /**
  * sys_getcwd: get current workspace.
- * @void:
  *
  * Returns: new allocted string.
  */
@@ -15,7 +14,7 @@ SysChar *sys_getcwd(void) {
  * sys_path_escape: replace all windows '\\' to '/'
  * @buf:
  *
- * Returns: void
+ * Returns: bool
  */
 SysBool sys_path_escape(SysChar *buf) {
   // FIXME: better escape function
@@ -61,7 +60,7 @@ SysChar *sys_path_name(const SysChar *path) {
  * sys_path_basename: get base name for path
  * @path: only path with '/' works
  *
- * Returns: void
+ * Returns: const char path
  */
 const SysChar *sys_path_basename(const SysChar *path) {
   sys_return_val_if_fail(path != NULL, NULL);

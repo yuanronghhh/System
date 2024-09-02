@@ -54,7 +54,7 @@ SysChar **sys_strsplit(SysChar * s, const SysChar *delim, SysInt * count) {
   sp_size = sizeof(SysChar *) * (delim_count + 1);
 
   /* array ptr and str with one malloc  */
-  sp = sys_malloc_N(sp_size + s_len + 1);
+  sp = sys_malloc(sp_size + s_len + 1);
   if(!sp) { return NULL; }
   ptrs = (SysChar **)sp;
 
@@ -86,7 +86,7 @@ SysChar **sys_strsplit(SysChar * s, const SysChar *delim, SysInt * count) {
  *    sys_strmcat(&s, &mlen, &len, "var");
  *    sys_strmcat(&s, &mlen, &len, "=");
  *    sys_strmcat(&s, &mlen, &len, "foo");
- *    sys_free_N(s);
+ *    sys_free(s);
  *
  * @v1: *v1 is the string to store.
  * @v1_max: *v1_max is max length of v1 string, may be realloc when not enough.
@@ -113,7 +113,7 @@ void sys_strmcat(SysChar** v1, SysSize* v1_max, SysSize* len, const SysChar* v2)
   if (nlen >= *v1_max) {
     nearup = sys_nearest_pow((SysUInt)(nlen + 1));
 
-    nstr = sys_realloc_N(*v1, nearup);
+    nstr = sys_realloc(*v1, nearup);
     if (nstr == NULL) {
       sys_abort_N("%s", "renew failed");
     }
@@ -196,7 +196,7 @@ SysChar* sys_strdup(const SysChar *s) {
   sys_return_val_if_fail(s != NULL, NULL);
 
   SysSize len = strlen(s);
-  SysChar *n = sys_new_N(SysChar, len + 1);
+  SysChar *n = sys_new(SysChar, len + 1);
   memcpy(n, s, len);
   n[len] = '\0';
 
@@ -211,7 +211,7 @@ SysChar* sys_strdup(const SysChar *s) {
 SysChar* sys_strndup(const SysChar *s, SysSize len) {
   sys_return_val_if_fail(s != NULL, NULL);
 
-  SysChar *n = sys_new_N(SysChar, len + 1);
+  SysChar *n = sys_new(SysChar, len + 1);
   memcpy(n, s, len);
   n[len] = '\0';
 
@@ -360,7 +360,7 @@ SysChar* sys_strjoin_array(const SysChar *delim, const SysChar **arr, SysSize *d
     len += dlen + strlen((*na));
   }
 
-  nstr = sys_new0_N(SysChar, len + 1);
+  nstr = sys_new0(SysChar, len + 1);
   na = arr;
 
   ptr = sys_strpcpy(nstr, (*na));
@@ -390,7 +390,7 @@ SysChar *sys_strjoinv(const SysChar *delim, va_list args) {
     s = va_arg(nargs, SysChar *);
   }
 
-  nstr = sys_new0_N(SysChar, len + 1);
+  nstr = sys_new0(SysChar, len + 1);
 
   s = va_arg(args, SysChar *);
   ptr = sys_strpcpy(nstr, s);
@@ -575,7 +575,7 @@ SysChar* sys_str_newsize(SysSize size) {
     size = SYS_BYTE_INIT_SIZE;
   }
 
-  nstr = sys_new0_N(SysChar, size + 1);
+  nstr = sys_new0(SysChar, size + 1);
 
   return nstr;
 }

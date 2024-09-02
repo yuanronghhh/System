@@ -30,17 +30,17 @@ struct _TIOVar {
 };
 
 static void tio_var_free(TIOVar* var) {
-  sys_free_N(var->varname);
+  sys_free(var->varname);
 
   if (var->content != NULL) {
-    sys_free_N(var->content);
+    sys_free(var->content);
   }
 
-  sys_free_N(var);
+  sys_free(var);
 }
 
 SysTextIO *sys_tio_new(const SysChar *filename) {
-  SysTextIO *tio = sys_new_N(SysTextIO, 1);
+  SysTextIO *tio = sys_new(SysTextIO, 1);
 
   tio->fp = sys_fopen(filename, "w+");
   if (tio->fp == NULL) {
@@ -58,9 +58,9 @@ SysTextIO *sys_tio_new(const SysChar *filename) {
 }
 
 void sys_tio_free(SysTextIO *tio) {
-  sys_free_N(tio->filename);
+  sys_free(tio->filename);
   sys_fclose(tio->fp);
-  sys_free_N(tio);
+  sys_free(tio);
 }
 
 SysChar *sys_tio_filename(SysTextIO *tio) {
@@ -145,7 +145,7 @@ SysInt sys_tio_match_vars(SysTextIO *tio,
         continue;
       }
 
-      nvar = sys_new0_N(TIOVar, 1);
+      nvar = sys_new0(TIOVar, 1);
       nvar->start = s;
       nvar->end = se;
 
@@ -210,7 +210,7 @@ SysBool sys_tio_write_template(SysTextIO *tio, SysChar *tpl, SysHashTable *map) 
     } else {
 
       if (vars->len > 0) {
-        nline = sys_malloc0_N(total + 1);
+        nline = sys_malloc0(total + 1);
 
         ptr = nline;
         start = line;
@@ -228,7 +228,7 @@ SysBool sys_tio_write_template(SysTextIO *tio, SysChar *tpl, SysHashTable *map) 
         }
 
         sys_tio_write(tio, nline);
-        sys_free_N(nline);
+        sys_free(nline);
       } else {
         sys_tio_write(tio, line);
       }
@@ -236,7 +236,7 @@ SysBool sys_tio_write_template(SysTextIO *tio, SysChar *tpl, SysHashTable *map) 
       sys_ptr_array_unref(vars);
     }
 
-    sys_free_N(line);
+    sys_free(line);
   }
 
   return 0;

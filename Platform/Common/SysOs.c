@@ -189,7 +189,7 @@ static void msort_r(void *b, size_t n, size_t s, SysCompareDataFunc cmp, void *a
   else
   {
     /* It's large, so malloc it.  */
-    tmp = sys_malloc_N(size);
+    tmp = sys_malloc(size);
     p.t = tmp;
   }
 

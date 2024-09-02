@@ -22,21 +22,23 @@ typedef struct _SysTypeInterface SysTypeInterface;
 typedef struct _IFaceEntry IFaceEntry;
 typedef struct _SysTypeClass SysTypeClass;
 
+typedef struct _SysParamContext SysParamContext;
 typedef struct _SysParam SysParam;
 typedef struct _SysParamClass SysParamClass;
 typedef struct _SysObject SysObject;
 typedef struct _SysObjectClass SysObjectClass;
 
-typedef struct _SgcBlock SgcBlock;
+typedef struct _SysBlock SysBlock;
+typedef struct _SysBlockClass SysBlockClass;
 
 typedef SysType (*SysTypeFunc) (void);
 typedef void (*SysTypeInitFunc) (void *self);
 typedef void (*SysTypeFinalizeFunc) (void *self);
 typedef void (*SysInstanceInitFunc) (void* self);
 typedef void (*SysInterfaceInitFunc) (void *iface);
-typedef SgcBlock* (*SysCloneFunc) (SgcBlock *o);
-typedef void (*SysRefHook) (SgcBlock *o, const SysChar *name, SysInt ref_count);
-typedef void (*SgcBlockFunc) (SgcBlock *o, ...);
+typedef SysBlock* (*SysCloneFunc) (SysBlock *o);
+typedef void (*SysRefHook) (SysBlock *o, const SysChar *name, SysInt ref_count);
+typedef void (*SysBlockFunc) (SysBlock *o, ...);
 
 SYS_END_DECLS
 

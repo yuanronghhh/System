@@ -420,7 +420,7 @@ static void sys_array_maybe_expand(SysRealArray *array,
         want_alloc = sys_nearest_pow(want_alloc);
         want_alloc = max(want_alloc, MIN_ARRAY_SIZE);
 
-        array->data = sys_realloc_N(array->data, want_alloc);
+        array->data = sys_realloc(array->data, want_alloc);
         array->alloc = want_alloc;
     }
 }
@@ -642,7 +642,7 @@ static void sys_ptr_array_maybe_expand(SysRealPtrArray *array,
     {
         array->alloc = sys_nearest_pow(array->len + len);
         array->alloc = max(array->alloc, MIN_ARRAY_SIZE);
-        array->pdata = sys_realloc_N(array->pdata, sizeof(SysPointer) * array->alloc);
+        array->pdata = sys_realloc(array->pdata, sizeof(SysPointer) * array->alloc);
     }
 }
 

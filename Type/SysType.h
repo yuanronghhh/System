@@ -19,10 +19,11 @@ SYS_BEGIN_DECLS
 #define SYS_TYPE_STRING                           SYS_TYPE_MAKE_FUNDAMENTAL(16)
 #define SYS_TYPE_POINTER                          SYS_TYPE_MAKE_FUNDAMENTAL(17)
 #define SYS_TYPE_OBJECT                           SYS_TYPE_MAKE_FUNDAMENTAL(20)
+#define SYS_TYPE_BLOCK                            SYS_TYPE_MAKE_FUNDAMENTAL(22)
 
-#define sys_type_from_instance(o) sys_type_from_sgc_block(o)
-#define sys_type_from_class(o) sys_type_from_sgc_block(o)
-#define sys_instance_get_class(o, TypeName) ((TypeName *)((SysTypeInstance *)o)->type_class)
+#define sys_type_from_instance(o) sys_type_from_sys_block(o)
+#define sys_type_from_class(o) sys_type_from_sys_block(o)
+#define sys_instance_get_class(o, TypeName) SYS_BLOCK_GET_CLASS(o, TypeName)
 #define sys_class_get_parent_class(o, TypeName) (TypeName *)_sys_type_parent_class(sys_type_from_class(o))
 
 #define SYS_TYPE_GET_INTERFACE(o, iface_type) _sys_type_get_interface((((SysTypeInstance *)o)->parent.type), iface_type)
@@ -136,7 +137,7 @@ struct _SysTypeInfo {
 };
 
 struct _SysTypeClass {
-  SgcBlock parent;
+  SysBlockClass parent;
 
   /* limit 255 interface count for class */
   SysUInt8 n_ifaces;
@@ -144,8 +145,7 @@ struct _SysTypeClass {
 };
 
 struct _SysTypeInstance {
-  SgcBlock parent;
-  SysTypeClass *type_class;
+  SysBlock parent;
 };
 
 struct _SysTypeInterface {

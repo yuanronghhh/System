@@ -25,7 +25,7 @@ SysBool sys_real_path_exists(const SysChar *path) {
   DWORD attr;
 
   attr = GetFileAttributesW(wname);
-  sys_free_N(wname);
+  sys_free(wname);
 
   if (attr == INVALID_FILE_ATTRIBUTES) {
     return false;

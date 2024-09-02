@@ -70,7 +70,7 @@ SysBool sys_real_console_is_utf8(void) {
 /**
  * sys_real_get_env: get system enviroment
  * @var: name
- * need call sys_free_N after used
+ * need call sys_free after used
  *
  * Returns: new allocted string.
  */
@@ -84,7 +84,7 @@ const SysChar *sys_real_get_env(const SysChar *var) {
   wname = sys_mbyte_to_wchar(var, NULL);
   len = GetEnvironmentVariableW(wname, tmp, 2);
   if (len == 0) {
-    sys_free_N(wname);
+    sys_free(wname);
     return NULL;
   }
 
@@ -92,18 +92,18 @@ const SysChar *sys_real_get_env(const SysChar *var) {
     len = 2;
   }
 
-  wvalue = sys_new_N(wchar_t, len);
+  wvalue = sys_new(wchar_t, len);
 
   if ((SysInt)GetEnvironmentVariableW(wname, wvalue, len) != (len - 1)) {
-    sys_free_N(wname);
-    sys_free_N(wvalue);
+    sys_free(wname);
+    sys_free(wvalue);
     return NULL;
   }
 
   value = sys_wchar_to_mbyte(wvalue, NULL);
 
-  sys_free_N(wname);
-  sys_free_N(wvalue);
+  sys_free(wname);
+  sys_free(wvalue);
 
   return value;
 }
@@ -119,7 +119,7 @@ SysBool sys_real_set_env(const SysChar *var, const SysChar *value) {
 
   wname = sys_mbyte_to_wchar(var, NULL);
   wvalue = sys_mbyte_to_wchar(value, NULL);
-  nvar = sys_new0_N(SysChar, vlen + 2);
+  nvar = sys_new0(SysChar, vlen + 2);
   sys_memcpy(nvar, vlen + 2, var, vlen);
   sys_memcpy(nvar + vlen, vlen + 2, "=", 1);
 
@@ -128,11 +128,11 @@ SysBool sys_real_set_env(const SysChar *var, const SysChar *value) {
 
   ret = (SetEnvironmentVariableW(wname, wvalue) != 0);
 
-  sys_free_N(nvar);
-  sys_free_N(wvar);
+  sys_free(nvar);
+  sys_free(wvar);
 
-  sys_free_N((void *)wname);
-  sys_free_N(wvalue);
+  sys_free((void *)wname);
+  sys_free(wvalue);
 
   return ret;
 }
@@ -158,7 +158,7 @@ SysPointer sys_real_dlopen(const SysChar *filename) {
 
   wname = sys_mbyte_to_wchar(filename, NULL);
   handle = LoadLibraryW(wname);
-  sys_free_N(wname);
+  sys_free(wname);
 
   if (!handle) {
     sys_warning_N("dlopen failed: %s.", filename);
@@ -223,10 +223,10 @@ SysChar **sys_real_backtrace_string(SysInt *size) {
   }
   rsize = frame_size - 3;
 
-  s = sys_new_N(SysChar *, rsize);
+  s = sys_new(SysChar *, rsize);
   p = s;
 
-  symbol = (IMAGEHLP_SYMBOL64 *)sys_malloc_N(sizeof(IMAGEHLP_SYMBOL64) + 256 * sizeof(SysChar));
+  symbol = (IMAGEHLP_SYMBOL64 *)sys_malloc(sizeof(IMAGEHLP_SYMBOL64) + 256 * sizeof(SysChar));
   symbol->MaxNameLength = 255;
   symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
 
@@ -238,7 +238,7 @@ SysChar **sys_real_backtrace_string(SysInt *size) {
 
     *p++ = sys_strdup_printf("%s:%d:%s - %p\n",  lineInfo.FileName, lineInfo.LineNumber, symbol->Name, symbol->Address);
   }
-  sys_free_N(symbol);
+  sys_free(symbol);
 
   *size = rsize;
   return s;

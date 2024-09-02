@@ -32,12 +32,12 @@ SysInt sys_vasprintf (SysChar** str, const SysChar* format, va_list va) {
   count = vsnprintf(NULL, 0, format, va);
   if (count >= 0) {
 
-    buff = sys_malloc_N(count + 1);
+    buff = sys_malloc(count + 1);
     if (buff) {
 
       count = vsnprintf(buff, count + 1, format, vap);
       if (count < 0) {
-        sys_free_N(buff);
+        sys_free(buff);
 
       } else {
         *str = buff;

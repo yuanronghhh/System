@@ -24,21 +24,16 @@ SYS_BEGIN_DECLS
 #define SYS_ALIGNOF(type) (offsetof (struct { SysChar a; type b; }, b)) 
 #endif
 
-#define sys_realloc_N(ptr, size) sys_realloc(ptr, size)
-#define sys_malloc_N(size) sys_malloc(size)
-#define sys_malloc0_N(size) sys_malloc0(size)
-#define sys_free_N(ptr) sys_free(ptr);
-#define sys_memdup_N(mem, byte_size) sys_memdup(mem, byte_size)
 #define sys_alloca(size)  alloca (size)
 
-#define sys_new_N(struct_type, n_structs) (struct_type *)sys_malloc_N((n_structs) * sizeof(struct_type))
-#define sys_new0_N(struct_type, n_structs) (struct_type *)sys_malloc0_N((n_structs) * sizeof(struct_type))
-#define sys_renew_N(struct_type, ptr, n_structs) (struct_type *)sys_realloc_N(ptr, (n_structs) * sizeof(struct_type))
+#define sys_new(struct_type, n_structs) (struct_type *)sys_malloc((n_structs) * sizeof(struct_type))
+#define sys_new0(struct_type, n_structs) (struct_type *)sys_malloc0((n_structs) * sizeof(struct_type))
+#define sys_renew(struct_type, ptr, n_structs) (struct_type *)sys_realloc(ptr, (n_structs) * sizeof(struct_type))
 
-#define sys_slice_new(type) sys_new_N(type, 1)
-#define sys_slice_new0(type) sys_new0_N(type, 1)
+#define sys_slice_new(type) sys_new(type, 1)
+#define sys_slice_new0(type) sys_new0(type, 1)
 
-#define sys_slice_free1(type, ptr) sys_free_N(ptr)
+#define sys_slice_free1(type, ptr) sys_free(ptr)
 #define sys_slice_free(type, ptr) sys_slice_free1(type, ptr)
 #define sys_slice_free_chain(type, ptr, next) _sys_slice_free_chain(sizeof(type), ptr, offsetof(type, next))
 

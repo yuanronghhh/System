@@ -35,7 +35,7 @@ const SysChar *sys_exe_path(void) {
 
    if (nlen <= 0) {
      perror("get execute path failed");
-     sys_free_N(buf);
+     sys_free(buf);
      return NULL;
    }
    buf[nlen] = '\0';

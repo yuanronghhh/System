@@ -62,7 +62,7 @@ void sys_real_leaks_report(void) {
 
     VLDSetReportOptions(VLD_OPT_REPORT_TO_FILE, wname);
     VLDReportLeaks();
-    sys_free_N(wname);
+    sys_free(wname);
   } else {
 
     VLDReportLeaks();

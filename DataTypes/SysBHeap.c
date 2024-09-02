@@ -15,7 +15,7 @@ void sys_bheap_free(SysBHeap *hp, SysBool free_segment) {
 
   sys_bheap_destroy(hp);
 
-  sys_free_N(hp);
+  sys_free(hp);
 }
 
 void sys_bheap_init(SysBHeap *hp, SysBHeapFunc func, SysDestroyFunc node_free) {
@@ -24,7 +24,7 @@ void sys_bheap_init(SysBHeap *hp, SysBHeapFunc func, SysDestroyFunc node_free) {
 }
 
 SysBHeap *sys_bheap_new(SysBHeapFunc func, SysDestroyFunc node_free) {
-  SysBHeap *hp = sys_new0_N(SysBHeap, 1);
+  SysBHeap *hp = sys_new0(SysBHeap, 1);
 
   sys_bheap_init(hp, func, node_free);
 
@@ -44,7 +44,7 @@ SysBHeapIter *sys_bheap_iter_new(SysBHeap *hp) {
   sys_return_val_if_fail(hp->array.len > 0, NULL);
   SysHArray* array = &hp->array;
 
-  SysBHeapIter *iter = sys_malloc_N(sizeof(SysBHeapIter) + sizeof(SysPointer) * array->len - 1);
+  SysBHeapIter *iter = sys_malloc(sizeof(SysBHeapIter) + sizeof(SysPointer) * array->len - 1);
   *(&iter->pdata[0]) = ((SysUInt8*)iter) + offsetof(SysBHeapIter, pdata);
   iter->len = array->len;
   iter->position = 0;
@@ -86,7 +86,7 @@ void sys_bheap_iter_free(SysBHeapIter* iter) {
   sys_return_if_fail(iter->len > 0);
   sys_return_if_fail(iter->position < iter->len);
 
-  sys_free_N(iter);
+  sys_free(iter);
 }
 
 static void sys_bheap_sinkdown(SysBHeap *hp, SysInt n) {

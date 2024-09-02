@@ -18,8 +18,16 @@ struct _SysParam {
   SysObject parent;
 
   /* < private > */
-  SysType type;
-  const SysChar *full_type;
+  SysType object_type;
+  const SysChar *field_type_name;
+  SysType field_type;
+  const SysChar *field_name;
+  SysInt offset;
+};
+
+struct _SysParamContext {
+  SysType object_type;
+  const SysChar *field_type_name;
   SysType field_type;
   const SysChar *field_name;
   SysInt offset;
@@ -28,12 +36,7 @@ struct _SysParam {
 SYS_API SysType sys_param_get_type(void);
 SYS_API SysParam *sys_param_new(void);
 
-SYS_API SysParam *sys_param_new_I(
-    SysType type,
-    const SysChar *full_type,
-    SysType field_type,
-    const SysChar *field_name,
-    SysInt offset);
+SYS_API SysParam *sys_param_new_I(SysParamContext *info);
 
 SYS_API const SysChar *sys_param_get_field_name(SysParam *self);
 SYS_API SysInt sys_param_get_offset(SysParam *self);

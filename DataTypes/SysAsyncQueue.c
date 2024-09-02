@@ -54,7 +54,7 @@ sys_async_queue_new_full (SysDestroyFunc item_free_func)
 {
   SysAsyncQueue *queue;
 
-  queue = sys_new_N (SysAsyncQueue, 1);
+  queue = sys_new (SysAsyncQueue, 1);
   sys_async_queue_init_full(queue, item_free_func);
 
   return queue;

@@ -3,8 +3,8 @@
 
 #include <System/Platform/Common/SysMem.h>
 
-#define malloc(size) sys_malloc0_N(size)
-#define free(ptr) sys_free_N(ptr)
-#define realloc(ptr, size) sys_realloc_N(ptr, size)
+#define malloc(size) sys_malloc0(size)
+#define free(ptr) sys_free(ptr)
+#define realloc(ptr, size) sys_realloc(ptr, size)
 
 #endif

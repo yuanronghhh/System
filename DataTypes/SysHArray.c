@@ -87,7 +87,7 @@ void sys_harray_free(SysHArray* self, SysBool free_segment) {
     self->pdata = NULL;
     self->alloc = 0;
   }
-  sys_free_N(self);
+  sys_free(self);
 }
 
 void sys_harray_unref(SysHArray* self) {
@@ -124,7 +124,7 @@ static void harray_maybe_expand(SysHArray *self, SysUInt len) {
   if ((self->len + len) > self->alloc) {
     self->alloc = sys_nearest_pow(self->len + len);
     self->alloc = max(self->alloc, MIN_ARRAY_SIZE);
-    self->pdata = sys_realloc_N(self->pdata, sizeof(SysPointer) * self->alloc);
+    self->pdata = sys_realloc(self->pdata, sizeof(SysPointer) * self->alloc);
   }
 }
 

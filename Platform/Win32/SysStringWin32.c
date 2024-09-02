@@ -56,7 +56,7 @@ SysInt sys_vasprintf(SysChar **ptr, const SysChar *format, va_list va) {
   SysInt len;
 
   len = _vscprintf_p(format, va) + 1;
-  *ptr = sys_new_N(SysChar, len);
+  *ptr = sys_new(SysChar, len);
   if (!*ptr) {
     return -1;
   }

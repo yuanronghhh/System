@@ -7,7 +7,7 @@ SYS_BEGIN_DECLS
 
 #define SYS_BYTE_MAX INT_MAX
 #define SYS_LSTR(str) (SysChar *)(str), (sizeof(str) - 1)
-#define sys_bin_new(o, szof) sys_malloc0_N((szof) * 8 + 1)
+#define sys_bin_new(o, szof) sys_malloc0((szof) * 8 + 1)
 #define sys_bin_tostr(buffer, o, szof) sys_bin_str_full(buffer, (szof) * 8 + 1, szof, &o)
 #define sys_strneq(s1, s2, n) (strncmp(s1, s2, (n)) == 0)
 #define sys_str_startswith(s1, s2) (strncmp(s1, s2, sizeof(s2)-1) == 0)

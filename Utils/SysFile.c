@@ -53,7 +53,7 @@ SysChar* sys_freadline(SysChar** dst, SysSize* len, FILE* fp) {
   SysChar *ts, *ns, *se, *ep;
 
   total = LINE_BLOCK;
-  ns = sys_malloc_N(total);
+  ns = sys_malloc(total);
   nlen = 0;
   ep = ns + total;
   se = ns;
@@ -68,12 +68,12 @@ SysChar* sys_freadline(SysChar** dst, SysSize* len, FILE* fp) {
       nlen += (ep - se - 1);
 
       total += ep - ns;
-      ts = sys_malloc_N(total);
+      ts = sys_malloc(total);
       ts[total - 2] = '\0';
       ts[total - 1] = '\0';
 
       sys_memcpy(ts, total, ns, nlen + 1);
-      sys_free_N(ns);
+      sys_free(ns);
 
       ns = ts;
       ep = ns + total;
@@ -94,7 +94,7 @@ SysChar* sys_freadline(SysChar** dst, SysSize* len, FILE* fp) {
     *len = nlen;
     return ns;
   } else {
-    sys_free_N(ns);
+    sys_free(ns);
   }
 
   return NULL;
@@ -168,7 +168,7 @@ SysBool sys_file_get_contents (const SysChar *filename,
     goto fail;
   }
 
-  content = sys_malloc_N(st.st_size + 1);
+  content = sys_malloc(st.st_size + 1);
   offset = 0;
   do {
     nread = sys_read(fd, content + offset, st.st_size - offset);
@@ -194,7 +194,7 @@ SysBool sys_file_get_contents (const SysChar *filename,
   return true;
 fail:
   if(content != NULL) {
-    sys_free_N(content);
+    sys_free(content);
   }
 
   sys_close(fd);
