@@ -85,6 +85,7 @@ SysParam *sys_param_new_I(SysParamContext *info) {
 
 static void sys_param_dispose(SysObject* o) {
 
+  SYS_OBJECT_CLASS(sys_param_parent_class)->dispose(o);
 }
 
 static void sys_param_class_init(SysParamClass* cls) {
