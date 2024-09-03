@@ -7,7 +7,6 @@
 #include <System/Utils/SysString.h>
 #include <System/Platform/Common/SysThread.h>
 
-
 #define NODE_TYPE(node) (node->supers[0])
 #define NODE_PARENT(node) (node->supers[1])
 #define NODE_IS_ANCESTOR(ancestor, node)                                                    \
@@ -533,19 +532,23 @@ SysTypeNode *sys_type_node_ref(SysTypeNode *node) {
   return node;
 }
 
-SysTypeClass *sys_type_class_ref(SysType type) {
-  sys_return_val_if_fail(type != 0, NULL);
-  SysTypeNode *node;
+static SysTypeClass *sys_type_node_class_ref(SysTypeNode *node) {
+  sys_return_val_if_fail(node != NULL, NULL);
 
-  node = sys_type_node(type);
   node = sys_type_node_ref(node);
 
   return node->data.instance.class_ptr;
 }
 
-static SysBool instance_create(
+SysTypeClass *sys_type_class_ref(SysType type) {
+  sys_return_val_if_fail(type != 0, NULL);
+  SysTypeNode *node = sys_type_node(type);
+
+  return sys_type_node_class_ref(node);
+}
+
+SysBool sys_type_instance_create(
     SysTypeInstance *instance,
-    SysTypeClass *cls,
     SysTypeNode *node) {
   sys_return_val_if_fail(instance != NULL, false);
 
@@ -573,17 +576,6 @@ static SysBool instance_destroy(SysTypeInstance *instance, SysTypeClass *cls) {
   return true;
 }
 
-SysBool sys_type_instance_create(SysTypeInstance *instance, SysType type) {
-  sys_return_val_if_fail(instance != NULL, false);
-  SysTypeNode *node;
-  SysTypeClass *cls;
-
-  cls = sys_type_class_ref(type);
-  node = sys_type_node(type);
-
-  return instance_create(instance, cls, node);
-}
-
 SysBool sys_type_instance_get_size(SysType type, SysSize *size, SysSize *priv_size) {
   sys_return_val_if_fail(type != 0, 0);
   SysTypeNode *node = sys_type_node(type);
@@ -594,16 +586,14 @@ SysBool sys_type_instance_get_size(SysType type, SysSize *size, SysSize *priv_si
   return true;
 }
 
-SysTypeInstance *sys_type_instance_new(SysType type, SysSize count) {
-  sys_return_val_if_fail(type != 0, NULL);
+SysTypeInstance *sys_type_instance_new(SysTypeNode *node, SysSize count) {
+  sys_return_val_if_fail(node != NULL, NULL);
 
-  SysTypeNode *node;
   SysTypeInstance *instance;
   SysBlock *mp;
 
+  SysType type = NODE_TYPE(node);
   SysInt priv_psize = 0;
-  node = sys_type_node(type);
-
   priv_psize = node->data.instance.private_size;
 
   mp = sys_block_new(type, (priv_psize + node->data.instance.instance_size) * count);
@@ -687,7 +677,6 @@ void sys_type_setup(void) {
       (SysDestroyFunc)sys_type_node_unref);
 
   _sys_fundanmental_node_init_type();
-  _sys_block_init_type();
   _sys_char_node_init_type();
   _sys_double_node_init_type();
   _sys_int_node_init_type();
@@ -713,6 +702,12 @@ SysBool sys_type_node_check(SysTypeNode *node) {
   }
 
   return true;
+}
+
+SysType sys_node_get_type(SysTypeNode *node) {
+  sys_return_val_if_fail(node != NULL, 0);
+
+  return NODE_TYPE(node);
 }
 
 SysTypeNode* sys_type_node(SysType utype) {

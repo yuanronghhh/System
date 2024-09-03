@@ -7,21 +7,17 @@ SYS_BEGIN_DECLS
 
 #define SYS_BLOCK(o) ((SysBlock *)_sys_block_cast_check((SysBlock *)o))
 #define SYS_BLOCK_CLASS(cls) ((SysBlockClass *)sys_class_cast_check(cls, SYS_TYPE_BLOCK))
-#define SYS_BLOCK_GET_CLASS(o, TypeName) ((TypeName *)((SysBlock *)o)->type_class)
+#define SYS_BLOCK_GET_CLASS(o, TypeName) ((TypeName *)((SysBlock *)o)->class)
 #define sys_type_from_sys_block(o) ((SYS_BLOCK(o))->type)
 
 struct _SysBlock {
   SysType type;
-  SysTypeClass *type_class;
   /* <private> */
   SysRef ref_count;
 };
 
 struct _SysBlockClass {
   SysBlock parent;
-
-  SysPointer (*ref) (SysBlock *o);
-  void (*unref) (SysBlock *o);
 };
 
 #define sys_block_ref_check(o) sys_ref_count_check((SysBlock *)(o), MAX_REF_NODE)
@@ -38,14 +34,10 @@ SYS_API void sys_block_set_ref_hook(SysRefHook hook);
 SYS_API void sys_block_set_new_hook(SysRefHook hook);
 
 SYS_API SysPointer _sys_block_cast_check(SysBlock *self);
-SYS_API SysBool sys_block_create(SysBlock *o, SysType type);
 SYS_API void _sys_block_destroy(SysBlock* self);
 
 SYS_API SysPointer sys_block_new(SysType tp, SysSize size);
 SYS_API void sys_block_free(SysBlock* self);
-
-SYS_API void sys_block_class_init(SysBlockClass *cls);
-SYS_API void _sys_block_init_type(void);
 
 SYS_END_DECLS
 

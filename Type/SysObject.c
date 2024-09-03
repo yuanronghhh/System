@@ -18,7 +18,7 @@ SysPointer sys_object_get_private(SysObject* o) {
   return (((SysUInt8*)o) + SysObject_private_offset);
 }
 static void sys_object_class_intern_init(SysPointer cls) {
-  sys_object_parent_class = sys_type_class_ref(SYS_TYPE_BLOCK);
+  sys_object_parent_class = NULL;
   sys_type_class_adjust_private_offset(cls, &SysObject_private_offset);
   sys_object_class_init(cls);
 }
@@ -37,8 +37,7 @@ void _sys_object_init_type(void) {
     (SysInstanceInitFunc)sys_object_init
   };
 
-  SysTypeNode *pnode = sys_type_node(SYS_TYPE_BLOCK);
-  sys_type_make_fundamental_node(pnode, SYS_TYPE_OBJECT, &type_info);
+  sys_type_make_fundamental_node(NULL, SYS_TYPE_OBJECT, &type_info);
 }
 
 static void sys_object_base_finalize(SysObject *self) {
@@ -50,21 +49,15 @@ static void object_destroy(SysObject* self) {
   SysObjectClass* cls;
 
   cls = SYS_OBJECT_GET_CLASS(self);
-  while((SysPointer)cls != sys_object_parent_class) {
 
-    if(cls->dispose) {
+  if(cls->dispose) {
 
-      cls->dispose(self);
-    }
-
-    cls = sys_class_get_parent_class(cls, SysObjectClass);
+    cls->dispose(self);
   }
 }
 
 static void sys_object_dispose_i(SysObject *self) {
   sys_return_if_fail(self != NULL);
-
-  object_destroy(self);
 }
 
 SysObject* _sys_object_new_from_instance(SysObject *o) {
@@ -98,9 +91,10 @@ SysObject* _sys_object_dclone(SysObject *o) {
 }
 
 SysPointer sys_object_new(SysType type, const SysChar * first, ...) {
-  SysTypeInstance *o = sys_type_instance_new(type, 1);
+  SysTypeNode *node = sys_type_node(type);
+  SysTypeInstance *o = sys_type_instance_new(node, 1);
 
-  if (!sys_type_instance_create(o, type)) {
+  if (!sys_type_instance_create(o, node)) {
 
     sys_type_instance_free(o);
   }

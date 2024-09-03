@@ -1,7 +1,7 @@
 #ifndef __SYS_TYPE_H__
 #define __SYS_TYPE_H__
 
-#include <System/Type/SysGc.h>
+#include <System/Type/SysBlock.h>
 
 SYS_BEGIN_DECLS
 
@@ -23,7 +23,7 @@ SYS_BEGIN_DECLS
 
 #define sys_type_from_instance(o) sys_type_from_sys_block(o)
 #define sys_type_from_class(o) sys_type_from_sys_block(o)
-#define sys_instance_get_class(o, TypeName) SYS_BLOCK_GET_CLASS(o, TypeName)
+#define sys_instance_get_class(o, TypeName) ((TypeName *)((SysTypeInstance *)o)->type_class)
 #define sys_class_get_parent_class(o, TypeName) (TypeName *)_sys_type_parent_class(sys_type_from_class(o))
 
 #define SYS_TYPE_GET_INTERFACE(o, iface_type) _sys_type_get_interface((((SysTypeInstance *)o)->parent.type), iface_type)
@@ -146,6 +146,7 @@ struct _SysTypeClass {
 
 struct _SysTypeInstance {
   SysBlock parent;
+  SysTypeClass *type_class;
 };
 
 struct _SysTypeInterface {
@@ -161,18 +162,18 @@ SYS_API const SysChar* _sys_object_get_type_name(SysObject* self);
 SYS_API SysTypeInterface* _sys_type_get_interface(SysType type, SysType iface_type);
 SYS_API void sys_type_imp_interface(SysType instance_type, SysType iface_type, const SysInterfaceInfo* info);
 
+SYS_API SysType sys_node_get_type(SysTypeNode *node);
 SYS_API SysTypeNode* sys_type_node(SysType type);
 SYS_API const SysChar *sys_type_node_name(SysTypeNode *node);
 SYS_API SysBool sys_type_node_check(SysTypeNode *node);
 SYS_API SysBool sys_type_node_is(SysTypeNode *node, SYS_NODE_ENUM tp);
-
-SYS_API SysType sys_type_get_by_name(const SysChar *name);
-SYS_API SysTypeClass *_sys_type_parent_class(SysType type);
 SYS_API void sys_type_node_unref(SysTypeNode *node);
 SYS_API void sys_type_node_free(SysTypeNode *node);
+SYS_API SysType sys_type_get_by_name(const SysChar *name);
+SYS_API SysTypeClass *_sys_type_parent_class(SysType type);
 
-SYS_API SysBool sys_type_instance_create(SysTypeInstance *instance, SysType type);
-SYS_API SysTypeInstance *sys_type_instance_new(SysType type, SysSize count);
+SYS_API SysBool sys_type_instance_create(SysTypeInstance *instance, SysTypeNode *node);
+SYS_API SysTypeInstance *sys_type_instance_new(SysTypeNode *node, SysSize count);
 SYS_API SysBool sys_type_instance_get_size(SysType type,
     SysSize *size, 
     SysSize *priv_size);

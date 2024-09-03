@@ -33,7 +33,7 @@
 #include <System/Type/SysType.h>
 #include <System/Type/SysObject.h>
 #include <System/Type/SysParam.h>
-#include <System/Type/SysGc.h>
+#include <System/Type/SysBlock.h>
 #include <System/Type/SysTypeCommon.h>
 
 #include <System/Utils/SysError.h>

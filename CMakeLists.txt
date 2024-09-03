@@ -82,8 +82,8 @@ set(SRC
   ./Type/SysTypeCommon.c
   ./Type/SysType.h
   ./Type/SysType.c
-  ./Type/SysGc.h
-  ./Type/SysGc.c
+  ./Type/SysBlock.h
+  ./Type/SysBlock.c
   ./Type/SysObject.h
   ./Type/SysObject.c
   ./Type/SysParam.h
