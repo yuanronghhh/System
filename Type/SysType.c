@@ -554,6 +554,12 @@ SysBool sys_type_instance_create(
 
   SysTypeNode *pnode;
 
+  SysTypeClass *cls = sys_type_node_class_ref(node);
+  if(cls == NULL) { return false; }
+  instance->type_class = cls;
+
+  sys_block_create((SysBlock *)instance, NODE_TYPE(node));
+
   for (SysInt i = node->n_supers; i > 0; i--) {
     SysType p = node->supers[i];
     pnode = sys_type_node(p);
@@ -719,7 +725,11 @@ SysTypeNode* sys_type_node(SysType utype) {
   else
     node = static_fundamental_type_nodes[utype >> SYS_TYPE_FUNDAMENTAL_SHIFT];
 
-  sys_assert(node != NULL);
+  if(!sys_ref_count_check(node, MAX_REF_NODE)) {
+
+    sys_error_N("type cast failed: %p", utype);
+  }
+
   return node;
 }
 

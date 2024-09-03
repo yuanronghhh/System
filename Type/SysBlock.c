@@ -32,7 +32,7 @@ SysPointer _sys_block_cast_check(SysBlock *self) {
   return self;
 }
 
-static SysBool sys_block_create(SysBlock* self, SysType type) {
+SysBool sys_block_create(SysBlock* self, SysType type) {
   self->type = type;
 
   sys_ref_count_init(self);

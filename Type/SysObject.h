@@ -15,6 +15,10 @@ SYS_BEGIN_DECLS
 struct _SysObjectClass {
   SysTypeClass parent;
 
+  SysPointer (*ref) (SysObject* self);
+  void (*unref) (SysObject* self);
+
+  void (*destroy) (SysObject* self);
   SysObject* (*dclone) (SysObject* self);
   void (*dispose) (SysObject *self);
   void (*finalize) (SysObject *self);
@@ -24,12 +28,14 @@ struct _SysObject {
   SysTypeInstance instance;
 };
 
-#define sys_object_create(o, type) sys_block_create(SYS_BLOCK(o), type)
+#define sys_object_create(o, type) _sys_object_create(((SysObject *)o), type)
 #define sys_object_destroy(o) _sys_object_destroy(SYS_OBJECT(o))
 #define sys_object_unref(o) _sys_object_unref(SYS_OBJECT(o))
 #define sys_object_ref(o) _sys_object_ref(SYS_OBJECT(o))
 SYS_API void _sys_object_unref(SysObject* self);
 SYS_API SysPointer _sys_object_ref(SysObject* self);
+
+SYS_API void _sys_object_create(SysObject* self, SysType type);
 SYS_API void _sys_object_destroy(SysObject* self);
 
 #define sys_object_is_a(o, type) _sys_object_is_a(SYS_OBJECT(o), type)

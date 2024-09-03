@@ -46,14 +46,6 @@ static void sys_object_base_finalize(SysObject *self) {
 
 static void object_destroy(SysObject* self) {
   sys_return_if_fail(self != NULL);
-  SysObjectClass* cls;
-
-  cls = SYS_OBJECT_GET_CLASS(self);
-
-  if(cls->dispose) {
-
-    cls->dispose(self);
-  }
 }
 
 static void sys_object_dispose_i(SysObject *self) {
@@ -90,6 +82,12 @@ SysObject* _sys_object_dclone(SysObject *o) {
   return cls->dclone(o);
 }
 
+void _sys_object_create(SysObject *o, SysType type) {
+  SysTypeNode *node = sys_type_node(type);
+
+  sys_type_instance_create((SysTypeInstance *)o, node);
+}
+
 SysPointer sys_object_new(SysType type, const SysChar * first, ...) {
   SysTypeNode *node = sys_type_node(type);
   SysTypeInstance *o = sys_type_instance_new(node, 1);
@@ -108,16 +106,36 @@ SysPointer _sys_object_ref(SysObject* self) {
 }
 
 void _sys_object_unref(SysObject* self) {
+  sys_return_if_fail(self != NULL);
+  SysObjectClass* cls;
 
-  sys_block_unref(self);
-}
-
-void _sys_object_destroy(SysObject* self) {
   if(!sys_block_destroy_check(self)) {
     return;
   }
 
-  object_destroy(self);
+  cls = SYS_OBJECT_GET_CLASS(self);
+  if(cls->dispose) {
+
+    cls->dispose(self);
+  }
+
+  sys_block_free((SysBlock *)self);
+}
+
+void _sys_object_destroy(SysObject* self) {
+  sys_return_if_fail(self != NULL);
+
+  SysObjectClass* cls;
+
+  if(!sys_block_destroy_check(self)) {
+    return;
+  }
+
+  cls = SYS_OBJECT_GET_CLASS(self);
+  if(cls->destroy) {
+
+    cls->destroy(self);
+  }
 }
 
 static void sys_object_init(SysObject *self) {

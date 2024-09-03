@@ -29,7 +29,6 @@ typedef struct _SysObject SysObject;
 typedef struct _SysObjectClass SysObjectClass;
 
 typedef struct _SysBlock SysBlock;
-typedef struct _SysBlockClass SysBlockClass;
 
 typedef SysType (*SysTypeFunc) (void);
 typedef void (*SysTypeInitFunc) (void *self);
