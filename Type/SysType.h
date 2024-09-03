@@ -137,7 +137,7 @@ struct _SysTypeInfo {
 };
 
 struct _SysTypeClass {
-  SysType parent;
+  SysBlock parent;
 
   /* limit 255 interface count for class */
   SysUInt8 n_ifaces;
