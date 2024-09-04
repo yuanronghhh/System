@@ -41,27 +41,20 @@ SysBool sys_block_create(SysBlock* self, SysType type) {
 }
 
 void sys_block_free(SysBlock* b) {
-  sys_assert(b->ref_count == 0);
+  sys_return_if_fail(b->ref_count == 0);
 
   sys_free(b);
 }
 
 SysPointer sys_block_new(SysType tp, SysSize size) {
-  SysBlock* o =  sys_malloc0(size);
+  SysBlock* o = sys_malloc0(size);
 
   sys_block_create(o, tp);
 
   return o;
 }
 
-SysBool _sys_block_destroy_check(SysBlock* self) {
-  sys_return_val_if_fail(self != NULL, false);
-
-  if (!sys_ref_count_valid_check(self, MAX_REF_NODE)) {
-    sys_warning_N("block ref check failed: %p", self);
-    return false;
-  }
-
+void sys_block_unref_hook(SysBlock* self) {
   if (sys_block_unref_debug_func) {
     SysType type;
     SysTypeNode* node;
@@ -73,8 +66,28 @@ SysBool _sys_block_destroy_check(SysBlock* self) {
         sys_type_node_name(node),
         sys_ref_count_get(self));
   }
+}
 
-  return sys_ref_count_dec(self);
+void sys_block_new_hook(SysBlock* self) {
+  if (sys_block_ref_debug_func) {
+    SysType type = sys_type_from_sys_block(self);
+    SysTypeNode *node = sys_type_node(type);
+
+    sys_block_new_debug_func(self,
+        sys_type_node_name(node),
+        sys_ref_count_get(self));
+  }
+}
+
+void sys_block_ref_hook(SysBlock* self) {
+  if (sys_block_ref_debug_func) {
+    SysType type = sys_type_from_sys_block(self);
+    SysTypeNode *node = sys_type_node(type);
+
+    sys_block_ref_debug_func(self,
+        sys_type_node_name(node),
+        sys_ref_count_get(self));
+  }
 }
 
 void _sys_block_destroy(SysBlock* self) {
@@ -102,15 +115,6 @@ SysPointer _sys_block_ref(SysBlock* self) {
   if (!sys_ref_count_valid_check(self, MAX_REF_NODE)) {
     sys_warning_N("block ref check failed: %p", self);
     return NULL;
-  }
-
-  if (sys_block_ref_debug_func) {
-    SysType type = sys_type_from_sys_block(self);
-    SysTypeNode *node = sys_type_node(type);
-
-    sys_block_ref_debug_func(self,
-        sys_type_node_name(node),
-        sys_ref_count_get(self));
   }
 
   sys_ref_count_inc(self);
