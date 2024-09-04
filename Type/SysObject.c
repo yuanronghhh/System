@@ -82,14 +82,14 @@ void _sys_object_create(SysObject *o, SysType type) {
   SysTypeNode *node = sys_type_node(type);
 
   sys_type_instance_create((SysTypeInstance *)o, node);
+  sys_block_new_hook(SYS_BLOCK(o));
 }
 
 SysPointer sys_object_new(SysType type, const SysChar * first, ...) {
   SysTypeNode *node = sys_type_node(type);
   SysTypeInstance *instance = sys_type_instance_new(node, 1);
-  SysBlock *o = (SysBlock *)instance;
 
-  sys_block_new_hook(o);
+  sys_block_new_hook((SysBlock *)instance);
   if (!sys_type_instance_create(instance, node)) {
 
     sys_type_instance_free(instance);

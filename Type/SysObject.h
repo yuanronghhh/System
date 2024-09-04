@@ -28,7 +28,7 @@ struct _SysObject {
   SysTypeInstance instance;
 };
 
-#define sys_object_create(o, type) _sys_object_create(((SysObject *)o), type)
+#define sys_object_create(o, type) _sys_object_create((SysObject *)o, type)
 #define sys_object_destroy(o) _sys_object_destroy(SYS_OBJECT(o))
 #define sys_object_unref(o) _sys_object_unref(SYS_OBJECT(o))
 #define sys_object_ref(o) _sys_object_ref(SYS_OBJECT(o))
