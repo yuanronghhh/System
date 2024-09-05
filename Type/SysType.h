@@ -39,7 +39,6 @@ static void type_name##_class_init(TypeName##Class *o);                \
 static void type_name##_dispose(SysObject *o);                         \
 static SysTypeClass* type_name##_parent_class = NULL;                  \
 static SysInt TypeName##_private_offset = 0;                           \
-static SysType private_g_type = 0;                                     \
 SysPointer type_name##_get_private(TypeName* o) {                      \
    return (((SysUInt8 *)o) + TypeName##_private_offset); \
 } \
@@ -49,10 +48,8 @@ static void type_name##_class_intern_init (SysPointer kclass) \
   sys_type_class_adjust_private_offset (kclass, &TypeName##_private_offset); \
   type_name##_class_init ((TypeName##Class*) kclass); \
 } \
-void type_name##_set_type(SysType ntype) {               \
-  private_g_type = ntype;                                        \
-}                                                        \
 SysType type_name##_get_type(void) {                     \
+  static SysType private_g_type = 0;                     \
   if(private_g_type != 0) {                                      \
     return private_g_type;                                       \
   }                                                      \
