@@ -10,7 +10,7 @@ SysBool sys_real_console_is_utf8(void) {
   return true;
 }
 
-SysBool sys_real_set_env(const SysChar *var, const SysChar *value) {
+SysBool sys_real_env_set(const SysChar *var, const SysChar *value) {
   SysInt result;
 
   result = setenv (var, value, true);
@@ -18,7 +18,7 @@ SysBool sys_real_set_env(const SysChar *var, const SysChar *value) {
   return result == 0;
 }
 
-const SysChar* sys_real_get_env(const SysChar *var) {
+const SysChar* sys_real_env_get(const SysChar *var) {
   sys_return_val_if_fail (var != NULL, NULL);
 
   return getenv(var);

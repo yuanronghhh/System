@@ -68,13 +68,13 @@ SysBool sys_real_console_is_utf8(void) {
 }
 
 /**
- * sys_real_get_env: get system enviroment
+ * sys_real_env_get: get system enviroment
  * @var: name
  * need call sys_free after used
  *
  * Returns: new allocted string.
  */
-const SysChar *sys_real_get_env(const SysChar *var) {
+const SysChar *sys_real_env_get(const SysChar *var) {
   wchar_t *wvalue;
   wchar_t tmp[2];
   wchar_t *wname;
@@ -108,7 +108,7 @@ const SysChar *sys_real_get_env(const SysChar *var) {
   return value;
 }
 
-SysBool sys_real_set_env(const SysChar *var, const SysChar *value) {
+SysBool sys_real_env_set(const SysChar *var, const SysChar *value) {
   wchar_t *wvar, *wvalue;
   const wchar_t *wname;
   SysChar *nvar;

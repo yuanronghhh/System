@@ -30,8 +30,8 @@ SYS_API void sys_qsort_with_data(const SysPointer  pbase, SysInt total_elems,
   SysCompareDataFunc compare_func,
   SysPointer         user_data);
 
-SYS_API SysBool sys_set_env(const SysChar *var, const SysChar *value);
-SYS_API const SysChar *sys_get_env(const SysChar *var);
+SYS_API SysBool sys_env_set(const SysChar *var, const SysChar *value);
+SYS_API const SysChar *sys_env_get(const SysChar *var);
 SYS_API SysUInt64 sys_get_monotonic_time(void);
 SYS_API void sys_usleep(unsigned long mseconds);
 SYS_API void* sys_dlopen(const SysChar *filename);

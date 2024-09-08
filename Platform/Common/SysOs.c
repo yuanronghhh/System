@@ -272,12 +272,12 @@ SysBool sys_console_is_utf8(void) {
   return sys_real_console_is_utf8();
 }
 
-SysBool sys_set_env(const SysChar *var, const SysChar *value) {
-  return sys_real_set_env(var, value);
+SysBool sys_env_set(const SysChar *var, const SysChar *value) {
+  return sys_real_env_set(var, value);
 }
 
-const SysChar* sys_get_env(const SysChar *var) {
-  return sys_real_get_env(var);
+const SysChar* sys_env_get(const SysChar *var) {
+  return sys_real_env_get(var);
 }
 
 SysUInt64 sys_get_monotonic_time(void) {
