@@ -13,11 +13,13 @@
 
 #define _USE_MATH_DEFINES
 
-#if _MSC_VER
+#if defined(_MSC_VER)
   #include <System/Platform/Win32/SysWin32.h>
-#elif defined(__MINGW64__) || defined(__MINGW32__)
+#elif defined(__MSYS__)
   #include <System/Platform/MinGW/SysMinGW.h>
-#elif __GNUC__
+#elif defined(__ANDROID__)
+  #include <System/Platform/Android/SysAndroid.h>
+#elif defined(__UNIX__)
   #include <System/Platform/Unix/SysUnix.h>
 #endif
 

@@ -10,7 +10,6 @@
 #include <System/Platform/Common/SysAtomic.h>
 #include <System/Platform/Common/SysProcess.h>
 #include <System/Platform/Common/SysThread.h>
-#include <System/Platform/Common/SysSocket.h>
 
 #include <System/DataTypes/SysBit.h>
 #include <System/DataTypes/SysQuark.h>
@@ -45,6 +44,7 @@
 
 #if USE_OPENSSL
 #include <System/Utils/SysOpenSSL.h>
+#include <System/Platform/Common/SysSocket.h>
 #endif
 
 SYS_API void sys_setup(void);

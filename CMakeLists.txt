@@ -8,6 +8,21 @@ set(INC_SYS
   ${OPENSSL_INCLUDE_DIRS}
 )
 
+
+set(ANDROID_SYS_SRC
+  ./Platform/Android/SysFileAndroid.c
+  ./Platform/Android/SysStringAndroid.c
+  ./Platform/Android/SysOsAndroid.c
+  ./Platform/Android/SysMemAndroid.c
+  ./Platform/Android/SysThreadAndroid.c
+  ./Platform/Android/SysAndroid.h
+  ./Platform/Android/SysErrorAndroid.c
+  ./Platform/Android/SysAtomicAndroid.c
+  ./Platform/Android/SysProcessAndroid.c
+  ./Platform/Android/SysPathAndroid.c
+  # ./Platform/Android/SysSocketAndroid.c
+)
+
 set(UNIX_SYS_SRC
   ./Platform/Unix/SysFileUnix.c
   ./Platform/Unix/SysStringUnix.c
@@ -19,7 +34,7 @@ set(UNIX_SYS_SRC
   ./Platform/Unix/SysAtomicUnix.c
   ./Platform/Unix/SysProcessUnix.c
   ./Platform/Unix/SysPathUnix.c
-  ./Platform/Unix/SysSocketUnix.c
+  # ./Platform/Unix/SysSocketUnix.c
 )
 set(WIN32_SYS_SRC
   ./Platform/Win32/SysFileWin32.c
@@ -32,10 +47,12 @@ set(WIN32_SYS_SRC
   ./Platform/Win32/SysThreadWin32.c
   ./Platform/Win32/SysWin32.h
   ./Platform/Win32/SysProcessWin32.c
-  ./Platform/Win32/SysSocketWin32.c
+  # ./Platform/Win32/SysSocketWin32.c
 )
 
-if(UNIX)
+if(ANDROID)
+  set(OS_SYS_SRC ${ANDROID_SYS_SRC})
+elseif(UNIX)
   set(OS_SYS_SRC ${UNIX_SYS_SRC})
 elseif(WIN32)
   set(OS_SYS_SRC ${WIN32_SYS_SRC})
@@ -101,8 +118,8 @@ set(SRC
   ./Utils/SysError.c
   ./Utils/SysTextIO.h
   ./Utils/SysTextIO.c
-  ./Utils/SysOpenSSL.h
-  ./Utils/SysOpenSSL.c
+  # ./Utils/SysOpenSSL.h
+  # ./Utils/SysOpenSSL.c
 
   ./Platform/Common/SysMemPrivate.h
   ./Platform/Common/SysMem.h
@@ -115,9 +132,9 @@ set(SRC
   ./Platform/Common/SysAtomic.c
   ./Platform/Common/SysThread.c
   ./Platform/Common/SysThread.h
-  ./Platform/Common/SysSocket.c
-  ./Platform/Common/SysSocket.h
-  ./Platform/Common/SysSocketPrivate.h
+  # ./Platform/Common/SysSocket.c
+  # ./Platform/Common/SysSocket.h
+  # ./Platform/Common/SysSocketPrivate.h
   ./Platform/Common/SysThreadPrivate.h
 
   ./Platform/Common/SysProcess.c
@@ -146,5 +163,6 @@ target_link_libraries(System
   ${ADDTIONAL_LIBRARIES}
   ${DBG_LIBRAREIS}
   ${VLD_LIBRARIES}
+  android
 )
 set_property(TARGET System PROPERTY FOLDER CstProject)
