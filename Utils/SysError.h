@@ -60,6 +60,10 @@ struct _SysError {
   SysInt line;
 };
 
+#if SYS_OS_ANDROID
+void sys_set_android_log_tag(const SysChar *tag);
+#endif
+
 SYS_API void sys_break (void);
 SYS_API void sys_abort (SYS_LOG_ARGS_N const SysChar* format, ...);
 SYS_API void sys_exit (SYS_LOG_ARGS_N SysInt exitcode, const SysChar* format, ...);
