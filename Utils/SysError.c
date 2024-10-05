@@ -17,8 +17,11 @@ static SysChar g_android_tag[255] = {0};
 static SysInt androidPrior[] = {
   ANDROID_LOG_UNKNOWN,
   ANDROID_LOG_DEBUG,
+  ANDROID_LOG_INFO,
   ANDROID_LOG_WARN,
-  ANDROID_LOG_ERROR
+  ANDROID_LOG_ERROR,
+  ANDROID_LOG_FATAL,
+  ANDROID_LOG_SILENT
 };
 #endif
 
@@ -31,7 +34,7 @@ static SYS_INLINE SysChar* get_color(SYS_LOG_LEVEL level) {
 #if SYS_OS_ANDROID
 void sys_set_android_log_tag(const SysChar *tag) {
   SysSize len = strlen(tag);
-  sys_return_if_fail(len >= 255);
+  sys_return_if_fail(len <= 255);
 
   sys_strcpy(g_android_tag, tag);
 }
@@ -52,13 +55,42 @@ void sys_break(void) {
 #endif
 }
 
+static SysInt sys_log_fprintf(FILE* std, SYS_LOG_LEVEL level, const SysChar *format, ...) {
+  SysInt len;
+
+  va_list args;
+  va_start(args, format);
+
+#if SYS_OS_ANDROID
+  len = __android_log_vprint(androidPrior[level], &g_android_tag[0], format, args);
+#else
+  len = sys_vfprintf(std, format, args);
+#endif
+
+  va_end(args);
+
+  return len;
+}
+
+static SysInt sys_log_vfprintf(FILE* std, SYS_LOG_LEVEL level, const SysChar* format, va_list args) {
+  SysInt len;
+
+#if SYS_OS_ANDROID
+  len = __android_log_vprint(androidPrior[level], &g_android_tag[0], format, args);
+#else
+  len = sys_vfprintf(format, args);
+#endif
+
+  return len;
+}
+
 void sys_vlog(SYS_LOG_ARGS_N FILE* std, SYS_LOG_LEVEL level, const SysChar* format, va_list args) {
   sys_mutex_lock(&g_log_lock);
   SYS_LEAK_IGNORE_BEGIN;
 
-  sys_fprintf(std, "%s[%s:%d] ", get_color(level), _funcname, _line);
-  sys_vfprintf(std, format, args);
-  sys_fprintf(std, "%s\n", get_color(SYS_LOG_RESET));
+  sys_log_fprintf(std, level, "%s[%s:%d] ", get_color(level), _funcname, _line);
+  sys_log_vfprintf(std, level, format, args);
+  sys_log_fprintf(std, level, "%s\n", get_color(SYS_LOG_RESET));
 
   SYS_LEAK_IGNORE_END;
   sys_mutex_unlock(&g_log_lock);

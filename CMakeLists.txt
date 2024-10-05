@@ -163,6 +163,6 @@ target_link_libraries(System
   ${ADDTIONAL_LIBRARIES}
   ${DBG_LIBRAREIS}
   ${VLD_LIBRARIES}
-  android
+  ${ANDROID_LIBRARIES}
 )
 set_property(TARGET System PROPERTY FOLDER CstProject)

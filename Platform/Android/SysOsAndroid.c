@@ -30,7 +30,6 @@ SysUInt64 sys_real_get_monotonic_time(void) {
 
   time = clock_gettime (CLOCK_MONOTONIC, &ts);
 
-  sys_debug_N("%lld", time);
   if (time != 0) {
     sys_abort_N("%s", "clock_gettime error.");
   }
