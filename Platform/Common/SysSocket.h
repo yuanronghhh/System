@@ -1,7 +1,6 @@
 #ifndef __SYS_SOCKET_H__
 #define __SYS_SOCKET_H__
 
-#include <System/Utils/SysOpenSSL.h>
 #include <System/Type/SysObject.h>
 
 
@@ -11,9 +10,6 @@ SYS_BEGIN_DECLS
 #define SYS_SOCKET(o) ((SysSocket* )sys_object_cast_check(o, SYS_TYPE_SOCKET))
 #define SYS_SOCKET_CLASS(o) ((SysSocketClass *)sys_class_cast_check(o, SYS_TYPE_SOCKET))
 #define SYS_SOCKET_GET_CLASS(o) sys_instance_get_class(o, SysSocketClass)
-
-typedef struct _SysSocket SysSocket;
-typedef struct _SysSocketClass SysSocketClass;
 
 #if SYS_OS_UNIX
 #define SOCKET SysInt
@@ -29,12 +25,7 @@ struct _SysSocket {
   SOCKET fd;
 
   SysBool noblocking;
-  SSL *ssl;
 };
-
-SYS_API SysSocket *sys_socket_new_ssl(SysInt domain, SysInt type, SysInt protocol, SysBool noblocking, SSL_CTX * ssl_ctx);
-SYS_API SSL* sys_socket_get_ssl(SysSocket* s);
-SYS_API void sys_socket_set_ssl(SysSocket* s, SSL* ssl);
 
 SYS_API SysType sys_socket_get_type(void);
 SYS_API SysSocket* sys_socket_new(void);

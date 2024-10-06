@@ -1,4 +1,4 @@
-#include <System/Utils/SysOpenSSL.h>
+#include <System/ThirdParty/SysOpenssl.h>
 #include <System/Platform/Common/SysThread.h>
 
 static SysMutex ssl_ctx_mlock;
@@ -129,6 +129,29 @@ static void sys_ssl_ctx_set_server_option(SSL_CTX* ctx) {
 #endif
 
   SSL_CTX_set_read_ahead(ctx, 1);
+}
+
+SysInt sys_ssl_renegotiate(SSL* ssl) {
+  SysInt r = false;
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
+  if (SSL_version(ssl) >= TLS1_3_VERSION) {
+
+    r = SSL_key_update(ssl, SSL_KEY_UPDATE_REQUESTED);
+  }
+  else if (SSL_get_secure_renegotiation_support(ssl) && !(SSL_get_options(ssl) & SSL_OP_NO_RENEGOTIATION)) {
+
+    /* remote and local peers both can rehandshake */
+    r = SSL_renegotiate(ssl);
+  }
+  else {
+
+    sys_warning_N("%s", "Secure renegotiation is not supported");
+  }
+#else
+  r = SSL_renegotiate(ssl);
+#endif
+
+  return r;
 }
 
 static SysInt ssl_verify_callback(SysInt ok, X509_STORE_CTX* x509_store)

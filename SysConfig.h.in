@@ -13,6 +13,7 @@ typedef unsigned long long SysUInt64;
 
 #define SIZEOF_INT 8
 #define SYS_DEBUG ${DEBUG}
-#define USE_DEBUGGER ${USE_DEBUGGER}
+#define USE_DEBUGGER 1
+#define USE_OPENSSL 1
 
 #endif

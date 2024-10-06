@@ -6,5 +6,10 @@
 #include <System/Platform/Common/SysOs.h>
 #include <System/DataTypes/SysHCommon.h>
 #include <System/Utils/SysError.h>
+#include <System/Utils/SysEnum.h>
+
+#if defined(USE_OPENSSL)
+#include <System/ThirdParty/SysOpenssl.h>
+#endif
 
 #endif

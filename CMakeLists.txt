@@ -8,6 +8,12 @@ set(INC_SYS
   ${OPENSSL_INCLUDE_DIRS}
 )
 
+set(OPENSSL_SRC
+  ./ThirdParty/SysOpenssl.h
+  ./ThirdParty/SysOpenssl.c
+  ./Utils/SysSsl.h
+  ./Utils/SysSsl.c
+)
 
 set(ANDROID_SYS_SRC
   ./Platform/Android/SysFileAndroid.c
@@ -20,7 +26,7 @@ set(ANDROID_SYS_SRC
   ./Platform/Android/SysAtomicAndroid.c
   ./Platform/Android/SysProcessAndroid.c
   ./Platform/Android/SysPathAndroid.c
-  # ./Platform/Android/SysSocketAndroid.c
+  ./Platform/Android/SysSocketAndroid.c
 )
 
 set(UNIX_SYS_SRC
@@ -34,7 +40,7 @@ set(UNIX_SYS_SRC
   ./Platform/Unix/SysAtomicUnix.c
   ./Platform/Unix/SysProcessUnix.c
   ./Platform/Unix/SysPathUnix.c
-  # ./Platform/Unix/SysSocketUnix.c
+  ./Platform/Unix/SysSocketUnix.c
 )
 set(WIN32_SYS_SRC
   ./Platform/Win32/SysFileWin32.c
@@ -47,7 +53,7 @@ set(WIN32_SYS_SRC
   ./Platform/Win32/SysThreadWin32.c
   ./Platform/Win32/SysWin32.h
   ./Platform/Win32/SysProcessWin32.c
-  # ./Platform/Win32/SysSocketWin32.c
+  ./Platform/Win32/SysSocketWin32.c
 )
 
 if(ANDROID)
@@ -56,6 +62,10 @@ elseif(UNIX)
   set(OS_SYS_SRC ${UNIX_SYS_SRC})
 elseif(WIN32)
   set(OS_SYS_SRC ${WIN32_SYS_SRC})
+endif()
+
+if(USE_OPENSSL)
+  LIST(OS_SYS_SRC ${OPENSSL_SRC})
 endif()
 
 set(SRC
@@ -110,6 +120,8 @@ set(SRC
   ./Utils/SysFile.c
   ./Utils/SysString.h
   ./Utils/SysString.c
+  ./Utils/SysEnum.h
+  ./Utils/SysEnum.c
   ./Utils/SysPathPrivate.h
   ./Utils/SysPath.h
   ./Utils/SysPath.c
@@ -118,8 +130,6 @@ set(SRC
   ./Utils/SysError.c
   ./Utils/SysTextIO.h
   ./Utils/SysTextIO.c
-  # ./Utils/SysOpenSSL.h
-  # ./Utils/SysOpenSSL.c
 
   ./Platform/Common/SysMemPrivate.h
   ./Platform/Common/SysMem.h
@@ -132,9 +142,9 @@ set(SRC
   ./Platform/Common/SysAtomic.c
   ./Platform/Common/SysThread.c
   ./Platform/Common/SysThread.h
-  # ./Platform/Common/SysSocket.c
-  # ./Platform/Common/SysSocket.h
-  # ./Platform/Common/SysSocketPrivate.h
+  ./Platform/Common/SysSocket.c
+  ./Platform/Common/SysSocket.h
+  ./Platform/Common/SysSocketPrivate.h
   ./Platform/Common/SysThreadPrivate.h
 
   ./Platform/Common/SysProcess.c
@@ -144,6 +154,7 @@ set(SRC
   ./Fundamental/SysCommonCore.h
   ./Fundamental/SysCommon.h
   ./Fundamental/SysCommon.c
+  ./Fundamental/SysCommonTypes.h
 
   ./SysConfig.h
   ./SysConfig.h.in
