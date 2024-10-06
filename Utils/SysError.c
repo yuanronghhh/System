@@ -78,7 +78,7 @@ static SysInt sys_log_vfprintf(FILE* std, SYS_LOG_LEVEL level, const SysChar* fo
 #if SYS_OS_ANDROID
   len = __android_log_vprint(androidPrior[level], &g_android_tag[0], format, args);
 #else
-  len = sys_vfprintf(format, args);
+  len = sys_vfprintf(std, format, args);
 #endif
 
   return len;
