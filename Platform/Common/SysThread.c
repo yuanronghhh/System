@@ -1,6 +1,6 @@
 #include <System/Platform/Common/SysThreadPrivate.h>
 #include <System/DataTypes/SysSList.h>
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 
 /**
  * this code from glib Thread

@@ -1,5 +1,5 @@
 #include <System/Utils/SysError.h>
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 
 SysChar *sys_wchar_to_mbyte(const SysWChar *wchar, SysInt *nsize) {
   SysInt size;

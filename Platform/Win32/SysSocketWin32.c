@@ -1,6 +1,6 @@
 #include <System/Platform/Common/SysSocketPrivate.h>
 #include <System/DataTypes/SysQuark.h>
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 
 SysSocket *sys_socket_real_new_I(SysInt domain, SysInt type, SysInt protocol, SysBool noblocking) {
   SOCKET fd;

@@ -2,7 +2,7 @@
 #define __SYS_PATH_H__
 
 #include <System/Fundamental/SysCommonCore.h>
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 
 SYS_BEGIN_DECLS
 

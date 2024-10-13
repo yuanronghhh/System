@@ -1,5 +1,5 @@
 #include <System/Utils/SysFile.h>
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 
 #define LINE_BLOCK 512
 

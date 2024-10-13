@@ -1,5 +1,5 @@
 #include <System/DataTypes/SysHashTable.h>
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 #include <System/Platform/Common/SysAtomic.h>
 
 /**

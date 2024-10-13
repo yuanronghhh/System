@@ -1,4 +1,4 @@
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 #include <System/Utils/SysError.h>
 #include <System/Platform/Common/SysOs.h>
 #include <System/Platform/Common/SysMem.h>

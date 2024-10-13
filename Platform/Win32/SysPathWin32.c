@@ -1,5 +1,5 @@
 #include <System/DataTypes/SysArray.h>
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 #include <System/Utils/SysPathPrivate.h>
 
 

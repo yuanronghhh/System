@@ -1,4 +1,4 @@
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 #include <System/Utils/SysErrorPrivate.h>
 
 static SysChar buff[1024];

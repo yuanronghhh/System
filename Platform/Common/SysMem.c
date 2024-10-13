@@ -1,5 +1,5 @@
 #include <System/Platform/Common/SysMemPrivate.h>
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 #include <System/Utils/SysFile.h>
 #include <System/Utils/SysError.h>
 

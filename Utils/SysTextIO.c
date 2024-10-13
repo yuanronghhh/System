@@ -1,6 +1,6 @@
 #include <System/Utils/SysPath.h>
 #include <System/Utils/SysFile.h>
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 #include <System/Utils/SysTextIO.h>
 
 #define is_id(c) (c >= 0 && c <= 9) || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c == '_') || ((c == '-'))

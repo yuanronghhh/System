@@ -1,6 +1,6 @@
 #include <System/DataTypes/SysValue.h>
 #include <System/Type/SysObject.h>
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 
 struct _SysValue {
   SysType data_type;

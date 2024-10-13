@@ -4,7 +4,7 @@
 #include <System/DataTypes/SysHashTable.h>
 #include <System/DataTypes/SysHArray.h>
 #include <System/DataTypes/SysSList.h>
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 #include <System/Platform/Common/SysThread.h>
 
 #define NODE_TYPE(node) (node->supers[0])

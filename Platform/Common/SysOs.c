@@ -1,5 +1,5 @@
 #include <System/Platform/Common/SysOs.h>
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 #include <System/Utils/SysError.h>
 #include <System/DataTypes/SysQuark.h>
 #include <System/DataTypes/SysArray.h>

@@ -1,5 +1,5 @@
 #include <System/Utils/SysErrorPrivate.h>
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 #include <System/Utils/SysFile.h>
 #include <System/Platform/Common/SysThread.h>
 

@@ -17,7 +17,7 @@ set(OPENSSL_SRC
 
 set(ANDROID_SYS_SRC
   ./Platform/Android/SysFileAndroid.c
-  ./Platform/Android/SysStringAndroid.c
+  ./Platform/Android/SysStrAndroid.c
   ./Platform/Android/SysOsAndroid.c
   ./Platform/Android/SysMemAndroid.c
   ./Platform/Android/SysThreadAndroid.c
@@ -31,7 +31,7 @@ set(ANDROID_SYS_SRC
 
 set(UNIX_SYS_SRC
   ./Platform/Unix/SysFileUnix.c
-  ./Platform/Unix/SysStringUnix.c
+  ./Platform/Unix/SysStrUnix.c
   ./Platform/Unix/SysOsUnix.c
   ./Platform/Unix/SysMemUnix.c
   ./Platform/Unix/SysThreadUnix.c
@@ -44,7 +44,7 @@ set(UNIX_SYS_SRC
 )
 set(WIN32_SYS_SRC
   ./Platform/Win32/SysFileWin32.c
-  ./Platform/Win32/SysStringWin32.c
+  ./Platform/Win32/SysStrWin32.c
   ./Platform/Win32/SysOsWin32.c
   ./Platform/Win32/SysPathWin32.c
   ./Platform/Win32/SysErrorWin32.c
@@ -118,8 +118,8 @@ set(SRC
 
   ./Utils/SysFile.h
   ./Utils/SysFile.c
-  ./Utils/SysString.h
-  ./Utils/SysString.c
+  ./Utils/SysStr.h
+  ./Utils/SysStr.c
   ./Utils/SysEnum.h
   ./Utils/SysEnum.c
   ./Utils/SysPathPrivate.h

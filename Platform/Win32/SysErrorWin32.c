@@ -1,4 +1,4 @@
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 #include <System/DataTypes/SysQuark.h>
 #include <System/Utils/SysErrorPrivate.h>
 

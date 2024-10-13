@@ -1,6 +1,6 @@
 #include <System/Fundamental/SysCommon.h>
 #include <System/Utils/SysError.h>
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 
 SysInt sys_get_type_by_name(const SysChar *names[], SysInt len, const SysChar *name) {
   sys_return_val_if_fail(name != NULL, -1);

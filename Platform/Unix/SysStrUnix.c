@@ -1,4 +1,4 @@
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 
 SysSize sys_fread(
     void*  buffer,

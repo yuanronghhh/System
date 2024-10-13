@@ -1,5 +1,5 @@
 #include <System/DataTypes/SysQuark.h>
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 
 static SysHashTable *ht;
 

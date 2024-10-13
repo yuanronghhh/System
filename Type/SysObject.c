@@ -3,7 +3,7 @@
 #include <System/DataTypes/SysHashTable.h>
 #include <System/DataTypes/SysHArray.h>
 #include <System/DataTypes/SysSList.h>
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 #include <System/Platform/Common/SysThread.h>
 
 static void sys_object_base_class_init(SysObjectClass* self);

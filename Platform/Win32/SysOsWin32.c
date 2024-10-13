@@ -1,5 +1,5 @@
 #include <System/Platform/Common/SysOsPrivate.h>
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 #include <System/DataTypes/SysArray.h>
 #include <System/Platform/Common/SysThread.h>
 

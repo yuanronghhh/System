@@ -1,5 +1,5 @@
 #include <System/Platform/Common/SysThreadPrivate.h>
-#include <System/Utils/SysString.h>
+#include <System/Utils/SysStr.h>
 
 
 static void
