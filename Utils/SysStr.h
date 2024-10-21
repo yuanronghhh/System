@@ -12,6 +12,7 @@ SYS_BEGIN_DECLS
 #define sys_strneq(s1, s2, n) (strncmp(s1, s2, (n)) == 0)
 #define sys_str_startswith(s1, s2) (strncmp(s1, s2, sizeof(s2)-1) == 0)
 #define sys_strjoin(delim, ...) _sys_strjoin(delim, __VA_ARGS__, NULL)
+#define SYS_STR_MULTILINE(...) #__VA_ARGS__
 
 SYS_API SysWChar * sys_mbyte_to_wchar(const SysChar * mbyte, SysInt * nsize);
 SYS_API SysChar* sys_wchar_to_mbyte(const SysWChar* wchar, SysInt * nsize);

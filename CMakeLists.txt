@@ -65,7 +65,7 @@ elseif(WIN32)
 endif()
 
 if(USE_OPENSSL)
-  LIST(OS_SYS_SRC ${OPENSSL_SRC})
+  LIST(APPEND OS_SYS_SRC ${OPENSSL_SRC})
 endif()
 
 set(SRC

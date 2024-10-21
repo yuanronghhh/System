@@ -1,5 +1,5 @@
 #include <System/Platform/Common/SysSocketPrivate.h>
-
+#include <System/Utils/SysError.h>
 
 SysSocket *sys_socket_real_new_I(SysInt domain, SysInt type, SysInt protocol, SysBool noblocking) {
   SysInt fd;
