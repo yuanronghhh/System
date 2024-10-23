@@ -6,7 +6,9 @@
 SYS_BEGIN_DECLS
 
 #if defined(USE_DEBUGGER) && SYS_OS_WIN32
-  #define _DEBUG SYS_DEBUG
+  #if !defined(_DEBUG)
+    #define _DEBUG SYS_DEBUG
+  #endif 
   #include "vld.h"
   #define SYS_LEAK_IGNORE_BEGIN VLDGlobalDisable()
   #define SYS_LEAK_IGNORE_END VLDGlobalEnable()
