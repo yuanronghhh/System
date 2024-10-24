@@ -32,7 +32,7 @@ struct _SysHNode
 
   /* <private> */
   SysHNode   *last_child;
-  SysInt check;
+  SysUInt check;
 };
 
 SYS_API SysBool sys_hnode_has_one_child(SysHNode *self);

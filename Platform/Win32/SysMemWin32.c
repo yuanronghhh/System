@@ -5,8 +5,6 @@
 #include <System/Platform/Common/SysOs.h>
 #include <System/Platform/Common/SysMemPrivate.h>
 
-#define MAXMODULELISTLENGTH 512
-
 void sys_real_memcpy(
   void*       const dst,
   SysSize     const dst_size,

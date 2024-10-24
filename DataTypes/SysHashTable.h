@@ -19,7 +19,7 @@ typedef SysBool (*SysHRFunc)(SysPointer key, SysPointer value, SysPointer user_d
 typedef void (*SysHFunc) (SysPointer key, SysPointer value, SysPointer user_data);
 
 struct _SysHashTableIter {
-  /*< private >*/
+  /* <private> */
   SysPointer      dummy1;
   SysPointer      dummy2;
   SysPointer      dummy3;

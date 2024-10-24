@@ -20,39 +20,40 @@ typedef struct _SysPrivate        SysPrivate;
 typedef struct _SysOnce           SysOnce;
 
 struct _SysThread {
-  /*< private >*/
+  /* <private> */
   SysThreadFunc func;
   SysPointer data;
   SysBool joinable;
 };
 
 union _SysMutex {
-  /*< private >*/
+  /* <private> */
   SysPointer p;
   SysUInt i[2];
 };
 
 struct _SysRWLock {
-  /*< private >*/
+  /* <private> */
   SysPointer p;
   SysUInt i[2];
 };
 
 struct _SysCond {
-  /*< private >*/
+  /* <private> */
   SysPointer p;
   SysUInt i[2];
 };
 
 struct _SysRecMutex {
-  /*< private >*/
+  /* <private> */
   SysPointer p;
   SysUInt i[2];
 };
 
 #define SYS_PRIVATE_INIT(notify) { NULL, (notify), { NULL, NULL } }
 struct _SysPrivate {
-  /*< private >*/
+
+  /* <private> */
   SysPointer       p;
   SysDestroyFunc notify;
   SysPointer future[2];

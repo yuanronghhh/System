@@ -11,7 +11,7 @@ SYS_BEGIN_DECLS
 #define SYS_SOCKET_CLASS(o) ((SysSocketClass *)sys_class_cast_check(o, SYS_TYPE_SOCKET))
 #define SYS_SOCKET_GET_CLASS(o) sys_instance_get_class(o, SysSocketClass)
 
-#if SYS_OS_UNIX
+#if defined(SYS_OS_UNIX)
 #define SOCKET SysInt
 #endif
 

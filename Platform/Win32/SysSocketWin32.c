@@ -25,13 +25,10 @@ SysInt sys_socket_setopt(SysSocket *s,
   SysInt optname, 
   const void *optval, 
   socklen_t optlen) {
+  SysInt r;
   sys_return_val_if_fail(s != NULL, -1);
 
-  SysInt r = setsockopt(s->fd, level, optname, (SysChar *)optval, optlen);
-  if (r < 0) {
-
-  }
-
+  r = setsockopt(s->fd, level, optname, (SysChar *)optval, optlen);
   return r;
 }
 
@@ -42,8 +39,9 @@ SysInt sys_socket_listen(SysSocket *s, SysInt backlog) {
 }
 
 SysSocket* sys_socket_real_accept(SysSocket *s, struct sockaddr *addr, socklen_t *addrlen) {
-  sys_return_val_if_fail(s != NULL, NULL);
   SOCKET fd;
+
+  sys_return_val_if_fail(s != NULL, NULL);
 
   fd = accept(s->fd, addr, addrlen);
   if(fd == INVALID_SOCKET) {
@@ -55,12 +53,10 @@ SysSocket* sys_socket_real_accept(SysSocket *s, struct sockaddr *addr, socklen_t
 }
 
 SysInt sys_socket_real_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
+  SysInt r;
   sys_return_val_if_fail(s != NULL, -1);
 
-  SysInt r = bind(s->fd, addr, addrlen);
-  if (r < 0) {
-
-  }
+  r = bind(s->fd, addr, addrlen);
 
   return r;
 }
@@ -76,12 +72,10 @@ void sys_freeaddrinfo(struct addrinfo *res) {
 }
 
 SysInt sys_socket_real_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen) {
+  SysInt r;
   sys_return_val_if_fail(s != NULL, -1);
 
-  SysInt r = connect(s->fd, addr, addrlen);
-  if (r == SOCKET_ERROR) {
-
-  }
+  r = connect(s->fd, addr, addrlen);
 
   return r;
 }

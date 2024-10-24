@@ -1,4 +1,5 @@
 #include <System/Platform/Common/SysThreadPrivate.h>
+#include <System/Platform/Win32/SysThreadWin32.h>
 #include <System/Utils/SysStr.h>
 
 
@@ -347,8 +348,6 @@ sys_private_replace (SysPrivate *key,
     sys_error_N ("error %s during %s",	GetLastError (), #what);		\
   }SYS_STMT_END
 
-#define SYS_MUTEX_SIZE (sizeof (SysPointer))
-
 typedef BOOL (__stdcall *GTryEnterCriticalSectionFunc) (CRITICAL_SECTION *);
 
 typedef struct
@@ -663,9 +662,7 @@ sys_system_thread_detach (void)
   while (dtors_called);
 }
 
-void
-sys_thread_win32_process_detach (void)
-{
+void sys_thread_win32_process_detach (void) {
 #ifndef _MSC_VER
   if (SetThreadName_VEH_handle != NULL)
     {

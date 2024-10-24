@@ -179,11 +179,13 @@ static SysBool win32_execute_child(SysSubProcessWin32 *pwin32,
 static SysSubProcessWin32 *sys_real_subprocess_internal(SysSubProcessOption* option) {
   sys_return_val_if_fail(option != NULL, NULL);
 
-  SysSubProcessWin32 *pwin32 = sys_new0(SysSubProcessWin32, 1);
+  SysSubProcessWin32 *pwin32;
 
   HANDLE std0read = NULL, std0write = NULL;
   HANDLE std1read = NULL, std1write = NULL;
   HANDLE std2read = NULL, std2write = NULL;
+
+  pwin32 = sys_new0(SysSubProcessWin32, 1);
 
   win32_get_handle(
     &std0read, &std0write,
@@ -209,9 +211,9 @@ static SysSubProcessWin32 *sys_real_subprocess_internal(SysSubProcessOption* opt
 }
 
 SysSubProcess* sys_real_subprocess_new(const SysChar *cmd[]) {
-  sys_return_val_if_fail(cmd != NULL, NULL);
-
   SysSubProcessOption option = { 0 };
+
+  sys_return_val_if_fail(cmd != NULL, NULL);
 
   option.cmd = cmd;
 
@@ -219,16 +221,20 @@ SysSubProcess* sys_real_subprocess_new(const SysChar *cmd[]) {
 }
 
 SysSubProcess* sys_real_subprocess_new_option(SysSubProcessOption* option) {
+  SysSubProcessWin32 *pwin32;
+
   sys_return_val_if_fail(option != NULL, NULL);
 
-  SysSubProcessWin32 *pwin32 = sys_real_subprocess_internal(option);
+  pwin32 = sys_real_subprocess_internal(option);
   return (SysSubProcess *)pwin32;
 }
 
 void sys_real_subprocess_terminate(SysSubProcess *sub) {
+  SysSubProcessWin32 *pwin32;
+
   sys_return_if_fail(sub != NULL);
 
-  SysSubProcessWin32 *pwin32 = (SysSubProcessWin32 *)sub;
+  pwin32= (SysSubProcessWin32 *)sub;
 
   TerminateProcess(pwin32->s_pi.hProcess, 300);
   CloseHandle_N(pwin32->s_pi.hProcess);

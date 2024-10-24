@@ -46,7 +46,7 @@ SysSSize sys_read(SysInt fd, SysPointer buf, SysSize mcount) {
 }
 
 const SysChar *sys_exe_path(void) {
-  SysInt nlen;
+  SysULong nlen;
   SysChar *sp;
 
   sp = &exepath[0];

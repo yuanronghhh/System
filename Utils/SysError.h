@@ -4,7 +4,7 @@
 #include <System/Fundamental/SysCommon.h>
 
 #define sys_assert(expr) assert(expr)
-#if __GNUC__ >= 5
+#if defined(__GNUC__) && (__GNUC__ >= 5)
   #define sys_assert_not_reached()          SYS_STMT_START { (void) 0; __builtin_unreachable (); } SYS_STMT_END
 #elif defined (_MSC_VER)
   #define sys_assert_not_reached()          SYS_STMT_START { (void) 0; __assume (0); } SYS_STMT_END
@@ -60,7 +60,7 @@ struct _SysError {
   SysInt line;
 };
 
-#if SYS_OS_ANDROID
+#if defined(SYS_OS_ANDROID)
 void sys_set_android_log_tag(const SysChar *tag);
 #endif
 

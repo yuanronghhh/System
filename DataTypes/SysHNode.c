@@ -519,6 +519,9 @@ void sys_hnode_traverse (SysHNode    *root,
     case SYS_LEVEL_ORDER:
       sys_hnode_depth_traverse_level (root, flags, depth, func, user_data);
       break;
+    default:
+      sys_warning_N("Bad SYS_LEVEL_ORDER: %d", order);
+      break;
   }
 }
 

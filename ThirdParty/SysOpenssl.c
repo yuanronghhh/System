@@ -186,7 +186,7 @@ static SysInt ssl_verify_callback(SysInt ok, X509_STORE_CTX* x509_store)
   return 1;
 }
 
-SSL_CTX* ssl_ctx_create_server(const SysChar* signed_file, const SysChar* priv_file) {
+static SSL_CTX* ssl_ctx_create_server(const SysChar* signed_file, const SysChar* priv_file) {
   SSL_CTX* ctx = SSL_CTX_new(SSLv23_server_method());
 
   SSL_CTX_set_ex_data(ctx, server_conf_index, NULL);
@@ -219,7 +219,7 @@ fail:
   return NULL;
 }
 
-SSL_CTX* ssl_ctx_create_client(const SysChar* ca_file, const SysChar* priv_file) {
+static SSL_CTX* ssl_ctx_create_client(const SysChar* ca_file, const SysChar* priv_file) {
   SSL_CTX* ctx = SSL_CTX_new(SSLv23_client_method());
 
   STACK_OF(X509_NAME)* list = NULL;

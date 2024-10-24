@@ -859,7 +859,7 @@ void sys_ptr_array_insert(SysPtrArray *array,
     sys_ptr_array_maybe_expand(rarray, 1);
 
     if (index_ < 0)
-        index_ = rarray->len;
+        index_ = (SysInt)rarray->len;
 
     if ((SysUInt)index_ < rarray->len)
         memmove(&(rarray->pdata[index_ + 1]),

@@ -5,16 +5,8 @@
 
 SYS_BEGIN_DECLS
 
-#if defined(USE_DEBUGGER) && SYS_OS_WIN32
-  #if !defined(_DEBUG)
-    #define _DEBUG SYS_DEBUG
-  #endif 
-  #include "vld.h"
-  #define SYS_LEAK_IGNORE_BEGIN VLDGlobalDisable()
-  #define SYS_LEAK_IGNORE_END VLDGlobalEnable()
-#else
-  #define SYS_LEAK_IGNORE_BEGIN
-  #define SYS_LEAK_IGNORE_END
+#if defined(SYS_OS_WIN32)
+  #include <System/ThirdParty/SysVld.h>
 #endif
 
 #define sys_align_up(o, base) (((o)+ (base - 1)) & ~((base) - 1))
@@ -28,9 +20,9 @@ SYS_BEGIN_DECLS
 
 #define sys_alloca(size)  alloca (size)
 
-#define sys_new(struct_type, n_structs) (struct_type *)sys_malloc((n_structs) * sizeof(struct_type))
-#define sys_new0(struct_type, n_structs) (struct_type *)sys_malloc0((n_structs) * sizeof(struct_type))
-#define sys_renew(struct_type, ptr, n_structs) (struct_type *)sys_realloc(ptr, (n_structs) * sizeof(struct_type))
+#define sys_new(struct_type, n_structs) (struct_type *)sys_malloc(((SysSize)n_structs) * sizeof(struct_type))
+#define sys_new0(struct_type, n_structs) (struct_type *)sys_malloc0(((SysSize)n_structs) * sizeof(struct_type))
+#define sys_renew(struct_type, ptr, n_structs) (struct_type *)sys_realloc(ptr, ((SysSize)n_structs) * sizeof(struct_type))
 
 #define sys_slice_new(type) sys_new(type, 1)
 #define sys_slice_new0(type) sys_new0(type, 1)

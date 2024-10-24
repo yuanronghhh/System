@@ -34,9 +34,9 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,DWORD fdwReason, LPVOID lpvReserved) {
 }
 
 void sys_real_init_console(void) {
-  SetConsoleOutputCP(65001);
+  CONSOLE_FONT_INFOEX cfi = {0};
 
-  CONSOLE_FONT_INFOEX cfi;
+  SetConsoleOutputCP(65001);
   cfi.cbSize = sizeof(cfi);
   cfi.nFont = 0;
   cfi.dwFontSize.X = 0;
@@ -151,10 +151,10 @@ void sys_real_usleep(unsigned long mseconds) {
 }
 
 SysPointer sys_real_dlopen(const SysChar *filename) {
-  sys_return_val_if_fail(filename != NULL, NULL);
-
   HINSTANCE handle;
   wchar_t *wname;
+
+  sys_return_val_if_fail(filename != NULL, NULL);
 
   wname = sys_mbyte_to_wchar(filename, NULL);
   handle = LoadLibraryW(wname);
@@ -169,9 +169,11 @@ SysPointer sys_real_dlopen(const SysChar *filename) {
 }
 
 SysPointer sys_real_dlmodule(const SysChar* name) {
+  HMODULE handle;
+
   sys_return_val_if_fail(name != NULL, NULL);
 
-  HMODULE handle = GetModuleHandle(name);
+  handle = GetModuleHandle(name);
   if (!handle) {
     sys_warning_N("get module failed: %s.", name);
     return NULL;
@@ -181,10 +183,12 @@ SysPointer sys_real_dlmodule(const SysChar* name) {
 }
 
 SysPointer sys_real_dlsymbol(void *handle, const SysChar *symbol) {
+  SysPointer p;
+
   sys_return_val_if_fail(handle != NULL, NULL);
   sys_return_val_if_fail(symbol != NULL, NULL);
 
-  SysPointer p = (SysPointer)GetProcAddress(handle, symbol);
+  p = (SysPointer)GetProcAddress(handle, symbol);
   if (!p) {
     sys_warning_N("dlsymbol failed: %p,%s.", handle, symbol);
     return NULL;
@@ -212,7 +216,7 @@ SysChar **sys_real_backtrace_string(SysInt *size) {
   HANDLE         process;
   SysInt dp = 0;
 
-  IMAGEHLP_LINE lineInfo = { sizeof(IMAGEHLP_LINE) };
+  IMAGEHLP_LINE lineInfo = {0};
   process = GetCurrentProcess();
 
   SymInitialize(process, NULL, true);
