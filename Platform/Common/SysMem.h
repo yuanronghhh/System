@@ -6,7 +6,12 @@
 SYS_BEGIN_DECLS
 
 #if defined(SYS_OS_WIN32)
+  #define SYS_LEAK_IGNORE_BEGIN VLDGlobalDisable()
+  #define SYS_LEAK_IGNORE_END VLDGlobalEnable()
   #include <System/ThirdParty/SysVld.h>
+#else 
+  #define SYS_LEAK_IGNORE_BEGIN
+  #define SYS_LEAK_IGNORE_END
 #endif
 
 #define sys_align_up(o, base) (((o)+ (base - 1)) & ~((base) - 1))

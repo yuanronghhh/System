@@ -13,12 +13,6 @@ SYS_BEGIN_DECLS
   #pragma warning(push)
   #include <vld.h>
   #pragma warning(pop)
-
-  #define SYS_LEAK_IGNORE_BEGIN VLDGlobalDisable()
-  #define SYS_LEAK_IGNORE_END VLDGlobalEnable()
-#else
-  #define SYS_LEAK_IGNORE_BEGIN
-  #define SYS_LEAK_IGNORE_END
 #endif
 
 

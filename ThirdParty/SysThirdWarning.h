@@ -1,35 +1,18 @@
 #if defined(__clang__)
-#pragma clang diagnostic ignored "-Wunused-function"
-#pragma clang diagnostic ignored "-Wunused-variable"
-#pragma clang diagnostic ignored "-Wreserved-macro-identifier"
-#pragma clang diagnostic ignored "-Wnonportable-system-include-path"
-#pragma clang diagnostic ignored "-Wreserved-identifier"
-#pragma clang diagnostic ignored "-Wstrict-prototypes"
-#pragma clang diagnostic ignored "-Wcast-function-type-strict"
-#pragma clang diagnostic ignored "-Wlanguage-extension-token"
-#pragma clang diagnostic ignored "-Wdocumentation-unknown-command"
-#pragma clang diagnostic ignored "-Wdocumentation"
-#pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
-#pragma clang diagnostic ignored "-Wmissing-variable-declarations"
-#pragma clang diagnostic ignored "-Wbad-function-cast"
-#pragma clang diagnostic ignored "-Wlanguage-extension-token"
-#pragma clang diagnostic ignored "-Wcast-function-type"
-#pragma clang diagnostic ignored "-Wunused-macros"
-#endif
-
-#if defined(__GNUC__)
-#pragma gcc diagnostic ignored "-Wunused-function"
-#pragma gcc diagnostic ignored "-Wunused-variable"
-#pragma gcc diagnostic ignored "-Wreserved-macro-identifier"
-#pragma gcc diagnostic ignored "-Wnonportable-system-include-path"
-#pragma gcc diagnostic ignored "-Wreserved-identifier"
-#pragma gcc diagnostic ignored "-Wstrict-prototypes"
-#pragma gcc diagnostic ignored "-Wcast-function-type-strict"
-#pragma gcc diagnostic ignored "-Wlanguage-extension-token"
-#pragma gcc diagnostic ignored "-Wdocumentation-unknown-command"
-#pragma gcc diagnostic ignored "-Wdocumentation"
-#pragma gcc diagnostic ignored "-Wunsafe-buffer-usage"
-#pragma gcc diagnostic ignored "-Wmissing-variable-declarations"
-#pragma gcc diagnostic ignored "-Wbad-function-cast"
-#pragma gcc diagnostic ignored "-Wlanguage-extension-token"
+_Pragma("clang diagnostic push")
+_Pragma("clang diagnostic ignored \"-Wunused-function\"")
+_Pragma("clang diagnostic ignored \"-Wunused-variable\"")
+_Pragma("clang diagnostic ignored \"-Wreserved-macro-identifier\"")
+_Pragma("clang diagnostic ignored \"-Wnonportable-system-include-path\"")
+_Pragma("clang diagnostic ignored \"-Wreserved-identifier\"")
+_Pragma("clang diagnostic ignored \"-Wstrict-prototypes\"")
+_Pragma("clang diagnostic ignored \"-Wcast-function-type-strict\"")
+_Pragma("clang diagnostic ignored \"-Wdocumentation-unknown-command\"")
+_Pragma("clang diagnostic ignored \"-Wdocumentation\"")
+_Pragma("clang diagnostic ignored \"-Wunsafe-buffer-usage\"")
+_Pragma("clang diagnostic ignored \"-Wmissing-variable-declarations\"")
+_Pragma("clang diagnostic ignored \"-Wbad-function-cast\"")
+_Pragma("clang diagnostic ignored \"-Wlanguage-extension-token\"")
+_Pragma("clang diagnostic ignored \"-Wcast-function-type\"")
+_Pragma("clang diagnostic ignored \"-Wunused-macros\"")
 #endif

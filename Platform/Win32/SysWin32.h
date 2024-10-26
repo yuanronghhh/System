@@ -5,8 +5,6 @@
 extern "C" {
 #endif
 
-#pragma warning(push)
-#include <System/ThirdParty/SysThirdWarning.h>
 #include <System/Platform/Win32/dirent.h>
 #include <shellapi.h>
 #include <Psapi.h>
@@ -20,7 +18,6 @@ extern "C" {
 #include <WS2tcpip.h>
 #include <shlobj_core.h>
 #include <intrin.h>
-#pragma warning(pop)
 
 #define SYS_OS_WIN32 1
 #define SYS_API __declspec(dllexport)

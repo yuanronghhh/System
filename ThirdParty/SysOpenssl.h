@@ -5,11 +5,8 @@
 
 SYS_BEGIN_DECLS
 
-#pragma warning(push)
-#include <System/ThirdParty/SysThirdWarning.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
-#pragma warning(pop)
 
 SYS_API void sys_ssl_setup(void);
 SYS_API void sys_ssl_teardown(void);
