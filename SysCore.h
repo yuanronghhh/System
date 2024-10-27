@@ -41,7 +41,7 @@
 #include <System/Utils/SysPath.h>
 #include <System/Utils/SysStr.h>
 #include <System/Utils/SysEnum.h>
-#include <System/Utils/SysFile.h>
+#include <System/Platform/Common/SysFile.h>
 #include <System/Utils/SysTextIO.h>
 
 #if USE_OPENSSL

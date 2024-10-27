@@ -23,7 +23,7 @@ SysBool sys_atomic_int_dec(SysInt *x) {
   return sys_atomic_int_dec_and_test(x);
 }
 
-SysBool sys_atomic_cmpxchg(SysInt *x, SysInt o, SysInt n) {
+SysBool sys_atomic_int_cmpxchg(SysInt *x, SysInt o, SysInt n) {
   SysInt gaicae_oldval = (o);
 
   return __atomic_compare_exchange_n ((x), (void *) (&(gaicae_oldval)), (n), false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST) ? true : false;

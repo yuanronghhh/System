@@ -9,6 +9,7 @@ typedef struct _SysFileState SysFileState;
 
 struct _SysFileState {
   SysSize st_size;
+  SysBool is_dir;
 };
 
 #define sys_fappend(fp, line) sys_fwrite_string(fp, line, sys_strlen(s, MAX_LINE))
@@ -35,6 +36,10 @@ SYS_API void sys_fcloseall(void);
 SYS_API SysBool sys_fstat(FILE*  fp, SysFileState* state);
 SYS_API const SysChar* sys_exe_path(void);
 SYS_API SysBool sys_file_get_contents (const SysChar *filename, SysChar **contents, SysSize *length, SysError **error);
+SYS_API SysBool sys_file_is_dir (const SysChar  *filename);
+
+SYS_API SysBool sys_file_state_is_dir (SysFileState *state);
+SysBool sys_file_state_get_by_filename(const SysChar *filename, SysFileState* state);
 
 SYS_END_DECLS
 

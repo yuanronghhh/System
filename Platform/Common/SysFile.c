@@ -1,9 +1,21 @@
-#include <System/Utils/SysFile.h>
+#include <System/Platform/Common/SysFile.h>
 #include <System/Utils/SysStr.h>
 
 #define LINE_BLOCK 512
 
+SysBool sys_file_is_dir (const SysChar *filename) {
+  SysFileState fs;
+
+  if (sys_file_state_get_by_filename (filename, &fs) == 0) {
+    return false;
+  }
+
+  return sys_file_state_is_dir(&fs);
+}
+
 SysBool sys_fstat(FILE* fp, SysFileState* state) {
+  sys_return_val_if_fail(state != NULL, false);
+
   SysInt fno;
   struct stat _fstate;
 
@@ -176,7 +188,7 @@ SysBool sys_file_get_contents (const SysChar *filename,
     if (nread < 0) {
       goto fail;
     }
-    
+
     if (nread > 0) {
       offset += nread;
     }

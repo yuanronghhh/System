@@ -31,7 +31,7 @@ struct _SysByteArray {
 #define sys_array_append_val(a,v)	  sys_array_append_vals (a, &(v), 1)
 #define sys_array_prepend_val(a,v)  sys_array_prepend_vals (a, &(v), 1)
 #define sys_array_insert_val(a,i,v) sys_array_insert_vals (a, i, &(v), 1)
-#define sys_array_index(a,t,i)      (((t*) (void *) (a)->data) [(i)])
+#define sys_array_index(a,t,i)      (((t*) (void *) (a)->pdata) [(i)])
 
 SYS_API SysArray* sys_array_new(SysBool zero_terminated, SysBool clear_, SysUInt element_size);
 SYS_API SysPointer sys_array_steal(SysArray *array, SysSize *len);

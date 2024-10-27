@@ -73,7 +73,6 @@ def rename_glib(file):
             .replace("GThread", "SysThread")\
             .replace("gsize", "SysSize")\
             .replace("GPrivate", "SysPrivate")\
-            .replace("gint", "SysInt")\
             .replace("gushort", "SysUShort")\
             .replace("guint", "SysUInt")\
             .replace("gchar", "SysChar")\
@@ -106,6 +105,8 @@ def rename_glib(file):
             .replace("GPollFD", "SysPollFD")\
             .replace("GWakeup", "SysWakeup")\
             .replace("GCompareDataFunc", "SysCompareDataFunc")\
+            .replace("GLIB_AVAILABLE_IN_2_58\n", "")\
+            .replace("GLIB_AVAILABLE_IN_2_68\n", "")\
             .replace("GLIB_AVAILABLE_IN_2_46\n", "")\
             .replace("GLIB_AVAILABLE_STATIC_INLINE_IN_2_70\n", "")\
             .replace("GLIB_AVAILABLE_IN_2_74\n", "")\
@@ -115,8 +116,13 @@ def rename_glib(file):
             .replace("GIOCondition", "SysIOCondition")\
             .replace("GUnixSignalWatchSource", "SysUnixSignalWatchSource")\
             .replace("G_", "SYS_")\
-            .replace("g_", "sys_")
-
+            .replace("g_", "sys_")\
+            .replace("gint", "SysInt")\
+            .replace("guchar", "SysUChar")\
+            .replace("GINT", "SYSINT")\
+            .replace("GArray", "SysArray")\
+            .replace("GTimeZone", "SysTimeZone")\
+            .replace("GTimeType", "SysTimeType")
 
     f.seek(0)
     f.truncate()
@@ -124,7 +130,5 @@ def rename_glib(file):
     f.close()
 
 if __name__ == '__main__':
-    # rename_tbox("/home/greyhound/Git/tbox/src/tbox/object/param.c")
-    # rename_tbox("/home/greyhound/Git/tbox/src/tbox/object/tobject.c")
-    rename_tbox("/home/greyhound/Git/tbox/src/demo/object/tobject.c")
-    # rename_glib("/home/greyhound/Git/CstDemo/Cst/System/DataTypes/SysAsyncQueue.c")
+    rename_glib(Path("System/Platform/Unix/SysFileUnix.c").as_posix())
+    # rename_glib("/home/greyhound/Git/CstDemo/Cst/System/DataTypes/SysTimeZone.h")

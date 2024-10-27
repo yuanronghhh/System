@@ -1,4 +1,4 @@
-#include <System/Utils/SysFile.h>
+#include <System/Platform/Common/SysFile.h>
 #include <System/Utils/SysPath.h>
 
 static SysChar exepath[MAX_PATH];
@@ -60,4 +60,28 @@ const SysChar *sys_exe_path(void) {
 
 void sys_fcloseall(void) {
   _fcloseall();
+}
+
+SysChar *sys_file_read_link(const SysChar  *filename, SysError **error) {
+  sys_return_val_if_fail(filename == NULL, NULL);
+
+  sys_warning_N("%s", "not implements");
+
+  return NULL;
+}
+
+SysBool sys_file_state_get_by_filename(const SysChar *filename, SysFileState* state) {
+  SysInt fno;
+  struct stat _fstate;
+
+  sys_return_val_if_fail(state != NULL, false);
+  sys_return_val_if_fail(filename != NULL, false);
+
+  fno = stat(filename, &_fstate);
+  if (fno == -1) { return false; }
+
+  state->st_size = _fstate.st_size;
+  state->is_dir = S_ISDIR (_fstate.st_mode);
+
+  return true;
 }

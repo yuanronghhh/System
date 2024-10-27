@@ -1,6 +1,6 @@
 #include <System/Platform/Common/SysMemPrivate.h>
 #include <System/Utils/SysStr.h>
-#include <System/Utils/SysFile.h>
+#include <System/Platform/Common/SysFile.h>
 #include <System/Utils/SysError.h>
 
 static SysChar* g_leakfile = NULL;

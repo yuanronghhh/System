@@ -116,8 +116,6 @@ set(SRC
   ./Type/SysParam.h
   ./Type/SysParam.c
 
-  ./Utils/SysFile.h
-  ./Utils/SysFile.c
   ./Utils/SysStr.h
   ./Utils/SysStr.c
   ./Utils/SysEnum.h
@@ -131,6 +129,10 @@ set(SRC
   ./Utils/SysTextIO.h
   ./Utils/SysTextIO.c
 
+  ./Platform/Common/SysTimeZone.h
+  ./Platform/Common/SysTimeZone.c
+  ./Platform/Common/SysFile.h
+  ./Platform/Common/SysFile.c
   ./Platform/Common/SysMemPrivate.h
   ./Platform/Common/SysMem.h
   ./Platform/Common/SysMemMap.h

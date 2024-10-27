@@ -1,6 +1,6 @@
 #include <System/Utils/SysErrorPrivate.h>
 #include <System/Utils/SysStr.h>
-#include <System/Utils/SysFile.h>
+#include <System/Platform/Common/SysFile.h>
 #include <System/Platform/Common/SysThread.h>
 
 static SysChar* errColors[] = {
@@ -165,7 +165,7 @@ void sys_error_set(SYS_LOG_ARGS_N SysError**err, const SysChar* format, ...) {
 
   SysError* nerror = NULL;
   if ((*err) != NULL) {
-    sys_warning_N("Error was set but bot handle: %s\n", (*err)->message);
+    sys_warning_N("Error was set but not handle: %s\n", (*err)->message);
     sys_free((*err)->message);
     nerror = (*err);
   } else {

@@ -1,6 +1,6 @@
+#include <System/DataTypes/SysArray.h>
 #include <System/DataTypes/SysHashTable.h>
 #include <System/Utils/SysStr.h>
-#include <System/DataTypes/SysArray.h>
 
 /**
  * this code from glib array

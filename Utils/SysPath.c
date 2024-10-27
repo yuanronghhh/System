@@ -1,5 +1,5 @@
-#include <System/Utils/SysStr.h>
 #include <System/Utils/SysPathPrivate.h>
+#include <System/Utils/SysStr.h>
 
 /**
  * sys_getcwd: get current workspace.
