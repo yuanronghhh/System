@@ -13,25 +13,18 @@ SysBool sys_file_is_dir (const SysChar *filename) {
   return sys_file_state_is_dir(&fs);
 }
 
-SysBool sys_fstat(FILE* fp, SysFileState* state) {
-  sys_return_val_if_fail(state != NULL, false);
+SysInt sys_lstat(const SysChar *pathname, struct stat * state) {
+  sys_return_val_if_fail(state != NULL, -1);
+  sys_return_val_if_fail(pathname != NULL, -1);
 
-  SysInt fno;
-  struct stat _fstate;
+  return lstat(pathname, state);
+}
 
-  if (fp == NULL) {
-    printf("[Cannot Process NULL fp]\n");
-    return false;
-  }
+SysInt sys_fstat(FILE* fp, struct stat * state) {
+  sys_return_val_if_fail(state != NULL, -1);
+  sys_return_val_if_fail(fp != NULL, -1);
 
-  fno = fstat(fileno(fp), &_fstate);
-  if (fno == -1) {
-    return false;
-  }
-
-  state->st_size = _fstate.st_size;
-
-  return true;
+  return fstat(fileno(fp), state);
 }
 
 SysSize sys_fwrite(const void* buf, SysSize size, SysSize n, FILE* fp) {

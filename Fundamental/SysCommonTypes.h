@@ -138,5 +138,6 @@ typedef struct _SysElapse SysElapse;
 typedef struct _SysSocket SysSocket;
 typedef struct _SysSocketClass SysSocketClass;
 typedef struct _SysSsl SysSsl;
+typedef SysUInt32 SysQuark;
 
 #endif

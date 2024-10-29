@@ -2,6 +2,7 @@
 #include <System/Utils/SysStr.h>
 #include <System/Platform/Common/SysFile.h>
 #include <System/Platform/Common/SysThread.h>
+#include <System/DataTypes/SysQuark.h>
 
 static SysChar* errColors[] = {
   "\033[0m",
@@ -202,6 +203,14 @@ void sys_error_free(SysError* err) {
  */
 const SysChar* sys_strerror(SysInt errnum) {
   return sys_real_strerr(errnum);
+}
+
+SysBool sys_error_matches (const SysError *error,
+                 SysQuark        domain,
+                 SysInt          code) {
+  return error &&
+    error->domain == domain &&
+    error->code == code;
 }
 
 void sys_error_setup(void) {

@@ -487,10 +487,11 @@ zone_identifier_unix (void)
     }
   else
     {
-      not_a_symlink_to_zoneinfo = sys_error_matches (read_link_err,
-                                                   SYS_FILE_ERROR,
-                                                   SYS_FILE_ERROR_INVAL);
-      sys_clear_error (&read_link_err);
+      not_a_symlink_to_zoneinfo = true;
+      // not_a_symlink_to_zoneinfo = sys_error_matches (read_link_err,
+      //                                              SYS_FILE_ERROR,
+      //                                              SYS_FILE_ERROR_INVAL);
+      // sys_clear_error (&read_link_err);
     }
 
   if (resolved_identifier == NULL)
@@ -515,7 +516,7 @@ zone_identifier_unix (void)
                                         (resolved_identifier = zone_identifier_illumos ())
 #endif
                                             ))
-        sys_strchomp (resolved_identifier);
+        sys_str_trim_end (resolved_identifier, ' ');
       else
         {
           /* Error */
