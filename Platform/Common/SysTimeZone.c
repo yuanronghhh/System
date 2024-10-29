@@ -79,17 +79,6 @@ typedef struct
    MSWindows TIME_ZONE_INFORMATION struct. Also used to compose time
    zones from tzset-style identifiers.
  */
-typedef struct
-{
-  SysUInt        start_year;
-  SysInt32       std_offset;
-  SysInt32       dlt_offset;
-  TimeZoneDate dlt_start;
-  TimeZoneDate dlt_end;
-  SysChar std_name[NAME_SIZE];
-  SysChar dlt_name[NAME_SIZE];
-} TimeZoneRule;
-
 /* SysTimeZone's internal representation of a Daylight Savings (Summer)
    time interval.
  */
@@ -128,10 +117,6 @@ static SysTimeZone *tz_local = NULL;
 #define MAX_TZYEAR 2999 /* And it's not likely ever to go away, but
                            there's no point in getting carried
                            away. */
-
-#ifdef SYS_OS_UNIX
-static SysTimeZone *parse_footertz (const SysChar *, size_t);
-#endif
 
 /**
  * sys_time_zone_unref:
@@ -665,7 +650,7 @@ init_zone_from_iana_info (SysTimeZone *gtz,
       footerlen = footerlast + 1 - footer;
       if (footerlen != 2)
         {
-          footertz = parse_footertz (footer, footerlen);
+          footertz = sys_timezon_parse_footertz (footer, footerlen);
           sys_return_if_fail (footertz);
           extra_type_count = footertz->t_info->len;
           extra_time_count = footertz->transitions->len;
@@ -769,11 +754,11 @@ rule_from_windows_time_zone_info (TimeZoneRule *rule,
 {
   SysChar *std_name, *dlt_name;
 
-  std_name = sys_utf16_to_utf8 ((gunichar2 *)tzi->StandardName, -1, NULL, NULL, NULL);
+  std_name =  sys_wchar_to_mbyte ((SysUniChar2 *)tzi->StandardName, NULL);
   if (std_name == NULL)
     return false;
 
-  dlt_name = sys_utf16_to_utf8 ((gunichar2 *)tzi->DaylightName, -1, NULL, NULL, NULL);
+  dlt_name =  sys_wchar_to_mbyte ((SysUniChar2 *)tzi->DaylightName, NULL);
   if (dlt_name == NULL)
     {
       sys_free (std_name);
@@ -795,8 +780,8 @@ rule_from_windows_time_zone_info (TimeZoneRule *rule,
       rule->std_offset = -tzi->Bias * 60;
       rule->dlt_start.mon = 0;
     }
-  strncpy (rule->std_name, std_name, NAME_SIZE - 1);
-  strncpy (rule->dlt_name, dlt_name, NAME_SIZE - 1);
+  sys_strncpy (rule->std_name, std_name, NAME_SIZE - 1);
+  sys_strncpy (rule->dlt_name, dlt_name, NAME_SIZE - 1);
 
   sys_free (std_name);
   sys_free (dlt_name);
@@ -807,11 +792,11 @@ rule_from_windows_time_zone_info (TimeZoneRule *rule,
 static SysChar*
 windows_default_tzname (void)
 {
-  const gunichar2 *subkey =
+  const SysUniChar2 *subkey =
     L"SYSTEM\\CurrentControlSet\\Control\\TimeZoneInformation";
   HKEY key;
   SysChar *key_name = NULL;
-  gunichar2 *key_name_w = NULL;
+  SysUniChar2 *key_name_w = NULL;
   if (RegOpenKeyExW (HKEY_LOCAL_MACHINE, subkey, 0,
                      KEY_QUERY_VALUE, &key) == ERROR_SUCCESS)
     {
@@ -829,7 +814,7 @@ windows_default_tzname (void)
               key_name = NULL;
             }
           else
-            key_name = sys_utf16_to_utf8 (key_name_w, -1, NULL, NULL, NULL);
+            key_name = sys_utf16_to_utf8 (key_name_w, NULL);
         }
       RegCloseKey (key);
     }
@@ -882,14 +867,14 @@ rules_from_windows_time_zone (const SysChar   *identifier,
   SysChar *subkey = NULL;
   SysChar *subkey_dynamic = NULL;
   const SysChar *key_name;
-  const SysChar *resys_key =
+  SysChar resys_key[1024] = 
     "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Time Zones\\";
   TIME_ZONE_INFORMATION tzi;
   DWORD size;
   SysUInt rules_num = 0;
   RegTZI regtzi = { 0 }, regtzi_prev;
   WCHAR winsyspath[MAX_PATH];
-  gunichar2 *subkey_w, *subkey_dynamic_w;
+  SysUniChar2 *subkey_w, *subkey_dynamic_w;
 
   subkey_dynamic_w = NULL;
 
@@ -909,13 +894,13 @@ rules_from_windows_time_zone (const SysChar   *identifier,
   if (!key_name)
     return 0;
 
-  subkey = sys_strconcat (resys_key, key_name, NULL);
-  subkey_w = sys_utf8_to_utf16 (subkey, -1, NULL, NULL, NULL);
+  subkey = sys_strlcat (resys_key, sizeof(resys_key), key_name);
+  subkey_w = sys_utf8_to_utf16 (subkey, NULL);
   if (subkey_w == NULL)
     goto utf16_conv_failed;
 
-  subkey_dynamic = sys_strconcat (subkey, "\\Dynamic DST", NULL);
-  subkey_dynamic_w = sys_utf8_to_utf16 (subkey_dynamic, -1, NULL, NULL, NULL);
+  subkey_dynamic = sys_strlcat (subkey, sizeof(resys_key), "\\Dynamic DST");
+  subkey_dynamic_w = sys_utf8_to_utf16 (subkey_dynamic, NULL);
   if (subkey_dynamic_w == NULL)
     goto utf16_conv_failed;
 
@@ -1498,42 +1483,6 @@ parse_identifier_boundary (SysChar **pos, TimeZoneDate *target)
 }
 
 static SysBool
-set_tz_name (SysChar **pos, SysChar *buffer, SysUInt size)
-{
-  SysBool quoted = **pos == '<';
-  SysChar *name_pos = *pos;
-  SysUInt len;
-
-  sys_assert (size != 0);
-
-  if (quoted)
-    {
-      name_pos++;
-      do
-        ++(*pos);
-      while (sys_ascii_isalnum (**pos) || **pos == '-' || **pos == '+');
-      if (**pos != '>')
-        return false;
-    }
-  else
-    while (sys_ascii_isalpha (**pos))
-      ++(*pos);
-
-  /* Name should be three or more characters */
-  /* FIXME: Should return false if the name is too long.
-     This should simplify code later in this function.  */
-  if (*pos - name_pos < 3)
-    return false;
-
-  memset (buffer, 0, size);
-  /* name_pos isn't 0-terminated, so we have to limit the length expressly */
-  len = (SysUInt) (*pos - name_pos) > size - 1 ? size - 1 : (SysUInt) (*pos - name_pos);
-  strncpy (buffer, name_pos, len);
-  *pos += quoted;
-  return true;
-}
-
-static SysBool
 parse_identifier_boundaries (SysChar **pos, TimeZoneRule *tzr)
 {
   if (*(*pos)++ != ',')
@@ -1619,32 +1568,6 @@ rules_from_identifier (const SysChar   *identifier,
 
   return create_ruleset_from_rule (rules, &tzr);
 }
-
-#ifdef SYS_OS_UNIX
-static SysTimeZone *
-parse_footertz (const SysChar *footer, size_t footerlen)
-{
-  SysChar *tzstring = sys_strndup (footer + 1, footerlen - 2);
-  SysTimeZone *footertz = NULL;
-
-  /* FIXME: The allocation for tzstring could be avoided by
-     passing a SysSize identifier_len argument to rules_from_identifier
-     and changing the code in that function to stop assuming that
-     identifier is nul-terminated.  */
-  TimeZoneRule *rules;
-  SysUInt rules_num = rules_from_identifier (tzstring, &rules);
-
-  sys_free (tzstring);
-  if (rules_num > 1)
-    {
-      footertz = sys_slice_new0 (SysTimeZone);
-      init_zone_from_rules (footertz, rules, rules_num, NULL);
-      footertz->ref_count++;
-    }
-  sys_free (rules);
-  return footertz;
-}
-#endif
 
 /* Construction {{{1 */
 /**

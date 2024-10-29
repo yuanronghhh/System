@@ -5,29 +5,15 @@
 
 SYS_BEGIN_DECLS
 
-typedef struct _SysTimeZone SysTimeZone;
-
-/**
- * SysTimeType:
- * @SYS_TIME_TYPE_STANDARD: the time is in local standard time
- * @SYS_TIME_TYPE_DAYLIGHT: the time is in local daylight time
- * @SYS_TIME_TYPE_UNIVERSAL: the time is in UTC
- *
- * Disambiguates a given time in two ways.
- *
- * First, specifies if the given time is in universal or local time.
- *
- * Second, if the time is in local time, specifies if it is local
- * standard time or local daylight time.  This is important for the case
- * where the same local time occurs twice (during daylight savings time
- * transitions, for example).
- */
-typedef enum
-{
-  SYS_TIME_TYPE_STANDARD,
-  SYS_TIME_TYPE_DAYLIGHT,
-  SYS_TIME_TYPE_UNIVERSAL
-} SysTimeType;
+struct _TimeZoneRule {
+  SysUInt        start_year;
+  SysInt32       std_offset;
+  SysInt32       dlt_offset;
+  TimeZoneDate dlt_start;
+  TimeZoneDate dlt_end;
+  SysChar std_name[NAME_SIZE];
+  SysChar dlt_name[NAME_SIZE];
+};
 
 SysTimeZone *             sys_time_zone_new                                 (const SysChar *identifier);
 SysTimeZone *             sys_time_zone_new_identifier                      (const SysChar *identifier);

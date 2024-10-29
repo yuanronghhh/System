@@ -12,13 +12,23 @@ SysChar* sys_strstr(const SysChar *s, const SysChar* delim) {
   return strstr(s, delim);
 }
 
-void sys_str_trim_end(SysChar *s, const SysChar delim) {
-  sys_return_if_fail(s != NULL);
+SysBool sys_str_trim_end(SysChar *s, const SysChar delim) {
+  SysSize len;
 
-  SysChar * p = strrchr(s, delim);
-  if(!p) { return;}
+  sys_return_val_if_fail(s != NULL, false);
 
-  *p = '\0';
+  len = strlen(s);
+  while (len--) {
+    if(s[len] == ' ') {
+
+      s[len] = '\0';
+    } else {
+
+      break;
+    }
+  }
+
+  return true;
 }
 
 /**
@@ -128,12 +138,9 @@ void sys_strmcat(SysChar** v1, SysSize* v1_max, SysSize* len, const SysChar* v2)
 }
 
 /**
- * sys_strlcat: copy v2 to v1, return v1, return v1 if v1 not enough.
- * @v1:
- * @v1_max:
- * @v2:
+ * sys_strlcat: copy v2 to v1, return v1 if v1 not enough.
  *
- * Returns: void
+ * Returns: return v1
  */
 SysChar* sys_strlcat(SysChar* v1, SysSize v1_max, const SysChar* v2) {
   sys_return_val_if_fail(v1 != NULL, NULL);

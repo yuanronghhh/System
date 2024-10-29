@@ -17,6 +17,9 @@ SYS_BEGIN_DECLS
 SYS_API SysWChar * sys_mbyte_to_wchar(const SysChar * mbyte, SysInt * nsize);
 SYS_API SysChar* sys_wchar_to_mbyte(const SysWChar* wchar, SysInt * nsize);
 
+#define sys_utf16_to_utf8 sys_wchar_to_mbyte
+#define sys_utf8_to_utf16 sys_mbyte_to_wchar
+
 SYS_API SysDouble sys_str_to_double(const SysChar* str);
 SYS_API SysInt64 sys_str_to_int64(const SysChar* str);
 
@@ -47,7 +50,7 @@ SYS_API SysChar* sys_str_newsize(SysSize size);
 SYS_API void sys_strmcat(SysChar** v1, SysSize* v1_max, SysSize* len, const SysChar* v2);
 SYS_API SysChar* sys_strlcat(SysChar* v1, SysSize v1_max, const SysChar* v2);
 SYS_API SysInt sys_vsprintf(SysChar* str, SysSize size, const SysChar* format, va_list args);
-SYS_API void sys_str_trim_end(SysChar *s, const SysChar delim);
+SYS_API SysBool sys_str_trim_end(SysChar *s, const SysChar delim);
 SYS_API SysChar* sys_strstr(const SysChar *s, const SysChar* delim);
 
 SYS_API SysBool sys_str_override_c(SysChar* str, SysChar oldchar, SysChar newchar);

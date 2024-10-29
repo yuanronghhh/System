@@ -45,7 +45,6 @@ typedef bool SysBool;
 typedef int SysRef;
 typedef void* SysPointer;
 typedef int SysInt;
-typedef signed int SysInt32;
 typedef unsigned short SysUShort;
 typedef unsigned int SysUInt;
 typedef float SysFloat;
@@ -54,9 +53,6 @@ typedef unsigned char u_char;
 typedef unsigned char SysUChar;
 typedef unsigned char SysUInt8;
 typedef signed char SysInt8;
-typedef signed short SysInt16;
-typedef unsigned short SysUInt16;
-typedef unsigned int SysUInt32;
 typedef unsigned long SysULong;
 typedef long SysLong;
 typedef uintptr_t SysUIntPtr;
@@ -64,6 +60,8 @@ typedef double SysDouble;
 typedef size_t SysSize;
 typedef ssize_t SysSSize;
 typedef wchar_t SysWChar;
+
+typedef SysUInt16 SysUniChar2;
 
 #define SYS_STMT_START do
 #define SYS_STMT_END while(0)

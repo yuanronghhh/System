@@ -128,6 +128,16 @@ typedef enum _SYS_IO_ENUM {
   SYS_IO_DEV_NULL
 } SYS_IO_ENUM;
 
+typedef enum
+{
+  SYS_TIME_TYPE_STANDARD,
+  SYS_TIME_TYPE_DAYLIGHT,
+  SYS_TIME_TYPE_UNIVERSAL
+} SysTimeType;
+
+typedef struct _TimeZoneRule TimeZoneRule;
+typedef struct _SysTimeZone SysTimeZone;
+
 typedef struct _SysPtrArray SysPtrArray;
 typedef struct _SysArray SysArray;
 typedef struct _SysByteArray SysByteArray;

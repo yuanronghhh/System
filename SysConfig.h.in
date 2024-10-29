@@ -16,4 +16,9 @@ typedef unsigned long long SysUInt64;
 #define USE_DEBUGGER 1
 #define USE_OPENSSL 1
 
+typedef signed short SysInt16;
+typedef unsigned short SysUInt16;
+typedef signed int SysInt32;
+typedef unsigned int SysUInt32;
+
 #endif
