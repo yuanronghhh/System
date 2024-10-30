@@ -58,6 +58,13 @@ SysInt sys_close(SysInt fd) {
   return close(fd);
 }
 
+SysInt sys_lstat(const SysChar *pathname, struct stat * state) {
+  sys_return_val_if_fail(state != NULL, -1);
+  sys_return_val_if_fail(pathname != NULL, -1);
+
+  return lstat(pathname, state);
+}
+
 SysBool sys_file_state_is_dir (SysFileState *state) {
   sys_return_val_if_fail(state != NULL, false);
 

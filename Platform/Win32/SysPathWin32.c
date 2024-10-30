@@ -2,7 +2,6 @@
 #include <System/Utils/SysStr.h>
 #include <System/Utils/SysPathPrivate.h>
 
-
 SysChar *sys_real_getcwd(void) {
   wchar_t wbuf[MAX_PATH];
   DWORD len;
@@ -45,4 +44,55 @@ SysBool sys_real_path_is_absolute(const SysChar *path) {
   }
 
   return false;
+}
+
+const SysChar * sys_path_skip_root (const SysChar *file_name) {
+  sys_return_val_if_fail (file_name != NULL, NULL);
+
+  /* Skip \\server\share or //server/share */
+  if (SYS_IS_DIR_SEPARATOR (file_name[0]) &&
+      SYS_IS_DIR_SEPARATOR (file_name[1]) &&
+      file_name[2] &&
+      !SYS_IS_DIR_SEPARATOR (file_name[2]))
+    {
+      SysChar *p;
+      p = strchr (file_name + 2, SYS_DIR_SEPARATOR);
+
+      {
+        SysChar *q;
+
+        q = strchr (file_name + 2, '/');
+        if (p == NULL || (q != NULL && q < p))
+        p = q;
+      }
+
+      if (p && p > file_name + 2 && p[1])
+        {
+          file_name = p + 1;
+
+          while (file_name[0] && !SYS_IS_DIR_SEPARATOR (file_name[0]))
+            file_name++;
+
+          /* Possibly skip a backslash after the share name */
+          if (SYS_IS_DIR_SEPARATOR (file_name[0]))
+            file_name++;
+
+          return (SysChar *)file_name;
+        }
+    }
+
+  /* Skip initial slashes */
+  if (SYS_IS_DIR_SEPARATOR (file_name[0])) {
+    while (SYS_IS_DIR_SEPARATOR (file_name[0]))
+      file_name++;
+    return (SysChar *)file_name;
+  }
+
+  /* Skip X:\ */
+  if (isalpha (file_name[0]) &&
+      file_name[1] == ':' &&
+      SYS_IS_DIR_SEPARATOR (file_name[2]))
+    return (SysChar *)file_name + 3;
+
+  return NULL;
 }

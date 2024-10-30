@@ -129,8 +129,8 @@ set(SRC
   ./Utils/SysTextIO.h
   ./Utils/SysTextIO.c
 
-  ./Platform/Common/SysTimeZone.h
-  ./Platform/Common/SysTimeZone.c
+  # ./Platform/Common/SysTimeZone.h
+  # ./Platform/Common/SysTimeZone.c
   ./Platform/Common/SysFile.h
   ./Platform/Common/SysFile.c
   ./Platform/Common/SysMemPrivate.h

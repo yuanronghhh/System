@@ -27,3 +27,16 @@ SysBool sys_real_path_is_absolute(const SysChar *path) {
 
   return false;
 }
+
+const SysChar * sys_path_skip_root (const SysChar *file_name) {
+  sys_return_val_if_fail (file_name != NULL, NULL);
+
+  /* Skip initial slashes */
+  if (SYS_IS_DIR_SEPARATOR (file_name[0])) {
+    while (SYS_IS_DIR_SEPARATOR (file_name[0]))
+      file_name++;
+    return (SysChar *)file_name;
+  }
+
+  return NULL;
+}

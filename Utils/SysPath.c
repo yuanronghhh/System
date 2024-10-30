@@ -98,3 +98,4 @@ SysChar* sys_path_purename(const SysChar *path) {
 SysBool sys_path_is_absolute(const SysChar *path) {
   return sys_real_path_is_absolute(path);
 }
+

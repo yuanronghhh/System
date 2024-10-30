@@ -85,3 +85,56 @@ SysBool sys_file_state_get_by_filename(const SysChar *filename, SysFileState* st
 
   return true;
 }
+
+static int
+_g_win32_stat_utf8 (const SysChar       *filename,
+                    struct stat *buf,
+                    SysBool for_symlink)
+{
+  wchar_t *wfilename;
+  int result;
+  SysSize len;
+
+  if (filename == NULL)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+
+  len = strlen (filename);
+
+  while (len > 0 && SYS_IS_DIR_SEPARATOR (filename[len - 1]))
+    len--;
+
+  if (len <= 0 ||
+      (sys_path_is_absolute (filename) && len <= (SysSize) (g_path_skip_root (filename) - filename)))
+    len = strlen (filename);
+
+  wfilename = g_utf8_to_utf16 (filename, len, NULL, NULL, NULL);
+
+  if (wfilename == NULL)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+
+  result = _g_win32_stat_utf16_no_trailing_slashes (wfilename, buf, for_symlink);
+
+  g_free (wfilename);
+
+  return result;
+}
+
+int sys_win32_lstat_utf8 (const SysChar       *filename,
+                    struct stat *buf)
+{
+  return _g_win32_stat_utf8 (filename, buf, TRUE);
+}
+
+SysInt sys_lstat(const SysChar *filename, struct stat * state) {
+  sys_return_val_if_fail(state != NULL, -1);
+  sys_return_val_if_fail(filename != NULL, -1);
+
+  return sys_win32_lstat_utf8 (filename, state);
+}
+

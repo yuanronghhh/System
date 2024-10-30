@@ -22,6 +22,7 @@ extern "C" {
 #define SYS_OS_WIN32 1
 #define SYS_API __declspec(dllexport)
 #define PATH_SEP '\\'
+#define SYS_DIR_SEPARATOR PATH_SEP
 typedef SSIZE_T ssize_t;
 #define fileno _fileno
 #define __builtin_frame_address(x)  ((void)(x), _AddressOfReturnAddress())

@@ -7,6 +7,7 @@
 SYS_BEGIN_DECLS
 
 #define sys_path_join(...) _sys_strjoin("/", __VA_ARGS__, NULL)
+#define SYS_IS_DIR_SEPARATOR(c) ((c) == PATH_SEP || (c) == '/')
 
 #define sys_path_build_filename sys_path_join
 SYS_API SysChar* sys_path_name(const SysChar* path);

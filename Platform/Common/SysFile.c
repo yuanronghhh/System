@@ -13,13 +13,6 @@ SysBool sys_file_is_dir (const SysChar *filename) {
   return sys_file_state_is_dir(&fs);
 }
 
-SysInt sys_lstat(const SysChar *pathname, struct stat * state) {
-  sys_return_val_if_fail(state != NULL, -1);
-  sys_return_val_if_fail(pathname != NULL, -1);
-
-  return lstat(pathname, state);
-}
-
 SysInt sys_fstat(FILE* fp, struct stat * state) {
   sys_return_val_if_fail(state != NULL, -1);
   sys_return_val_if_fail(fp != NULL, -1);
