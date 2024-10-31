@@ -101,6 +101,23 @@ SysPointer sys_memdup(const SysPointer mem, SysUInt byte_size) {
   return new_mem;
 }
 
+SysPointer sys_memdup2 (const SysPointer mem,
+    SysSize byte_size) {
+  SysPointer new_mem;
+
+  if (mem && byte_size != 0) {
+
+    new_mem = sys_malloc (byte_size);
+    memcpy (new_mem, mem, byte_size);
+
+  } else {
+
+    new_mem = NULL;
+  }
+
+  return new_mem;
+}
+
 SysPointer sys_aligned_malloc(SysSize align, SysSize size) {
 
   return sys_real_aligned_malloc(align, size);

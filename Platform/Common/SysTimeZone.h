@@ -11,6 +11,19 @@ SYS_BEGIN_DECLS
  */
 #define SYS_TIME_ZONE_NAME_SIZE 33
 
+/* A Transition Date structure for TZ Rules, an intermediate structure
+   for parsing MSWindows and Environment-variable time zones. It
+   Generalizes MSWindows's SYSTEMTIME struct.
+ */
+struct _TimeZoneDate {
+  SysInt     year;
+  SysInt     mon;
+  SysInt     mday;
+  SysInt     wday;
+  SysInt     week;
+  SysInt32   offset;  /* hour*3600 + min*60 + sec; can be negative.  */
+};
+
 struct _TimeZoneRule {
   SysUInt        start_year;
   SysInt32       std_offset;

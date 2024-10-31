@@ -85,12 +85,18 @@ def rename_glib(file):
             .replace("GRWLock", "SysRWLock")\
             .replace("GRecMutex", "SysRecMutex")\
             .replace("compare_and_exchange", "cmpxchg")\
+            .replace("g_string", "sys_string")\
+            .replace("GString", "SysString")\
+            .replace("gstring", "string")\
+            .replace("gssize", "SysSize")\
+            .replace("gstr", "str")\
+            .replace("GBytes", "SysBytes")\
             .replace("g_strerror", "sys_strerr")\
             .replace("sys_set_error", "sys_error_set_N")\
             .replace("sys_strerror", "sys_strerr")\
-            .replace("sys_abort", "sys_abort_N")\
-            .replace("sys_warning", "sys_warning_N")\
-            .replace("sys_critical", "sys_abort_N")\
+            .replace("sys_abort ", "sys_abort_N ")\
+            .replace("sys_warning ", "sys_warning_N ")\
+            .replace("sys_critical ", "sys_abort_N ")\
             .replace("GPtrArray", "SysPtrArray")\
             .replace("GDestroyNotify", "SysDestroyFunc")\
             .replace("GHashTable", "SysHashTable")\
@@ -99,19 +105,34 @@ def rename_glib(file):
             .replace("GPoll", "SysPoll")\
             .replace("GSource", "SysSource")\
             .replace("GChildWatchSource", "SysChildWatchSource")\
+            .replace("G_GNUC_EXTENSION", "SYS_GNUC_EXTENSION")\
             .replace("GMain", "SysMain")\
             .replace("GWin32PollThreadData", "SysWin32PollThreadData")\
             .replace("GList", "SysList")\
             .replace("GPollFD", "SysPollFD")\
             .replace("GWakeup", "SysWakeup")\
             .replace("GCompareDataFunc", "SysCompareDataFunc")\
+            .replace("GBytes", "SysBytes")\
+            .replace("G_UNLIKELY", "SYS_UNLIKELY")\
+            .replace("G_LIKELY", "SYS_LIKELY")\
+            .replace("G_ALWAYS_INLINE", "SYS_INLINE")\
+            .replace("GLIB_AVAILABLE_IN_2_34\n", "")\
+            .replace("GLIB_AVAILABLE_IN_2_76\n", "")\
+            .replace("GLIB_AVAILABLE_IN_2_78\n", "")\
+            .replace("GLIB_AVAILABLE_IN_2_56\n", "")\
             .replace("GLIB_AVAILABLE_IN_2_58\n", "")\
             .replace("GLIB_AVAILABLE_IN_2_68\n", "")\
             .replace("GLIB_AVAILABLE_IN_2_46\n", "")\
             .replace("GLIB_AVAILABLE_STATIC_INLINE_IN_2_70\n", "")\
+            .replace("GLIB_AVAILABLE_IN_2_70\n", "")\
             .replace("GLIB_AVAILABLE_IN_2_74\n", "")\
             .replace("GLIB_AVAILABLE_IN_ALL\n", "")\
+            .replace("GLIB_AVAILABLE_IN_2_62\n", "")\
+            .replace("GLIB_AVAILABLE_ENUMERATOR_IN_2_74", "")\
             .replace("GLIB_.*", "")\
+            .replace("G_GNUC_WARN_UNUSED_RESULT\n", "")\
+            .replace("G_STRING", "SYS_STRING")\
+            .replace("G_MAXSIZE", "SYS_MAXSIZE")\
             .replace("GLIB_VAR", "")\
             .replace("GIOCondition", "SysIOCondition")\
             .replace("GUnixSignalWatchSource", "SysUnixSignalWatchSource")\
@@ -121,9 +142,43 @@ def rename_glib(file):
             .replace("GArray", "SysArray")\
             .replace("GTimeZone", "SysTimeZone")\
             .replace("GTimeType", "SysTimeType")\
+            .replace("GTimeSpan", "SysTimeSpan")\
             .replace("GDate", "SysDate")\
-            .replace("G_", "SYS_")\
+            .replace("g_date", "sys_date")\
+            .replace(" g_error", " sys_error_N")\
+            .replace("GByteArray", "SysByteArray")\
+            .replace("gconstpointer", "const SysPointer")\
+            .replace("gatomicrefcount", "SysRef")\
+            .replace(" MAX", " max")\
+            .replace(" MIN", " min")\
+            .replace(" ABS", " abs")\
+            .replace(" G_", " SYS_")\
+            .replace(" g_", " sys_")\
+            .replace("(g_", "(sys_")\
+            .replace("sys_atomic_ref_count", "sys_ref_count")\
+            .replace(" g_size", " sys_size")\
+            .replace("gdouble", "SysDouble")\
+            .replace("gunichar", "SysUniChar")\
+            .replace("g_mapped", "sys_mapped")\
+            .replace("GMapped", "SysMapped")\
+            .replace("sys_set_error", "sys_error_set_N")\
+            .replace("sys_getenv", "sys_env_get")\
+            .replace("sys_strcmp0", "sys_str_equal")\
+            .replace("sys_strerr", "sys_strerror")\
+            .replace(" _(", " SYS_(")\
+            .replace(" C_(", " SYS_C_(")\
+            .replace("glong ", "SysLong ")\
+            .replace("g_utf8", "sys_utf8")\
+            .replace("GUnicode", "SysUnicode")\
+            .replace("G_UNICODE", "SYS_UNICODE")\
+            .replace("GConvert", "SysConvert")\
+            .replace("GQuark", "SysQuark")\
+            .replace("g_quark", "sys_quark")\
+            .replace("g_intern", "sys_intern")\
+            .replace("g_iconv", "sys_iconv")\
+            .replace("g_charset", "sys_charset")\
             .replace("g_", "sys_")\
+            .replace("g_bytes", "sys_bytes")
 
     f.seek(0)
     f.truncate()
@@ -131,5 +186,4 @@ def rename_glib(file):
     f.close()
 
 if __name__ == '__main__':
-    rename_glib(Path("D:\GreyHound\PRIVATE\Git\CstDemo\System\DataTypes\SysString.h").as_posix())
-    # rename_glib("/home/greyhound/Git/CstDemo/Cst/System/DataTypes/SysTimeZone.h")
+    rename_glib(Path("System/Utils/SysConvert.c").as_posix())

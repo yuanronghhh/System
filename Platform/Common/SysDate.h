@@ -14,7 +14,6 @@ SYS_BEGIN_DECLS
  * Pennington <hp@pobox.com>
  */
 
-typedef SysInt32  GTime GLIB_DEPRECATED_TYPE_IN_2_62_FOR(SysDateTime);
 typedef SysUInt16 SysDateYear;
 typedef SysUInt8  SysDateDay;   /* day of the month */
 typedef struct _SysDate SysDate;
@@ -92,7 +91,6 @@ SysDate*       sys_date_new_dmy               (SysDateDay     day,
                                            SysDateYear    year);
 SysDate*       sys_date_new_julian            (SysUInt32      julian_day);
 void         sys_date_free                  (SysDate       *date);
-GLIB_AVAILABLE_IN_2_56
 SysDate*       sys_date_copy                  (const SysDate *date);
 
 /* check sys_date_valid() after doing an operation that might fail, like
@@ -140,15 +138,7 @@ void         sys_date_clear                 (SysDate       *date,
 void         sys_date_set_parse             (SysDate       *date,
                                            const SysChar *str);
 void         sys_date_set_time_t            (SysDate       *date,
-					   time_t       timet);
-SYS_GNUC_BEGIN_IGNORE_DEPRECATIONS
-GLIB_DEPRECATED_IN_2_62_FOR(sys_date_set_time_t)
-void         sys_date_set_time_val          (SysDate       *date,
-					   GTimeVal    *timeval);
-GLIB_DEPRECATED_FOR(sys_date_set_time_t)
-void         sys_date_set_time              (SysDate       *date,
-                                           GTime        time_);
-SYS_GNUC_END_IGNORE_DEPRECATIONS
+    time_t       timet);
 void         sys_date_set_month             (SysDate       *date,
                                            SysDateMonth   month);
 void         sys_date_set_day               (SysDate       *date,
@@ -190,7 +180,7 @@ SysUInt8       sys_date_get_sunday_weeks_in_year  (SysDateYear    year) SYS_GNUC
 /* Returns the number of days between the two dates.  If date2 comes
    before date1, a negative value is return. */
 SysInt         sys_date_days_between          (const SysDate *date1,
-					   const SysDate *date2);
+    const SysDate *date2);
 
 /* qsort-friendly (with a cast...) */
 SysInt         sys_date_compare               (const SysDate *lhs,
@@ -199,8 +189,8 @@ void         sys_date_to_struct_tm          (const SysDate *date,
                                            struct tm   *tm);
 
 void         sys_date_clamp                 (SysDate *date,
-					   const SysDate *min_date,
-					   const SysDate *max_date);
+    const SysDate *min_date,
+    const SysDate *max_date);
 
 /* Swap date1 and date2's values if date1 > date2. */
 void         sys_date_order                 (SysDate *date1, SysDate *date2);

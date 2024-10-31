@@ -4,6 +4,7 @@
 #include <System/Fundamental/SysCommon.h>
 
 #define sys_assert(expr) assert(expr)
+#define sys_warn_if_reached() sys_warning_N("%s", "code should not reached")
 #if defined(__GNUC__) && (__GNUC__ >= 5)
   #define sys_assert_not_reached()          SYS_STMT_START { (void) 0; __builtin_unreachable (); } SYS_STMT_END
 #elif defined (_MSC_VER)

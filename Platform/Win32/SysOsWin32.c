@@ -250,6 +250,23 @@ SysChar **sys_real_backtrace_string(SysInt *size) {
   return NULL;
 }
 
+SysInt64 sys_get_real_time (void)
+{
+  FILETIME ft;
+  SysUInt64 time64;
+
+  GetSystemTimeAsFileTime (&ft);
+  memmove (&time64, &ft, sizeof (FILETIME));
+
+  /* Convert from 100s of nanoseconds since 1601-01-01
+   * to Unix epoch. This is Y2038 safe.
+   */
+  time64 -= SYS_INT64_CONSTANT (116444736000000000);
+  time64 /= 10;
+
+  return time64;
+}
+
 void sys_real_setup(void) {
   WSADATA info;
   if (WSAStartup(MAKEWORD(1, 1), &info) != 0) {
@@ -260,4 +277,5 @@ void sys_real_setup(void) {
 void sys_real_teardown(void) {
   WSACleanup();
 }
+
 

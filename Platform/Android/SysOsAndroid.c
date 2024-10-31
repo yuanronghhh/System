@@ -115,3 +115,13 @@ SysChar **sys_real_backtrace_string(SysInt *size) {
   return s;
 #endif
 }
+
+SysInt64 sys_get_real_time (void) {
+  struct timeval r;
+
+  /* this is required on alpha, there the timeval structs are ints
+   * not longs and a cast only would fail horribly */
+  gettimeofday (&r, NULL);
+
+  return (((SysInt64) r.tv_sec) * 1000000) + r.tv_usec;
+}

@@ -106,6 +106,8 @@ set(SRC
   ./DataTypes/SysQuark.c
   ./DataTypes/SysString.c
   ./DataTypes/SysString.h
+  ./DataTypes/SysBytes.c
+  ./DataTypes/SysBytes.h
 
   ./Type/SysTypeCommon.h
   ./Type/SysTypeCommon.c
@@ -133,6 +135,8 @@ set(SRC
 
   ./Platform/Common/SysTimeZone.h
   ./Platform/Common/SysTimeZone.c
+  ./Platform/Common/SysDateTime.h
+  ./Platform/Common/SysDateTime.c
   ./Platform/Common/SysFile.h
   ./Platform/Common/SysFile.c
   ./Platform/Common/SysMemPrivate.h
@@ -146,10 +150,10 @@ set(SRC
   ./Platform/Common/SysAtomic.c
   ./Platform/Common/SysThread.c
   ./Platform/Common/SysThread.h
+  ./Platform/Common/SysThreadPrivate.h
   ./Platform/Common/SysSocket.c
   ./Platform/Common/SysSocket.h
   ./Platform/Common/SysSocketPrivate.h
-  ./Platform/Common/SysThreadPrivate.h
 
   ./Platform/Common/SysProcess.c
   ./Platform/Common/SysProcess.h

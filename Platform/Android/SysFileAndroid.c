@@ -1,5 +1,5 @@
-#include <System/Platform/Common/SysMem.h>
 #include <System/Platform/Common/SysFile.h>
+#include <System/Platform/Common/SysMem.h>
 
 static SysChar exe_path[MAX_PATH];
 

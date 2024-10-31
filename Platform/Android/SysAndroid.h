@@ -28,8 +28,9 @@ extern "C" {
 #include <malloc.h>
 #include <android/log.h>
 #include <jni.h>
+#include <sys/time.h>
 
-#define PATH_SEP "/"
+#define PATH_SEP '/'
 #ifndef MAX_PATH
   #define MAX_PATH 260
 #endif

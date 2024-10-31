@@ -1,11 +1,9 @@
 #ifndef __SYS_ARRAY_H__
 #define __SYS_ARRAY_H__
 
-#include <System/Fundamental/SysCommon.h>
+#include <System/Fundamental/SysCommonCore.h>
 
 SYS_BEGIN_DECLS
-
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
 struct _SysArray {
   void** pdata;

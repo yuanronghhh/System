@@ -19,8 +19,9 @@ struct _SysSArg {
 
 #define sys_sleep(ms) sys_usleep((unsigned long)ms)
 #define SYS_(text) text
+#define SYS_C_(Context,String) Context"\004"String
 #define SYS_BACKTRACE_SIZE 100
-#define CLAMP(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
+#define clamp(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
 
 SYS_API void sys_console_setup(void);
 SYS_API SysBool sys_console_is_utf8(void);
@@ -42,6 +43,7 @@ SYS_API SysUInt sys_nearest_pow(SysUInt num);
 SYS_API SysDouble sys_rand_double(void);
 SYS_API SysDouble sys_rand_double_range(SysDouble begin, SysDouble end);
 SYS_API SysChar **sys_backtrace_string(SysInt *size);
+SYS_API SysInt64 sys_get_real_time (void);
 
 SYS_API void sys_arg_init(SysSArg *self, SysInt argc, const SysChar* argv[]);
 SYS_API SysInt sys_arg_index(SysSArg *self, const SysChar *key, SysBool is_flag);

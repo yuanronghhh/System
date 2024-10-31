@@ -2,7 +2,7 @@
 #include <System/Utils/SysStr.h>
 #include <System/Utils/SysPathPrivate.h>
 
-SysChar *sys_real_getcwd(void) {
+SysChar *sys_real_path_getcwd(void) {
   wchar_t wbuf[MAX_PATH];
   DWORD len;
   SysChar *cwd;

@@ -167,19 +167,19 @@ SYS_API void _sys_once_init_leave (volatile SysPointer location, SysSize result)
 # define sys_once(once, func, arg) sys_once_impl ((once), (func), (arg))
 #endif
 
-#ifdef __GNUC__
+#if defined(__GNUC__)
 # define sys_once_init_enter(location) \
   (SYS_GNUC_EXTENSION ({                                               \
     SYS_STATIC_ASSERT (sizeof *(location) == sizeof (SysPointer));       \
     (void) (0 ? (SysPointer) *(location) : NULL);                      \
     (!sys_atomic_pointer_get (location) &&                             \
-     sys_once_init_enter (location));                                  \
+     _sys_once_init_enter (location));                                  \
   }))
 # define sys_once_init_leave(location, result) \
   (SYS_GNUC_EXTENSION ({                                               \
     SYS_STATIC_ASSERT (sizeof *(location) == sizeof (SysPointer));       \
     0 ? (void) (*(location) = (result)) : (void) 0;                  \
-    sys_once_init_leave ((location), (SysSize) (result));                \
+    _sys_once_init_leave ((location), (SysSize) (result));                \
   }))
 #else
 # define sys_once_init_enter(location) \

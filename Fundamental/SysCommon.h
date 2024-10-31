@@ -41,6 +41,8 @@
 
 #define UNUSED(o) ((void)o)
 #define SYS_INLINE inline
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+
 typedef bool SysBool;
 typedef int SysRef;
 typedef void* SysPointer;
@@ -62,6 +64,7 @@ typedef ssize_t SysSSize;
 typedef wchar_t SysWChar;
 
 typedef SysUInt16 SysUniChar2;
+typedef SysUInt32 SysUniChar;
 
 #define SYS_STMT_START do
 #define SYS_STMT_END while(0)
@@ -70,10 +73,22 @@ typedef SysUInt16 SysUniChar2;
 # define SYS_UNLIKELY(cond) (__builtin_expect ((cond), 0))
 # define SYS_LIKELY(cond) (__builtin_expect ((cond), 1))
 # define SYS_GNUC_CONST __attribute__ ((__const__))
+# define SYS_ALWAYS_INLINE __attribute__ ((__always_inline__))
+#define SYS_GNUC_EXTENSION __extension__
+#define sys_size_checked_mul(dest, a, b) \
+    (!__builtin_mul_overflow(a, b, dest))
+#define sys_size_checked_add(dest, a, b) \
+    (!__builtin_add_overflow(a, b, dest))
+#define SYS_STATIC_ASSERT(expr) _Static_assert (expr, "Expression evaluates to false")
+#define SYS_GNUC_MALLOC __attribute__ ((__malloc__))
+#define SYS_GNUC_PURE __attribute__((__pure__))
 #else
 # define SYS_GNUC_CONST
 # define SYS_UNLIKELY(cond) (cond)
 # define SYS_LIKELY(cond) (cond)
+# define SYS_ALWAYS_INLINE
+# define SYS_GNUC_EXTENSION
+#define SYS_GNUC_PURE
 #endif
 
 #define SYS_LOG_ARGS(func, ptr) __FILE__, __func__, __LINE__, #func, #ptr,

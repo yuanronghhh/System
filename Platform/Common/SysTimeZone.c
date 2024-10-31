@@ -1,7 +1,10 @@
 #include <System/Platform/Common/SysTimeZone.h>
-#include <System/Platform/Common/SysFile.h>
 #include <System/Platform/Common/SysThread.h>
+#include <System/Platform/Common/SysFile.h>
+#include <System/Platform/Common/SysDate.h>
+#include <System/Platform/Common/SysMappedFile.h>
 #include <System/DataTypes/SysArray.h>
+#include <System/DataTypes/SysBytes.h>
 #include <System/DataTypes/SysHashTable.h>
 #include <System/Utils/SysStr.h>
 #include <System/Utils/SysPath.h>
@@ -26,6 +29,9 @@
 typedef struct { SysChar bytes[8]; } SysInt64_be;
 typedef struct { SysChar bytes[4]; } SysInt32_be;
 typedef struct { SysChar bytes[4]; } SysUInt32_be;
+
+static SysBool parse_tz_boundary (const SysChar  *identifier, TimeZoneDate *boundary);
+static void find_relative_date (TimeZoneDate *buffer);
 
 static inline SysInt64 SysInt64_from_be (const SysInt64_be be) {
   SysInt64 tmp; memcpy (&tmp, &be, sizeof tmp); return SYSINT64_FROM_BE (tmp);
@@ -59,19 +65,6 @@ struct ttinfo
   SysInt32_be tt_gmtoff;
   SysUInt8    tt_isdst;
   SysUInt8    tt_abbrind;
-};
-
-/* A Transition Date structure for TZ Rules, an intermediate structure
-   for parsing MSWindows and Environment-variable time zones. It
-   Generalizes MSWindows's SYSTEMTIME struct.
- */
-struct _TimeZoneDate {
-  SysInt     year;
-  SysInt     mon;
-  SysInt     mday;
-  SysInt     wday;
-  SysInt     week;
-  SysInt32   offset;  /* hour*3600 + min*60 + sec; can be negative.  */
 };
 
 /* A MSWindows-style time zone transition rule. Generalizes the
@@ -112,8 +105,8 @@ static SysTimeZone *tz_default = NULL;
 SYS_LOCK_DEFINE_STATIC (tz_local);
 static SysTimeZone *tz_local = NULL;
 
-#define MIN_TZYEAR 1916 /* Daylight Savings started in WWI */
-#define MAX_TZYEAR 2999 /* And it's not likely ever to go away, but
+#define min_TZYEAR 1916 /* Daylight Savings started in WWI */
+#define max_TZYEAR 2999 /* And it's not likely ever to go away, but
                            there's no point in getting carried
                            away. */
 
@@ -511,17 +504,17 @@ zone_identifier_unix (void)
   else
     {
       /* Resolve relative path */
-      canonical_path = sys_canonicalize_filename (resolved_identifier, "/etc");
+      canonical_path = sys_path_canonicalize_filename (resolved_identifier, "/etc");
       sys_free (resolved_identifier);
       resolved_identifier = sys_steal_pointer (&canonical_path);
     }
 
-  tzdir = sys_getenv ("TZDIR");
+  tzdir = sys_env_get ("TZDIR");
   if (tzdir == NULL)
     tzdir = zone_info_base_dir ();
 
   /* Strip the prefix and slashes if possible. */
-  if (sys_str_has_prefix (resolved_identifier, tzdir))
+  if (sys_str_startswith (resolved_identifier, tzdir))
     {
       prefix_len = strlen (tzdir);
       while (*(resolved_identifier + prefix_len) == '/')
@@ -540,16 +533,15 @@ out:
   return resolved_identifier;
 }
 
-static GBytes*
-zone_info_unix (const SysChar *identifier,
+static SysBytes* zone_info_unix (const SysChar *identifier,
                 const SysChar *resolved_identifier)
 {
   SysChar *filename = NULL;
-  GMappedFile *file = NULL;
-  GBytes *zoneinfo = NULL;
+  SysMappedFile *file = NULL;
+  SysBytes *zoneinfo = NULL;
   const SysChar *tzdir;
 
-  tzdir = sys_getenv ("TZDIR");
+  tzdir = sys_env_get ("TZDIR");
   if (tzdir == NULL)
     tzdir = zone_info_base_dir ();
 
@@ -565,7 +557,7 @@ zone_info_unix (const SysChar *identifier,
       if (sys_path_is_absolute (identifier))
         filename = sys_strdup (identifier);
       else
-        filename = sys_build_filename (tzdir, identifier, NULL);
+        filename = sys_path_build_filename (tzdir, identifier, NULL);
     }
   else
     {
@@ -593,9 +585,406 @@ out:
   return zoneinfo;
 }
 
+static SysBool set_tz_name (SysChar **pos, SysChar *buffer, SysUInt size) {
+  SysBool quoted = **pos == '<';
+  SysChar *name_pos = *pos;
+  SysUInt len;
+
+  sys_assert (size != 0);
+
+  if (quoted)
+    {
+      name_pos++;
+      do
+        ++(*pos);
+      while (isalnum (**pos) || **pos == '-' || **pos == '+');
+      if (**pos != '>')
+        return false;
+    }
+  else
+    while (isalpha (**pos))
+      ++(*pos);
+
+  /* Name should be three or more characters */
+  /* FIXME: Should return false if the name is too long.
+     This should simplify code later in this function.  */
+  if (*pos - name_pos < 3)
+    return false;
+
+  memset (buffer, 0, size);
+  /* name_pos isn't 0-terminated, so we have to limit the length expressly */
+  len = (SysUInt) (*pos - name_pos) > size - 1 ? size - 1 : (SysUInt) (*pos - name_pos);
+  strncpy (buffer, name_pos, len);
+  *pos += quoted;
+  return true;
+}
+
+static SysBool
+parse_offset (SysChar **pos, SysInt32 *target)
+{
+  SysChar *buffer;
+  SysChar *target_pos = *pos;
+  SysBool ret;
+
+  while (**pos == '+' || **pos == '-' || **pos == ':' ||
+         (**pos >= '0' && '9' >= **pos))
+    ++(*pos);
+
+  buffer = sys_strndup (target_pos, *pos - target_pos);
+  ret = parse_constant_offset (buffer, target, false);
+  sys_free (buffer);
+
+  return ret;
+}
+
+static SysUInt
+create_ruleset_from_rule (TimeZoneRule **rules, TimeZoneRule *rule)
+{
+  *rules = sys_new0 (TimeZoneRule, 2);
+
+  (*rules)[0].start_year = min_TZYEAR;
+  (*rules)[1].start_year = max_TZYEAR;
+
+  (*rules)[0].std_offset = -rule->std_offset;
+  (*rules)[0].dlt_offset = -rule->dlt_offset;
+  (*rules)[0].dlt_start  = rule->dlt_start;
+  (*rules)[0].dlt_end = rule->dlt_end;
+  strcpy ((*rules)[0].std_name, rule->std_name);
+  strcpy ((*rules)[0].dlt_name, rule->dlt_name);
+  return 2;
+}
+
+static SysBool
+parse_identifier_boundary (SysChar **pos, TimeZoneDate *target)
+{
+  SysChar *buffer;
+  SysChar *target_pos = *pos;
+  SysBool ret;
+
+  while (**pos != ',' && **pos != '\0')
+    ++(*pos);
+  buffer = sys_strndup (target_pos, *pos - target_pos);
+  ret = parse_tz_boundary (buffer, target);
+  sys_free (buffer);
+
+  return ret;
+}
+
+
+static SysBool
+parse_identifier_boundaries (SysChar **pos, TimeZoneRule *tzr)
+{
+  if (*(*pos)++ != ',')
+    return false;
+
+  /* Start date */
+  if (!parse_identifier_boundary (pos, &(tzr->dlt_start)) || *(*pos)++ != ',')
+    return false;
+
+  /* End date */
+  if (!parse_identifier_boundary (pos, &(tzr->dlt_end)))
+    return false;
+  return true;
+}
+
+/*
+ * Creates an array of TimeZoneRule from a TZ environment variable
+ * type of identifier.  Should free rules afterwards
+ */
+static SysUInt
+rules_from_identifier (const SysChar   *identifier,
+                       TimeZoneRule **rules)
+{
+  SysChar *pos;
+  TimeZoneRule tzr;
+
+  sys_assert (rules != NULL);
+
+  *rules = NULL;
+
+  if (!identifier)
+    return 0;
+
+  pos = (SysChar*)identifier;
+  memset (&tzr, 0, sizeof (tzr));
+  /* Standard offset */
+  if (!(set_tz_name (&pos, tzr.std_name, SYS_TIME_ZONE_NAME_SIZE)) ||
+      !parse_offset (&pos, &(tzr.std_offset)))
+    return 0;
+
+  if (*pos == 0)
+    {
+      return create_ruleset_from_rule (rules, &tzr);
+    }
+
+  /* Format 2 */
+  if (!(set_tz_name (&pos, tzr.dlt_name, SYS_TIME_ZONE_NAME_SIZE)))
+    return 0;
+  parse_offset (&pos, &(tzr.dlt_offset));
+  if (tzr.dlt_offset == 0) /* No daylight offset given, assume it's 1
+                              hour earlier that standard */
+    tzr.dlt_offset = tzr.std_offset - 3600;
+  if (*pos == '\0')
+#ifdef SYS_OS_WIN32
+    /* Windows allows us to use the US DST boundaries if they're not given */
+    {
+      SysUInt i, rules_num = 0;
+
+      /* Use US rules, Windows' default is Pacific Standard Time */
+      if ((rules_num = rules_from_windows_time_zone ("Pacific Standard Time",
+                                                     NULL,
+                                                     rules)))
+        {
+          for (i = 0; i < rules_num - 1; i++)
+            {
+              (*rules)[i].std_offset = - tzr.std_offset;
+              (*rules)[i].dlt_offset = - tzr.dlt_offset;
+              strcpy ((*rules)[i].std_name, tzr.std_name);
+              strcpy ((*rules)[i].dlt_name, tzr.dlt_name);
+            }
+
+          return rules_num;
+        }
+      else
+        return 0;
+    }
+#else
+  return 0;
+#endif
+  /* Start and end required (format 2) */
+  if (!parse_identifier_boundaries (&pos, &tzr))
+    return 0;
+
+  return create_ruleset_from_rule (rules, &tzr);
+}
+
+static void
+fill_transition_info_from_rule (TransitionInfo *info,
+                                TimeZoneRule   *rule,
+                                SysBool        is_dst)
+{
+  SysInt offset = is_dst ? rule->dlt_offset : rule->std_offset;
+  SysChar *name = is_dst ? rule->dlt_name : rule->std_name;
+
+  info->gmt_offset = offset;
+  info->is_dst = is_dst;
+
+  if (name)
+    info->abbrev = sys_strdup (name);
+
+  else
+    info->abbrev = sys_strdup_printf ("%+03d%02d",
+                                      (int) offset / 3600,
+                                      (int) abs (offset / 60) % 60);
+}
+
+/* Offset is previous offset of local time. Returns 0 if month is 0 */
+static SysInt64
+boundary_for_year (TimeZoneDate *boundary,
+                   SysInt          year,
+                   SysInt32        offset)
+{
+  TimeZoneDate buffer;
+  SysDate date;
+  const SysUInt64 unix_epoch_start = 719163L;
+  const SysUInt64 seconds_per_day = 86400L;
+
+  if (!boundary->mon)
+    return 0;
+  buffer = *boundary;
+
+  if (boundary->year == 0)
+    {
+      buffer.year = year;
+
+      if (buffer.wday)
+      {
+        find_relative_date (&buffer);
+      }
+    }
+
+  sys_assert (buffer.year == year);
+  sys_date_clear (&date, 1);
+  sys_date_set_dmy (&date, buffer.mday, buffer.mon, buffer.year);
+  return ((sys_date_get_julian (&date) - unix_epoch_start) * seconds_per_day +
+          buffer.offset - offset);
+}
+
+
+
+static void
+init_zone_from_rules (SysTimeZone    *gtz,
+                      TimeZoneRule *rules,
+                      SysUInt         rules_num,
+                      SysChar        *identifier  /* (transfer full) */)
+{
+  SysUInt type_count = 0, trans_count = 0, info_index = 0;
+  SysUInt ri; /* rule index */
+  SysBool skip_first_std_trans = true;
+  SysInt32 last_offset;
+
+  type_count = 0;
+  trans_count = 0;
+
+  /* Last rule only contains max year */
+  for (ri = 0; ri < rules_num - 1; ri++)
+    {
+      if (rules[ri].dlt_start.mon || rules[ri].dlt_end.mon)
+        {
+          SysUInt rulespan = (rules[ri + 1].start_year - rules[ri].start_year);
+          SysUInt transitions = rules[ri].dlt_start.mon > 0 ? 1 : 0;
+          transitions += rules[ri].dlt_end.mon > 0 ? 1 : 0;
+          type_count += rules[ri].dlt_start.mon > 0 ? 2 : 1;
+          trans_count += transitions * rulespan;
+        }
+      else
+        type_count++;
+    }
+
+  gtz->name = sys_steal_pointer (&identifier);
+  gtz->t_info = sys_array_sized_new (false, true, sizeof (TransitionInfo), type_count);
+  gtz->transitions = sys_array_sized_new (false, true, sizeof (Transition), trans_count);
+
+  last_offset = rules[0].std_offset;
+
+  for (ri = 0; ri < rules_num - 1; ri++)
+    {
+      if ((rules[ri].std_offset || rules[ri].dlt_offset) &&
+          rules[ri].dlt_start.mon == 0 && rules[ri].dlt_end.mon == 0)
+        {
+          TransitionInfo std_info;
+          /* Standard */
+          fill_transition_info_from_rule (&std_info, &(rules[ri]), false);
+          sys_array_append_val (gtz->t_info, std_info);
+
+          if (ri > 0 &&
+              ((rules[ri - 1].dlt_start.mon > 12 &&
+                rules[ri - 1].dlt_start.wday > rules[ri - 1].dlt_end.wday) ||
+                rules[ri - 1].dlt_start.mon > rules[ri - 1].dlt_end.mon))
+            {
+              /* The previous rule was a southern hemisphere rule that
+                 starts the year with DST, so we need to add a
+                 transition to return to standard time */
+              SysUInt year = rules[ri].start_year;
+              SysInt64 std_time =  boundary_for_year (&rules[ri].dlt_end,
+                                                    year, last_offset);
+              Transition std_trans = {std_time, info_index};
+              sys_array_append_val (gtz->transitions, std_trans);
+
+            }
+          last_offset = rules[ri].std_offset;
+          ++info_index;
+          skip_first_std_trans = true;
+         }
+      else
+        {
+          const SysUInt start_year = rules[ri].start_year;
+          const SysUInt end_year = rules[ri + 1].start_year;
+          SysBool dlt_first;
+          SysUInt year;
+          TransitionInfo std_info, dlt_info;
+          if (rules[ri].dlt_start.mon > 12)
+            dlt_first = rules[ri].dlt_start.wday > rules[ri].dlt_end.wday;
+          else
+            dlt_first = rules[ri].dlt_start.mon > rules[ri].dlt_end.mon;
+          /* Standard rules are always even, because before the first
+             transition is always standard time, and 0 is even. */
+          fill_transition_info_from_rule (&std_info, &(rules[ri]), false);
+          fill_transition_info_from_rule (&dlt_info, &(rules[ri]), true);
+
+          sys_array_append_val (gtz->t_info, std_info);
+          sys_array_append_val (gtz->t_info, dlt_info);
+
+          /* Transition dates. We hope that a year which ends daylight
+             time in a southern-hemisphere country (i.e., one that
+             begins the year in daylight time) will include a rule
+             which has only a dlt_end. */
+          for (year = start_year; year < end_year; year++)
+            {
+              SysInt32 dlt_offset = (dlt_first ? last_offset :
+                                   rules[ri].dlt_offset);
+              SysInt32 std_offset = (dlt_first ? rules[ri].std_offset :
+                                   last_offset);
+              /* NB: boundary_for_year returns 0 if mon == 0 */
+              SysInt64 std_time =  boundary_for_year (&rules[ri].dlt_end,
+                                                    year, dlt_offset);
+              SysInt64 dlt_time = boundary_for_year (&rules[ri].dlt_start,
+                                                   year, std_offset);
+              Transition std_trans = {std_time, info_index};
+              Transition dlt_trans = {dlt_time, info_index + 1};
+              last_offset = (dlt_first ? rules[ri].dlt_offset :
+                             rules[ri].std_offset);
+              if (dlt_first)
+                {
+                  if (skip_first_std_trans)
+                    skip_first_std_trans = false;
+                  else if (std_time)
+                    sys_array_append_val (gtz->transitions, std_trans);
+                  if (dlt_time)
+                    sys_array_append_val (gtz->transitions, dlt_trans);
+                }
+              else
+                {
+                  if (dlt_time)
+                    sys_array_append_val (gtz->transitions, dlt_trans);
+                  if (std_time)
+                    sys_array_append_val (gtz->transitions, std_trans);
+                }
+            }
+
+          info_index += 2;
+        }
+    }
+  if (ri > 0 &&
+      ((rules[ri - 1].dlt_start.mon > 12 &&
+        rules[ri - 1].dlt_start.wday > rules[ri - 1].dlt_end.wday) ||
+       rules[ri - 1].dlt_start.mon > rules[ri - 1].dlt_end.mon))
+    {
+      /* The previous rule was a southern hemisphere rule that
+         starts the year with DST, so we need to add a
+         transition to return to standard time */
+      TransitionInfo info;
+      SysUInt year = rules[ri].start_year;
+      Transition trans;
+      fill_transition_info_from_rule (&info, &(rules[ri - 1]), false);
+      sys_array_append_val (gtz->t_info, info);
+      trans.time = boundary_for_year (&rules[ri - 1].dlt_end,
+                                      year, last_offset);
+      trans.info_index = info_index;
+      sys_array_append_val (gtz->transitions, trans);
+     }
+}
+
+
+#ifdef SYS_OS_UNIX
+static SysTimeZone *
+parse_footertz (const SysChar *footer, size_t footerlen)
+{
+  SysChar *tzstring = sys_strndup (footer + 1, footerlen - 2);
+  SysTimeZone *footertz = NULL;
+
+  /* FIXME: The allocation for tzstring could be avoided by
+     passing a SysSize identifier_len argument to rules_from_identifier
+     and changing the code in that function to stop assuming that
+     identifier is nul-terminated.  */
+  TimeZoneRule *rules;
+  SysUInt rules_num = rules_from_identifier (tzstring, &rules);
+
+  sys_free (tzstring);
+  if (rules_num > 1)
+    {
+      footertz = sys_slice_new0 (SysTimeZone);
+      init_zone_from_rules (footertz, rules, rules_num, NULL);
+      footertz->ref_count++;
+    }
+  sys_free (rules);
+  return footertz;
+}
+#endif
+
 static void
 init_zone_from_iana_info (SysTimeZone *gtz,
-                          GBytes    *zoneinfo,
+                          SysBytes    *zoneinfo,
                           SysChar     *identifier  /* (transfer full) */)
 {
   SysSize size;
@@ -604,7 +993,7 @@ init_zone_from_iana_info (SysTimeZone *gtz,
   SysUInt8 *tz_transitions, *tz_type_index, *tz_ttinfo;
   SysUInt8 *tz_abbrs;
   SysSize timesize = sizeof (SysInt32);
-  gconstpointer header_data = sys_bytes_get_data (zoneinfo, &size);
+  const SysPointer header_data = sys_bytes_get_data (zoneinfo, &size);
   const SysChar *data = header_data;
   const struct tzhead *header = header_data;
   SysTimeZone *footertz = NULL;
@@ -649,7 +1038,7 @@ init_zone_from_iana_info (SysTimeZone *gtz,
       footerlen = footerlast + 1 - footer;
       if (footerlen != 2)
         {
-          footertz = sys_timezon_parse_footertz (footer, footerlen);
+          footertz = parse_footertz (footer, footerlen);
           sys_return_if_fail (footertz);
           extra_type_count = footertz->t_info->len;
           extra_time_count = footertz->transitions->len;
@@ -877,7 +1266,7 @@ rules_from_windows_time_zone (const SysChar   *identifier,
 
   subkey_dynamic_w = NULL;
 
-  if (GetSystemDirectoryW (winsyspath, MAX_PATH) == 0)
+  if (GetSystemDirectoryW (winsyspath, max_PATH) == 0)
     return 0;
 
   sys_assert (rules != NULL);
@@ -1024,9 +1413,9 @@ utf16_conv_failed:
 
   if (*rules)
     {
-      (*rules)[0].start_year = MIN_TZYEAR;
-      if ((*rules)[rules_num - 2].start_year < MAX_TZYEAR)
-        (*rules)[rules_num - 1].start_year = MAX_TZYEAR;
+      (*rules)[0].start_year = min_TZYEAR;
+      if ((*rules)[rules_num - 2].start_year < max_TZYEAR)
+        (*rules)[rules_num - 1].start_year = max_TZYEAR;
       else
         (*rules)[rules_num - 1].start_year = (*rules)[rules_num - 2].start_year + 1;
 
@@ -1038,9 +1427,7 @@ utf16_conv_failed:
 
 #endif
 
-static void
-find_relative_date (TimeZoneDate *buffer)
-{
+static void find_relative_date (TimeZoneDate *buffer) {
   SysUInt wday;
   SysDate date;
   sys_date_clear (&date, 1);
@@ -1083,199 +1470,6 @@ find_relative_date (TimeZoneDate *buffer)
 
       buffer->mday = sys_date_get_day (&date);
     }
-}
-
-/* Offset is previous offset of local time. Returns 0 if month is 0 */
-static SysInt64
-boundary_for_year (TimeZoneDate *boundary,
-                   SysInt          year,
-                   SysInt32        offset)
-{
-  TimeZoneDate buffer;
-  GDate date;
-  const SysUInt64 unix_epoch_start = 719163L;
-  const SysUInt64 seconds_per_day = 86400L;
-
-  if (!boundary->mon)
-    return 0;
-  buffer = *boundary;
-
-  if (boundary->year == 0)
-    {
-      buffer.year = year;
-
-      if (buffer.wday)
-        find_relative_date (&buffer);
-    }
-
-  sys_assert (buffer.year == year);
-  sys_date_clear (&date, 1);
-  sys_date_set_dmy (&date, buffer.mday, buffer.mon, buffer.year);
-  return ((sys_date_get_julian (&date) - unix_epoch_start) * seconds_per_day +
-          buffer.offset - offset);
-}
-
-static void
-fill_transition_info_from_rule (TransitionInfo *info,
-                                TimeZoneRule   *rule,
-                                SysBool        is_dst)
-{
-  SysInt offset = is_dst ? rule->dlt_offset : rule->std_offset;
-  SysChar *name = is_dst ? rule->dlt_name : rule->std_name;
-
-  info->gmt_offset = offset;
-  info->is_dst = is_dst;
-
-  if (name)
-    info->abbrev = sys_strdup (name);
-
-  else
-    info->abbrev = sys_strdup_printf ("%+03d%02d",
-                                      (int) offset / 3600,
-                                      (int) abs (offset / 60) % 60);
-}
-
-static void
-init_zone_from_rules (SysTimeZone    *gtz,
-                      TimeZoneRule *rules,
-                      SysUInt         rules_num,
-                      SysChar        *identifier  /* (transfer full) */)
-{
-  SysUInt type_count = 0, trans_count = 0, info_index = 0;
-  SysUInt ri; /* rule index */
-  SysBool skip_first_std_trans = true;
-  SysInt32 last_offset;
-
-  type_count = 0;
-  trans_count = 0;
-
-  /* Last rule only contains max year */
-  for (ri = 0; ri < rules_num - 1; ri++)
-    {
-      if (rules[ri].dlt_start.mon || rules[ri].dlt_end.mon)
-        {
-          SysUInt rulespan = (rules[ri + 1].start_year - rules[ri].start_year);
-          SysUInt transitions = rules[ri].dlt_start.mon > 0 ? 1 : 0;
-          transitions += rules[ri].dlt_end.mon > 0 ? 1 : 0;
-          type_count += rules[ri].dlt_start.mon > 0 ? 2 : 1;
-          trans_count += transitions * rulespan;
-        }
-      else
-        type_count++;
-    }
-
-  gtz->name = sys_steal_pointer (&identifier);
-  gtz->t_info = sys_array_sized_new (false, true, sizeof (TransitionInfo), type_count);
-  gtz->transitions = sys_array_sized_new (false, true, sizeof (Transition), trans_count);
-
-  last_offset = rules[0].std_offset;
-
-  for (ri = 0; ri < rules_num - 1; ri++)
-    {
-      if ((rules[ri].std_offset || rules[ri].dlt_offset) &&
-          rules[ri].dlt_start.mon == 0 && rules[ri].dlt_end.mon == 0)
-        {
-          TransitionInfo std_info;
-          /* Standard */
-          fill_transition_info_from_rule (&std_info, &(rules[ri]), false);
-          sys_array_append_val (gtz->t_info, std_info);
-
-          if (ri > 0 &&
-              ((rules[ri - 1].dlt_start.mon > 12 &&
-                rules[ri - 1].dlt_start.wday > rules[ri - 1].dlt_end.wday) ||
-                rules[ri - 1].dlt_start.mon > rules[ri - 1].dlt_end.mon))
-            {
-              /* The previous rule was a southern hemisphere rule that
-                 starts the year with DST, so we need to add a
-                 transition to return to standard time */
-              SysUInt year = rules[ri].start_year;
-              SysInt64 std_time =  boundary_for_year (&rules[ri].dlt_end,
-                                                    year, last_offset);
-              Transition std_trans = {std_time, info_index};
-              sys_array_append_val (gtz->transitions, std_trans);
-
-            }
-          last_offset = rules[ri].std_offset;
-          ++info_index;
-          skip_first_std_trans = true;
-         }
-      else
-        {
-          const SysUInt start_year = rules[ri].start_year;
-          const SysUInt end_year = rules[ri + 1].start_year;
-          SysBool dlt_first;
-          SysUInt year;
-          TransitionInfo std_info, dlt_info;
-          if (rules[ri].dlt_start.mon > 12)
-            dlt_first = rules[ri].dlt_start.wday > rules[ri].dlt_end.wday;
-          else
-            dlt_first = rules[ri].dlt_start.mon > rules[ri].dlt_end.mon;
-          /* Standard rules are always even, because before the first
-             transition is always standard time, and 0 is even. */
-          fill_transition_info_from_rule (&std_info, &(rules[ri]), false);
-          fill_transition_info_from_rule (&dlt_info, &(rules[ri]), true);
-
-          sys_array_append_val (gtz->t_info, std_info);
-          sys_array_append_val (gtz->t_info, dlt_info);
-
-          /* Transition dates. We hope that a year which ends daylight
-             time in a southern-hemisphere country (i.e., one that
-             begins the year in daylight time) will include a rule
-             which has only a dlt_end. */
-          for (year = start_year; year < end_year; year++)
-            {
-              SysInt32 dlt_offset = (dlt_first ? last_offset :
-                                   rules[ri].dlt_offset);
-              SysInt32 std_offset = (dlt_first ? rules[ri].std_offset :
-                                   last_offset);
-              /* NB: boundary_for_year returns 0 if mon == 0 */
-              SysInt64 std_time =  boundary_for_year (&rules[ri].dlt_end,
-                                                    year, dlt_offset);
-              SysInt64 dlt_time = boundary_for_year (&rules[ri].dlt_start,
-                                                   year, std_offset);
-              Transition std_trans = {std_time, info_index};
-              Transition dlt_trans = {dlt_time, info_index + 1};
-              last_offset = (dlt_first ? rules[ri].dlt_offset :
-                             rules[ri].std_offset);
-              if (dlt_first)
-                {
-                  if (skip_first_std_trans)
-                    skip_first_std_trans = false;
-                  else if (std_time)
-                    sys_array_append_val (gtz->transitions, std_trans);
-                  if (dlt_time)
-                    sys_array_append_val (gtz->transitions, dlt_trans);
-                }
-              else
-                {
-                  if (dlt_time)
-                    sys_array_append_val (gtz->transitions, dlt_trans);
-                  if (std_time)
-                    sys_array_append_val (gtz->transitions, std_trans);
-                }
-            }
-
-          info_index += 2;
-        }
-    }
-  if (ri > 0 &&
-      ((rules[ri - 1].dlt_start.mon > 12 &&
-        rules[ri - 1].dlt_start.wday > rules[ri - 1].dlt_end.wday) ||
-       rules[ri - 1].dlt_start.mon > rules[ri - 1].dlt_end.mon))
-    {
-      /* The previous rule was a southern hemisphere rule that
-         starts the year with DST, so we need to add a
-         transition to return to standard time */
-      TransitionInfo info;
-      SysUInt year = rules[ri].start_year;
-      Transition trans;
-      fill_transition_info_from_rule (&info, &(rules[ri - 1]), false);
-      sys_array_append_val (gtz->t_info, info);
-      trans.time = boundary_for_year (&rules[ri - 1].dlt_end,
-                                      year, last_offset);
-      trans.info_index = info_index;
-      sys_array_append_val (gtz->transitions, trans);
-     }
 }
 
 /*
@@ -1356,7 +1550,7 @@ parse_julian_boundary (SysChar** pos, TimeZoneDate *boundary,
                        SysBool ignore_leap)
 {
   SysInt day = 0;
-  GDate date;
+  SysDate date;
 
   while (**pos >= '0' && '9' >= **pos)
     {
@@ -1375,7 +1569,7 @@ parse_julian_boundary (SysChar** pos, TimeZoneDate *boundary,
     {
       if (day < 0 || 365 < day)
         return false;
-      /* GDate wants day in range 1->366 */
+      /* SysDate wants day in range 1->366 */
       day++;
     }
 
@@ -1428,144 +1622,6 @@ parse_tz_boundary (const SysChar  *identifier,
       boundary->offset = 2 * 60 * 60;
       return *pos == '\0';
     }
-}
-
-static SysUInt
-create_ruleset_from_rule (TimeZoneRule **rules, TimeZoneRule *rule)
-{
-  *rules = sys_new0 (TimeZoneRule, 2);
-
-  (*rules)[0].start_year = MIN_TZYEAR;
-  (*rules)[1].start_year = MAX_TZYEAR;
-
-  (*rules)[0].std_offset = -rule->std_offset;
-  (*rules)[0].dlt_offset = -rule->dlt_offset;
-  (*rules)[0].dlt_start  = rule->dlt_start;
-  (*rules)[0].dlt_end = rule->dlt_end;
-  strcpy ((*rules)[0].std_name, rule->std_name);
-  strcpy ((*rules)[0].dlt_name, rule->dlt_name);
-  return 2;
-}
-
-static SysBool
-parse_offset (SysChar **pos, SysInt32 *target)
-{
-  SysChar *buffer;
-  SysChar *target_pos = *pos;
-  SysBool ret;
-
-  while (**pos == '+' || **pos == '-' || **pos == ':' ||
-         (**pos >= '0' && '9' >= **pos))
-    ++(*pos);
-
-  buffer = sys_strndup (target_pos, *pos - target_pos);
-  ret = parse_constant_offset (buffer, target, false);
-  sys_free (buffer);
-
-  return ret;
-}
-
-static SysBool
-parse_identifier_boundary (SysChar **pos, TimeZoneDate *target)
-{
-  SysChar *buffer;
-  SysChar *target_pos = *pos;
-  SysBool ret;
-
-  while (**pos != ',' && **pos != '\0')
-    ++(*pos);
-  buffer = sys_strndup (target_pos, *pos - target_pos);
-  ret = parse_tz_boundary (buffer, target);
-  sys_free (buffer);
-
-  return ret;
-}
-
-static SysBool
-parse_identifier_boundaries (SysChar **pos, TimeZoneRule *tzr)
-{
-  if (*(*pos)++ != ',')
-    return false;
-
-  /* Start date */
-  if (!parse_identifier_boundary (pos, &(tzr->dlt_start)) || *(*pos)++ != ',')
-    return false;
-
-  /* End date */
-  if (!parse_identifier_boundary (pos, &(tzr->dlt_end)))
-    return false;
-  return true;
-}
-
-/*
- * Creates an array of TimeZoneRule from a TZ environment variable
- * type of identifier.  Should free rules afterwards
- */
-static SysUInt
-rules_from_identifier (const SysChar   *identifier,
-                       TimeZoneRule **rules)
-{
-  SysChar *pos;
-  TimeZoneRule tzr;
-
-  sys_assert (rules != NULL);
-
-  *rules = NULL;
-
-  if (!identifier)
-    return 0;
-
-  pos = (SysChar*)identifier;
-  memset (&tzr, 0, sizeof (tzr));
-  /* Standard offset */
-  if (!(set_tz_name (&pos, tzr.std_name, NAME_SIZE)) ||
-      !parse_offset (&pos, &(tzr.std_offset)))
-    return 0;
-
-  if (*pos == 0)
-    {
-      return create_ruleset_from_rule (rules, &tzr);
-    }
-
-  /* Format 2 */
-  if (!(set_tz_name (&pos, tzr.dlt_name, NAME_SIZE)))
-    return 0;
-  parse_offset (&pos, &(tzr.dlt_offset));
-  if (tzr.dlt_offset == 0) /* No daylight offset given, assume it's 1
-                              hour earlier that standard */
-    tzr.dlt_offset = tzr.std_offset - 3600;
-  if (*pos == '\0')
-#ifdef SYS_OS_WIN32
-    /* Windows allows us to use the US DST boundaries if they're not given */
-    {
-      SysUInt i, rules_num = 0;
-
-      /* Use US rules, Windows' default is Pacific Standard Time */
-      if ((rules_num = rules_from_windows_time_zone ("Pacific Standard Time",
-                                                     NULL,
-                                                     rules)))
-        {
-          for (i = 0; i < rules_num - 1; i++)
-            {
-              (*rules)[i].std_offset = - tzr.std_offset;
-              (*rules)[i].dlt_offset = - tzr.dlt_offset;
-              strcpy ((*rules)[i].std_name, tzr.std_name);
-              strcpy ((*rules)[i].dlt_name, tzr.dlt_name);
-            }
-
-          return rules_num;
-        }
-      else
-        return 0;
-    }
-#else
-  return 0;
-#endif
-  /* Start and end required (format 2) */
-  if (!parse_identifier_boundaries (&pos, &tzr))
-    return 0;
-
-  return create_ruleset_from_rule (rules, &tzr);
 }
 
 /* Construction {{{1 */
@@ -1686,9 +1742,9 @@ sys_time_zone_new_identifier (const SysChar *identifier)
     {
       SYS_LOCK (time_zones);
       if (time_zones == NULL)
-        time_zones = sys_hash_table_new (sys_str_hash, sys_str_equal);
+        time_zones = sys_hash_table_new (sys_str_hash, (SysEqualFunc)sys_str_equal);
 
-      tz = sys_hash_table_lookup (time_zones, identifier);
+      tz = sys_hash_table_lookup (time_zones, (const SysPointer)identifier);
       if (tz)
         {
           sys_atomic_int_inc (&tz->ref_count);
@@ -1712,7 +1768,7 @@ sys_time_zone_new_identifier (const SysChar *identifier)
            * we’re going to fall back to UTC eventually, so don’t clear out the
            * cache if it’s already UTC. */
           if (!(resolved_identifier == NULL && sys_str_equal (tz_default->name, "UTC")) &&
-              sys_strcmp0 (tz_default->name, resolved_identifier) != 0)
+              sys_str_equal (tz_default->name, resolved_identifier))
             {
               sys_clear_pointer (&tz_default, sys_time_zone_unref);
             }
@@ -1742,7 +1798,7 @@ sys_time_zone_new_identifier (const SysChar *identifier)
   if (tz->t_info == NULL)
     {
 #ifdef SYS_OS_UNIX
-      GBytes *zoneinfo = zone_info_unix (identifier, resolved_identifier);
+      SysBytes *zoneinfo = zone_info_unix (identifier, resolved_identifier);
       if (zoneinfo != NULL)
         {
           init_zone_from_iana_info (tz, zoneinfo, sys_steal_pointer (&resolved_identifier));
@@ -1775,8 +1831,8 @@ sys_time_zone_new_identifier (const SysChar *identifier)
                   memset (rules[0].std_name, 0, NAME_SIZE);
                   memset (rules[0].dlt_name, 0, NAME_SIZE);
 
-                  rules[0].start_year = MIN_TZYEAR;
-                  rules[1].start_year = MAX_TZYEAR;
+                  rules[0].start_year = min_TZYEAR;
+                  rules[1].start_year = max_TZYEAR;
 
                   init_zone_from_rules (tz, rules, 2, sys_steal_pointer (&resolved_identifier));
                 }
@@ -1839,8 +1895,7 @@ sys_time_zone_new_identifier (const SysChar *identifier)
  *
  * Since: 2.26
  **/
-SysTimeZone *
-sys_time_zone_new_utc (void)
+SysTimeZone * sys_time_zone_new_utc (void)
 {
   static SysTimeZone *utc = NULL;
   static SysSize initialised;
@@ -1875,13 +1930,13 @@ sys_time_zone_new_utc (void)
 SysTimeZone *
 sys_time_zone_new_local (void)
 {
-  const SysChar *tzenv = sys_getenv ("TZ");
+  const SysChar *tzenv = sys_env_get ("TZ");
   SysTimeZone *tz;
 
   SYS_LOCK (tz_local);
 
   /* Is time zone changed and must be flushed? */
-  if (tz_local && sys_strcmp0 (sys_time_zone_get_identifier (tz_local), tzenv))
+  if (tz_local && sys_str_equal (sys_time_zone_get_identifier (tz_local), tzenv))
     sys_clear_pointer (&tz_local, sys_time_zone_unref);
 
   if (tz_local == NULL)
@@ -1928,9 +1983,9 @@ sys_time_zone_new_offset (SysInt32 seconds)
    * sys_time_zone_new_identifier() should never fail in this situation. */
   identifier = sys_strdup_printf ("%c%02u:%02u:%02u",
                                 (seconds >= 0) ? '+' : '-',
-                                (ABS (seconds) / 60) / 60,
-                                (ABS (seconds) / 60) % 60,
-                                ABS (seconds) % 60);
+                                (abs (seconds) / 60) / 60,
+                                (abs (seconds) / 60) % 60,
+                                abs (seconds) % 60);
   tz = sys_time_zone_new_identifier (identifier);
 
   if (tz == NULL)
@@ -1994,10 +2049,10 @@ interval_end (SysTimeZone *tz,
               SysUInt      interval)
 {
   if (tz->transitions && interval < tz->transitions->len)
-    {
-      SysInt64 lim = (TRANSITION(interval)).time;
-      return lim - (lim != SYS_MININT64);
-    }
+  {
+    SysInt64 lim = (TRANSITION(interval)).time;
+    return lim - (lim != SYS_MININT64);
+  }
   return SYS_MAXINT64;
 }
 
@@ -2060,7 +2115,7 @@ interval_valid (SysTimeZone *tz,
 /**
  * sys_time_zone_adjust_time:
  * @tz: a #SysTimeZone
- * @type: the #GTimeType of @time_
+ * @type: the #SysTimeType of @time_
  * @time_: (inout): a pointer to a number of seconds since January 1, 1970
  *
  * Finds an interval within @tz that corresponds to the given @time_,
@@ -2086,7 +2141,7 @@ interval_valid (SysTimeZone *tz,
  **/
 SysInt
 sys_time_zone_adjust_time (SysTimeZone *tz,
-                         GTimeType  type,
+                         SysTimeType  type,
                          SysInt64    *time_)
 {
   SysUInt i, intervals;
@@ -2156,7 +2211,7 @@ sys_time_zone_adjust_time (SysTimeZone *tz,
 /**
  * sys_time_zone_find_interval:
  * @tz: a #SysTimeZone
- * @type: the #GTimeType of @time_
+ * @type: the #SysTimeType of @time_
  * @time_: a number of seconds since January 1, 1970
  *
  * Finds an interval within @tz that corresponds to the given @time_.
@@ -2184,7 +2239,7 @@ sys_time_zone_adjust_time (SysTimeZone *tz,
  */
 SysInt
 sys_time_zone_find_interval (SysTimeZone *tz,
-                           GTimeType  type,
+                           SysTimeType  type,
                            SysInt64     time_)
 {
   SysUInt i, intervals;

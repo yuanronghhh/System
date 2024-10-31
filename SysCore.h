@@ -11,11 +11,17 @@
 #include <System/Platform/Common/SysProcess.h>
 #include <System/Platform/Common/SysThread.h>
 #include <System/Platform/Common/SysSocket.h>
+#include <System/Platform/Common/SysFile.h>
+#include <System/Platform/Common/SysDate.h>
+#include <System/Platform/Common/SysTimeZone.h>
+#include <System/Platform/Common/SysMappedFile.h>
 
 #include <System/DataTypes/SysBit.h>
 #include <System/DataTypes/SysQuark.h>
 #include <System/DataTypes/SysClouse.h>
 #include <System/DataTypes/SysArray.h>
+#include <System/DataTypes/SysString.h>
+#include <System/DataTypes/SysBytes.h>
 #include <System/DataTypes/SysHArray.h>
 #include <System/DataTypes/SysValue.h>
 #include <System/DataTypes/SysHashTable.h>
@@ -41,7 +47,6 @@
 #include <System/Utils/SysPath.h>
 #include <System/Utils/SysStr.h>
 #include <System/Utils/SysEnum.h>
-#include <System/Platform/Common/SysFile.h>
 #include <System/Utils/SysTextIO.h>
 
 #if USE_OPENSSL

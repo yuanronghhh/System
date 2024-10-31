@@ -51,6 +51,7 @@ SYS_API SysPointer sys_malloc(SysSize size);
 SYS_API void sys_free(void *block);
 SYS_API SysPointer sys_malloc0(SysSize size);
 SYS_API SysPointer sys_memdup(const SysPointer mem, SysUInt byte_size);
+SYS_API SysPointer sys_memdup2 (const SysPointer mem, SysSize byte_size);
 SYS_API void _sys_slice_free_chain(SysSize type, SysPointer ptr, SysSize offset);
 SYS_API void _sys_clear_pointer(void **pp, SysDestroyFunc destroy);
 SYS_API SysSize sys_get_msize(void *block);

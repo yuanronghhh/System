@@ -387,7 +387,6 @@ void sys_elapse_end(SysElapse *self) {
   self->diff = self->end - self->start;
 }
 
-/* for feature */
 void sys_set_debugger (SysBool bvalue) {
   g_use_debugger = bvalue;
 }
@@ -395,4 +394,3 @@ void sys_set_debugger (SysBool bvalue) {
 SysBool sys_get_debugger (void) {
   return g_use_debugger;
 }
-
