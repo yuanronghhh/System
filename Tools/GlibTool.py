@@ -115,14 +115,15 @@ def rename_glib(file):
             .replace("GLIB_VAR", "")\
             .replace("GIOCondition", "SysIOCondition")\
             .replace("GUnixSignalWatchSource", "SysUnixSignalWatchSource")\
-            .replace("G_", "SYS_")\
-            .replace("g_", "sys_")\
             .replace("gint", "SysInt")\
             .replace("guchar", "SysUChar")\
             .replace("GINT", "SYSINT")\
             .replace("GArray", "SysArray")\
             .replace("GTimeZone", "SysTimeZone")\
-            .replace("GTimeType", "SysTimeType")
+            .replace("GTimeType", "SysTimeType")\
+            .replace("GDate", "SysDate")\
+            .replace("G_", "SYS_")\
+            .replace("g_", "sys_")\
 
     f.seek(0)
     f.truncate()
@@ -130,5 +131,5 @@ def rename_glib(file):
     f.close()
 
 if __name__ == '__main__':
-    rename_glib(Path("System/Platform/Unix/SysFileUnix.c").as_posix())
+    rename_glib(Path("D:\GreyHound\PRIVATE\Git\CstDemo\System\DataTypes\SysString.h").as_posix())
     # rename_glib("/home/greyhound/Git/CstDemo/Cst/System/DataTypes/SysTimeZone.h")

@@ -104,6 +104,8 @@ set(SRC
   ./DataTypes/SysValue.c
   ./DataTypes/SysQuark.h
   ./DataTypes/SysQuark.c
+  ./DataTypes/SysString.c
+  ./DataTypes/SysString.h
 
   ./Type/SysTypeCommon.h
   ./Type/SysTypeCommon.c
@@ -129,8 +131,8 @@ set(SRC
   ./Utils/SysTextIO.h
   ./Utils/SysTextIO.c
 
-  # ./Platform/Common/SysTimeZone.h
-  # ./Platform/Common/SysTimeZone.c
+  ./Platform/Common/SysTimeZone.h
+  ./Platform/Common/SysTimeZone.c
   ./Platform/Common/SysFile.h
   ./Platform/Common/SysFile.c
   ./Platform/Common/SysMemPrivate.h

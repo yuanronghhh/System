@@ -69,7 +69,9 @@ typedef SysUInt16 SysUniChar2;
 #if defined(__GNUC__) && (__GNUC__ >= 3)
 # define SYS_UNLIKELY(cond) (__builtin_expect ((cond), 0))
 # define SYS_LIKELY(cond) (__builtin_expect ((cond), 1))
+# define SYS_GNUC_CONST __attribute__ ((__const__))
 #else
+# define SYS_GNUC_CONST
 # define SYS_UNLIKELY(cond) (cond)
 # define SYS_LIKELY(cond) (cond)
 #endif

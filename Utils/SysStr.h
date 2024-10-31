@@ -1,5 +1,5 @@
-#ifndef __SYS_STRING_H__
-#define __SYS_STRING_H__
+#ifndef __SYS_STR_H__
+#define __SYS_STR_H__
 
 #include <System/Fundamental/SysCommonCore.h>
 

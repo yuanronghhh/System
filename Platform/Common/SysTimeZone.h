@@ -5,14 +5,20 @@
 
 SYS_BEGIN_DECLS
 
+/* POSIX Timezone abbreviations are typically 3 or 4 characters, but
+   Microsoft uses 32-character names. We'll use one larger to ensure
+   we have room for the terminating \0.
+ */
+#define SYS_TIME_ZONE_NAME_SIZE 33
+
 struct _TimeZoneRule {
   SysUInt        start_year;
   SysInt32       std_offset;
   SysInt32       dlt_offset;
   TimeZoneDate dlt_start;
   TimeZoneDate dlt_end;
-  SysChar std_name[NAME_SIZE];
-  SysChar dlt_name[NAME_SIZE];
+  SysChar std_name[SYS_TIME_ZONE_NAME_SIZE];
+  SysChar dlt_name[SYS_TIME_ZONE_NAME_SIZE];
 };
 
 SysTimeZone *             sys_time_zone_new                                 (const SysChar *identifier);

@@ -19,6 +19,7 @@ SYS_API SysBool sys_path_escape(SysChar* buf);
 SYS_API SysChar* sys_path_dirname(const SysChar* path);
 SYS_API SysChar* sys_getcwd(void);
 SYS_API SysBool sys_path_is_absolute(const SysChar *path);
+SYS_API const SysChar * sys_path_skip_root (const SysChar *file_name);
 
 SYS_END_DECLS
 

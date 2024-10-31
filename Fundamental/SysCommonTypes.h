@@ -137,6 +137,7 @@ typedef enum
 
 typedef struct _TimeZoneRule TimeZoneRule;
 typedef struct _SysTimeZone SysTimeZone;
+typedef struct _TimeZoneDate TimeZoneDate;
 
 typedef struct _SysPtrArray SysPtrArray;
 typedef struct _SysArray SysArray;

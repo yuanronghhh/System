@@ -7,6 +7,12 @@
 #include <System/Utils/SysPath.h>
 
 /**
+ * this code from glib Thread
+ * see: ftp://ftp.gtk.org/pub/gtk/
+ * license under GNU Lesser General Public
+ */
+
+/**
  * SysTimeZone:
  *
  * #SysTimeZone is an opaque structure whose members cannot be accessed
@@ -59,21 +65,14 @@ struct ttinfo
    for parsing MSWindows and Environment-variable time zones. It
    Generalizes MSWindows's SYSTEMTIME struct.
  */
-typedef struct
-{
+struct _TimeZoneDate {
   SysInt     year;
   SysInt     mon;
   SysInt     mday;
   SysInt     wday;
   SysInt     week;
   SysInt32   offset;  /* hour*3600 + min*60 + sec; can be negative.  */
-} TimeZoneDate;
-
-/* POSIX Timezone abbreviations are typically 3 or 4 characters, but
-   Microsoft uses 32-character names. We'll use one larger to ensure
-   we have room for the terminating \0.
- */
-#define NAME_SIZE 33
+};
 
 /* A MSWindows-style time zone transition rule. Generalizes the
    MSWindows TIME_ZONE_INFORMATION struct. Also used to compose time
@@ -1043,7 +1042,7 @@ static void
 find_relative_date (TimeZoneDate *buffer)
 {
   SysUInt wday;
-  GDate date;
+  SysDate date;
   sys_date_clear (&date, 1);
   wday = buffer->wday;
 
@@ -1063,7 +1062,7 @@ find_relative_date (TimeZoneDate *buffer)
     {
       SysUInt days;
       SysUInt days_in_month = sys_date_get_days_in_month (buffer->mon, buffer->year);
-      GDateWeekday first_wday;
+      SysDateWeekday first_wday;
 
       sys_date_set_dmy (&date, 1, buffer->mon, buffer->year);
       first_wday = sys_date_get_weekday (&date);
