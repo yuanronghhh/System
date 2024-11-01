@@ -135,6 +135,45 @@ typedef enum
   SYS_TIME_TYPE_UNIVERSAL
 } SysTimeType;
 
+typedef enum
+{
+  SYS_DATE_DAY   = 0,
+  SYS_DATE_MONTH = 1,
+  SYS_DATE_YEAR  = 2
+} SysDateDMY;
+
+typedef enum
+{
+  SYS_DATE_BAD_WEEKDAY  = 0,
+  SYS_DATE_MONDAY       = 1,
+  SYS_DATE_TUESDAY      = 2,
+  SYS_DATE_WEDNESDAY    = 3,
+  SYS_DATE_THURSDAY     = 4,
+  SYS_DATE_FRIDAY       = 5,
+  SYS_DATE_SATURDAY     = 6,
+  SYS_DATE_SUNDAY       = 7
+} SysDateWeekday;
+
+typedef enum
+{
+  SYS_DATE_BAD_MONTH = 0,
+  SYS_DATE_JANUARY   = 1,
+  SYS_DATE_FEBRUARY  = 2,
+  SYS_DATE_MARCH     = 3,
+  SYS_DATE_APRIL     = 4,
+  SYS_DATE_MAY       = 5,
+  SYS_DATE_JUNE      = 6,
+  SYS_DATE_JULY      = 7,
+  SYS_DATE_AUGUST    = 8,
+  SYS_DATE_SEPTEMBER = 9,
+  SYS_DATE_OCTOBER   = 10,
+  SYS_DATE_NOVEMBER  = 11,
+  SYS_DATE_DECEMBER  = 12
+} SysDateMonth;
+
+typedef SysUInt16 SysDateYear;
+typedef SysUInt8  SysDateDay;   /* day of the month */
+typedef struct _SysDate SysDate;
 typedef struct _TimeZoneRule TimeZoneRule;
 typedef struct _SysTimeZone SysTimeZone;
 typedef struct _TimeZoneDate TimeZoneDate;

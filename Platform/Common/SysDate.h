@@ -14,46 +14,7 @@ SYS_BEGIN_DECLS
  * Pennington <hp@pobox.com>
  */
 
-typedef SysUInt16 SysDateYear;
-typedef SysUInt8  SysDateDay;   /* day of the month */
-typedef struct _SysDate SysDate;
-
-/* enum used to specify order of appearance in parsed date strings */
-typedef enum
-{
-  SYS_DATE_DAY   = 0,
-  SYS_DATE_MONTH = 1,
-  SYS_DATE_YEAR  = 2
-} SysDateDMY;
-
 /* actual week and month values */
-typedef enum
-{
-  SYS_DATE_BAD_WEEKDAY  = 0,
-  SYS_DATE_MONDAY       = 1,
-  SYS_DATE_TUESDAY      = 2,
-  SYS_DATE_WEDNESDAY    = 3,
-  SYS_DATE_THURSDAY     = 4,
-  SYS_DATE_FRIDAY       = 5,
-  SYS_DATE_SATURDAY     = 6,
-  SYS_DATE_SUNDAY       = 7
-} SysDateWeekday;
-typedef enum
-{
-  SYS_DATE_BAD_MONTH = 0,
-  SYS_DATE_JANUARY   = 1,
-  SYS_DATE_FEBRUARY  = 2,
-  SYS_DATE_MARCH     = 3,
-  SYS_DATE_APRIL     = 4,
-  SYS_DATE_MAY       = 5,
-  SYS_DATE_JUNE      = 6,
-  SYS_DATE_JULY      = 7,
-  SYS_DATE_AUGUST    = 8,
-  SYS_DATE_SEPTEMBER = 9,
-  SYS_DATE_OCTOBER   = 10,
-  SYS_DATE_NOVEMBER  = 11,
-  SYS_DATE_DECEMBER  = 12
-} SysDateMonth;
 
 #define SYS_DATE_BAD_JULIAN 0U
 #define SYS_DATE_BAD_DAY    0U

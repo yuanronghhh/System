@@ -16,9 +16,9 @@ SYS_BEGIN_DECLS
    Generalizes MSWindows's SYSTEMTIME struct.
  */
 struct _TimeZoneDate {
-  SysInt     year;
-  SysInt     mon;
-  SysInt     mday;
+  SysDateYear     year;
+  SysDateMonth     mon;
+  SysDateDay mday;
   SysInt     wday;
   SysInt     week;
   SysInt32   offset;  /* hour*3600 + min*60 + sec; can be negative.  */

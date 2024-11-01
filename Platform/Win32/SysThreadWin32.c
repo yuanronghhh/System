@@ -217,7 +217,7 @@ sys_cond_wait_until (SysCond  *cond,
 
       if SYS_UNLIKELY (span < 0)
         span_millis = 0;
-      else if SYS_UNLIKELY (span > INT64_CONSTANT (1000) * (DWORD) INFINITE)
+      else if SYS_UNLIKELY (span > SYS_INT64_CONSTANT (1000) * (DWORD) INFINITE)
         span_millis = INFINITE;
       else
         /* Round up so we don't time out too early */

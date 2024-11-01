@@ -6,11 +6,14 @@ set(INC_SYS
   ${PTHREAD_INCLUDE_DIRS}
   ${VLD_INCLUDE_DIRS}
   ${OPENSSL_INCLUDE_DIRS}
+  ${LIBICONV_INCLUDE_DIRS}
 )
 
 set(OPENSSL_SRC
   ./ThirdParty/SysOpenssl.h
   ./ThirdParty/SysOpenssl.c
+  ./ThirdParty/SysIconv.h
+  ./ThirdParty/SysIconv.c
   ./Utils/SysSsl.h
   ./Utils/SysSsl.c
 )
@@ -120,6 +123,12 @@ set(SRC
   ./Type/SysParam.h
   ./Type/SysParam.c
 
+  ./Utils/SysUtf8.h
+  ./Utils/SysUtf8.c
+  ./Utils/SysUnicode.h
+  ./Utils/SysUnicode.c
+  ./Utils/SysConvert.h
+  ./Utils/SysConvert.c
   ./Utils/SysStr.h
   ./Utils/SysStr.c
   ./Utils/SysEnum.h
@@ -183,5 +192,6 @@ target_link_libraries(System
   ${DBG_LIBRAREIS}
   ${VLD_LIBRARIES}
   ${ANDROID_LIBRARIES}
+  ${LIBICONV_LIBRARIES}
 )
 set_property(TARGET System PROPERTY FOLDER CstProject)

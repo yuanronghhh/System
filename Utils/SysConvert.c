@@ -870,8 +870,7 @@ sys_locale_to_utf8 (const SysChar  *opsysstring,
  *
  * Returns: The converted string, or %NULL on an error.
  */
-SysChar *
-_sys_time_locale_to_utf8 (const SysChar *opsysstring,
+SysChar * _sys_time_locale_to_utf8 (const SysChar *opsysstring,
                         SysSize       len,
                         SysSize       *bytes_read,
                         SysSize       *bytes_written,

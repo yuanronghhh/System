@@ -5,6 +5,7 @@
 #include <System/DataTypes/SysString.h>
 #include <System/Utils/SysUtf8.h>
 #include <System/Utils/SysStr.h>
+#include <System/Utils/SysConvertPrivate.h>
 
 struct _SysDateTime
 {

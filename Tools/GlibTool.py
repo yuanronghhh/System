@@ -149,9 +149,9 @@ def rename_glib(file):
             .replace("GByteArray", "SysByteArray")\
             .replace("gconstpointer", "const SysPointer")\
             .replace("gatomicrefcount", "SysRef")\
-            .replace(" MAX", " max")\
-            .replace(" MIN", " min")\
-            .replace(" ABS", " abs")\
+            .replace(" MAX(", " max(")\
+            .replace(" MIN(", " min(")\
+            .replace(" ABS(", " abs(")\
             .replace(" G_", " SYS_")\
             .replace(" g_", " sys_")\
             .replace("(g_", "(sys_")\
@@ -161,6 +161,7 @@ def rename_glib(file):
             .replace("gunichar", "SysUniChar")\
             .replace("g_mapped", "sys_mapped")\
             .replace("GMapped", "SysMapped")\
+            .replace("G_LOCK_DEFINE_STATIC", "SYS_LOCK_DEFINE_STATIC")\
             .replace("sys_set_error", "sys_error_set_N")\
             .replace("sys_getenv", "sys_env_get")\
             .replace("sys_strcmp0", "sys_str_equal")\
@@ -186,4 +187,4 @@ def rename_glib(file):
     f.close()
 
 if __name__ == '__main__':
-    rename_glib(Path("System/Utils/SysConvert.c").as_posix())
+    rename_glib(Path("System/Utils/SysStr.c").as_posix())

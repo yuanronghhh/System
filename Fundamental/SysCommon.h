@@ -88,7 +88,22 @@ typedef SysUInt32 SysUniChar;
 # define SYS_LIKELY(cond) (cond)
 # define SYS_ALWAYS_INLINE
 # define SYS_GNUC_EXTENSION
+#define SYS_GNUC_MALLOC
 #define SYS_GNUC_PURE
+
+static inline SysBool _sys_checked_add_size (SysSize *dest, SysSize a, SysSize b) {
+  *dest = a + b; return *dest >= a; 
+}
+
+static inline SysBool _sys_checked_mul_size (SysSize *dest, SysSize a, SysSize b) {
+  *dest = a * b; return !a || *dest / a == b; 
+}
+#define SYS_GNUC_PURE
+
+#define sys_size_checked_add(dest, a, b) \
+    _sys_checked_add_size(dest, a, b)
+#define sys_size_checked_mul(dest, a, b) \
+    _sys_checked_mul_size(dest, a, b)
 #endif
 
 #define SYS_LOG_ARGS(func, ptr) __FILE__, __func__, __LINE__, #func, #ptr,

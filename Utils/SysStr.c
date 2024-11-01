@@ -88,7 +88,7 @@ SysChar **sys_strsplit(SysChar * s, const SysChar *delim, SysInt * count) {
 /**
  * sys_strcat_M:
  *   copy v2 to v1, return v1, realloc v1 if v1 not enough.
- *   simple method for concat string, use sys_string_* for better api.
+ *   simple method for concat string, use sys_strinsys_* for better api.
  *
  *  example:
  *    SysSize mlen = 200, len = 0;
@@ -151,7 +151,7 @@ SysChar* sys_strlcat(SysChar* v1, SysSize v1_max, const SysChar* v2) {
   SysSize nlen = v1_len + v2_len;
 
   if (nlen > v1_max) {
-    sys_warning_N("string has no enough space ? %s", v1);
+    sys_warninsys_N("string has no enough space ? %s", v1);
     return v1;
   }
 
@@ -586,3 +586,59 @@ SysChar* sys_str_newsize(SysSize size) {
 
   return nstr;
 }
+
+
+/**
+ * sys_strstr_len:
+ * @haystack: a nul-terminated string
+ * @haystack_len: the maximum length of @haystack in bytes. A length of -1
+ *     can be used to mean "search the entire string", like `strstr()`.
+ * @needle: the string to search for
+ *
+ * Searches the string @haystack for the first occurrence
+ * of the string @needle, limiting the length of the search
+ * to @haystack_len or a nul terminator byte (whichever is reached first).
+ *
+ * Returns: a pointer to the found occurrence, or
+ *    %NULL if not found.
+ */
+SysChar * sys_strstr_len (const SysChar *haystack,
+    SysSize       haystack_len,
+    const SysChar *needle) {
+  sys_return_val_if_fail (haystack != NULL, NULL);
+  sys_return_val_if_fail (needle != NULL, NULL);
+
+  if (haystack_len < 0)
+    return strstr (haystack, needle);
+  else
+  {
+    const SysChar *p = haystack;
+    SysSize needle_len = strlen (needle);
+    SysSize haystack_len_unsigned = haystack_len;
+    const SysChar *end;
+    SysSize i;
+
+    if (needle_len == 0)
+      return (SysChar *)haystack;
+
+    if (haystack_len_unsigned < needle_len)
+      return NULL;
+
+    end = haystack + haystack_len - needle_len;
+
+    while (p <= end && *p)
+    {
+      for (i = 0; i < needle_len; i++)
+        if (p[i] != needle[i])
+          goto next;
+
+      return (SysChar *)p;
+
+next:
+      p++;
+    }
+
+    return NULL;
+  }
+}
+

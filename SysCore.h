@@ -46,6 +46,10 @@
 #include <System/Utils/SysError.h>
 #include <System/Utils/SysPath.h>
 #include <System/Utils/SysStr.h>
+#include <System/Utils/SysCharSet.h>
+#include <System/Utils/SysConvert.h>
+#include <System/Utils/SysUnicode.h>
+#include <System/Utils/SysUtf8.h>
 #include <System/Utils/SysEnum.h>
 #include <System/Utils/SysTextIO.h>
 

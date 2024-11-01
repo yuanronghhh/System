@@ -32,6 +32,11 @@ typedef struct { SysChar bytes[4]; } SysUInt32_be;
 
 static SysBool parse_tz_boundary (const SysChar  *identifier, TimeZoneDate *boundary);
 static void find_relative_date (TimeZoneDate *buffer);
+static SysUInt rules_from_identifier (const SysChar   *identifier, TimeZoneRule **rules);
+static void init_zone_from_rules (SysTimeZone    *gtz,
+    TimeZoneRule *rules,
+    SysUInt         rules_num,
+    SysChar        *identifier);
 
 static inline SysInt64 SysInt64_from_be (const SysInt64_be be) {
   SysInt64 tmp; memcpy (&tmp, &be, sizeof tmp); return SYSINT64_FROM_BE (tmp);
@@ -1168,8 +1173,8 @@ rule_from_windows_time_zone_info (TimeZoneRule *rule,
       rule->std_offset = -tzi->Bias * 60;
       rule->dlt_start.mon = 0;
     }
-  sys_strncpy (rule->std_name, std_name, NAME_SIZE - 1);
-  sys_strncpy (rule->dlt_name, dlt_name, NAME_SIZE - 1);
+  sys_strncpy (rule->std_name, std_name, SYS_TIME_ZONE_NAME_SIZE - 1);
+  sys_strncpy (rule->dlt_name, dlt_name, SYS_TIME_ZONE_NAME_SIZE - 1);
 
   sys_free (std_name);
   sys_free (dlt_name);
@@ -1266,7 +1271,7 @@ rules_from_windows_time_zone (const SysChar   *identifier,
 
   subkey_dynamic_w = NULL;
 
-  if (GetSystemDirectoryW (winsyspath, max_PATH) == 0)
+  if (GetSystemDirectoryW (winsyspath, MAX_PATH) == 0)
     return 0;
 
   sys_assert (rules != NULL);
@@ -1828,8 +1833,8 @@ sys_time_zone_new_identifier (const SysChar *identifier)
 
               if (rule_from_windows_time_zone_info (&rules[0], &tzi))
                 {
-                  memset (rules[0].std_name, 0, NAME_SIZE);
-                  memset (rules[0].dlt_name, 0, NAME_SIZE);
+                  memset (rules[0].std_name, 0, SYS_TIME_ZONE_NAME_SIZE);
+                  memset (rules[0].dlt_name, 0, SYS_TIME_ZONE_NAME_SIZE);
 
                   rules[0].start_year = min_TZYEAR;
                   rules[1].start_year = max_TZYEAR;
