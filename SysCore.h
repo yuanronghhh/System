@@ -52,10 +52,7 @@
 #include <System/Utils/SysUtf8.h>
 #include <System/Utils/SysEnum.h>
 #include <System/Utils/SysTextIO.h>
-
-#if USE_OPENSSL
 #include <System/Utils/SysSsl.h>
-#endif
 
 SYS_API void sys_setup(void);
 SYS_API void sys_teardown(void);

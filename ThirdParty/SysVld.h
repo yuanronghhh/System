@@ -5,10 +5,10 @@
 
 SYS_BEGIN_DECLS
 
-#if defined(USE_DEBUGGER)
+#if defined(USE_VLD)
   #if !defined(_DEBUG)
     #define _DEBUG SYS_DEBUG
-  #endif 
+  #endif
 
   #pragma warning(push)
   #include <vld.h>

@@ -10,7 +10,6 @@
 #define MAP_FAILED ((void *) -1)
 #endif
 
-#define sys_filename_display_name(filename) (SysChar *)filename
 /**
  * SysMappedFile:
  *

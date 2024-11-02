@@ -572,6 +572,12 @@ typedef enum
   SYS_UNICODE_SCRIPT_NAG_MUNDARI ,   /* Nag Mundari */
 } SysUnicodeScript;
 
+typedef enum {
+  LOCALE_NORMAL,
+  LOCALE_TURKIC,
+  LOCALE_LITHUANIAN
+} LocaleType;
+
 SysUInt32        sys_unicode_script_to_iso15924   (SysUnicodeScript script);
 SysUnicodeScript sys_unicode_script_from_iso15924 (SysUInt32        iso15924);
 
@@ -654,6 +660,18 @@ SysSize sys_unichar_fully_decompose (SysUniChar  ch,
    classes.  See the Unicode manual for more information.  */
 void sys_unicode_canonical_ordering (SysUniChar *string,
                                    SysSize     len);
+
+LocaleType sys_unicode_get_locale_type (void);
+
+SysSize sys_unicode_real_toupper (const SysChar *str,
+              SysSize       max_len,
+              SysChar       *out_buffer,
+              LocaleType   locale_type);
+
+SysSize sys_unicode_real_tolower (const SysChar *str,
+              SysSize       max_len,
+              SysChar       *out_buffer,
+              LocaleType   locale_type);
 
 SYS_END_DECLS
 

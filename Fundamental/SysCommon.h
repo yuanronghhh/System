@@ -70,10 +70,11 @@ typedef SysUInt32 SysUniChar;
 #define SYS_STMT_END while(0)
 
 #if defined(__GNUC__) && (__GNUC__ >= 3)
-# define SYS_UNLIKELY(cond) (__builtin_expect ((cond), 0))
-# define SYS_LIKELY(cond) (__builtin_expect ((cond), 1))
-# define SYS_GNUC_CONST __attribute__ ((__const__))
-# define SYS_ALWAYS_INLINE __attribute__ ((__always_inline__))
+#define SYS_GNUC_FALLTHROUGH __attribute__((fallthrough))
+#define SYS_UNLIKELY(cond) (__builtin_expect ((cond), 0))
+#define SYS_LIKELY(cond) (__builtin_expect ((cond), 1))
+#define SYS_GNUC_CONST __attribute__ ((__const__))
+#define SYS_ALWAYS_INLINE __attribute__ ((__always_inline__))
 #define SYS_GNUC_EXTENSION __extension__
 #define sys_size_checked_mul(dest, a, b) \
     (!__builtin_mul_overflow(a, b, dest))
@@ -83,11 +84,12 @@ typedef SysUInt32 SysUniChar;
 #define SYS_GNUC_MALLOC __attribute__ ((__malloc__))
 #define SYS_GNUC_PURE __attribute__((__pure__))
 #else
-# define SYS_GNUC_CONST
-# define SYS_UNLIKELY(cond) (cond)
-# define SYS_LIKELY(cond) (cond)
-# define SYS_ALWAYS_INLINE
-# define SYS_GNUC_EXTENSION
+#define SYS_GNUC_FALLTHROUGH
+#define SYS_GNUC_CONST
+#define SYS_UNLIKELY(cond) (cond)
+#define SYS_LIKELY(cond) (cond)
+#define SYS_ALWAYS_INLINE
+#define SYS_GNUC_EXTENSION
 #define SYS_GNUC_MALLOC
 #define SYS_GNUC_PURE
 

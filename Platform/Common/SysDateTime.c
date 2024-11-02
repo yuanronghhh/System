@@ -4,6 +4,8 @@
 #include <System/Platform/Common/SysThreadPrivate.h>
 #include <System/DataTypes/SysString.h>
 #include <System/Utils/SysUtf8.h>
+#include <System/Utils/SysCharSetPrivate.h>
+#include <System/Utils/SysConvert.h>
 #include <System/Utils/SysStr.h>
 #include <System/Utils/SysConvertPrivate.h>
 

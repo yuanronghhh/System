@@ -5,10 +5,7 @@
 
 SYS_BEGIN_DECLS
 
-#define LIBCHARSET_DLL_EXPORTED SYS_API
 #include <iconv.h>
-#include <libcharset.h>
-#include <localcharset.h>
 
 SYS_END_DECLS
 

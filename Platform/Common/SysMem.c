@@ -3,7 +3,9 @@
 #include <System/Platform/Common/SysFile.h>
 #include <System/Utils/SysError.h>
 
-static SysChar* g_leakfile = NULL;
+#define SIZE_OVERFLOWS(a,b) (SYS_UNLIKELY ((b) > 0 && (a) > SYS_MAXSIZE / (b)))
+
+static SysChar* sys_leakfile = NULL;
 
 void sys_memcpy(
     SysPointer  const dst,
@@ -56,6 +58,31 @@ void sys_free(void *ptr) {
   free(ptr);
 }
 
+/**
+ * sys_strfreev:
+ * @str_array: (nullable): a %NULL-terminated array of strings to free
+ *
+ * Frees a %NULL-terminated array of strings, as well as each
+ * string it contains.
+ *
+ * If @str_array is %NULL, this function simply returns.
+ */
+void sys_strfreev (SysChar **str_array)
+{
+  if (str_array)
+  {
+    SysSize i;
+
+    for (i = 0; str_array[i] != NULL; i++) {
+
+      sys_free (str_array[i]);
+    }
+
+    sys_free (str_array);
+  }
+}
+
+
 SysPointer sys_calloc(SysSize count, SysSize size) {
   void* b = calloc(count, size);
 
@@ -70,6 +97,7 @@ SysPointer sys_malloc(SysSize size) {
   void *b = malloc(size);
 
   if(b == NULL) {
+
     sys_error_N("%s", "sys_malloc run failed.");
   }
 
@@ -83,6 +111,26 @@ SysPointer sys_malloc0(SysSize size) {
 
   memset(b, 0, size);
   return b;
+}
+
+SysPointer sys_try_malloc (SysSize n_bytes) {
+  SysPointer mem;
+
+  if (SYS_LIKELY (n_bytes)) {
+    mem = sys_malloc (n_bytes);
+
+  } else {
+    mem = NULL;
+  }
+
+  return mem;
+}
+
+SysPointer sys_try_malloc_n (SysSize n_blocks, SysSize n_block_bytes) {
+  if (SIZE_OVERFLOWS (n_blocks, n_block_bytes))
+    return NULL;
+
+  return sys_try_malloc (n_blocks * n_block_bytes);
 }
 
 SysSize sys_get_msize(void *block) {
@@ -144,13 +192,13 @@ void sys_leaks_setup(void) {
 
 const SysChar* sys_leaks_get_file(void) {
 
-  return g_leakfile;
+  return sys_leakfile;
 }
 
 void sys_leaks_set_file(const SysChar *leakfile) {
 
   SYS_LEAK_IGNORE_BEGIN;
-  g_leakfile = sys_strdup(leakfile);
+  sys_leakfile = sys_strdup(leakfile);
   SYS_LEAK_IGNORE_END;
 }
 

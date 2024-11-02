@@ -6,8 +6,8 @@
 SYS_BEGIN_DECLS
 
 /* Array of skip-bytes-per-initial character.
- */
- const SysChar * const sys_utf8_skip;
+*/
+extern const SysChar * const sys_utf8_skip;
 
 /**
  * sys_utf8_next_char:

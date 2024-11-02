@@ -1,37 +1,41 @@
 #include <System/Utils/SysUtf8.h>
+#include <System/Utils/SysStr.h>
+#include <System/Utils/SysUnicode.h>
+#include <System/Utils/SysUnicodeTable.h>
+#include <System/DataTypes/SysString.h>
 
-#define UTF8_COMPUTE(Char, Mask, Len)					      \
-  if (Char < 128)							      \
-    {									      \
-      Len = 1;								      \
-      Mask = 0x7f;							      \
-    }									      \
-  else if ((Char & 0xe0) == 0xc0)					      \
-    {									      \
-      Len = 2;								      \
-      Mask = 0x1f;							      \
-    }									      \
-  else if ((Char & 0xf0) == 0xe0)					      \
-    {									      \
-      Len = 3;								      \
-      Mask = 0x0f;							      \
-    }									      \
-  else if ((Char & 0xf8) == 0xf0)					      \
-    {									      \
-      Len = 4;								      \
-      Mask = 0x07;							      \
-    }									      \
-  else if ((Char & 0xfc) == 0xf8)					      \
-    {									      \
-      Len = 5;								      \
-      Mask = 0x03;							      \
-    }									      \
-  else if ((Char & 0xfe) == 0xfc)					      \
-    {									      \
-      Len = 6;								      \
-      Mask = 0x01;							      \
-    }									      \
-  else									      \
+#define UTF8_COMPUTE(Char, Mask, Len)                                              \
+  if (Char < 128)                                                              \
+    {                                                                              \
+      Len = 1;                                                                      \
+      Mask = 0x7f;                                                              \
+    }                                                                              \
+  else if ((Char & 0xe0) == 0xc0)                                              \
+    {                                                                              \
+      Len = 2;                                                                      \
+      Mask = 0x1f;                                                              \
+    }                                                                              \
+  else if ((Char & 0xf0) == 0xe0)                                              \
+    {                                                                              \
+      Len = 3;                                                                      \
+      Mask = 0x0f;                                                              \
+    }                                                                              \
+  else if ((Char & 0xf8) == 0xf0)                                              \
+    {                                                                              \
+      Len = 4;                                                                      \
+      Mask = 0x07;                                                              \
+    }                                                                              \
+  else if ((Char & 0xfc) == 0xf8)                                              \
+    {                                                                              \
+      Len = 5;                                                                      \
+      Mask = 0x03;                                                              \
+    }                                                                              \
+  else if ((Char & 0xfe) == 0xfc)                                              \
+    {                                                                              \
+      Len = 6;                                                                      \
+      Mask = 0x01;                                                              \
+    }                                                                              \
+  else                                                                              \
     Len = -1;
 
 #define UTF8_LENGTH(Char)              \
@@ -41,25 +45,25 @@
      ((Char) < 0x200000 ? 4 :          \
       ((Char) < 0x4000000 ? 5 : 6)))))
 
-#define UTF8_GET(Result, Chars, Count, Mask, Len)			      \
-  (Result) = (Chars)[0] & (Mask);					      \
-  for ((Count) = 1; (Count) < (Len); ++(Count))				      \
-    {									      \
-      if (((Chars)[(Count)] & 0xc0) != 0x80)				      \
-	{								      \
-	  (Result) = -1;						      \
-	  break;							      \
-	}								      \
-      (Result) <<= 6;							      \
-      (Result) |= ((Chars)[(Count)] & 0x3f);				      \
+#define UTF8_GET(Result, Chars, Count, Mask, Len)                              \
+  (Result) = (Chars)[0] & (Mask);                                              \
+  for ((Count) = 1; (Count) < (Len); ++(Count))                                      \
+    {                                                                              \
+      if (((Chars)[(Count)] & 0xc0) != 0x80)                                      \
+        {                                                                      \
+          (Result) = -1;                                                      \
+          break;                                                              \
+        }                                                                      \
+      (Result) <<= 6;                                                              \
+      (Result) |= ((Chars)[(Count)] & 0x3f);                                      \
     }
-    
+
 /*
  * Check whether a Unicode (5.2) char is in a valid range.
  *
  * The first check comes from the Unicode guarantee to never encode
  * a point above 0x0010ffff, since UTF-16 couldn't represent it.
- * 
+ *
  * The second check covers surrogate pairs (category Cs).
  *
  * @param Char the character
@@ -68,7 +72,7 @@
     ((Char) < 0x110000 &&                     \
      (((Char) & 0xFFFFF800) != 0xD800))
 
-    
+
 static const SysChar utf8_skip_data[256] = {
   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -86,7 +90,7 @@ const SysChar * const sys_utf8_skip = utf8_skip_data;
  * sys_utf8_find_prev_char:
  * @str: pointer to the beginning of a UTF-8 encoded string
  * @p: pointer to some position within @str
- * 
+ *
  * Given a position @p with a UTF-8 encoded string @str, find the start
  * of the previous UTF-8 character starting before @p. Returns %NULL if no
  * UTF-8 characters are present in @str before @p.
@@ -99,13 +103,13 @@ const SysChar * const sys_utf8_skip = utf8_skip_data;
  */
 SysChar *
 sys_utf8_find_prev_char (const SysChar *str,
-		       const SysChar *p)
+                       const SysChar *p)
 {
   while (p > str)
     {
       --p;
       if ((*p & 0xc0) != 0x80)
-	return (SysChar *)p;
+        return (SysChar *)p;
     }
   return NULL;
 }
@@ -121,7 +125,7 @@ sys_utf8_find_prev_char (const SysChar *str,
  * @p does not have to be at the beginning of a UTF-8 character. No check
  * is made to see if the character found is actually valid other than
  * it starts with an appropriate byte.
- * 
+ *
  * If @end is %NULL, the return value will never be %NULL: if the end of the
  * string is reached, a pointer to the terminating nul byte is returned. If
  * @end is non-%NULL, the return value will be %NULL if the end of the string
@@ -132,7 +136,7 @@ sys_utf8_find_prev_char (const SysChar *str,
  */
 SysChar *
 sys_utf8_find_next_char (const SysChar *p,
-		       const SysChar *end)
+                       const SysChar *end)
 {
   if (end)
     {
@@ -158,7 +162,7 @@ sys_utf8_find_next_char (const SysChar *p,
  * is made to see if the character found is actually valid other than
  * it starts with an appropriate byte. If @p might be the first
  * character of the string, you must use sys_utf8_find_prev_char() instead.
- * 
+ *
  * Returns: (transfer none) (not nullable): a pointer to the found character
  */
 SysChar *
@@ -168,10 +172,10 @@ sys_utf8_prev_char (const SysChar *p)
     {
       p--;
       if ((*p & 0xc0) != 0x80)
-	return (SysChar *)p;
+        return (SysChar *)p;
     }
 }
- 
+
 /**
  * sys_utf8_strlen:
  * @p: pointer to the start of a UTF-8 encoded string
@@ -274,14 +278,14 @@ sys_utf8_substring (const SysChar *str,
 /**
  * sys_utf8_get_char:
  * @p: a pointer to Unicode character encoded as UTF-8
- * 
+ *
  * Converts a sequence of bytes encoded as UTF-8 to a Unicode character.
  *
  * If @p does not point to a valid UTF-8 encoded character, results
  * are undefined. If you are not sure that the bytes are complete
  * valid Unicode characters, you should use sys_utf8_get_char_validated()
  * instead.
- * 
+ *
  * Returns: the resulting character
  */
 SysUniChar sys_utf8_get_char (const SysChar *p) {
@@ -320,30 +324,30 @@ SysUniChar sys_utf8_get_char (const SysChar *p) {
  */
 SysChar *
 sys_utf8_offset_to_pointer  (const SysChar *str,
-			   SysLong        offset)
+                           SysLong        offset)
 {
   const SysChar *s = str;
 
-  if (offset > 0) 
+  if (offset > 0)
     while (offset--)
       s = sys_utf8_next_char (s);
   else
     {
       const char *s1;
 
-      /* This nice technique for fast backwards stepping 
-       * through a UTF-8 string was dubbed "stutter stepping" 
+      /* This nice technique for fast backwards stepping
+       * through a UTF-8 string was dubbed "stutter stepping"
        * by its inventor, Larry Ewing.
        */
       while (offset)
-	{
-	  s1 = s;
-	  s += offset;
-	  while ((*s & 0xc0) == 0x80)
-	    s--;
+        {
+          s1 = s;
+          s += offset;
+          while ((*s & 0xc0) == 0x80)
+            s--;
 
-	  offset += sys_utf8_pointer_to_offset (s, s1);
-	}
+          offset += sys_utf8_pointer_to_offset (s, s1);
+        }
     }
 
   return (SysChar *)s;
@@ -353,31 +357,31 @@ sys_utf8_offset_to_pointer  (const SysChar *str,
  * sys_utf8_pointer_to_offset:
  * @str: a UTF-8 encoded string
  * @pos: a pointer to a position within @str
- * 
+ *
  * Converts from a pointer to position within a string to an integer
  * character offset.
  *
  * Since 2.10, this function allows @pos to be before @str, and returns
  * a negative offset in this case.
- * 
+ *
  * Returns: the resulting character offset
  */
-SysLong    
+SysLong
 sys_utf8_pointer_to_offset (const SysChar *str,
-			  const SysChar *pos)
+                          const SysChar *pos)
 {
   const SysChar *s = str;
-  SysLong offset = 0;    
+  SysLong offset = 0;
 
-  if (pos < str) 
+  if (pos < str)
     offset = - sys_utf8_pointer_to_offset (pos, str);
   else
     while (s < pos)
       {
-	s = sys_utf8_next_char (s);
-	offset++;
+        s = sys_utf8_next_char (s);
+        offset++;
       }
-  
+
   return offset;
 }
 
@@ -387,12 +391,12 @@ sys_utf8_pointer_to_offset (const SysChar *str,
  * @dest: (transfer none): buffer to fill with characters from @src
  * @src: UTF-8 encoded string
  * @n: character count
- * 
+ *
  * Like the standard C strncpy() function, but copies a given number
  * of characters instead of a given number of bytes. The @src string
  * must be valid UTF-8 encoded text. (Use sys_utf8_validate() on all
  * text before trying to use UTF-8 utility functions with it.)
- * 
+ *
  * Note you must ensure @dest is at least 4 * @n + 1 to fit the
  * largest possible UTF-8 characters
  *
@@ -400,8 +404,8 @@ sys_utf8_pointer_to_offset (const SysChar *str,
  */
 SysChar *
 sys_utf8_strncpy (SysChar       *dest,
-		const SysChar *src,
-		SysSize        n)
+                const SysChar *src,
+                SysSize        n)
 {
   const SysChar *s = src;
   while (n && *s)
@@ -422,17 +426,17 @@ sys_utf8_strncpy (SysChar       *dest,
  * @outbuf: (out caller-allocates) (optional): output buffer, must have at
  *       least 6 bytes of space. If %NULL, the length will be computed and
  *       returned and nothing will be written to @outbuf.
- * 
+ *
  * Converts a single character to UTF-8.
- * 
+ *
  * Returns: number of bytes written
  */
 int
-g_unichar_to_utf8 (SysUniChar c,
-		   SysChar   *outbuf)
+sys_unichar_to_utf8 (SysUniChar c,
+                   SysChar   *outbuf)
 {
   /* If this gets modified, also update the copy in sys_string_insert_unichar() */
-  SysUInt len = 0;    
+  SysUInt len = 0;
   int first;
   int i;
 
@@ -470,10 +474,10 @@ g_unichar_to_utf8 (SysUniChar c,
   if (outbuf)
     {
       for (i = len - 1; i > 0; --i)
-	{
-	  outbuf[i] = (c & 0x3f) | 0x80;
-	  c >>= 6;
-	}
+        {
+          outbuf[i] = (c & 0x3f) | 0x80;
+          c >>= 6;
+        }
       outbuf[0] = c | first;
     }
 
@@ -485,25 +489,25 @@ g_unichar_to_utf8 (SysUniChar c,
  * @p: a nul-terminated UTF-8 encoded string
  * @len: the maximum length of @p
  * @c: a Unicode character
- * 
+ *
  * Finds the leftmost occurrence of the given Unicode character
  * in a UTF-8 encoded string, while limiting the search to @len bytes.
  * If @len is -1, allow unbounded search.
- * 
+ *
  * Returns: (transfer none) (nullable): %NULL if the string does not contain the character,
  *     otherwise, a pointer to the start of the leftmost occurrence
  *     of the character in the string.
  */
 SysChar *
 sys_utf8_strchr (const char *p,
-	       SysSize      len,
-	       SysUniChar    c)
+               SysSize      len,
+               SysUniChar    c)
 {
   SysChar ch[10];
 
   SysInt charlen = sys_unichar_to_utf8 (c, ch);
   ch[charlen] = '\0';
-  
+
   return sys_strstr_len (p, len, ch);
 }
 
@@ -513,25 +517,25 @@ sys_utf8_strchr (const char *p,
  * @p: a nul-terminated UTF-8 encoded string
  * @len: the maximum length of @p
  * @c: a Unicode character
- * 
+ *
  * Find the rightmost occurrence of the given Unicode character
  * in a UTF-8 encoded string, while limiting the search to @len bytes.
  * If @len is -1, allow unbounded search.
- * 
+ *
  * Returns: (transfer none) (nullable): %NULL if the string does not contain the character,
  *     otherwise, a pointer to the start of the rightmost occurrence
  *     of the character in the string.
  */
 SysChar *
 sys_utf8_strrchr (const char *p,
-		SysSize      len,
-		SysUniChar    c)
+                SysSize      len,
+                SysUniChar    c)
 {
   SysChar ch[10];
 
   SysInt charlen = sys_unichar_to_utf8 (c, ch);
   ch[charlen] = '\0';
-  
+
   return sys_strrstr_len (p, len, ch);
 }
 
@@ -543,7 +547,7 @@ sys_utf8_strrchr (const char *p,
  */
 static inline SysUniChar
 sys_utf8_get_char_extended (const  SysChar *p,
-			  SysSize max_len)
+                          SysSize max_len)
 {
   SysSize i, len;
   SysUniChar min_code;
@@ -597,10 +601,10 @@ sys_utf8_get_char_extended (const  SysChar *p,
   if (SYS_UNLIKELY (max_len >= 0 && len > (SysSize) max_len))
     {
       for (i = 1; i < (SysSize) max_len; i++)
-	{
-	  if ((((SysUChar *)p)[i] & 0xc0) != 0x80)
-	    return malformed_sequence;
-	}
+        {
+          if ((((SysUChar *)p)[i] & 0xc0) != 0x80)
+            return malformed_sequence;
+        }
       return partial_sequence;
     }
 
@@ -609,12 +613,12 @@ sys_utf8_get_char_extended (const  SysChar *p,
       SysUniChar ch = ((SysUChar *)p)[i];
 
       if (SYS_UNLIKELY ((ch & 0xc0) != 0x80))
-	{
-	  if (ch)
-	    return malformed_sequence;
-	  else
-	    return partial_sequence;
-	}
+        {
+          if (ch)
+            return malformed_sequence;
+          else
+            return partial_sequence;
+        }
 
       wc <<= 6;
       wc |= (ch & 0x3f);
@@ -639,16 +643,16 @@ sys_utf8_get_char_extended (const  SysChar *p,
  * Note that sys_utf8_get_char_validated() returns (SysUniChar)-2 if
  * @max_len is positive and any of the bytes in the first UTF-8 character
  * sequence are nul.
- * 
+ *
  * Returns: the resulting character. If @p points to a partial
- *     sequence at the end of a string that could begin a valid 
- *     character (or if @max_len is zero), returns (SysUniChar)-2; 
- *     otherwise, if @p does not point to a valid UTF-8 encoded 
+ *     sequence at the end of a string that could begin a valid
+ *     character (or if @max_len is zero), returns (SysUniChar)-2;
+ *     otherwise, if @p does not point to a valid UTF-8 encoded
  *     Unicode character, returns (SysUniChar)-1.
  */
 SysUniChar
 sys_utf8_get_char_validated (const SysChar *p,
-			   SysSize       max_len)
+                           SysSize       max_len)
 {
   SysUniChar result;
 
@@ -685,14 +689,14 @@ sys_utf8_get_char_validated (const SysChar *p,
  * This function is roughly twice as fast as sys_utf8_to_ucs4()
  * but does no error checking on the input. A trailing 0 character
  * will be added to the string after the converted text.
- * 
+ *
  * Returns: (transfer full): a pointer to a newly allocated UCS-4 string.
  *     This value must be freed with sys_free().
  */
 SysUniChar *
 sys_utf8_to_ucs4_fast (const SysChar *str,
-		     SysLong        len,              
-		     SysLong       *items_written)    
+                     SysLong        len,
+                     SysLong       *items_written)
 {
   SysUniChar *result;
   SysInt n_chars, i;
@@ -705,22 +709,22 @@ sys_utf8_to_ucs4_fast (const SysChar *str,
   if (len < 0)
     {
       while (*p)
-	{
-	  p = sys_utf8_next_char (p);
-	  ++n_chars;
-	}
+        {
+          p = sys_utf8_next_char (p);
+          ++n_chars;
+        }
     }
   else
     {
       while (p < str + len && *p)
-	{
-	  p = sys_utf8_next_char (p);
-	  ++n_chars;
-	}
+        {
+          p = sys_utf8_next_char (p);
+          ++n_chars;
+        }
     }
-  
+
   result = sys_new (SysUniChar, n_chars + 1);
-  
+
   p = str;
   for (i=0; i < n_chars; i++)
     {
@@ -728,15 +732,15 @@ sys_utf8_to_ucs4_fast (const SysChar *str,
       SysUniChar wc;
 
       if (first < 0xc0)
-	{
+        {
           /* We really hope first < 0x80, but we don't want to test an
            * extra branch for invalid input, which this function
            * does not care about. Handling unexpected continuation bytes
            * here will do the least damage. */
-	  wc = first;
-	}
+          wc = first;
+        }
       else
-	{
+        {
           SysUniChar c1 = CONT_BYTE_FAST(p);
           if (first < 0xe0)
             {
@@ -768,7 +772,7 @@ sys_utf8_to_ucs4_fast (const SysChar *str,
                     }
                 }
             }
-	}
+        }
       result[i] = wc;
     }
   result[i] = 0;
@@ -779,14 +783,15 @@ sys_utf8_to_ucs4_fast (const SysChar *str,
   return result;
 }
 
-static SysPointer
-try_malloc_n (SysSize n_blocks, SysSize n_block_bytes, SysError **error)
-{
-    SysPointer ptr = sys_try_malloc_n (n_blocks, n_block_bytes);
-    if (ptr == NULL)
-      sys_error_set_N_literal (error, SYS_CONVERT_ERROR, SYS_CONVERT_ERROR_NO_MEMORY,
-                           SYS_("Failed to allocate memory"));
-    return ptr;
+static SysPointer try_malloc_n (SysSize n_blocks,
+    SysSize n_block_bytes,
+    SysError **error) {
+
+  SysPointer ptr = sys_try_malloc_n (n_blocks, n_block_bytes);
+  if (ptr == NULL)
+    sys_error_set_N(error, "%s",
+        SYS_("Failed to allocate memory"));
+  return ptr;
 }
 
 /**
@@ -804,71 +809,76 @@ try_malloc_n (SysSize n_blocks, SysSize n_block_bytes, SysError **error)
  *     of characters written or %NULL. The value here stored does not include
  *     the trailing 0 character.
  * @error: location to store the error occurring, or %NULL to ignore
- *     errors. Any of the errors in #GConvertError other than
+ *     errors. Any of the errors in #SysConvertError other than
  *     %G_CONVERT_ERROR_NO_CONVERSION may occur.
  *
  * Convert a string from UTF-8 to a 32-bit fixed width
  * representation as UCS-4. A trailing 0 character will be added to the
  * string after the converted text.
- * 
+ *
  * Returns: (transfer full): a pointer to a newly allocated UCS-4 string.
  *     This value must be freed with sys_free(). If an error occurs,
  *     %NULL will be returned and @error set.
  */
 SysUniChar *
 sys_utf8_to_ucs4 (const SysChar *str,
-		SysLong        len,             
-		SysLong       *items_read,      
-		SysLong       *items_written,   
-		SysError     **error)
+                SysLong        len,
+                SysLong       *items_read,
+                SysLong       *items_written,
+                SysError     **error)
 {
   SysUniChar *result = NULL;
   SysInt n_chars, i;
   const SysChar *in;
-  
+
   in = str;
   n_chars = 0;
   while ((len < 0 || str + len - in > 0) && *in)
-    {
-      SysUniChar wc = sys_utf8_get_char_extended (in, len < 0 ? 6 : str + len - in);
-      if (wc & 0x80000000)
-	{
-	  if (wc == (SysUniChar)-2)
-	    {
-	      if (items_read)
-		break;
-	      else
-		g_set_error_literal (error, SYS_CONVERT_ERROR, SYS_CONVERT_ERROR_PARTIAL_INPUT,
-                                     SYS_("Partial character sequence at end of input"));
-	    }
-	  else
-	    sys_error_set_N_literal (error, SYS_CONVERT_ERROR, SYS_CONVERT_ERROR_ILLEGAL_SEQUENCE,
-                                 SYS_("Invalid byte sequence in conversion input"));
+  {
+    SysUniChar wc = sys_utf8_get_char_extended (in, len < 0 ? 6 : str + len - in);
+    if (wc & 0x80000000) {
 
-	  goto err_out;
-	}
+      if (wc == (SysUniChar)-2) {
 
-      n_chars++;
+        if (items_read) {
+          break;
 
-      in = sys_utf8_next_char (in);
+        } else {
+
+          sys_error_set_N (error, "%s",
+              SYS_("Partial character sequence at end of input"));
+        }
+
+      } else {
+
+        sys_error_set_N (error, "%s",
+            SYS_("Invalid byte sequence in conversion input"));
+      }
+
+      goto err_out;
     }
+
+    n_chars++;
+
+    in = sys_utf8_next_char (in);
+  }
 
   result = try_malloc_n (n_chars + 1, sizeof (SysUniChar), error);
   if (result == NULL)
-      goto err_out;
+    goto err_out;
 
   in = str;
   for (i=0; i < n_chars; i++)
-    {
-      result[i] = sys_utf8_get_char (in);
-      in = sys_utf8_next_char (in);
-    }
+  {
+    result[i] = sys_utf8_get_char (in);
+    in = sys_utf8_next_char (in);
+  }
   result[i] = 0;
 
   if (items_written)
     *items_written = n_chars;
 
- err_out:
+err_out:
   if (items_read)
     *items_read = in - str;
 
@@ -878,7 +888,7 @@ sys_utf8_to_ucs4 (const SysChar *str,
 /**
  * sys_ucs4_to_utf8:
  * @str: (array length=len) (element-type SysUniChar): a UCS-4 encoded string
- * @len: the maximum length (number of characters) of @str to use. 
+ * @len: the maximum length (number of characters) of @str to use.
  *     If @len < 0, then the string is nul-terminated.
  * @items_read: (out) (optional): location to store number of
  *     characters read, or %NULL.
@@ -886,23 +896,23 @@ sys_utf8_to_ucs4 (const SysChar *str,
  *     of bytes written or %NULL. The value here stored does not include the
  *     trailing 0 byte.
  * @error: location to store the error occurring, or %NULL to ignore
- *         errors. Any of the errors in #GConvertError other than
+ *         errors. Any of the errors in #SysConvertError other than
  *         %G_CONVERT_ERROR_NO_CONVERSION may occur.
  *
  * Convert a string from a 32-bit fixed width representation as UCS-4.
  * to UTF-8. The result will be terminated with a 0 byte.
- * 
+ *
  * Returns: (transfer full): a pointer to a newly allocated UTF-8 string.
  *     This value must be freed with sys_free(). If an error occurs,
  *     %NULL will be returned and @error set. In that case, @items_read
  *     will be set to the position of the first invalid input character.
  */
-SysChar *
-g_ucs4_to_utf8 (const SysUniChar *str,
-		SysLong           len,              
-		SysLong          *items_read,       
-		SysLong          *items_written,    
-		SysError        **error)
+  SysChar *
+           sys_ucs4_to_utf8 (const SysUniChar *str,
+               SysLong           len,
+               SysLong          *items_read,
+               SysLong          *items_written,
+               SysError        **error)
 {
   SysInt result_length;
   SysChar *result = NULL;
@@ -911,36 +921,36 @@ g_ucs4_to_utf8 (const SysUniChar *str,
 
   result_length = 0;
   for (i = 0; len < 0 || i < len ; i++)
-    {
-      if (!str[i])
-	break;
+  {
+    if (!str[i])
+      break;
 
-      if (str[i] >= 0x80000000)
-	{
-	  sys_error_set_N_literal (error, SYS_CONVERT_ERROR, SYS_CONVERT_ERROR_ILLEGAL_SEQUENCE,
-                               SYS_("Character out of range for UTF-8"));
-	  goto err_out;
-	}
-      
-      result_length += UTF8_LENGTH (str[i]);
+    if (str[i] >= 0x80000000)
+    {
+      sys_error_set_N (error, "%s",
+          SYS_("Character out of range for UTF-8"));
+      goto err_out;
     }
+
+    result_length += UTF8_LENGTH (str[i]);
+  }
 
   result = try_malloc_n (result_length + 1, 1, error);
   if (result == NULL)
-      goto err_out;
+    goto err_out;
 
   p = result;
 
   i = 0;
   while (p < result + result_length)
     p += sys_unichar_to_utf8 (str[i++], p);
-  
+
   *p = '\0';
 
   if (items_written)
     *items_written = p - result;
 
- err_out:
+err_out:
   if (items_read)
     *items_read = i;
 
@@ -952,7 +962,7 @@ g_ucs4_to_utf8 (const SysUniChar *str,
 /**
  * sys_utf16_to_utf8:
  * @str: (array length=len) (element-type SysUInt16): a UTF-16 encoded string
- * @len: the maximum length (number of #SysUniChar2) of @str to use. 
+ * @len: the maximum length (number of #SysUniChar2) of @str to use.
  *     If @len < 0, then the string is nul-terminated.
  * @items_read: (out) (optional): location to store number of
  *     words read, or %NULL. If %NULL, then %G_CONVERT_ERROR_PARTIAL_INPUT will
@@ -963,7 +973,7 @@ g_ucs4_to_utf8 (const SysUniChar *str,
  *     of bytes written, or %NULL. The value stored here does not include the
  *     trailing 0 byte. It’s guaranteed to be non-negative.
  * @error: location to store the error occurring, or %NULL to ignore
- *     errors. Any of the errors in #GConvertError other than
+ *     errors. Any of the errors in #SysConvertError other than
  *     %G_CONVERT_ERROR_NO_CONVERSION may occur.
  *
  * Convert a string from UTF-16 to UTF-8. The result will be
@@ -984,12 +994,11 @@ g_ucs4_to_utf8 (const SysUniChar *str,
  *     This value must be freed with sys_free(). If an error occurs,
  *     %NULL will be returned and @error set.
  **/
-SysChar *
-g_utf16_to_utf8 (const SysUniChar2  *str,
-		 SysLong             len,
-		 SysLong            *items_read,
-		 SysLong            *items_written,
-		 SysError          **error)
+  SysChar * sys_utf16_to_utf8 (const SysUniChar2  *str,
+               SysLong             len,
+               SysLong            *items_read,
+               SysLong            *items_written,
+               SysError          **error)
 {
   /* This function and sys_utf16_to_ucs4 are almost exactly identical -
    * The lines that differ are marked.
@@ -1006,91 +1015,91 @@ g_utf16_to_utf8 (const SysUniChar2  *str,
   in = str;
   high_surrogate = 0;
   while ((len < 0 || in - str < len) && *in)
+  {
+    SysUniChar2 c = *in;
+    SysUniChar wc;
+
+    if (c >= 0xdc00 && c < 0xe000) /* low surrogate */
     {
-      SysUniChar2 c = *in;
-      SysUniChar wc;
-
-      if (c >= 0xdc00 && c < 0xe000) /* low surrogate */
-	{
-	  if (high_surrogate)
-	    {
-	      wc = SURROGATE_VALUE (high_surrogate, c);
-	      high_surrogate = 0;
-	    }
-	  else
-	    {
-	      sys_error_set_N_literal (error, SYS_CONVERT_ERROR, SYS_CONVERT_ERROR_ILLEGAL_SEQUENCE,
-                                   SYS_("Invalid sequence in conversion input"));
-	      goto err_out;
-	    }
-	}
+      if (high_surrogate)
+      {
+        wc = SURROGATE_VALUE (high_surrogate, c);
+        high_surrogate = 0;
+      }
       else
-	{
-	  if (high_surrogate)
-	    {
-	      sys_error_set_N_literal (error, SYS_CONVERT_ERROR, SYS_CONVERT_ERROR_ILLEGAL_SEQUENCE,
-                                   SYS_("Invalid sequence in conversion input"));
-	      goto err_out;
-	    }
-
-	  if (c >= 0xd800 && c < 0xdc00) /* high surrogate */
-	    {
-	      high_surrogate = c;
-	      goto next1;
-	    }
-	  else
-	    wc = c;
-	}
-
-      /********** DIFFERENT for UTF8/UCS4 **********/
-      n_bytes += UTF8_LENGTH (wc);
-
-    next1:
-      in++;
+      {
+        sys_error_set_N (error, "%s",
+            SYS_("Invalid sequence in conversion input"));
+        goto err_out;
+      }
     }
+    else
+    {
+      if (high_surrogate)
+      {
+        sys_error_set_N (error, "%s",
+            SYS_("Invalid sequence in conversion input"));
+        goto err_out;
+      }
+
+      if (c >= 0xd800 && c < 0xdc00) /* high surrogate */
+      {
+        high_surrogate = c;
+        goto next1;
+      }
+      else
+        wc = c;
+    }
+
+    /********** DIFFERENT for UTF8/UCS4 **********/
+    n_bytes += UTF8_LENGTH (wc);
+
+next1:
+    in++;
+  }
 
   if (high_surrogate && !items_read)
-    {
-      sys_error_set_N_literal (error, SYS_CONVERT_ERROR, SYS_CONVERT_ERROR_PARTIAL_INPUT,
-                           SYS_("Partial character sequence at end of input"));
-      goto err_out;
-    }
-  
+  {
+    sys_error_set_N (error, "%s",
+        SYS_("Partial character sequence at end of input"));
+    goto err_out;
+  }
+
   /* At this point, everything is valid, and we just need to convert
-   */
+  */
   /********** DIFFERENT for UTF8/UCS4 **********/
   result = try_malloc_n (n_bytes + 1, 1, error);
   if (result == NULL)
-      goto err_out;
+    goto err_out;
 
   high_surrogate = 0;
   out = result;
   in = str;
   while (out < result + n_bytes)
+  {
+    SysUniChar2 c = *in;
+    SysUniChar wc;
+
+    if (c >= 0xdc00 && c < 0xe000) /* low surrogate */
     {
-      SysUniChar2 c = *in;
-      SysUniChar wc;
-
-      if (c >= 0xdc00 && c < 0xe000) /* low surrogate */
-	{
-	  wc = SURROGATE_VALUE (high_surrogate, c);
-	  high_surrogate = 0;
-	}
-      else if (c >= 0xd800 && c < 0xdc00) /* high surrogate */
-	{
-	  high_surrogate = c;
-	  goto next2;
-	}
-      else
-	wc = c;
-
-      /********** DIFFERENT for UTF8/UCS4 **********/
-      out += sys_unichar_to_utf8 (wc, out);
-
-    next2:
-      in++;
+      wc = SURROGATE_VALUE (high_surrogate, c);
+      high_surrogate = 0;
     }
-  
+    else if (c >= 0xd800 && c < 0xdc00) /* high surrogate */
+    {
+      high_surrogate = c;
+      goto next2;
+    }
+    else
+      wc = c;
+
+    /********** DIFFERENT for UTF8/UCS4 **********/
+    out += sys_unichar_to_utf8 (wc, out);
+
+next2:
+    in++;
+  }
+
   /********** DIFFERENT for UTF8/UCS4 **********/
   *out = '\0';
 
@@ -1098,7 +1107,7 @@ g_utf16_to_utf8 (const SysUniChar2  *str,
     /********** DIFFERENT for UTF8/UCS4 **********/
     *items_written = out - result;
 
- err_out:
+err_out:
   if (items_read)
     *items_read = in - str;
 
@@ -1108,7 +1117,7 @@ g_utf16_to_utf8 (const SysUniChar2  *str,
 /**
  * sys_utf16_to_ucs4:
  * @str: (array length=len) (element-type SysUInt16): a UTF-16 encoded string
- * @len: the maximum length (number of #SysUniChar2) of @str to use. 
+ * @len: the maximum length (number of #SysUniChar2) of @str to use.
  *     If @len < 0, then the string is nul-terminated.
  * @items_read: (out) (optional): location to store number of
  *     words read, or %NULL. If %NULL, then %G_CONVERT_ERROR_PARTIAL_INPUT will
@@ -1118,22 +1127,22 @@ g_utf16_to_utf8 (const SysUniChar2  *str,
  *     of characters written, or %NULL. The value stored here does not include
  *     the trailing 0 character.
  * @error: location to store the error occurring, or %NULL to ignore
- *     errors. Any of the errors in #GConvertError other than
+ *     errors. Any of the errors in #SysConvertError other than
  *     %G_CONVERT_ERROR_NO_CONVERSION may occur.
  *
  * Convert a string from UTF-16 to UCS-4. The result will be
  * nul-terminated.
- * 
+ *
  * Returns: (transfer full): a pointer to a newly allocated UCS-4 string.
  *     This value must be freed with sys_free(). If an error occurs,
  *     %NULL will be returned and @error set.
  */
-SysUniChar *
-g_utf16_to_ucs4 (const SysUniChar2  *str,
-		 SysLong             len,              
-		 SysLong            *items_read,       
-		 SysLong            *items_written,    
-		 SysError          **error)
+  SysUniChar *
+              sys_utf16_to_ucs4 (const SysUniChar2  *str,
+                  SysLong             len,
+                  SysLong            *items_read,
+                  SysLong            *items_written,
+                  SysError          **error)
 {
   const SysUniChar2 *in;
   SysChar *out;
@@ -1147,87 +1156,87 @@ g_utf16_to_ucs4 (const SysUniChar2  *str,
   in = str;
   high_surrogate = 0;
   while ((len < 0 || in - str < len) && *in)
+  {
+    SysUniChar2 c = *in;
+
+    if (c >= 0xdc00 && c < 0xe000) /* low surrogate */
     {
-      SysUniChar2 c = *in;
-
-      if (c >= 0xdc00 && c < 0xe000) /* low surrogate */
-	{
-	  if (high_surrogate)
-	    {
-	      high_surrogate = 0;
-	    }
-	  else
-	    {
-	      sys_error_set_N_literal (error, SYS_CONVERT_ERROR, SYS_CONVERT_ERROR_ILLEGAL_SEQUENCE,
-                                   SYS_("Invalid sequence in conversion input"));
-	      goto err_out;
-	    }
-	}
+      if (high_surrogate)
+      {
+        high_surrogate = 0;
+      }
       else
-	{
-	  if (high_surrogate)
-	    {
-	      sys_error_set_N_literal (error, SYS_CONVERT_ERROR, SYS_CONVERT_ERROR_ILLEGAL_SEQUENCE,
-                                   SYS_("Invalid sequence in conversion input"));
-	      goto err_out;
-	    }
-
-	  if (c >= 0xd800 && c < 0xdc00) /* high surrogate */
-	    {
-	      high_surrogate = c;
-	      goto next1;
-	    }
-	}
-
-      /********** DIFFERENT for UTF8/UCS4 **********/
-      n_bytes += sizeof (SysUniChar);
-
-    next1:
-      in++;
+      {
+        sys_error_set_N (error, "%s",
+            SYS_("Invalid sequence in conversion input"));
+        goto err_out;
+      }
     }
+    else
+    {
+      if (high_surrogate)
+      {
+        sys_error_set_N (error, "%s",
+            SYS_("Invalid sequence in conversion input"));
+        goto err_out;
+      }
+
+      if (c >= 0xd800 && c < 0xdc00) /* high surrogate */
+      {
+        high_surrogate = c;
+        goto next1;
+      }
+    }
+
+    /********** DIFFERENT for UTF8/UCS4 **********/
+    n_bytes += sizeof (SysUniChar);
+
+next1:
+    in++;
+  }
 
   if (high_surrogate && !items_read)
-    {
-      sys_error_set_N_literal (error, SYS_CONVERT_ERROR, SYS_CONVERT_ERROR_PARTIAL_INPUT,
-                           SYS_("Partial character sequence at end of input"));
-      goto err_out;
-    }
-  
+  {
+    sys_error_set_N (error, "%s",
+        SYS_("Partial character sequence at end of input"));
+    goto err_out;
+  }
+
   /* At this point, everything is valid, and we just need to convert
-   */
+  */
   /********** DIFFERENT for UTF8/UCS4 **********/
   result = try_malloc_n (n_bytes + 4, 1, error);
   if (result == NULL)
-      goto err_out;
+    goto err_out;
 
   high_surrogate = 0;
   out = result;
   in = str;
   while (out < result + n_bytes)
+  {
+    SysUniChar2 c = *in;
+    SysUniChar wc;
+
+    if (c >= 0xdc00 && c < 0xe000) /* low surrogate */
     {
-      SysUniChar2 c = *in;
-      SysUniChar wc;
-
-      if (c >= 0xdc00 && c < 0xe000) /* low surrogate */
-	{
-	  wc = SURROGATE_VALUE (high_surrogate, c);
-	  high_surrogate = 0;
-	}
-      else if (c >= 0xd800 && c < 0xdc00) /* high surrogate */
-	{
-	  high_surrogate = c;
-	  goto next2;
-	}
-      else
-	wc = c;
-
-      /********** DIFFERENT for UTF8/UCS4 **********/
-      *(SysUniChar *)out = wc;
-      out += sizeof (SysUniChar);
-
-    next2:
-      in++;
+      wc = SURROGATE_VALUE (high_surrogate, c);
+      high_surrogate = 0;
     }
+    else if (c >= 0xd800 && c < 0xdc00) /* high surrogate */
+    {
+      high_surrogate = c;
+      goto next2;
+    }
+    else
+      wc = c;
+
+    /********** DIFFERENT for UTF8/UCS4 **********/
+    *(SysUniChar *)out = wc;
+    out += sizeof (SysUniChar);
+
+next2:
+    in++;
+  }
 
   /********** DIFFERENT for UTF8/UCS4 **********/
   *(SysUniChar *)out = 0;
@@ -1236,7 +1245,7 @@ g_utf16_to_ucs4 (const SysUniChar2  *str,
     /********** DIFFERENT for UTF8/UCS4 **********/
     *items_written = (out - result) / sizeof (SysUniChar);
 
- err_out:
+err_out:
   if (items_read)
     *items_read = in - str;
 
@@ -1256,7 +1265,7 @@ g_utf16_to_ucs4 (const SysUniChar2  *str,
  *     of #SysUniChar2 written, or %NULL. The value stored here does not include
  *     the trailing 0.
  * @error: location to store the error occurring, or %NULL to ignore
- *     errors. Any of the errors in #GConvertError other than
+ *     errors. Any of the errors in #SysConvertError other than
  *     %G_CONVERT_ERROR_NO_CONVERSION may occur.
  *
  * Convert a string from UTF-8 to UTF-16. A 0 character will be
@@ -1266,12 +1275,12 @@ g_utf16_to_ucs4 (const SysUniChar2  *str,
  *     This value must be freed with sys_free(). If an error occurs,
  *     %NULL will be returned and @error set.
  */
-SysUniChar2 *
-sys_utf8_to_utf16 (const SysChar *str,
-		 SysLong        len,
-		 SysLong       *items_read,
-		 SysLong       *items_written,
-		 SysError     **error)
+  SysUniChar2 *
+               sys_utf8_to_utf16 (const SysChar *str,
+                   SysLong        len,
+                   SysLong       *items_read,
+                   SysLong       *items_written,
+                   SysError     **error)
 {
   SysUniChar2 *result = NULL;
   SysInt n16;
@@ -1283,87 +1292,87 @@ sys_utf8_to_utf16 (const SysChar *str,
   in = str;
   n16 = 0;
   while ((len < 0 || str + len - in > 0) && *in)
+  {
+    SysUniChar wc = sys_utf8_get_char_extended (in, len < 0 ? 6 : str + len - in);
+    if (wc & 0x80000000)
     {
-      SysUniChar wc = sys_utf8_get_char_extended (in, len < 0 ? 6 : str + len - in);
-      if (wc & 0x80000000)
-	{
-	  if (wc == (SysUniChar)-2)
-	    {
-	      if (items_read)
-		break;
-	      else
-		g_set_error_literal (error, SYS_CONVERT_ERROR, SYS_CONVERT_ERROR_PARTIAL_INPUT,
-                                     SYS_("Partial character sequence at end of input"));
-	    }
-	  else
-	    sys_error_set_N_literal (error, SYS_CONVERT_ERROR, SYS_CONVERT_ERROR_ILLEGAL_SEQUENCE,
-                                 SYS_("Invalid byte sequence in conversion input"));
-
-	  goto err_out;
-	}
-
-      if (wc < 0xd800)
-	n16 += 1;
-      else if (wc < 0xe000)
-	{
-	  sys_error_set_N_literal (error, SYS_CONVERT_ERROR, SYS_CONVERT_ERROR_ILLEGAL_SEQUENCE,
-                               SYS_("Invalid sequence in conversion input"));
-
-	  goto err_out;
-	}
-      else if (wc < 0x10000)
-	n16 += 1;
-      else if (wc < 0x110000)
-	n16 += 2;
+      if (wc == (SysUniChar)-2)
+      {
+        if (items_read)
+          break;
+        else
+          sys_error_set_N (error, "%s",
+              SYS_("Partial character sequence at end of input"));
+      }
       else
-	{
-	  sys_error_set_N_literal (error, SYS_CONVERT_ERROR, SYS_CONVERT_ERROR_ILLEGAL_SEQUENCE,
-                               SYS_("Character out of range for UTF-16"));
+        sys_error_set_N (error, "%s",
+            SYS_("Invalid byte sequence in conversion input"));
 
-	  goto err_out;
-	}
-      
-      in = sys_utf8_next_char (in);
+      goto err_out;
     }
+
+    if (wc < 0xd800)
+      n16 += 1;
+    else if (wc < 0xe000)
+    {
+      sys_error_set_N (error, "%s",
+          SYS_("Invalid sequence in conversion input"));
+
+      goto err_out;
+    }
+    else if (wc < 0x10000)
+      n16 += 1;
+    else if (wc < 0x110000)
+      n16 += 2;
+    else
+    {
+      sys_error_set_N (error, "%s",
+          SYS_("Character out of range for UTF-16"));
+
+      goto err_out;
+    }
+
+    in = sys_utf8_next_char (in);
+  }
 
   result = try_malloc_n (n16 + 1, sizeof (SysUniChar2), error);
   if (result == NULL)
-      goto err_out;
+    goto err_out;
 
   in = str;
   for (i = 0; i < n16;)
-    {
-      SysUniChar wc = sys_utf8_get_char (in);
+  {
+    SysUniChar wc = sys_utf8_get_char (in);
 
-      if (wc < 0x10000)
-	{
-	  result[i++] = wc;
-	}
-      else
-	{
-	  result[i++] = (wc - 0x10000) / 0x400 + 0xd800;
-	  result[i++] = (wc - 0x10000) % 0x400 + 0xdc00;
-	}
-      
-      in = sys_utf8_next_char (in);
+    if (wc < 0x10000)
+    {
+      result[i++] = wc;
     }
+    else
+    {
+      result[i++] = (wc - 0x10000) / 0x400 + 0xd800;
+      result[i++] = (wc - 0x10000) % 0x400 + 0xdc00;
+    }
+
+    in = sys_utf8_next_char (in);
+  }
 
   result[i] = 0;
 
   if (items_written)
     *items_written = n16;
 
- err_out:
+err_out:
   if (items_read)
     *items_read = in - str;
-  
+
   return result;
 }
 
 /**
  * sys_ucs4_to_utf16:
  * @str: (array length=len) (element-type SysUniChar): a UCS-4 encoded string
- * @len: the maximum length (number of characters) of @str to use. 
+ * @len: the maximum length (number of characters) of @str to use.
  *     If @len < 0, then the string is nul-terminated.
  * @items_read: (out) (optional): location to store number of
  *     bytes read, or %NULL. If an error occurs then the index of the invalid
@@ -1372,22 +1381,22 @@ sys_utf8_to_utf16 (const SysChar *str,
  *     of #SysUniChar2  written, or %NULL. The value stored here does not include
  *     the trailing 0.
  * @error: location to store the error occurring, or %NULL to ignore
- *     errors. Any of the errors in #GConvertError other than
+ *     errors. Any of the errors in #SysConvertError other than
  *     %G_CONVERT_ERROR_NO_CONVERSION may occur.
  *
  * Convert a string from UCS-4 to UTF-16. A 0 character will be
  * added to the result after the converted text.
- * 
+ *
  * Returns: (transfer full): a pointer to a newly allocated UTF-16 string.
  *     This value must be freed with sys_free(). If an error occurs,
  *     %NULL will be returned and @error set.
  */
-SysUniChar2 *
-g_ucs4_to_utf16 (const SysUniChar  *str,
-		 SysLong            len,              
-		 SysLong           *items_read,       
-		 SysLong           *items_written,    
-		 SysError         **error)
+  SysUniChar2 *
+               sys_ucs4_to_utf16 (const SysUniChar  *str,
+                   SysLong            len,
+                   SysLong           *items_read,
+                   SysLong           *items_written,
+                   SysError         **error)
 {
   SysUniChar2 *result = NULL;
   SysInt n16;
@@ -1396,145 +1405,145 @@ g_ucs4_to_utf16 (const SysUniChar  *str,
   n16 = 0;
   i = 0;
   while ((len < 0 || i < len) && str[i])
+  {
+    SysUniChar wc = str[i];
+
+    if (wc < 0xd800)
+      n16 += 1;
+    else if (wc < 0xe000)
     {
-      SysUniChar wc = str[i];
+      sys_error_set_N(error, "%s",
+          SYS_("Invalid sequence in conversion input"));
 
-      if (wc < 0xd800)
-	n16 += 1;
-      else if (wc < 0xe000)
-	{
-	  sys_error_set_N_literal (error, SYS_CONVERT_ERROR, SYS_CONVERT_ERROR_ILLEGAL_SEQUENCE,
-                               SYS_("Invalid sequence in conversion input"));
-
-	  goto err_out;
-	}
-      else if (wc < 0x10000)
-	n16 += 1;
-      else if (wc < 0x110000)
-	n16 += 2;
-      else
-	{
-	  sys_error_set_N_literal (error, SYS_CONVERT_ERROR, SYS_CONVERT_ERROR_ILLEGAL_SEQUENCE,
-                               SYS_("Character out of range for UTF-16"));
-
-	  goto err_out;
-	}
-
-      i++;
+      goto err_out;
     }
+    else if (wc < 0x10000)
+      n16 += 1;
+    else if (wc < 0x110000)
+      n16 += 2;
+    else
+    {
+      sys_error_set_N (error, "%s",
+          SYS_("Character out of range for UTF-16"));
+
+      goto err_out;
+    }
+
+    i++;
+  }
 
   result = try_malloc_n (n16 + 1, sizeof (SysUniChar2), error);
   if (result == NULL)
-      goto err_out;
+    goto err_out;
 
   for (i = 0, j = 0; j < n16; i++)
-    {
-      SysUniChar wc = str[i];
+  {
+    SysUniChar wc = str[i];
 
-      if (wc < 0x10000)
-	{
-	  result[j++] = wc;
-	}
-      else
-	{
-	  result[j++] = (wc - 0x10000) / 0x400 + 0xd800;
-	  result[j++] = (wc - 0x10000) % 0x400 + 0xdc00;
-	}
+    if (wc < 0x10000)
+    {
+      result[j++] = wc;
     }
+    else
+    {
+      result[j++] = (wc - 0x10000) / 0x400 + 0xd800;
+      result[j++] = (wc - 0x10000) % 0x400 + 0xdc00;
+    }
+  }
   result[j] = 0;
 
   if (items_written)
     *items_written = n16;
-  
- err_out:
+
+err_out:
   if (items_read)
     *items_read = i;
-  
+
   return result;
 }
 
 #define VALIDATE_BYTE(mask, expect)                      \
   SYS_STMT_START {                                         \
     if (SYS_UNLIKELY((*(SysUChar *)p & (mask)) != (expect))) \
-      goto error;                                        \
+    goto error;                                        \
   } SYS_STMT_END
 
 /* see IETF RFC 3629 Section 4 */
 
-static const SysChar *
+  static const SysChar *
 fast_validate (const char *str)
 
 {
   const SysChar *p;
 
   for (p = str; *p; p++)
+  {
+    if (*(SysUChar *)p < 128)
+      /* done */;
+    else
     {
-      if (*(SysUChar *)p < 128)
-	/* done */;
-      else 
-	{
-	  const SysChar *last;
+      const SysChar *last;
 
-	  last = p;
-	  if (*(SysUChar *)p < 0xe0) /* 110xxxxx */
-	    {
-	      if (SYS_UNLIKELY (*(SysUChar *)p < 0xc2))
-		goto error;
-	    }
-	  else
-	    {
-	      if (*(SysUChar *)p < 0xf0) /* 1110xxxx */
-		{
-		  switch (*(SysUChar *)p++ & 0x0f)
-		    {
-		    case 0:
-		      VALIDATE_BYTE(0xe0, 0xa0); /* 0xa0 ... 0xbf */
-		      break;
-		    case 0x0d:
-		      VALIDATE_BYTE(0xe0, 0x80); /* 0x80 ... 0x9f */
-		      break;
-		    default:
-		      VALIDATE_BYTE(0xc0, 0x80); /* 10xxxxxx */
-		    }
-		}
-	      else if (*(SysUChar *)p < 0xf5) /* 11110xxx excluding out-of-range */
-		{
-		  switch (*(SysUChar *)p++ & 0x07)
-		    {
-		    case 0:
-		      VALIDATE_BYTE(0xc0, 0x80); /* 10xxxxxx */
-		      if (SYS_UNLIKELY((*(SysUChar *)p & 0x30) == 0))
-			goto error;
-		      break;
-		    case 4:
-		      VALIDATE_BYTE(0xf0, 0x80); /* 0x80 ... 0x8f */
-		      break;
-		    default:
-		      VALIDATE_BYTE(0xc0, 0x80); /* 10xxxxxx */
-		    }
-		  p++;
-		  VALIDATE_BYTE(0xc0, 0x80); /* 10xxxxxx */
-		}
-	      else
-		goto error;
-	    }
+      last = p;
+      if (*(SysUChar *)p < 0xe0) /* 110xxxxx */
+      {
+        if (SYS_UNLIKELY (*(SysUChar *)p < 0xc2))
+          goto error;
+      }
+      else
+      {
+        if (*(SysUChar *)p < 0xf0) /* 1110xxxx */
+        {
+          switch (*(SysUChar *)p++ & 0x0f)
+          {
+            case 0:
+              VALIDATE_BYTE(0xe0, 0xa0); /* 0xa0 ... 0xbf */
+              break;
+            case 0x0d:
+              VALIDATE_BYTE(0xe0, 0x80); /* 0x80 ... 0x9f */
+              break;
+            default:
+              VALIDATE_BYTE(0xc0, 0x80); /* 10xxxxxx */
+          }
+        }
+        else if (*(SysUChar *)p < 0xf5) /* 11110xxx excluding out-of-range */
+        {
+          switch (*(SysUChar *)p++ & 0x07)
+          {
+            case 0:
+              VALIDATE_BYTE(0xc0, 0x80); /* 10xxxxxx */
+              if (SYS_UNLIKELY((*(SysUChar *)p & 0x30) == 0))
+                goto error;
+              break;
+            case 4:
+              VALIDATE_BYTE(0xf0, 0x80); /* 0x80 ... 0x8f */
+              break;
+            default:
+              VALIDATE_BYTE(0xc0, 0x80); /* 10xxxxxx */
+          }
+          p++;
+          VALIDATE_BYTE(0xc0, 0x80); /* 10xxxxxx */
+        }
+        else
+          goto error;
+      }
 
-	  p++;
-	  VALIDATE_BYTE(0xc0, 0x80); /* 10xxxxxx */
+      p++;
+      VALIDATE_BYTE(0xc0, 0x80); /* 10xxxxxx */
 
-	  continue;
+      continue;
 
-	error:
-	  return last;
-	}
+error:
+      return last;
     }
+  }
 
   return p;
 }
 
-static const SysChar *
+  static const SysChar *
 fast_validate_len (const char *str,
-		   SysSize      max_len)
+    SysSize      max_len)
 
 {
   const SysChar *p;
@@ -1542,75 +1551,75 @@ fast_validate_len (const char *str,
   sys_assert (max_len >= 0);
 
   for (p = str; ((p - str) < max_len) && *p; p++)
+  {
+    if (*(SysUChar *)p < 128)
+      /* done */;
+    else
     {
-      if (*(SysUChar *)p < 128)
-	/* done */;
-      else 
-	{
-	  const SysChar *last;
+      const SysChar *last;
 
-	  last = p;
-	  if (*(SysUChar *)p < 0xe0) /* 110xxxxx */
-	    {
-	      if (SYS_UNLIKELY (max_len - (p - str) < 2))
-		goto error;
-	      
-	      if (SYS_UNLIKELY (*(SysUChar *)p < 0xc2))
-		goto error;
-	    }
-	  else
-	    {
-	      if (*(SysUChar *)p < 0xf0) /* 1110xxxx */
-		{
-		  if (SYS_UNLIKELY (max_len - (p - str) < 3))
-		    goto error;
+      last = p;
+      if (*(SysUChar *)p < 0xe0) /* 110xxxxx */
+      {
+        if (SYS_UNLIKELY (max_len - (p - str) < 2))
+          goto error;
 
-		  switch (*(SysUChar *)p++ & 0x0f)
-		    {
-		    case 0:
-		      VALIDATE_BYTE(0xe0, 0xa0); /* 0xa0 ... 0xbf */
-		      break;
-		    case 0x0d:
-		      VALIDATE_BYTE(0xe0, 0x80); /* 0x80 ... 0x9f */
-		      break;
-		    default:
-		      VALIDATE_BYTE(0xc0, 0x80); /* 10xxxxxx */
-		    }
-		}
-	      else if (*(SysUChar *)p < 0xf5) /* 11110xxx excluding out-of-range */
-		{
-		  if (SYS_UNLIKELY (max_len - (p - str) < 4))
-		    goto error;
+        if (SYS_UNLIKELY (*(SysUChar *)p < 0xc2))
+          goto error;
+      }
+      else
+      {
+        if (*(SysUChar *)p < 0xf0) /* 1110xxxx */
+        {
+          if (SYS_UNLIKELY (max_len - (p - str) < 3))
+            goto error;
 
-		  switch (*(SysUChar *)p++ & 0x07)
-		    {
-		    case 0:
-		      VALIDATE_BYTE(0xc0, 0x80); /* 10xxxxxx */
-		      if (SYS_UNLIKELY((*(SysUChar *)p & 0x30) == 0))
-			goto error;
-		      break;
-		    case 4:
-		      VALIDATE_BYTE(0xf0, 0x80); /* 0x80 ... 0x8f */
-		      break;
-		    default:
-		      VALIDATE_BYTE(0xc0, 0x80); /* 10xxxxxx */
-		    }
-		  p++;
-		  VALIDATE_BYTE(0xc0, 0x80); /* 10xxxxxx */
-		}
-	      else
-		goto error;
-	    }
+          switch (*(SysUChar *)p++ & 0x0f)
+          {
+            case 0:
+              VALIDATE_BYTE(0xe0, 0xa0); /* 0xa0 ... 0xbf */
+              break;
+            case 0x0d:
+              VALIDATE_BYTE(0xe0, 0x80); /* 0x80 ... 0x9f */
+              break;
+            default:
+              VALIDATE_BYTE(0xc0, 0x80); /* 10xxxxxx */
+          }
+        }
+        else if (*(SysUChar *)p < 0xf5) /* 11110xxx excluding out-of-range */
+        {
+          if (SYS_UNLIKELY (max_len - (p - str) < 4))
+            goto error;
 
-	  p++;
-	  VALIDATE_BYTE(0xc0, 0x80); /* 10xxxxxx */
+          switch (*(SysUChar *)p++ & 0x07)
+          {
+            case 0:
+              VALIDATE_BYTE(0xc0, 0x80); /* 10xxxxxx */
+              if (SYS_UNLIKELY((*(SysUChar *)p & 0x30) == 0))
+                goto error;
+              break;
+            case 4:
+              VALIDATE_BYTE(0xf0, 0x80); /* 0x80 ... 0x8f */
+              break;
+            default:
+              VALIDATE_BYTE(0xc0, 0x80); /* 10xxxxxx */
+          }
+          p++;
+          VALIDATE_BYTE(0xc0, 0x80); /* 10xxxxxx */
+        }
+        else
+          goto error;
+      }
 
-	  continue;
+      p++;
+      VALIDATE_BYTE(0xc0, 0x80); /* 10xxxxxx */
 
-	error:
-	  return last;
-	}
+      continue;
+
+error:
+      return last;
     }
+  }
 
   return p;
 }
@@ -1620,29 +1629,29 @@ fast_validate_len (const char *str,
  * @str: (array length=max_len) (element-type SysUInt8): a pointer to character data
  * @max_len: max bytes to validate, or -1 to go until NUL
  * @end: (out) (optional) (transfer none): return location for end of valid data
- * 
+ *
  * Validates UTF-8 encoded text. @str is the text to validate;
  * if @str is nul-terminated, then @max_len can be -1, otherwise
  * @max_len should be the number of bytes to validate.
  * If @end is non-%NULL, then the end of the valid range
- * will be stored there (i.e. the start of the first invalid 
- * character if some bytes were invalid, or the end of the text 
+ * will be stored there (i.e. the start of the first invalid
+ * character if some bytes were invalid, or the end of the text
  * being validated otherwise).
  *
- * Note that sys_utf8_validate() returns %false if @max_len is 
+ * Note that sys_utf8_validate() returns %false if @max_len is
  * positive and any of the @max_len bytes are nul.
  *
  * Returns %true if all of @str was valid. Many GLib and GTK+
  * routines require valid UTF-8 as input; so data read from a file
  * or the network should be checked with sys_utf8_validate() before
  * doing anything else with it.
- * 
+ *
  * Returns: %true if the text was valid UTF-8
  */
-SysBool
+  SysBool
 sys_utf8_validate (const char   *str,
-		 SysSize        max_len,    
-		 const SysChar **end)
+    SysSize        max_len,
+    const SysChar **end)
 
 {
   const SysChar *p;
@@ -1675,10 +1684,10 @@ sys_utf8_validate (const char   *str,
  * Returns: %true if the text was valid UTF-8
  * Since: 2.60
  */
-SysBool
-sys_utf8_validate_len (const char   *str,
-                     SysSize         max_len,
-                     const SysChar **end)
+  SysBool
+         sys_utf8_validate_len (const char   *str,
+             SysSize         max_len,
+             const SysChar **end)
 
 {
   const SysChar *p;
@@ -1697,15 +1706,15 @@ sys_utf8_validate_len (const char   *str,
 /**
  * sys_unichar_validate:
  * @ch: a Unicode character
- * 
+ *
  * Checks whether @ch is a valid Unicode character. Some possible
  * integer values of @ch will not be valid. 0 is considered a valid
  * character, though it's normally a string terminator.
- * 
+ *
  * Returns: %true if @ch is a valid Unicode character
  **/
-SysBool
-g_unichar_validate (SysUniChar ch)
+  SysBool
+sys_unichar_validate (SysUniChar ch)
 {
   return UNICODE_VALID (ch);
 }
@@ -1716,27 +1725,27 @@ g_unichar_validate (SysUniChar ch)
  * @len: the maximum length of @str to use, in bytes. If @len < 0,
  *     then the string is nul-terminated.
  *
- * Reverses a UTF-8 string. @str must be valid UTF-8 encoded text. 
- * (Use sys_utf8_validate() on all text before trying to use UTF-8 
+ * Reverses a UTF-8 string. @str must be valid UTF-8 encoded text.
+ * (Use sys_utf8_validate() on all text before trying to use UTF-8
  * utility functions with it.)
  *
  * This function is intended for programmatic uses of reversed strings.
- * It pays no attention to decomposed characters, combining marks, byte 
- * order marks, directional indicators (LRM, LRO, etc) and similar 
- * characters which might need special handling when reversing a string 
+ * It pays no attention to decomposed characters, combining marks, byte
+ * order marks, directional indicators (LRM, LRO, etc) and similar
+ * characters which might need special handling when reversing a string
  * for display purposes.
  *
  * Note that unlike sys_strreverse(), this function returns
  * newly-allocated memory, which should be freed with sys_free() when
- * no longer needed. 
+ * no longer needed.
  *
  * Returns: (transfer full): a newly-allocated string which is the reverse of @str
  *
  * Since: 2.2
  */
-SysChar *
-sys_utf8_strreverse (const SysChar *str,
-		   SysSize       len)
+  SysChar *
+           sys_utf8_strreverse (const SysChar *str,
+               SysSize       len)
 {
   SysChar *r, *result;
   const SysChar *p;
@@ -1748,13 +1757,13 @@ sys_utf8_strreverse (const SysChar *str,
   r = result + len;
   p = str;
   while (r > result)
-    {
-      SysChar *m, skip = sys_utf8_skip[*(SysUChar*) p];
-      r -= skip;
-      sys_assert (r >= result);
-      for (m = r; skip; skip--)
-        *m++ = *p++;
-    }
+  {
+    SysChar *m, skip = sys_utf8_skip[*(SysUChar*) p];
+    r -= skip;
+    sys_assert (r >= result);
+    for (m = r; skip; skip--)
+      *m++ = *p++;
+  }
   result[len] = 0;
 
   return result;
@@ -1780,9 +1789,9 @@ sys_utf8_strreverse (const SysChar *str,
  *
  * Since: 2.52
  */
-SysChar *
-sys_utf8_make_valid (const SysChar *str,
-                   SysSize       len)
+  SysChar *
+           sys_utf8_make_valid (const SysChar *str,
+               SysSize       len)
 {
   SysString *string;
   const SysChar *remainder, *invalid;
@@ -1797,26 +1806,26 @@ sys_utf8_make_valid (const SysChar *str,
   remainder = str;
   remaininsys_bytes = len;
 
-  while (remaininsys_bytes != 0) 
-    {
-      if (sys_utf8_validate (remainder, remaininsys_bytes, &invalid)) 
-	break;
-      valid_bytes = invalid - remainder;
-    
-      if (string == NULL) 
-	string = sys_string_sized_new (remaininsys_bytes);
+  while (remaininsys_bytes != 0)
+  {
+    if (sys_utf8_validate (remainder, remaininsys_bytes, &invalid))
+      break;
+    valid_bytes = invalid - remainder;
 
-      sys_string_append_len (string, remainder, valid_bytes);
-      /* append U+FFFD REPLACEMENT CHARACTER */
-      sys_string_append (string, "\357\277\275");
-      
-      remaininsys_bytes -= valid_bytes + 1;
-      remainder = invalid + 1;
-    }
-  
+    if (string == NULL)
+      string = sys_string_sized_new (remaininsys_bytes);
+
+    sys_string_append_len (string, remainder, valid_bytes);
+    /* append U+FFFD REPLACEMENT CHARACTER */
+    sys_string_append (string, "\357\277\275");
+
+    remaininsys_bytes -= valid_bytes + 1;
+    remainder = invalid + 1;
+  }
+
   if (string == NULL)
     return sys_strndup (str, len);
-  
+
   sys_string_append_len (string, remainder, remaininsys_bytes);
   sys_string_append_c (string, '\0');
 
@@ -1826,140 +1835,140 @@ sys_utf8_make_valid (const SysChar *str,
 }
 
 /**
- * g_utf8_casefold:
+ * sys_utf8_casefold:
  * @str: a UTF-8 encoded string
  * @len: length of @str, in bytes, or -1 if @str is nul-terminated.
- * 
+ *
  * Converts a string into a form that is independent of case. The
  * result will not correspond to any particular case, but can be
  * compared for equality or ordered with the results of calling
- * g_utf8_casefold() on other strings.
- * 
- * Note that calling g_utf8_casefold() followed by g_utf8_collate() is
+ * sys_utf8_casefold() on other strings.
+ *
+ * Note that calling sys_utf8_casefold() followed by sys_utf8_collate() is
  * only an approximation to the correct linguistic case insensitive
  * ordering, though it is a fairly good one. Getting this exactly
  * right would require a more sophisticated collation function that
  * takes case sensitivity into account. GLib does not currently
  * provide such a function.
- * 
+ *
  * Returns: a newly allocated string, that is a
  *   case independent form of @str.
  **/
-gchar *
-g_utf8_casefold (const gchar *str,
-		 gssize       len)
+  SysChar *
+sys_utf8_casefold (const SysChar *str,
+    SysSize       len)
 {
-  GString *result;
+  SysString *result;
   const char *p;
 
-  g_return_val_if_fail (str != NULL, NULL);
+  sys_return_val_if_fail (str != NULL, NULL);
 
-  result = g_string_new (NULL);
+  result = sys_string_new (NULL);
   p = str;
   while ((len < 0 || p < str + len) && *p)
+  {
+    SysUniChar ch = sys_utf8_get_char (p);
+
+    int start = 0;
+    int end = ARRAY_SIZE (casefold_table);
+
+    if (ch >= casefold_table[start].ch &&
+        ch <= casefold_table[end - 1].ch)
     {
-      gunichar ch = g_utf8_get_char (p);
-
-      int start = 0;
-      int end = G_N_ELEMENTS (casefold_table);
-
-      if (ch >= casefold_table[start].ch &&
-          ch <= casefold_table[end - 1].ch)
-	{
-	  while (TRUE)
-	    {
-	      int half = (start + end) / 2;
-	      if (ch == casefold_table[half].ch)
-		{
-		  g_string_append (result, casefold_table[half].data);
-		  goto next;
-		}
-	      else if (half == start)
-		break;
-	      else if (ch > casefold_table[half].ch)
-		start = half;
-	      else
-		end = half;
-	    }
-	}
-
-      g_string_append_unichar (result, g_unichar_tolower (ch));
-      
-    next:
-      p = g_utf8_next_char (p);
+      while (true)
+      {
+        int half = (start + end) / 2;
+        if (ch == casefold_table[half].ch)
+        {
+          sys_string_append (result, casefold_table[half].data);
+          goto next;
+        }
+        else if (half == start)
+          break;
+        else if (ch > casefold_table[half].ch)
+          start = half;
+        else
+          end = half;
+      }
     }
 
-  return g_string_free (result, FALSE); 
+    sys_string_append_unichar (result, sys_unichar_tolower (ch));
+
+next:
+    p = sys_utf8_next_char (p);
+  }
+
+  return sys_string_free (result, false);
 }
 
 /**
- * g_utf8_strdown:
+ * sys_utf8_strdown:
  * @str: a UTF-8 encoded string
  * @len: length of @str, in bytes, or -1 if @str is nul-terminated.
- * 
+ *
  * Converts all Unicode characters in the string that have a case
  * to lowercase. The exact manner that this is done depends
  * on the current locale, and may result in the number of
  * characters in the string changing.
- * 
+ *
  * Returns: a newly allocated string, with all characters
- *    converted to lowercase.  
+ *    converted to lowercase.
  **/
-gchar *
-g_utf8_strdown (const gchar *str,
-		gssize       len)
+  SysChar *
+sys_utf8_strdown (const SysChar *str,
+    SysSize       len)
 {
-  gsize result_len;
+  SysSize result_len;
   LocaleType locale_type;
-  gchar *result;
+  SysChar *result;
 
-  g_return_val_if_fail (str != NULL, NULL);
+  sys_return_val_if_fail (str != NULL, NULL);
 
-  locale_type = get_locale_type ();
-  
+  locale_type = sys_unicode_get_locale_type ();
+
   /*
    * We use a two pass approach to keep memory management simple
    */
-  result_len = real_tolower (str, len, NULL, locale_type);
-  result = g_malloc (result_len + 1);
-  real_tolower (str, len, result, locale_type);
+  result_len = sys_unicode_real_tolower (str, len, NULL, locale_type);
+  result = sys_malloc (result_len + 1);
+  sys_unicode_real_tolower (str, len, result, locale_type);
   result[result_len] = '\0';
 
   return result;
 }
 
 /**
- * g_utf8_strup:
+ * sys_utf8_strup:
  * @str: a UTF-8 encoded string
  * @len: length of @str, in bytes, or -1 if @str is nul-terminated.
- * 
+ *
  * Converts all Unicode characters in the string that have a case
  * to uppercase. The exact manner that this is done depends
  * on the current locale, and may result in the number of
  * characters in the string increasing. (For instance, the
  * German ess-zet will be changed to SS.)
- * 
+ *
  * Returns: a newly allocated string, with all characters
- *    converted to uppercase.  
+ *    converted to uppercase.
  **/
-gchar *
-g_utf8_strup (const gchar *str,
-	      gssize       len)
+  SysChar *
+sys_utf8_strup (const SysChar *str,
+    SysSize       len)
 {
-  gsize result_len;
+  SysSize result_len;
   LocaleType locale_type;
-  gchar *result;
+  SysChar *result;
 
-  g_return_val_if_fail (str != NULL, NULL);
+  sys_return_val_if_fail (str != NULL, NULL);
 
-  locale_type = get_locale_type ();
-  
+  locale_type = sys_unicode_get_locale_type ();
+
   /*
    * We use a two pass approach to keep memory management simple
    */
-  result_len = real_toupper (str, len, NULL, locale_type);
-  result = g_malloc (result_len + 1);
-  real_toupper (str, len, result, locale_type);
+  result_len = sys_unicode_real_toupper (str, len, NULL, locale_type);
+  result = sys_malloc (result_len + 1);
+  sys_unicode_real_toupper (str, len, result, locale_type);
   result[result_len] = '\0';
 
   return result;

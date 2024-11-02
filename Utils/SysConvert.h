@@ -113,17 +113,17 @@ SysChar* sys_filename_from_utf8 (const SysChar  *utf8string,
                              SysSize        *bytes_written,  
                              SysError      **error) SYS_GNUC_MALLOC;
 
-SysChar *g_filename_from_uri (const SysChar *uri,
+SysChar *sys_filename_from_uri (const SysChar *uri,
                             SysChar      **hostname,
                             SysError     **error) SYS_GNUC_MALLOC;
   
-SysChar *g_filename_to_uri   (const SysChar *filename,
+SysChar *sys_filename_to_uri   (const SysChar *filename,
                             const SysChar *hostname,
                             SysError     **error) SYS_GNUC_MALLOC;
-SysChar *g_filename_display_name (const SysChar *filename) SYS_GNUC_MALLOC;
+SysChar *sys_filename_display_name (const SysChar *filename) SYS_GNUC_MALLOC;
 SysBool sys_get_filename_charsets (const SysChar ***filename_charsets);
 
-SysChar *g_filename_display_basename (const SysChar *filename) SYS_GNUC_MALLOC;
+SysChar *sys_filename_display_basename (const SysChar *filename) SYS_GNUC_MALLOC;
 
 SysChar **g_uri_list_extract_uris (const SysChar *uri_list);
 

@@ -77,6 +77,7 @@ SYS_API void sys_verror (SYS_LOG_ARGS_N const SysChar* format, va_list args);
 SYS_API SysError* sys_error_new (void);
 SYS_API void sys_error_free (SysError* err);
 SYS_API void sys_error_set (SYS_LOG_ARGS_N SysError** err, const SysChar* format, ...);
+SYS_API void sys_error_propagate (SysError **dest, SysError  *src);
 SYS_API void sys_vlog(SYS_LOG_ARGS_N FILE* std, SYS_LOG_LEVEL level, const SysChar* format, va_list args);
 SYS_API const SysChar* sys_strerror(SysInt errnum);
 SysBool sys_error_matches (const SysError *error,

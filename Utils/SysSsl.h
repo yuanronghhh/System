@@ -6,7 +6,7 @@
 SYS_BEGIN_DECLS
 
 struct _SysSsl {
-  SSL *ssl;
+  SysPointer ssl;
 };
 
 SYS_END_DECLS

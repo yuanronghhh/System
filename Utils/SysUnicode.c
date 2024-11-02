@@ -1,5 +1,8 @@
 #include <System/Utils/SysUnicode.h>
+#include <System/Utils/SysUtf8.h>
 #include <System/Utils/SysUnicodeTable.h>
+#include <System/Utils/SysUnicodeScriptTable.h>
+#include <System/Utils/SysUnicodeMirrorTable.h>
 
 #define SYS_UNICHAR_FULLWIDTH_A 0xff21
 #define SYS_UNICHAR_FULLWIDTH_I 0xff29
@@ -33,37 +36,37 @@
       : SYS_UNICODE_UNASSIGNED))
 
 
-#define IS(Type, Class)	(((SysUInt)1 << (Type)) & (Class))
-#define OR(Type, Rest)	(((SysUInt)1 << (Type)) | (Rest))
+#define IS(Type, Class)        (((SysUInt)1 << (Type)) & (Class))
+#define OR(Type, Rest)        (((SysUInt)1 << (Type)) | (Rest))
 
 
 
-#define ISALPHA(Type)	IS ((Type),				\
-			    OR (SYS_UNICODE_LOWERCASE_LETTER,	\
-			    OR (SYS_UNICODE_UPPERCASE_LETTER,	\
-			    OR (SYS_UNICODE_TITLECASE_LETTER,	\
-			    OR (SYS_UNICODE_MODIFIER_LETTER,	\
-			    OR (SYS_UNICODE_OTHER_LETTER,		0))))))
+#define ISALPHA(Type)        IS ((Type),                                \
+                            OR (SYS_UNICODE_LOWERCASE_LETTER,        \
+                            OR (SYS_UNICODE_UPPERCASE_LETTER,        \
+                            OR (SYS_UNICODE_TITLECASE_LETTER,        \
+                            OR (SYS_UNICODE_MODIFIER_LETTER,        \
+                            OR (SYS_UNICODE_OTHER_LETTER,                0))))))
 
-#define ISALDIGIT(Type)	IS ((Type),				\
-			    OR (SYS_UNICODE_DECIMAL_NUMBER,	\
-			    OR (SYS_UNICODE_LETTER_NUMBER,	\
-			    OR (SYS_UNICODE_OTHER_NUMBER,		\
-			    OR (SYS_UNICODE_LOWERCASE_LETTER,	\
-			    OR (SYS_UNICODE_UPPERCASE_LETTER,	\
-			    OR (SYS_UNICODE_TITLECASE_LETTER,	\
-			    OR (SYS_UNICODE_MODIFIER_LETTER,	\
-			    OR (SYS_UNICODE_OTHER_LETTER,		0)))))))))
+#define ISALDIGIT(Type)        IS ((Type),                                \
+                            OR (SYS_UNICODE_DECIMAL_NUMBER,        \
+                            OR (SYS_UNICODE_LETTER_NUMBER,        \
+                            OR (SYS_UNICODE_OTHER_NUMBER,                \
+                            OR (SYS_UNICODE_LOWERCASE_LETTER,        \
+                            OR (SYS_UNICODE_UPPERCASE_LETTER,        \
+                            OR (SYS_UNICODE_TITLECASE_LETTER,        \
+                            OR (SYS_UNICODE_MODIFIER_LETTER,        \
+                            OR (SYS_UNICODE_OTHER_LETTER,                0)))))))))
 
-#define ISMARK(Type)	IS ((Type),				\
-			    OR (SYS_UNICODE_NON_SPACING_MARK,	\
-			    OR (SYS_UNICODE_SPACING_MARK,	\
-			    OR (SYS_UNICODE_ENCLOSING_MARK,	0))))
+#define ISMARK(Type)        IS ((Type),                                \
+                            OR (SYS_UNICODE_NON_SPACING_MARK,        \
+                            OR (SYS_UNICODE_SPACING_MARK,        \
+                            OR (SYS_UNICODE_ENCLOSING_MARK,        0))))
 
-#define ISZEROWIDTHTYPE(Type)	IS ((Type),			\
-			    OR (SYS_UNICODE_NON_SPACING_MARK,	\
-			    OR (SYS_UNICODE_ENCLOSING_MARK,	\
-			    OR (SYS_UNICODE_FORMAT,		0))))
+#define ISZEROWIDTHTYPE(Type)        IS ((Type),                        \
+                            OR (SYS_UNICODE_NON_SPACING_MARK,        \
+                            OR (SYS_UNICODE_ENCLOSING_MARK,        \
+                            OR (SYS_UNICODE_FORMAT,                0))))
 
 /**
  * sys_unichar_isalnum:
@@ -76,7 +79,7 @@
  * Returns: %true if @c is an alphanumeric character
  **/
 SysBool
-g_unichar_isalnum (SysUniChar c)
+sys_unichar_isalnum (SysUniChar c)
 {
   return ISALDIGIT (TYPE (c)) ? true : false;
 }
@@ -92,7 +95,7 @@ g_unichar_isalnum (SysUniChar c)
  * Returns: %true if @c is an alphabetic character
  **/
 SysBool
-g_unichar_isalpha (SysUniChar c)
+sys_unichar_isalpha (SysUniChar c)
 {
   return ISALPHA (TYPE (c)) ? true : false;
 }
@@ -109,7 +112,7 @@ g_unichar_isalpha (SysUniChar c)
  * Returns: %true if @c is a control character
  **/
 SysBool
-g_unichar_iscntrl (SysUniChar c)
+sys_unichar_iscntrl (SysUniChar c)
 {
   return TYPE (c) == SYS_UNICODE_CONTROL;
 }
@@ -125,7 +128,7 @@ g_unichar_iscntrl (SysUniChar c)
  * Returns: %true if @c is a digit
  **/
 SysBool
-g_unichar_isdigit (SysUniChar c)
+sys_unichar_isdigit (SysUniChar c)
 {
   return TYPE (c) == SYS_UNICODE_DECIMAL_NUMBER;
 }
@@ -144,15 +147,15 @@ g_unichar_isdigit (SysUniChar c)
  * Returns: %true if @c is printable unless it's a space
  **/
 SysBool
-g_unichar_isgraph (SysUniChar c)
+sys_unichar_isgraph (SysUniChar c)
 {
   return !IS (TYPE(c),
-	      OR (SYS_UNICODE_CONTROL,
-	      OR (SYS_UNICODE_FORMAT,
-	      OR (SYS_UNICODE_UNASSIGNED,
-	      OR (SYS_UNICODE_SURROGATE,
-	      OR (SYS_UNICODE_SPACE_SEPARATOR,
-	     0))))));
+              OR (SYS_UNICODE_CONTROL,
+              OR (SYS_UNICODE_FORMAT,
+              OR (SYS_UNICODE_UNASSIGNED,
+              OR (SYS_UNICODE_SURROGATE,
+              OR (SYS_UNICODE_SPACE_SEPARATOR,
+             0))))));
 }
 
 /**
@@ -166,7 +169,7 @@ g_unichar_isgraph (SysUniChar c)
  * Returns: %true if @c is a lowercase letter
  **/
 SysBool
-g_unichar_islower (SysUniChar c)
+sys_unichar_islower (SysUniChar c)
 {
   return TYPE (c) == SYS_UNICODE_LOWERCASE_LETTER;
 }
@@ -184,14 +187,14 @@ g_unichar_islower (SysUniChar c)
  * Returns: %true if @c is printable
  **/
 SysBool
-g_unichar_isprint (SysUniChar c)
+sys_unichar_isprint (SysUniChar c)
 {
   return !IS (TYPE(c),
-	      OR (SYS_UNICODE_CONTROL,
-	      OR (SYS_UNICODE_FORMAT,
-	      OR (SYS_UNICODE_UNASSIGNED,
-	      OR (SYS_UNICODE_SURROGATE,
-	     0)))));
+              OR (SYS_UNICODE_CONTROL,
+              OR (SYS_UNICODE_FORMAT,
+              OR (SYS_UNICODE_UNASSIGNED,
+              OR (SYS_UNICODE_SURROGATE,
+             0)))));
 }
 
 /**
@@ -205,21 +208,21 @@ g_unichar_isprint (SysUniChar c)
  * Returns: %true if @c is a punctuation or symbol character
  **/
 SysBool
-g_unichar_ispunct (SysUniChar c)
+sys_unichar_ispunct (SysUniChar c)
 {
   return IS (TYPE(c),
-	     OR (SYS_UNICODE_CONNECT_PUNCTUATION,
-	     OR (SYS_UNICODE_DASH_PUNCTUATION,
-	     OR (SYS_UNICODE_CLOSE_PUNCTUATION,
-	     OR (SYS_UNICODE_FINAL_PUNCTUATION,
-	     OR (SYS_UNICODE_INITIAL_PUNCTUATION,
-	     OR (SYS_UNICODE_OTHER_PUNCTUATION,
-	     OR (SYS_UNICODE_OPEN_PUNCTUATION,
-	     OR (SYS_UNICODE_CURRENCY_SYMBOL,
-	     OR (SYS_UNICODE_MODIFIER_SYMBOL,
-	     OR (SYS_UNICODE_MATH_SYMBOL,
-	     OR (SYS_UNICODE_OTHER_SYMBOL,
-	    0)))))))))))) ? true : false;
+             OR (SYS_UNICODE_CONNECT_PUNCTUATION,
+             OR (SYS_UNICODE_DASH_PUNCTUATION,
+             OR (SYS_UNICODE_CLOSE_PUNCTUATION,
+             OR (SYS_UNICODE_FINAL_PUNCTUATION,
+             OR (SYS_UNICODE_INITIAL_PUNCTUATION,
+             OR (SYS_UNICODE_OTHER_PUNCTUATION,
+             OR (SYS_UNICODE_OPEN_PUNCTUATION,
+             OR (SYS_UNICODE_CURRENCY_SYMBOL,
+             OR (SYS_UNICODE_MODIFIER_SYMBOL,
+             OR (SYS_UNICODE_MATH_SYMBOL,
+             OR (SYS_UNICODE_OTHER_SYMBOL,
+            0)))))))))))) ? true : false;
 }
 
 /**
@@ -237,7 +240,7 @@ g_unichar_ispunct (SysUniChar c)
  * Returns: %true if @c is a space character
  **/
 SysBool
-g_unichar_isspace (SysUniChar c)
+sys_unichar_isspace (SysUniChar c)
 {
   switch (c)
     {
@@ -251,11 +254,11 @@ g_unichar_isspace (SysUniChar c)
       
     default:
       {
-	return IS (TYPE(c),
-	           OR (SYS_UNICODE_SPACE_SEPARATOR,
-	           OR (SYS_UNICODE_LINE_SEPARATOR,
+        return IS (TYPE(c),
+                   OR (SYS_UNICODE_SPACE_SEPARATOR,
+                   OR (SYS_UNICODE_LINE_SEPARATOR,
                    OR (SYS_UNICODE_PARAGRAPH_SEPARATOR,
-		  0)))) ? true : false;
+                  0)))) ? true : false;
       }
       break;
     }
@@ -280,7 +283,7 @@ g_unichar_isspace (SysUniChar c)
  * Since: 2.14
  **/
 SysBool
-g_unichar_ismark (SysUniChar c)
+sys_unichar_ismark (SysUniChar c)
 {
   return ISMARK (TYPE (c));
 }
@@ -294,7 +297,7 @@ g_unichar_ismark (SysUniChar c)
  * Returns: %true if @c is an uppercase character
  **/
 SysBool
-g_unichar_isupper (SysUniChar c)
+sys_unichar_isupper (SysUniChar c)
 {
   return TYPE (c) == SYS_UNICODE_UPPERCASE_LETTER;
 }
@@ -313,7 +316,7 @@ g_unichar_isupper (SysUniChar c)
  * Returns: %true if the character is titlecase
  **/
 SysBool
-g_unichar_istitle (SysUniChar c)
+sys_unichar_istitle (SysUniChar c)
 {
   unsigned int i;
   for (i = 0; i < ARRAY_SIZE (title_table); ++i)
@@ -331,7 +334,7 @@ g_unichar_istitle (SysUniChar c)
  * Returns: %true if the character is a hexadecimal digit
  **/
 SysBool
-g_unichar_isxdigit (SysUniChar c)
+sys_unichar_isxdigit (SysUniChar c)
 {
   return ((c >= 'a' && c <= 'f') ||
           (c >= 'A' && c <= 'F') ||
@@ -350,12 +353,12 @@ g_unichar_isxdigit (SysUniChar c)
  * Returns: %true if the character has an assigned value
  **/
 SysBool
-g_unichar_isdefined (SysUniChar c)
+sys_unichar_isdefined (SysUniChar c)
 {
   return !IS (TYPE(c),
-	      OR (SYS_UNICODE_UNASSIGNED,
-	      OR (SYS_UNICODE_SURROGATE,
-	     0)));
+              OR (SYS_UNICODE_UNASSIGNED,
+              OR (SYS_UNICODE_SURROGATE,
+             0)));
 }
 
 /**
@@ -377,7 +380,7 @@ g_unichar_isdefined (SysUniChar c)
  * Since: 2.14
  **/
 SysBool
-g_unichar_iszerowidth (SysUniChar c)
+sys_unichar_iszerowidth (SysUniChar c)
 {
   if (SYS_UNLIKELY (c == 0x00AD))
     return false;
@@ -387,7 +390,7 @@ g_unichar_iszerowidth (SysUniChar c)
 
   /* A few additional codepoints are zero-width:
    *  - Part of the Hangul Jamo block covering medial/vowels/jungseong and
-   *    final/trailing_consonants/jongseong Jamo
+   *    final/trailinsys_consonants/jongseong Jamo
    *  - Jungseong and jongseong for Old Korean
    *  - Zero-width space (U+200B)
    */
@@ -402,7 +405,7 @@ g_unichar_iszerowidth (SysUniChar c)
 static int
 interval_compare (const void *key, const void *elt)
 {
-  SysUniChar c = GPOINTER_TO_UINT (key);
+  SysUniChar c = POINTER_TO_UINT (key);
   struct Interval *interval = (struct Interval *)elt;
 
   if (c < interval->start)
@@ -413,27 +416,27 @@ interval_compare (const void *key, const void *elt)
   return 0;
 }
 
-#define SYS_WIDTH_TABLE_MIDPOINT (G_N_ELEMENTS (sys_unicode_width_table_wide) / 2)
+#define SYS_WIDTH_TABLE_MIDPOINT (ARRAY_SIZE (sys_unicode_width_table_wide) / 2)
 
 static inline SysBool
-g_unichar_iswide_bsearch (SysUniChar ch)
+sys_unichar_iswide_bsearch (SysUniChar ch)
 {
   int lower = 0;
-  int upper = SYS_N_ELEMENTS (sys_unicode_width_table_wide) - 1;
+  int upper = ARRAY_SIZE (sys_unicode_width_table_wide) - 1;
   static int saved_mid = SYS_WIDTH_TABLE_MIDPOINT;
   int mid = saved_mid;
 
   do
-    {
-      if (ch < sys_unicode_width_table_wide[mid].start)
-	upper = mid - 1;
-      else if (ch > sys_unicode_width_table_wide[mid].end)
-	lower = mid + 1;
-      else
-	return true;
+  {
+    if (ch < sys_unicode_width_table_wide[mid].start)
+      upper = mid - 1;
+    else if (ch > sys_unicode_width_table_wide[mid].end)
+      lower = mid + 1;
+    else
+      return true;
 
-      mid = (lower + upper) / 2;
-    }
+    mid = (lower + upper) / 2;
+  }
   while (lower <= upper);
 
   return false;
@@ -457,16 +460,16 @@ static const struct Interval default_wide_blocks[] = {
  * Returns: %true if the character is wide
  **/
 SysBool
-g_unichar_iswide (SysUniChar c)
+sys_unichar_iswide (SysUniChar c)
 {
   if (c < sys_unicode_width_table_wide[0].start)
     return false;
   else if (sys_unichar_iswide_bsearch (c))
     return true;
   else if (sys_unichar_type (c) == SYS_UNICODE_UNASSIGNED &&
-           bsearch (GUINT_TO_POINTER (c),
+           bsearch (UINT_TO_POINTER (c),
                     default_wide_blocks,
-                    SYS_N_ELEMENTS (default_wide_blocks),
+                    ARRAY_SIZE (default_wide_blocks),
                     sizeof default_wide_blocks[0],
                     interval_compare))
     return true;
@@ -495,7 +498,7 @@ g_unichar_iswide (SysUniChar c)
  * Since: 2.12
  */
 SysBool
-g_unichar_iswide_cjk (SysUniChar c)
+sys_unichar_iswide_cjk (SysUniChar c)
 {
   if (sys_unichar_iswide (c))
     return true;
@@ -505,11 +508,11 @@ g_unichar_iswide_cjk (SysUniChar c)
   if (c == 0)
     return false;
 
-  if (bsearch (GUINT_TO_POINTER (c), 
+  if (bsearch (UINT_TO_POINTER (c), 
                sys_unicode_width_table_ambiguous,
-               SYS_N_ELEMENTS (sys_unicode_width_table_ambiguous),
+               ARRAY_SIZE (sys_unicode_width_table_ambiguous),
                sizeof sys_unicode_width_table_ambiguous[0],
-	       interval_compare))
+               interval_compare))
     return true;
 
   return false;
@@ -527,17 +530,17 @@ g_unichar_iswide_cjk (SysUniChar c)
  *               or has no upper case equivalent @c is returned unchanged.
  **/
 SysUniChar
-g_unichar_toupper (SysUniChar c)
+sys_unichar_toupper (SysUniChar c)
 {
   int t = TYPE (c);
   if (t == SYS_UNICODE_LOWERCASE_LETTER)
     {
       SysUniChar val = ATTTABLE (c >> 8, c & 0xff);
       if (val >= 0x1000000)
-	{
-	  const SysChar *p = special_case_table + val - 0x1000000;
+        {
+          const SysChar *p = special_case_table + val - 0x1000000;
           val = sys_utf8_get_char (p);
-	}
+        }
       /* Some lowercase letters, e.g., U+000AA, FEMININE ORDINAL INDICATOR,
        * do not have an uppercase equivalent, in which case val will be
        * zero. 
@@ -547,11 +550,11 @@ g_unichar_toupper (SysUniChar c)
   else if (t == SYS_UNICODE_TITLECASE_LETTER)
     {
       unsigned int i;
-      for (i = 0; i < SYS_N_ELEMENTS (title_table); ++i)
-	{
-	  if (title_table[i][0] == c)
-	    return title_table[i][1] ? title_table[i][1] : c;
-	}
+      for (i = 0; i < ARRAY_SIZE (title_table); ++i)
+        {
+          if (title_table[i][0] == c)
+            return title_table[i][1] ? title_table[i][1] : c;
+        }
     }
   return c;
 }
@@ -567,32 +570,32 @@ g_unichar_toupper (SysUniChar c)
  *               or has no lowercase equivalent @c is returned unchanged.
  **/
 SysUniChar
-g_unichar_tolower (SysUniChar c)
+sys_unichar_tolower (SysUniChar c)
 {
   int t = TYPE (c);
   if (t == SYS_UNICODE_UPPERCASE_LETTER)
     {
       SysUniChar val = ATTTABLE (c >> 8, c & 0xff);
       if (val >= 0x1000000)
-	{
-	  const SysChar *p = special_case_table + val - 0x1000000;
-	  return sys_utf8_get_char (p);
-	}
+        {
+          const SysChar *p = special_case_table + val - 0x1000000;
+          return sys_utf8_get_char (p);
+        }
       else
-	{
-	  /* Not all uppercase letters are guaranteed to have a lowercase
-	   * equivalent.  If this is the case, val will be zero. */
-	  return val ? val : c;
-	}
+        {
+          /* Not all uppercase letters are guaranteed to have a lowercase
+           * equivalent.  If this is the case, val will be zero. */
+          return val ? val : c;
+        }
     }
   else if (t == SYS_UNICODE_TITLECASE_LETTER)
     {
       unsigned int i;
-      for (i = 0; i < SYS_N_ELEMENTS (title_table); ++i)
-	{
-	  if (title_table[i][0] == c)
-	    return title_table[i][2];
-	}
+      for (i = 0; i < ARRAY_SIZE (title_table); ++i)
+        {
+          if (title_table[i][0] == c)
+            return title_table[i][2];
+        }
     }
   return c;
 }
@@ -608,7 +611,7 @@ g_unichar_tolower (SysUniChar c)
  *               @c is returned unchanged.
  **/
 SysUniChar
-g_unichar_totitle (SysUniChar c)
+sys_unichar_totitle (SysUniChar c)
 {
   unsigned int i;
 
@@ -617,11 +620,11 @@ g_unichar_totitle (SysUniChar c)
   if (c == 0)
     return c;
 
-  for (i = 0; i < SYS_N_ELEMENTS (title_table); ++i)
+  for (i = 0; i < ARRAY_SIZE (title_table); ++i)
     {
       if (title_table[i][0] == c || title_table[i][1] == c
-	  || title_table[i][2] == c)
-	return title_table[i][0];
+          || title_table[i][2] == c)
+        return title_table[i][0];
     }
 
   if (TYPE (c) == SYS_UNICODE_LOWERCASE_LETTER)
@@ -641,7 +644,7 @@ g_unichar_totitle (SysUniChar c)
  * sys_unichar_isdigit()), its numeric value. Otherwise, -1.
  **/
 int
-g_unichar_digit_value (SysUniChar c)
+sys_unichar_digit_value (SysUniChar c)
 {
   if (TYPE (c) == SYS_UNICODE_DECIMAL_NUMBER)
     return ATTTABLE (c >> 8, c & 0xff);
@@ -659,7 +662,7 @@ g_unichar_digit_value (SysUniChar c)
  * sys_unichar_isxdigit()), its numeric value. Otherwise, -1.
  **/
 int
-g_unichar_xdigit_value (SysUniChar c)
+sys_unichar_xdigit_value (SysUniChar c)
 {
   if (c >= 'A' && c <= 'F')
     return c - 'A' + 10;
@@ -683,7 +686,7 @@ g_unichar_xdigit_value (SysUniChar c)
  * Returns: the type of the character.
  **/
 SysUnicodeType
-g_unichar_type (SysUniChar c)
+sys_unichar_type (SysUniChar c)
 {
   return TYPE (c);
 }
@@ -692,14 +695,7 @@ g_unichar_type (SysUniChar c)
  * Case mapping functions
  */
 
-typedef enum {
-  LOCALE_NORMAL,
-  LOCALE_TURKIC,
-  LOCALE_LITHUANIAN
-} LocaleType;
-
-static LocaleType
-get_locale_type (void)
+LocaleType sys_unicode_get_locale_type (void)
 {
 #ifdef SYS_OS_WIN32
   char *tem = sys_win32_getlocale ();
@@ -719,15 +715,15 @@ get_locale_type (void)
     {
    case 'a':
       if (locale[1] == 'z')
-	return LOCALE_TURKIC;
+        return LOCALE_TURKIC;
       break;
     case 'l':
       if (locale[1] == 't')
-	return LOCALE_LITHUANIAN;
+        return LOCALE_LITHUANIAN;
       break;
     case 't':
       if (locale[1] == 'r')
-	return LOCALE_TURKIC;
+        return LOCALE_TURKIC;
       break;
     }
 
@@ -736,8 +732,8 @@ get_locale_type (void)
 
 static SysInt
 output_marks (const char **p_inout,
-	      char        *out_buffer,
-	      SysBool     remove_dot)
+              char        *out_buffer,
+              SysBool     remove_dot)
 {
   const char *p = *p_inout;
   SysInt len = 0;
@@ -745,15 +741,15 @@ output_marks (const char **p_inout,
   while (*p)
     {
       SysUniChar c = sys_utf8_get_char (p);
-      
+
       if (ISMARK (TYPE (c)))
-	{
-	  if (!remove_dot || c != 0x307 /* COMBINING DOT ABOVE */)
-	    len += sys_unichar_to_utf8 (c, out_buffer ? out_buffer + len : NULL);
-	  p = sys_utf8_next_char (p);
-	}
+        {
+          if (!remove_dot || c != 0x307 /* COMBINING DOT ABOVE */)
+            len += sys_unichar_to_utf8 (c, out_buffer ? out_buffer + len : NULL);
+          p = sys_utf8_next_char (p);
+        }
       else
-	break;
+        break;
     }
 
   *p_inout = p;
@@ -762,9 +758,9 @@ output_marks (const char **p_inout,
 
 static SysInt
 output_special_case (SysChar *out_buffer,
-		     int    offset,
-		     int    type,
-		     int    which)
+                     int    offset,
+                     int    type,
+                     int    which)
 {
   const SysChar *p = special_case_table + offset;
   SysInt len;
@@ -782,11 +778,10 @@ output_special_case (SysChar *out_buffer,
   return len;
 }
 
-static SysSize
-real_toupper (const SysChar *str,
-	      SysSize       max_len,
-	      SysChar       *out_buffer,
-	      LocaleType   locale_type)
+SysSize sys_unicode_real_toupper (const SysChar *str,
+              SysSize       max_len,
+              SysChar       *out_buffer,
+              LocaleType   locale_type)
 {
   const SysChar *p = str;
   const char *last = NULL;
@@ -803,94 +798,94 @@ real_toupper (const SysChar *str,
       p = sys_utf8_next_char (p);
 
       if (locale_type == LOCALE_LITHUANIAN)
-	{
-	  if (c == 'i')
-	    last_was_i = true;
-	  else 
-	    {
-	      if (last_was_i)
-		{
-		  /* Nasty, need to remove any dot above. Though
-		   * I think only E WITH DOT ABOVE occurs in practice
-		   * which could simplify this considerably.
-		   */
-		  SysSize decomp_len, i;
-		  SysUniChar decomp[G_UNICHAR_MAX_DECOMPOSITION_LENGTH];
+        {
+          if (c == 'i')
+            last_was_i = true;
+          else 
+            {
+              if (last_was_i)
+                {
+                  /* Nasty, need to remove any dot above. Though
+                   * I think only E WITH DOT ABOVE occurs in practice
+                   * which could simplify this considerably.
+                   */
+                  SysSize decomp_len, i;
+                  SysUniChar decomp[SYS_UNICHAR_MAX_DECOMPOSITION_LENGTH];
 
-		  decomp_len = sys_unichar_fully_decompose (c, false, decomp, SYS_N_ELEMENTS (decomp));
-		  for (i=0; i < decomp_len; i++)
-		    {
-		      if (decomp[i] != 0x307 /* COMBINING DOT ABOVE */)
-			len += sys_unichar_to_utf8 (sys_unichar_toupper (decomp[i]), out_buffer ? out_buffer + len : NULL);
-		    }
-		  
-		  len += output_marks (&p, out_buffer ? out_buffer + len : NULL, true);
+                  decomp_len = sys_unichar_fully_decompose (c, false, decomp, ARRAY_SIZE (decomp));
+                  for (i=0; i < decomp_len; i++)
+                    {
+                      if (decomp[i] != 0x307 /* COMBINING DOT ABOVE */)
+                        len += sys_unichar_to_utf8 (sys_unichar_toupper (decomp[i]), out_buffer ? out_buffer + len : NULL);
+                    }
 
-		  continue;
-		}
+                  len += output_marks (&p, out_buffer ? out_buffer + len : NULL, true);
 
-	      if (!ISMARK (t))
-		last_was_i = false;
-	    }
-	}
+                  continue;
+                }
+
+              if (!ISMARK (t))
+                last_was_i = false;
+            }
+        }
 
       if (locale_type == LOCALE_TURKIC && c == 'i')
-	{
-	  /* i => LATIN CAPITAL LETTER I WITH DOT ABOVE */
-	  len += sys_unichar_to_utf8 (0x130, out_buffer ? out_buffer + len : NULL); 
-	}
-      else if (c == 0x0345)	/* COMBINING GREEK YPOGEGRAMMENI */
-	{
-	  /* Nasty, need to move it after other combining marks .. this would go away if
-	   * we normalized first.
-	   */
-	  len += output_marks (&p, out_buffer ? out_buffer + len : NULL, false);
+        {
+          /* i => LATIN CAPITAL LETTER I WITH DOT ABOVE */
+          len += sys_unichar_to_utf8 (0x130, out_buffer ? out_buffer + len : NULL); 
+        }
+      else if (c == 0x0345)        /* COMBINING GREEK YPOGEGRAMMENI */
+        {
+          /* Nasty, need to move it after other combining marks .. this would go away if
+           * we normalized first.
+           */
+          len += output_marks (&p, out_buffer ? out_buffer + len : NULL, false);
 
-	  /* And output as GREEK CAPITAL LETTER IOTA */
-	  len += sys_unichar_to_utf8 (0x399, out_buffer ? out_buffer + len : NULL); 	  
-	}
+          /* And output as GREEK CAPITAL LETTER IOTA */
+          len += sys_unichar_to_utf8 (0x399, out_buffer ? out_buffer + len : NULL);           
+        }
       else if (IS (t,
-		   OR (SYS_UNICODE_LOWERCASE_LETTER,
-		   OR (SYS_UNICODE_TITLECASE_LETTER,
-		  0))))
-	{
-	  val = ATTTABLE (c >> 8, c & 0xff);
+                   OR (SYS_UNICODE_LOWERCASE_LETTER,
+                   OR (SYS_UNICODE_TITLECASE_LETTER,
+                  0))))
+        {
+          val = ATTTABLE (c >> 8, c & 0xff);
 
-	  if (val >= 0x1000000)
-	    {
-	      len += output_special_case (out_buffer ? out_buffer + len : NULL, val - 0x1000000, t,
-					  t == SYS_UNICODE_LOWERCASE_LETTER ? 0 : 1);
-	    }
-	  else
-	    {
-	      if (t == SYS_UNICODE_TITLECASE_LETTER)
-		{
-		  unsigned int i;
-		  for (i = 0; i < SYS_N_ELEMENTS (title_table); ++i)
-		    {
-		      if (title_table[i][0] == c)
-			{
-			  val = title_table[i][1];
-			  break;
-			}
-		    }
-		}
+          if (val >= 0x1000000)
+            {
+              len += output_special_case (out_buffer ? out_buffer + len : NULL, val - 0x1000000, t,
+                                          t == SYS_UNICODE_LOWERCASE_LETTER ? 0 : 1);
+            }
+          else
+            {
+              if (t == SYS_UNICODE_TITLECASE_LETTER)
+                {
+                  unsigned int i;
+                  for (i = 0; i < ARRAY_SIZE (title_table); ++i)
+                    {
+                      if (title_table[i][0] == c)
+                        {
+                          val = title_table[i][1];
+                          break;
+                        }
+                    }
+                }
 
-	      /* Some lowercase letters, e.g., U+000AA, FEMININE ORDINAL INDICATOR,
-	       * do not have an uppercase equivalent, in which case val will be
-	       * zero. */
-	      len += sys_unichar_to_utf8 (val ? val : c, out_buffer ? out_buffer + len : NULL);
-	    }
-	}
+              /* Some lowercase letters, e.g., U+000AA, FEMININE ORDINAL INDICATOR,
+               * do not have an uppercase equivalent, in which case val will be
+               * zero. */
+              len += sys_unichar_to_utf8 (val ? val : c, out_buffer ? out_buffer + len : NULL);
+            }
+        }
       else
-	{
-	  SysSize char_len = sys_utf8_skip[*(SysUChar *)last];
+        {
+          SysSize char_len = sys_utf8_skip[*(SysUChar *)last];
 
-	  if (out_buffer)
-	    memcpy (out_buffer + len, last, char_len);
+          if (out_buffer)
+            memcpy (out_buffer + len, last, char_len);
 
-	  len += char_len;
-	}
+          len += char_len;
+        }
 
     }
 
@@ -903,14 +898,14 @@ static SysBool
 has_more_above (const SysChar *str)
 {
   const SysChar *p = str;
-  SysInt combining_class;
+  SysInt combininsys_class;
 
   while (*p)
     {
-      combining_class = sys_unichar_combining_class (sys_utf8_get_char (p));
-      if (combining_class == 230)
+      combininsys_class = sys_unichar_combining_class (sys_utf8_get_char (p));
+      if (combininsys_class == 230)
         return true;
-      else if (combining_class == 0)
+      else if (combininsys_class == 0)
         break;
 
       p = sys_utf8_next_char (p);
@@ -919,11 +914,10 @@ has_more_above (const SysChar *str)
   return false;
 }
 
-static SysSize
-real_tolower (const SysChar *str,
-	      SysSize       max_len,
-	      SysChar       *out_buffer,
-	      LocaleType   locale_type)
+SysSize sys_unicode_real_tolower (const SysChar *str,
+              SysSize       max_len,
+              SysChar       *out_buffer,
+              LocaleType   locale_type)
 {
   const SysChar *p = str;
   const char *last = NULL;
@@ -941,14 +935,14 @@ real_tolower (const SysChar *str,
       if (locale_type == LOCALE_TURKIC && (c == 'I' || c == 0x130 ||
                                            c == SYS_UNICHAR_FULLWIDTH_I))
         {
-          SysBool combining_dot = (c == 'I' || c == SYS_UNICHAR_FULLWIDTH_I) &&
+          SysBool combininsys_dot = (c == 'I' || c == SYS_UNICHAR_FULLWIDTH_I) &&
                                    sys_utf8_get_char (p) == 0x0307;
-          if (combining_dot || c == 0x130)
+          if (combininsys_dot || c == 0x130)
             {
               /* I + COMBINING DOT ABOVE => i (U+0069)
                * LATIN CAPITAL LETTER I WITH DOT ABOVE => i (U+0069) */
               len += sys_unichar_to_utf8 (0x0069, out_buffer ? out_buffer + len : NULL);
-              if (combining_dot)
+              if (combininsys_dot)
                 p = sys_utf8_next_char (p);
             }
           else
@@ -986,69 +980,69 @@ real_tolower (const SysChar *str,
           len += sys_unichar_to_utf8 (sys_unichar_tolower (c), out_buffer ? out_buffer + len : NULL); 
           len += sys_unichar_to_utf8 (0x0307, out_buffer ? out_buffer + len : NULL); 
         }
-      else if (c == 0x03A3)	/* GREEK CAPITAL LETTER SIGMA */
-	{
-	  if ((max_len < 0 || p < str + max_len) && *p)
-	    {
-	      SysUniChar next_c = sys_utf8_get_char (p);
-	      int next_type = TYPE(next_c);
+      else if (c == 0x03A3)        /* GREEK CAPITAL LETTER SIGMA */
+        {
+          if ((max_len < 0 || p < str + max_len) && *p)
+            {
+              SysUniChar next_c = sys_utf8_get_char (p);
+              int next_type = TYPE(next_c);
 
-	      /* SIGMA mapps differently depending on whether it is
-	       * final or not. The following simplified test would
-	       * fail in the case of combining marks following the
-	       * sigma, but I don't think that occurs in real text.
-	       * The test here matches that in ICU.
-	       */
-	      if (ISALPHA (next_type)) /* Lu,Ll,Lt,Lm,Lo */
-		val = 0x3c3;	/* GREEK SMALL SIGMA */
-	      else
-		val = 0x3c2;	/* GREEK SMALL FINAL SIGMA */
-	    }
-	  else
-	    val = 0x3c2;	/* GREEK SMALL FINAL SIGMA */
+              /* SIGMA mapps differently depending on whether it is
+               * final or not. The following simplified test would
+               * fail in the case of combining marks following the
+               * sigma, but I don't think that occurs in real text.
+               * The test here matches that in ICU.
+               */
+              if (ISALPHA (next_type)) /* Lu,Ll,Lt,Lm,Lo */
+                val = 0x3c3;        /* GREEK SMALL SIGMA */
+              else
+                val = 0x3c2;        /* GREEK SMALL FINAL SIGMA */
+            }
+          else
+            val = 0x3c2;        /* GREEK SMALL FINAL SIGMA */
 
-	  len += sys_unichar_to_utf8 (val, out_buffer ? out_buffer + len : NULL);
-	}
+          len += sys_unichar_to_utf8 (val, out_buffer ? out_buffer + len : NULL);
+        }
       else if (IS (t,
-		   OR (SYS_UNICODE_UPPERCASE_LETTER,
-		   OR (SYS_UNICODE_TITLECASE_LETTER,
-		  0))))
-	{
-	  val = ATTTABLE (c >> 8, c & 0xff);
+                   OR (SYS_UNICODE_UPPERCASE_LETTER,
+                   OR (SYS_UNICODE_TITLECASE_LETTER,
+                  0))))
+        {
+          val = ATTTABLE (c >> 8, c & 0xff);
 
-	  if (val >= 0x1000000)
-	    {
-	      len += output_special_case (out_buffer ? out_buffer + len : NULL, val - 0x1000000, t, 0);
-	    }
-	  else
-	    {
-	      if (t == SYS_UNICODE_TITLECASE_LETTER)
-		{
-		  unsigned int i;
-		  for (i = 0; i < SYS_N_ELEMENTS (title_table); ++i)
-		    {
-		      if (title_table[i][0] == c)
-			{
-			  val = title_table[i][2];
-			  break;
-			}
-		    }
-		}
+          if (val >= 0x1000000)
+            {
+              len += output_special_case (out_buffer ? out_buffer + len : NULL, val - 0x1000000, t, 0);
+            }
+          else
+            {
+              if (t == SYS_UNICODE_TITLECASE_LETTER)
+                {
+                  unsigned int i;
+                  for (i = 0; i < ARRAY_SIZE (title_table); ++i)
+                    {
+                      if (title_table[i][0] == c)
+                        {
+                          val = title_table[i][2];
+                          break;
+                        }
+                    }
+                }
 
-	      /* Not all uppercase letters are guaranteed to have a lowercase
-	       * equivalent.  If this is the case, val will be zero. */
-	      len += sys_unichar_to_utf8 (val ? val : c, out_buffer ? out_buffer + len : NULL);
-	    }
-	}
+              /* Not all uppercase letters are guaranteed to have a lowercase
+               * equivalent.  If this is the case, val will be zero. */
+              len += sys_unichar_to_utf8 (val ? val : c, out_buffer ? out_buffer + len : NULL);
+            }
+        }
       else
-	{
-	  SysSize char_len = sys_utf8_skip[*(SysUChar *)last];
+        {
+          SysSize char_len = sys_utf8_skip[*(SysUChar *)last];
 
-	  if (out_buffer)
-	    memcpy (out_buffer + len, last, char_len);
+          if (out_buffer)
+            memcpy (out_buffer + len, last, char_len);
 
-	  len += char_len;
-	}
+          len += char_len;
+        }
 
     }
 
@@ -1076,13 +1070,13 @@ real_tolower (const SysChar *str,
  * Since: 2.4
  **/
 SysBool
-g_unichar_get_mirror_char (SysUniChar ch,
+sys_unichar_get_mirror_char (SysUniChar ch,
                            SysUniChar *mirrored_ch)
 {
   SysBool found;
   SysUniChar mirrored;
 
-  mirrored = GLIB_GET_MIRRORING(ch);
+  mirrored = SYS_GET_MIRRORING(ch);
 
   found = ch != mirrored;
   if (mirrored_ch)
@@ -1092,25 +1086,24 @@ g_unichar_get_mirror_char (SysUniChar ch,
 
 }
 
-#define SYS_SCRIPT_TABLE_MIDPOINT (G_N_ELEMENTS (sys_script_table) / 2)
+#define SYS_SCRIPT_TABLE_MIDPOINT (ARRAY_SIZE (sys_script_table) / 2)
 
 static inline SysUnicodeScript
-g_unichar_get_script_bsearch (SysUniChar ch)
+sys_unichar_get_script_bsearch (SysUniChar ch)
 {
   int lower = 0;
-  int upper = SYS_N_ELEMENTS (sys_script_table) - 1;
+  int upper = ARRAY_SIZE (sys_script_table) - 1;
   static int saved_mid = SYS_SCRIPT_TABLE_MIDPOINT;
   int mid = saved_mid;
-
 
   do 
     {
       if (ch < sys_script_table[mid].start)
-	upper = mid - 1;
+        upper = mid - 1;
       else if (ch >= sys_script_table[mid].start + sys_script_table[mid].chars)
-	lower = mid + 1;
+        lower = mid + 1;
       else
-	return sys_script_table[saved_mid = mid].script;
+        return sys_script_table[saved_mid = mid].script;
 
       mid = (lower + upper) / 2;
     }
@@ -1136,7 +1129,7 @@ g_unichar_get_script_bsearch (SysUniChar ch)
  * Since: 2.14
  */
 SysUnicodeScript
-g_unichar_get_script (SysUniChar ch)
+sys_unichar_get_script (SysUniChar ch)
 {
   if (ch < SYS_EASY_SCRIPTS_RANGE)
     return sys_script_easy_table[ch];
@@ -1374,12 +1367,12 @@ static const SysUInt32 iso15924_tags[] =
  * Since: 2.30
  */
 SysUInt32
-g_unicode_script_to_iso15924 (SysUnicodeScript script)
+sys_unicode_script_to_iso15924 (SysUnicodeScript script)
 {
   if (SYS_UNLIKELY (script == SYS_UNICODE_SCRIPT_INVALID_CODE))
     return 0;
 
-  if (SYS_UNLIKELY (script < 0 || script >= (int) SYS_N_ELEMENTS (iso15924_tags)))
+  if (SYS_UNLIKELY (script < 0 || script >= (int) ARRAY_SIZE (iso15924_tags)))
     return 0x5A7A7A7A;
 
   return iso15924_tags[script];
@@ -1406,14 +1399,14 @@ g_unicode_script_to_iso15924 (SysUnicodeScript script)
  * Since: 2.30
  */
 SysUnicodeScript
-g_unicode_script_from_iso15924 (SysUInt32 iso15924)
+sys_unicode_script_from_iso15924 (SysUInt32 iso15924)
 {
   unsigned int i;
 
    if (!iso15924)
      return SYS_UNICODE_SCRIPT_INVALID_CODE;
 
-  for (i = 0; i < SYS_N_ELEMENTS (iso15924_tags); i++)
+  for (i = 0; i < ARRAY_SIZE (iso15924_tags); i++)
     if (iso15924_tags[i] == iso15924)
       return (SysUnicodeScript) i;
 

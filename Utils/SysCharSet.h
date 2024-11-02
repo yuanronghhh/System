@@ -13,6 +13,7 @@ const SysChar * const * sys_get_language_names  (void);
 const SysChar * const * sys_get_language_names_with_category
                                             (const SysChar *category_name);
 SysChar **              sys_get_locale_variants (const SysChar *locale);
+const char **           _sys_charset_get_aliases (const char *canonical_name);
 
 SYS_END_DECLS
 

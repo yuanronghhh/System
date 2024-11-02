@@ -24,12 +24,21 @@ typedef unsigned long long SysUInt64;
 
 #define SIZEOF_INT 8
 #define SYS_DEBUG ${DEBUG}
-#define USE_DEBUGGER 1
-#define USE_OPENSSL 1
+#define USE_ICONV ${USE_ICONV}
+#define USE_OPENSSL ${USE_OPENSSL}
+#define USE_VLD ${USE_VLD}
 
 typedef signed short SysInt16;
 typedef unsigned short SysUInt16;
 typedef signed int SysInt32;
 typedef unsigned int SysUInt32;
+
+#if !defined(PROJECT_DIR)
+#define PROJECT_DIR "${CMAKE_CURRENT_LIST_DIR}"
+#endif
+
+#if !defined(BINARY_DIR)
+#define BINARY_DIR "${CMAKE_BINARY_DIR}"
+#endif
 
 #endif

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import logging
 import os
+import sys
 from os import path
 from pathlib import Path
 
@@ -64,6 +65,15 @@ def rename_glib(file):
     f = open(file, "r+", encoding="utf-8")
     data = f.read()
     ndata = data\
+            .replace("gmirror", "sysmirror")\
+            .replace("G_N_ELEMENTS", "ARRAY_SIZE")\
+            .replace("SYS_N_ELEMENTS", "ARRAY_SIZE")\
+            .replace("GLIB_", "SYS_")\
+            .replace("G_UNICHAR_", "SYS_UNICHAR_")\
+            .replace("g_filename", "sys_filename")\
+            .replace("GUINT_TO_POINTER", "UINT_TO_POINTER")\
+            .replace("\t", "        ")\
+            .replace("g_error", "sys_error")\
             .replace("gboolean", "SysBool")\
             .replace("GReal", "SysReal")\
             .replace("GQueue", "SysQueue")\
@@ -92,6 +102,8 @@ def rename_glib(file):
             .replace("gstr", "str")\
             .replace("GBytes", "SysBytes")\
             .replace("g_strerror", "sys_strerr")\
+            .replace("g_set_error_literal", "sys_error_set_N")\
+            .replace("sys_error_set_literal", "sys_error_set_N")\
             .replace("sys_set_error", "sys_error_set_N")\
             .replace("sys_strerror", "sys_strerr")\
             .replace("sys_abort ", "sys_abort_N ")\
@@ -145,7 +157,8 @@ def rename_glib(file):
             .replace("GTimeSpan", "SysTimeSpan")\
             .replace("GDate", "SysDate")\
             .replace("g_date", "sys_date")\
-            .replace(" g_error", " sys_error_N")\
+            .replace("g_stpcpy", "sys_strpcpy")\
+            .replace(" g_set_error", " sys_error_set_N")\
             .replace("GByteArray", "SysByteArray")\
             .replace("gconstpointer", "const SysPointer")\
             .replace("gatomicrefcount", "SysRef")\
@@ -174,11 +187,13 @@ def rename_glib(file):
             .replace("G_UNICODE", "SYS_UNICODE")\
             .replace("GConvert", "SysConvert")\
             .replace("GQuark", "SysQuark")\
+            .replace("g_strchug", "sys_strchug")\
             .replace("g_quark", "sys_quark")\
             .replace("g_intern", "sys_intern")\
             .replace("g_iconv", "sys_iconv")\
             .replace("g_charset", "sys_charset")\
-            .replace("g_", "sys_")\
+            .replace("sys_error_set_N_literal", "sys_error_set_N")\
+            .replace("GPOINTER_TO_UINT", "POINTER_TO_UINT")\
             .replace("g_bytes", "sys_bytes")
 
     f.seek(0)
@@ -187,4 +202,9 @@ def rename_glib(file):
     f.close()
 
 if __name__ == '__main__':
-    rename_glib(Path("System/Utils/SysStr.c").as_posix())
+    fpath = Path(sys.argv[1])
+    if not fpath.exists():
+        exit(0)
+
+    rename_glib(fpath.as_posix())
+    print("done")

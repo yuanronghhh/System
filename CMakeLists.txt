@@ -1,3 +1,11 @@
+add_use_name(iconv 1)
+add_use_name(openssl 1)
+add_use_name(vld 0)
+
+if(WIN32)
+  add_use_name(vld)
+endif()
+
 set(INC
   ../
 )
@@ -7,15 +15,6 @@ set(INC_SYS
   ${VLD_INCLUDE_DIRS}
   ${OPENSSL_INCLUDE_DIRS}
   ${LIBICONV_INCLUDE_DIRS}
-)
-
-set(OPENSSL_SRC
-  ./ThirdParty/SysOpenssl.h
-  ./ThirdParty/SysOpenssl.c
-  ./ThirdParty/SysIconv.h
-  ./ThirdParty/SysIconv.c
-  ./Utils/SysSsl.h
-  ./Utils/SysSsl.c
 )
 
 set(ANDROID_SYS_SRC
@@ -68,7 +67,35 @@ elseif(WIN32)
 endif()
 
 if(USE_OPENSSL)
+  set(OPENSSL_SRC
+    ./ThirdParty/SysOpenssl.h
+    ./ThirdParty/SysOpenssl.c
+  )
+
   LIST(APPEND OS_SYS_SRC ${OPENSSL_SRC})
+endif()
+
+if(USE_ICONV)
+  set(ICONV_SRC
+    ./ThirdParty/SysIconv.h
+    ./ThirdParty/SysIconv.c
+    ./ThirdParty/SysLibCharSet.h
+    ./ThirdParty/SysLibCharSet.c
+    ./ThirdParty/localcharset.h
+    ./ThirdParty/localcharset.c
+    ./ThirdParty/libcharset.h
+  )
+
+  LIST(APPEND OS_SYS_SRC ${ICONV_SRC})
+endif()
+
+if(USE_VLD)
+  set(VLD_SRC
+    ./ThirdParty/SysVld.h
+    ./ThirdParty/SysVld.c
+  )
+
+  LIST(APPEND OS_SYS_SRC ${VLD_SRC})
 endif()
 
 set(SRC
@@ -127,6 +154,9 @@ set(SRC
   ./Utils/SysUtf8.c
   ./Utils/SysUnicode.h
   ./Utils/SysUnicode.c
+  ./Utils/SysUnicodeMirrorTable.h
+  ./Utils/SysUnicodeScriptTable.h
+  ./Utils/SysUnicodeTable.h
   ./Utils/SysConvert.h
   ./Utils/SysConvert.c
   ./Utils/SysStr.h
@@ -141,6 +171,10 @@ set(SRC
   ./Utils/SysError.c
   ./Utils/SysTextIO.h
   ./Utils/SysTextIO.c
+  ./Utils/SysSsl.h
+  ./Utils/SysSsl.c
+  ./Utils/SysCharSet.h
+  ./Utils/SysCharSet.c
 
   ./Platform/Common/SysTimeZone.h
   ./Platform/Common/SysTimeZone.c

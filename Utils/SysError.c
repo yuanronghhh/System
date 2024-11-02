@@ -185,6 +185,29 @@ void sys_error_set(SYS_LOG_ARGS_N SysError**err, const SysChar* format, ...) {
   va_end(args);
 }
 
+void sys_error_propagate (SysError **dest,
+                   SysError  *src) {
+  sys_return_if_fail (src != NULL);
+
+  if (dest == NULL) {
+
+    sys_error_free (src);
+    return;
+
+  } else {
+
+    if (*dest != NULL) {
+
+      sys_warning_N ("%s", src->message);
+      sys_error_free (src);
+
+    } else {
+
+      *dest = src;
+    }
+  }
+}
+
 void sys_error_free(SysError* err) {
   sys_return_if_fail(err != NULL);
 

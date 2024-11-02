@@ -1,7 +1,7 @@
 #include <System/Utils/SysCharSet.h>
 #include <System/Utils/SysStr.h>
 #include <System/DataTypes/SysHashTable.h>
-#include <System/Platform/Common/SysThread.h>
+#include <System/Platform/Common/SysThreadPrivate.h>
 
 SYS_LOCK_DEFINE_STATIC (aliases);
 
@@ -53,8 +53,7 @@ get_alias_hash (void)
 /* As an abuse of the alias table, the following routines gets
  * the charsets that are aliases for the canonical name.
  */
-const char **
-_sys_charset_get_aliases (const char *canonical_name)
+const char ** _sys_charset_get_aliases (const char *canonical_name)
 {
   SysHashTable *alias_hash = get_alias_hash ();
 
@@ -190,8 +189,7 @@ sys_get_charset (const char **charset)
  *
  * Returns: %true if the returned charset is UTF-8
  */
-SysBool
-_sys_get_time_charset (const char **charset)
+SysBool _sys_get_time_charset (const char **charset)
 {
   static SysPrivate cache_private = SYS_PRIVATE_INIT (charset_cache_free);
   GCharsetCache *cache = sys_private_get (&cache_private);
@@ -360,7 +358,7 @@ sys_get_console_charset (const char **charset)
       else if (GetLastError () != ERROR_INVALID_HANDLE)
         {
           SysChar *emsg = sys_win32_error_message (GetLastError ());
-          sys_warninsys_N ("Failed to determine console output code page: %s. "
+          sys_warning_N ("Failed to determine console output code page: %s. "
                      "Falling back to UTF-8", emsg);
           sys_free (emsg);
         }
@@ -407,7 +405,7 @@ read_aliases (const SysChar *file,
     {
       char *p, *q;
 
-      sys_strstrip (buf);
+      sys_str_strip (buf);
 
       /* Line is a comment */
       if ((buf[0] == '#') || (buf[0] == '\0'))
@@ -456,7 +454,7 @@ unalias_lang (char *lang)
 
   if (sys_once_init_enter (&alias_table))
     {
-      SysHashTable *table = sys_hash_table_new (sys_str_hash, sys_str_equal);
+      SysHashTable *table = sys_hash_table_new (sys_str_hash, (SysEqualFunc)sys_str_equal);
       read_aliases ("/usr/share/locale/locale.alias", table);
       sys_once_init_leave (&alias_table, table);
     }
@@ -469,8 +467,7 @@ unalias_lang (char *lang)
         {
           static SysBool said_before = false;
           if (!said_before)
-            sys_warninsys_N ("Too many alias levels for a locale, "
-                       "may indicate a loop");
+            sys_warning_N ("%s", "Too many alias levels for a locale, may indicate a loop");
           said_before = true;
           return lang;
         }
@@ -758,7 +755,7 @@ sys_get_language_names_with_category (const SysChar *category_name)
 
   if (!cache)
     {
-      cache = sys_hash_table_new_full (sys_str_hash, sys_str_equal,
+      cache = sys_hash_table_new_full (sys_str_hash, (SysEqualFunc)sys_str_equal,
                                      sys_free, language_names_cache_free);
       sys_private_set (&cache_private, cache);
     }
@@ -767,14 +764,14 @@ sys_get_language_names_with_category (const SysChar *category_name)
   if (!languages)
     languages = "C";
 
-  name_cache = (GLanguageNamesCache *) sys_hash_table_lookup (cache, category_name);
+  name_cache = (GLanguageNamesCache *) sys_hash_table_lookup (cache, (SysPointer)category_name);
   if (!(name_cache && name_cache->languages &&
         strcmp (name_cache->languages, languages) == 0))
     {
       SysPtrArray *array;
       SysChar **alist, **a;
 
-      sys_hash_table_remove (cache, category_name);
+      sys_hash_table_remove (cache, (SysPointer)category_name);
 
       array = sys_ptr_array_sized_new (8);
 

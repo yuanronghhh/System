@@ -48,7 +48,10 @@ SYS_API void sys_memcpy(
 SYS_API SysPointer sys_realloc(void *block, SysSize size);
 SYS_API SysPointer sys_calloc(SysSize count, SysSize size);
 SYS_API SysPointer sys_malloc(SysSize size);
+SYS_API SysPointer sys_try_malloc (SysSize n_bytes);
+SYS_API SysPointer sys_try_malloc_n (SysSize n_blocks, SysSize n_block_bytes);
 SYS_API void sys_free(void *block);
+SYS_API void sys_strfreev (SysChar **str_array);
 SYS_API SysPointer sys_malloc0(SysSize size);
 SYS_API SysPointer sys_memdup(const SysPointer mem, SysUInt byte_size);
 SYS_API SysPointer sys_memdup2 (const SysPointer mem, SysSize byte_size);

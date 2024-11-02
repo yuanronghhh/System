@@ -12,23 +12,50 @@ SysChar* sys_strstr(const SysChar *s, const SysChar* delim) {
   return strstr(s, delim);
 }
 
-SysBool sys_str_trim_end(SysChar *s, const SysChar delim) {
-  SysSize len;
+SysChar *sys_strchug (SysChar *string)
+{
+  SysUChar *start;
 
-  sys_return_val_if_fail(s != NULL, false);
+  sys_return_val_if_fail (string != NULL, NULL);
 
-  len = strlen(s);
-  while (len--) {
-    if(s[len] == ' ') {
+  for (start = (SysUChar*) string; *start && isspace (*start); start++)
+    ;
 
-      s[len] = '\0';
-    } else {
+  memmove (string, start, strlen ((SysChar *) start) + 1);
 
-      break;
-    }
-  }
+  return string;
+}
+
+SysBool sys_str_trim_end(SysChar *string, const SysChar c) {
+  sys_return_val_if_fail (string != NULL, NULL);
+
+  SysChar * p = rindex(string, c);
+  if(!p) { return false;}
+  *p = '\0';
 
   return true;
+}
+
+SysBool sys_str_strip(SysChar *s) {
+
+  return sys_strchomp(sys_strchug(s));
+}
+
+SysChar * sys_strchomp (SysChar *string) {
+  SysSize len;
+
+  sys_return_val_if_fail (string != NULL, NULL);
+
+  len = strlen (string);
+  while (len--)
+  {
+    if (isspace ((SysUChar) string[len]))
+      string[len] = '\0';
+    else
+      break;
+  }
+
+  return string;
 }
 
 /**
@@ -39,7 +66,7 @@ SysBool sys_str_trim_end(SysChar *s, const SysChar delim) {
  *
  * Returns: new points + string copy, just free returned pointer.
  */
-SysChar **sys_strsplit(SysChar * s, const SysChar *delim, SysInt * count) {
+SysChar **sys_strsplit(const SysChar * s, const SysChar *delim, SysInt * count) {
   sys_return_val_if_fail(s != NULL, NULL);
   sys_return_val_if_fail(delim != NULL, NULL);
   sys_return_val_if_fail(*count == 0, NULL);
@@ -138,6 +165,58 @@ void sys_strmcat(SysChar** v1, SysSize* v1_max, SysSize* len, const SysChar* v2)
 }
 
 /**
+ * sys_strconcat:
+ * @string1: the first string to add, which must not be %NULL
+ * @...: a %NULL-terminated list of strings to append to the string
+ *
+ * Concatenates all of the given strings into one long string. The
+ * returned string should be freed with sys_free() when no longer needed.
+ *
+ * The variable argument list must end with %NULL. If you forget the %NULL,
+ * sys_strconcat() will start appending random memory junk to your string.
+ *
+ * Note that this function is usually not the right function to use to
+ * assemble a translated message from pieces, since proper translation
+ * often requires the pieces to be reordered.
+ *
+ * Returns: a newly-allocated string containing all the string arguments
+ */
+SysChar* sys_strconcat (const SysChar *string1, ...) {
+  SysSize   l;
+  va_list args;
+  SysChar   *s;
+  SysChar   *concat;
+  SysChar   *ptr;
+
+  if (!string1)
+    return NULL;
+
+  l = 1 + strlen (string1);
+  va_start (args, string1);
+  s = va_arg (args, SysChar*);
+  while (s)
+  {
+    l += strlen (s);
+    s = va_arg (args, SysChar*);
+  }
+  va_end (args);
+
+  concat = sys_new (SysChar, l);
+  ptr = concat;
+
+  ptr = sys_strpcpy (ptr, string1);
+  va_start (args, string1);
+  s = va_arg (args, SysChar*);
+  while (s) {
+    ptr = sys_strpcpy (ptr, s);
+    s = va_arg (args, SysChar*);
+  }
+  va_end (args);
+
+  return concat;
+}
+
+/**
  * sys_strlcat: copy v2 to v1, return v1 if v1 not enough.
  *
  * Returns: return v1
@@ -151,7 +230,7 @@ SysChar* sys_strlcat(SysChar* v1, SysSize v1_max, const SysChar* v2) {
   SysSize nlen = v1_len + v2_len;
 
   if (nlen > v1_max) {
-    sys_warninsys_N("string has no enough space ? %s", v1);
+    sys_warning_N("string has no enough space ? %s", v1);
     return v1;
   }
 
@@ -587,7 +666,6 @@ SysChar* sys_str_newsize(SysSize size) {
   return nstr;
 }
 
-
 /**
  * sys_strstr_len:
  * @haystack: a nul-terminated string
@@ -642,3 +720,119 @@ next:
   }
 }
 
+/**
+ * sys_strrstr:
+ * @haystack: a nul-terminated string
+ * @needle: the nul-terminated string to search for
+ *
+ * Searches the string @haystack for the last occurrence
+ * of the string @needle.
+ *
+ * Returns: a pointer to the found occurrence, or
+ *    %NULL if not found.
+ */
+SysChar * sys_strrstr (const SysChar *haystack,
+    const SysChar *needle) {
+  SysSize i;
+  SysSize needle_len;
+  SysSize haystack_len;
+  const SysChar *p;
+
+  sys_return_val_if_fail (haystack != NULL, NULL);
+  sys_return_val_if_fail (needle != NULL, NULL);
+
+  needle_len = strlen (needle);
+  haystack_len = strlen (haystack);
+
+  if (needle_len == 0)
+    return (SysChar *)haystack;
+
+  if (haystack_len < needle_len)
+    return NULL;
+
+  p = haystack + haystack_len - needle_len;
+
+  while (p >= haystack)
+  {
+    for (i = 0; i < needle_len; i++)
+      if (p[i] != needle[i])
+        goto next;
+
+    return (SysChar *)p;
+
+next:
+    p--;
+  }
+
+  return NULL;
+}
+
+/**
+ * sys_strrstr_len:
+ * @haystack: a nul-terminated string
+ * @haystack_len: the maximum length of @haystack in bytes. A length of -1
+ *     can be used to mean "search the entire string", like sys_strrstr().
+ * @needle: the nul-terminated string to search for
+ *
+ * Searches the string @haystack for the last occurrence
+ * of the string @needle, limiting the length of the search
+ * to @haystack_len.
+ *
+ * Returns: a pointer to the found occurrence, or
+ *    %NULL if not found.
+ */
+SysChar * sys_strrstr_len (const SysChar *haystack,
+    SysSize        haystack_len,
+    const SysChar *needle) {
+  sys_return_val_if_fail (haystack != NULL, NULL);
+  sys_return_val_if_fail (needle != NULL, NULL);
+
+  if (haystack_len < 0) {
+
+    return sys_strrstr (haystack, needle);
+  }
+  else
+  {
+    SysSize needle_len = strlen (needle);
+    const SysChar *haystack_max = haystack + haystack_len;
+    const SysChar *p = haystack;
+    SysSize i;
+
+    while (p < haystack_max && *p)
+      p++;
+
+    if (p < haystack + needle_len)
+      return NULL;
+
+    p -= needle_len;
+
+    while (p >= haystack)
+    {
+      for (i = 0; i < needle_len; i++)
+        if (p[i] != needle[i])
+          goto next;
+
+      return (SysChar *)p;
+
+next:
+      p--;
+    }
+
+    return NULL;
+  }
+}
+
+int sys_ascii_digit_value (SysChar c) {
+  if (isdigit (c))
+    return c - '0';
+  return -1;
+}
+
+int sys_ascii_xdigit_value (SysChar c) {
+  if (c >= 'A' && c <= 'F')
+    return c - 'A' + 10;
+  if (c >= 'a' && c <= 'f')
+    return c - 'a' + 10;
+
+  return sys_ascii_digit_value (c);
+}
