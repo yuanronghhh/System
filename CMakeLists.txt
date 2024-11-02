@@ -1,9 +1,10 @@
 add_use_name(iconv 1)
 add_use_name(openssl 1)
-add_use_name(vld 0)
 
 if(WIN32)
-  add_use_name(vld)
+  add_use_name(vld 1)
+else()
+  add_use_name(vld 0)
 endif()
 
 set(INC

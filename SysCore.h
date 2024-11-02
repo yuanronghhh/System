@@ -13,6 +13,7 @@
 #include <System/Platform/Common/SysSocket.h>
 #include <System/Platform/Common/SysFile.h>
 #include <System/Platform/Common/SysDate.h>
+#include <System/Platform/Common/SysDateTime.h>
 #include <System/Platform/Common/SysTimeZone.h>
 #include <System/Platform/Common/SysMappedFile.h>
 
