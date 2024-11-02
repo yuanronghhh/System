@@ -6,7 +6,6 @@
 SYS_BEGIN_DECLS
 
 struct _SysString {
-
   SysChar  *str;
   SysSize len;
   SysSize allocated_len;

@@ -1,5 +1,5 @@
-#include <System/Utils/SysStr.h>
 #include <System/Platform/Common/SysThreadPrivate.h>
+#include <System/Utils/SysStr.h>
 
 /**
  * this code from glib SysThread
