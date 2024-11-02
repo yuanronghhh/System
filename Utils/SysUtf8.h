@@ -86,7 +86,7 @@ SysChar*     sys_utf16_to_utf8     (const SysUniChar2  *str,
                                 SysLong            *items_read,
                                 SysLong            *items_written,
                                 SysError          **error) SYS_GNUC_MALLOC;
-SysUniChar2 *g_ucs4_to_utf16     (const SysUniChar   *str,
+SysUniChar2 *sys_ucs4_to_utf16     (const SysUniChar   *str,
                                 SysLong             len,
                                 SysLong            *items_read,
                                 SysLong            *items_written,
@@ -115,7 +115,7 @@ SysChar *sys_utf8_casefold (const SysChar *str,
                         SysSize       len) SYS_GNUC_MALLOC;
 
 /**
- * GNormalizeMode:
+ * SysNormalizeMode:
  * @G_NORMALIZE_DEFAULT: standardize differences that do not affect the
  *     text content, such as the above-mentioned accent representation
  * @G_NORMALIZE_NFD: another name for %G_NORMALIZE_DEFAULT
@@ -147,11 +147,11 @@ typedef enum {
   SYS_NORMALIZE_NFKD = SYS_NORMALIZE_ALL,
   SYS_NORMALIZE_ALL_COMPOSE,
   SYS_NORMALIZE_NFKC = SYS_NORMALIZE_ALL_COMPOSE
-} GNormalizeMode;
+} SysNormalizeMode;
 
 SysChar *sys_utf8_normalize (const SysChar   *str,
                          SysSize         len,
-                         GNormalizeMode mode) SYS_GNUC_MALLOC;
+                         SysNormalizeMode mode) SYS_GNUC_MALLOC;
 
 SysInt   sys_utf8_collate     (const SysChar *str1,
                            const SysChar *str2) SYS_GNUC_PURE;

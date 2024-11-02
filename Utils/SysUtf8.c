@@ -885,35 +885,11 @@ err_out:
   return result;
 }
 
-/**
- * sys_ucs4_to_utf8:
- * @str: (array length=len) (element-type SysUniChar): a UCS-4 encoded string
- * @len: the maximum length (number of characters) of @str to use.
- *     If @len < 0, then the string is nul-terminated.
- * @items_read: (out) (optional): location to store number of
- *     characters read, or %NULL.
- * @items_written: (out) (optional): location to store number
- *     of bytes written or %NULL. The value here stored does not include the
- *     trailing 0 byte.
- * @error: location to store the error occurring, or %NULL to ignore
- *         errors. Any of the errors in #SysConvertError other than
- *         %G_CONVERT_ERROR_NO_CONVERSION may occur.
- *
- * Convert a string from a 32-bit fixed width representation as UCS-4.
- * to UTF-8. The result will be terminated with a 0 byte.
- *
- * Returns: (transfer full): a pointer to a newly allocated UTF-8 string.
- *     This value must be freed with sys_free(). If an error occurs,
- *     %NULL will be returned and @error set. In that case, @items_read
- *     will be set to the position of the first invalid input character.
- */
-  SysChar *
-           sys_ucs4_to_utf8 (const SysUniChar *str,
-               SysLong           len,
-               SysLong          *items_read,
-               SysLong          *items_written,
-               SysError        **error)
-{
+SysChar * sys_ucs4_to_utf8 (const SysUniChar *str,
+    SysLong           len,
+    SysLong          *items_read,
+    SysLong          *items_written,
+    SysError        **error) {
   SysInt result_length;
   SysChar *result = NULL;
   SysChar *p;
