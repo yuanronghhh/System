@@ -1,6 +1,7 @@
 #include <System/Utils/SysSsl.h>
 #include <System/Platform/Common/SysSocket.h>
 
+#if 0
 static SysInt ssl_verify_callback(SysInt ok, X509_STORE_CTX* x509_store) {
   SysChar* subject, * issuer;
   SysInt                err, depth;
@@ -58,3 +59,4 @@ static SysInt ssl_verify_callback(SysInt ok, X509_STORE_CTX* x509_store) {
   return 1;
 }
 
+#endif

@@ -21,7 +21,7 @@ SysInt sys_fstat(FILE* fp, struct stat * state) {
 }
 
 SysSize sys_fwrite(const void* buf, SysSize size, SysSize n, FILE* fp) {
-    return fwrite(buf, size, n, fp);
+  return fwrite(buf, size, n, fp);
 }
 
 SysSize sys_fwrite_string(FILE* fp, const SysChar* s, SysSize len) {

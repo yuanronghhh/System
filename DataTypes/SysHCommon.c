@@ -18,6 +18,7 @@ SysPointer _sys_hdata_f_cast(SysPointer self, SysInt offsize) {
 }
 
 SysHData* _sys_hdata_cast_check(SysHData *self) {
+  if(self == NULL) { return NULL; }
   sys_return_val_if_fail(SYS_HDATA_CHECK(self), NULL);
 
   return self;
