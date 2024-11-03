@@ -6,16 +6,19 @@
 SYS_BEGIN_DECLS
 
 #define SYS_HDATA_CHECK_VALUE 0xdeadbeef
-#define SYS_HDATA_CAST_TO(o, TypeName, member) (TypeName *)_sys_hdata_cast_to(o, offsetof(TypeName, member))
 #define SYS_HDATA_CHECK(o) (o != NULL && (o)->check == SYS_HDATA_CHECK_VALUE)
-#define SYS_HDATA(o, TypeName) ((TypeName *)o)
-#define SYS_DATA_TO_HDATA(o, TypeName, member) ((TypeName *)&(o->member))
+#define SYS_HDATA_F_CAST(o, TypeName, member) ((TypeName *)_sys_hdata_f_cast(o, offsetof(TypeName, member)))
+#define SYS_HDATA_B_CAST(o, TypeName, member) ((TypeName *)_sys_hdata_b_cast(o, offsetof(TypeName, member)))
+#define SYS_HDATA(o) _sys_hdata_cast_check((SysHData *)o)
+#define SYS_IS_HDATA(o) SYS_HDATA_CHECK((SysHData *)o)
 
 struct _SysHData {
   SysUInt check;
 };
 
-SysHData* _sys_hdata_cast_to(SysHData *self, SysInt offsize);
+SysPointer _sys_hdata_b_cast(SysPointer self, SysInt offsize);
+SysPointer _sys_hdata_f_cast(SysPointer self, SysInt offsize);
+SysHData* _sys_hdata_cast_check(SysHData *self);
 void sys_hdata_init(SysHData *self);
 
 SYS_END_DECLS

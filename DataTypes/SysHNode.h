@@ -10,10 +10,7 @@ SYS_BEGIN_DECLS
      ((SysHNode*) (hnode))->next == NULL)
 
 #define SYS_HNODE_IS_LEAF(hnode) (((SysHNode*) (hnode))->children == NULL)
-
-#define SYS_HNODE_CAST_TO(o, TypeName, member) SYS_HDATA_CAST_TO(o, TypeName, member)
-#define SYS_HNODE(o) SYS_HDATA(o, SysHNode)
-#define SYS_HNODE_CHECK(o) SYS_HDATA_CHECK((SysHData *)o)
+#define SYS_HNODE(o) ((SysHNode *)SYS_HDATA(o))
 
 typedef struct _SysHNode  SysHNode;
 
