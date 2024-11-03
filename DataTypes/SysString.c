@@ -66,10 +66,10 @@ SysString * sys_string_sized_new (SysSize dfl_size) {
 SysString * sys_string_new (const SysChar *init) {
   SysString *string;
 
-  if (init == NULL || *init == '\0')
+  if (init == NULL || *init == '\0') {
     string = sys_string_sized_new (2);
-  else
-  {
+
+  } else {
     SysInt len;
 
     len = strlen (init);
@@ -394,17 +394,23 @@ SysString *sys_string_insert_len (SysString     *string,
   sys_return_val_if_fail (string != NULL, NULL);
   sys_return_val_if_fail (len == 0 || val != NULL, string);
 
-  if (len == 0)
-    return string;
+  if (len == 0) {
 
-  if (len < 0)
+    return string;
+  }
+
+  if (len < 0) {
+
     len = strlen (val);
+  }
   len_unsigned = len;
 
-  if (pos < 0)
+  if (pos < 0) {
+
     pos_unsigned = string->len;
-  else
-  {
+
+  } else {
+
     pos_unsigned = pos;
     sys_return_val_if_fail (pos_unsigned <= string->len, string);
   }
@@ -424,9 +430,11 @@ SysString *sys_string_insert_len (SysString     *string,
     /* At this point, val is valid again.  */
 
     /* Open up space where we are going to insert.  */
-    if (pos_unsigned < string->len)
+    if (pos_unsigned < string->len) {
+
       memmove (string->str + pos_unsigned + len_unsigned,
           string->str + pos_unsigned, string->len - pos_unsigned);
+    }
 
     /* Move the source part before the gap, if any.  */
     if (offset < pos_unsigned)
@@ -438,33 +446,33 @@ SysString *sys_string_insert_len (SysString     *string,
     /* Move the source part after the gap, if any.  */
     if (len_unsigned > precount)
     {
-      memcpy (string->str + pos_unsigned + precount,
+      sys_memcpy (string->str + pos_unsigned + precount,
+          string->allocated_len,
           val + /* Already moved: */ precount +
           /* Space opened up: */ len_unsigned,
           len_unsigned - precount);
     }
-  }
-  else
-  {
+
+  } else {
     sys_string_maybe_expand (string, len_unsigned);
 
     /* If we aren't appending at the end, move a hunk
      * of the old string to the end, opening up space
      */
-    if (pos_unsigned < string->len)
-    {
+    if (pos_unsigned < string->len) {
+
       memmove (string->str + pos_unsigned + len_unsigned,
           string->str + pos_unsigned, string->len - pos_unsigned);
     }
 
     /* insert the new string */
-    if (len_unsigned == 1)
-    {
+    if (len_unsigned == 1) {
+
       string->str[pos_unsigned] = *val;
-    }
-    else
-    {
-      memcpy (string->str + pos_unsigned, val, len_unsigned);
+
+    } else {
+
+      sys_memcpy (string->str + pos_unsigned, string->allocated_len, val, len_unsigned);
     }
   }
 

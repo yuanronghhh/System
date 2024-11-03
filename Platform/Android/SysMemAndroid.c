@@ -1,12 +1,12 @@
 #include <System/Platform/Common/SysMemPrivate.h>
+#include <System/Utils/SysError.h>
 
 void sys_real_memcpy(
     void*       const dst,
     SysSize     const dst_size,
     void const* const src,
     SysSize     const src_size) {
-
-  UNUSED(dst_size);
+  sys_return_if_fail(src_size > dst_size);
 
   memcpy(dst, src, src_size);
 }
