@@ -15,7 +15,7 @@ SYS_BEGIN_DECLS
 typedef struct _SysHSList SysHSList;
 
 struct _SysHSList {
-  SysInt check;
+  SysHData unowned;
   SysHSList *next;
 };
 

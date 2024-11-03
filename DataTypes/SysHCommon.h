@@ -15,7 +15,7 @@ struct _SysHData {
   SysUInt check;
 };
 
-SysPointer _sys_hdata_cast_to(SysHData *self, SysInt offsize);
+SysHData* _sys_hdata_cast_to(SysHData *self, SysInt offsize);
 void sys_hdata_init(SysHData *self);
 
 SYS_END_DECLS
