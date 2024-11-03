@@ -11,9 +11,9 @@ SYS_BEGIN_DECLS
 
 #define SYS_HNODE_IS_LEAF(hnode) (((SysHNode*) (hnode))->children == NULL)
 
-#define SYS_HNODE_CAST_TO(o, TypeName, member) SYS_HDATA_CAST_TO(o, TypeName, member)
+#define SYS_HNODE_CAST_TO(o, TypeName, member) (TypeName *)_sys_hnode_cast_to(o, offsetof(TypeName, member))
 #define SYS_HNODE(o) SYS_HDATA(o, SysHNode)
-#define SYS_HNODE_CHECK(o) SYS_HDATA_CHECK(o)
+#define SYS_HNODE_CHECK(o) SYS_HDATA_CHECK((SysHData *)o)
 
 typedef struct _SysHNode  SysHNode;
 
@@ -23,8 +23,8 @@ typedef void  (*SysHNodeForeachFunc) (SysHNode        *hnode,
        SysPointer user_data);
 typedef SysBool (*SysHNodeFunc) (SysHNode* node, SysPointer user_data);
 
-struct _SysHNode
-{
+struct _SysHNode {
+  SysHData unowned;
   SysHNode   *next;
   SysHNode   *prev;
   SysHNode   *parent;
@@ -32,9 +32,9 @@ struct _SysHNode
 
   /* <private> */
   SysHNode   *last_child;
-  SysUInt check;
 };
 
+SYS_API SysPointer _sys_hnode_cast_to(SysHNode *self, SysInt offsize);
 SYS_API SysBool sys_hnode_has_one_child(SysHNode *self);
 SYS_API SysHNode*  sys_hnode_new  (void);
 SYS_API void  sys_hnode_destroy  (SysHNode    *root);

@@ -10,7 +10,7 @@ SysHNode* sys_hnode_new (void) {
 }
 
 void sys_hnode_init(SysHNode* node) {
-  node->check = SYS_HDATA_CHECK_VALUE;
+  sys_hdata_init(&node->unowned);
   node->children = NULL;
   node->last_child = NULL;
   node->parent = NULL;
@@ -777,4 +777,3 @@ SysBool sys_hnode_has_one_child(SysHNode *self) {
 
   return self->children != NULL && self->next == NULL;
 }
-

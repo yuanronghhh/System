@@ -178,6 +178,7 @@ typedef struct _TimeZoneRule TimeZoneRule;
 typedef struct _SysTimeZone SysTimeZone;
 typedef struct _TimeZoneDate TimeZoneDate;
 
+typedef struct _SysHData SysHData;
 typedef struct _SysString         SysString;
 typedef struct _SysPtrArray SysPtrArray;
 typedef struct _SysArray SysArray;
