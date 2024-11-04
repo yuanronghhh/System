@@ -44,6 +44,7 @@ SYS_API SysDouble sys_rand_double(void);
 SYS_API SysDouble sys_rand_double_range(SysDouble begin, SysDouble end);
 SYS_API SysChar **sys_backtrace_string(SysInt *size);
 SYS_API SysInt64 sys_get_real_time (void);
+SYS_API SysChar * sys_os_getlocale (void);
 
 SYS_API void sys_arg_init(SysSArg *self, SysInt argc, const SysChar* argv[]);
 SYS_API SysInt sys_arg_index(SysSArg *self, const SysChar *key, SysBool is_flag);

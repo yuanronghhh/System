@@ -29,7 +29,7 @@ SysChar *sys_strchug (SysChar *string)
 SysBool sys_str_trim_end(SysChar *string, const SysChar c) {
   sys_return_val_if_fail (string != NULL, NULL);
 
-  SysChar * p = rindex(string, c);
+  SysChar * p = strrchr(string, c);
   if(!p) { return false;}
   *p = '\0';
 
@@ -835,4 +835,24 @@ int sys_ascii_xdigit_value (SysChar c) {
     return c - 'a' + 10;
 
   return sys_ascii_digit_value (c);
+}
+
+SysInt sys_ascii_strcasecmp (
+    const SysChar *s1,
+    const SysChar *s2) {
+  SysInt c1, c2;
+
+  sys_return_val_if_fail (s1 != NULL, 0);
+  sys_return_val_if_fail (s2 != NULL, 0);
+
+  while (*s1 && *s2) {
+
+      c1 = (SysInt)(SysUChar) tolower (*s1);
+      c2 = (SysInt)(SysUChar) tolower (*s2);
+      if (c1 != c2)
+        return (c1 - c2);
+      s1++; s2++;
+    }
+
+  return (((SysInt)(SysUChar) *s1) - ((SysInt)(SysUChar) *s2));
 }

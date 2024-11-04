@@ -1329,7 +1329,7 @@ SysChar * sys_filename_from_uri (const SysChar *uri,
    * or "file://host/c|/foo" (some Netscape versions). In those cases, start
    * the filename from the drive letter.
    */
-  if (sys_ascii_isalpha (filename[1]))
+  if (isalpha (filename[1]))
   {
     if (filename[2] == ':')
       offs = 1;
@@ -1541,20 +1541,20 @@ SysChar * sys_filename_display_name (const SysChar *filename) {
 
 /* Binary compatibility versions. Not for newly compiled code. */
 
-_GLIB_EXTERN SysChar *sys_filename_to_utf8_utf8   (const SysChar  *opsysstring,
+SYS_API SysChar *sys_filename_to_utf8_utf8   (const SysChar  *opsysstring,
     SysSize        len,
     SysSize        *bytes_read,
     SysSize        *bytes_written,
     SysError      **error) SYS_GNUC_MALLOC;
-_GLIB_EXTERN SysChar *sys_filename_from_utf8_utf8 (const SysChar  *utf8string,
+SYS_API SysChar *sys_filename_from_utf8_utf8 (const SysChar  *utf8string,
     SysSize        len,
     SysSize        *bytes_read,
     SysSize        *bytes_written,
     SysError      **error) SYS_GNUC_MALLOC;
-_GLIB_EXTERN SysChar *sys_filename_from_uri_utf8  (const SysChar  *uri,
+SYS_API SysChar *sys_filename_from_uri_utf8  (const SysChar  *uri,
     SysChar       **hostname,
     SysError      **error) SYS_GNUC_MALLOC;
-_GLIB_EXTERN SysChar *sys_filename_to_uri_utf8    (const SysChar  *filename,
+SYS_API SysChar *sys_filename_to_uri_utf8    (const SysChar  *filename,
     const SysChar  *hostname,
     SysError      **error) SYS_GNUC_MALLOC;
 
@@ -1568,8 +1568,7 @@ sys_filename_to_utf8_utf8 (const SysChar *opsysstring,
   return sys_filename_to_utf8 (opsysstring, len, bytes_read, bytes_written, error);
 }
 
-  SysChar *
-sys_filename_from_utf8_utf8 (const SysChar *utf8string,
+SysChar * sys_filename_from_utf8_utf8 (const SysChar *utf8string,
     SysSize       len,
     SysSize       *bytes_read,
     SysSize       *bytes_written,
@@ -1585,8 +1584,7 @@ SysChar * sys_filename_from_uri_utf8 (const SysChar *uri,
   return sys_filename_from_uri (uri, hostname, error);
 }
 
-  SysChar *
-sys_filename_to_uri_utf8 (const SysChar *filename,
+SysChar * sys_filename_to_uri_utf8 (const SysChar *filename,
     const SysChar *hostname,
     SysError     **error)
 {

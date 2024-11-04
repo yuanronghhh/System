@@ -1,5 +1,6 @@
 #include <System/Platform/Common/SysOsPrivate.h>
 #include <System/Utils/SysStr.h>
+#include <System/Utils/SysUtf8.h>
 #include <System/DataTypes/SysArray.h>
 #include <System/Platform/Common/SysThread.h>
 
@@ -267,6 +268,89 @@ SysInt64 sys_get_real_time (void)
   return time64;
 }
 
+SysChar * sys_os_getlocale (void) {
+  SysChar *result;
+  LCID lcid;
+  LANGID langid;
+  const SysChar *ev;
+  SysInt primary, sub;
+  WCHAR iso639[10];
+  SysChar *iso639_utf8;
+  WCHAR iso3166[10];
+  SysChar *iso3166_utf8;
+  const SysChar *script = NULL;
+
+  /* Let the user override the system settings through environment
+   * variables, as on POSIX systems. Note that in GTK applications
+   * since GTK 2.10.7 setting either LC_ALL or LANG also sets the
+   * Win32 locale and C library locale through code in gtkmain.c.
+   */
+  if (((ev = sys_env_get ("LC_ALL")) != NULL && ev[0] != '\0')
+      || ((ev = sys_env_get ("LC_MESSAGES")) != NULL && ev[0] != '\0')
+      || ((ev = sys_env_get ("LANG")) != NULL && ev[0] != '\0'))
+    return sys_strdup (ev);
+
+  lcid = GetThreadLocale ();
+
+  if (!GetLocaleInfoW (lcid, LOCALE_SISO639LANGNAME, iso639, sizeof (iso639)) ||
+      !GetLocaleInfoW (lcid, LOCALE_SISO3166CTRYNAME, iso3166, sizeof (iso3166)))
+    return sys_strdup ("C");
+  
+  /* Strip off the sorting rules, keep only the language part.  */
+  langid = LANGIDFROMLCID (lcid);
+
+  /* Split into language and territory part.  */
+  primary = PRIMARYLANGID (langid);
+  sub = SUBLANGID (langid);
+
+  /* Handle special cases */
+  switch (primary)
+    {
+    case LANG_AZERI:
+      switch (sub)
+        {
+        case SUBLANG_AZERI_LATIN:
+          script = "@Latn";
+          break;
+        case SUBLANG_AZERI_CYRILLIC:
+          script = "@Cyrl";
+          break;
+        }
+      break;
+    case LANG_SERBIAN:                /* LANG_CROATIAN == LANG_SERBIAN */
+      switch (sub)
+        {
+        case SUBLANG_SERBIAN_LATIN:
+        case 0x06: /* Serbian (Latin) - Bosnia and Herzegovina */
+          script = "@Latn";
+          break;
+        }
+      break;
+    case LANG_UZBEK:
+      switch (sub)
+        {
+        case SUBLANG_UZBEK_LATIN:
+          script = "@Latn";
+          break;
+        case SUBLANG_UZBEK_CYRILLIC:
+          script = "@Cyrl";
+          break;
+        }
+      break;
+    }
+
+  iso639_utf8 = sys_utf16_to_utf8 (iso639, -1, NULL, NULL, NULL);
+  iso3166_utf8 = sys_utf16_to_utf8 (iso3166, -1, NULL, NULL, NULL);
+
+  result = sys_strconcat (iso639_utf8, "_", iso3166_utf8, script, NULL);
+
+  sys_free (iso3166_utf8);
+  sys_free (iso639_utf8);
+
+  return result;
+}
+
+
 void sys_real_setup(void) {
   WSADATA info;
   if (WSAStartup(MAKEWORD(1, 1), &info) != 0) {
@@ -277,5 +361,3 @@ void sys_real_setup(void) {
 void sys_real_teardown(void) {
   WSACleanup();
 }
-
-

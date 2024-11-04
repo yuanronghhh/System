@@ -1,5 +1,6 @@
 #include <System/Platform/Common/SysFile.h>
 #include <System/Utils/SysPath.h>
+#include <System/Utils/SysUtf8.h>
 
 typedef struct _REPARSE_DATA_BUFFER
 {
@@ -758,7 +759,7 @@ _sys_win32_stat_utf8 (const SysChar       *filename,
       (sys_path_is_absolute (filename) && len <= (SysSize) (sys_path_skip_root (filename) - filename)))
     len = strlen (filename);
 
-  wfilename = sys_utf8_to_utf16 (filename, NULL);
+  wfilename = sys_utf8_to_utf16 (filename, len, NULL, NULL, NULL);
 
   if (wfilename == NULL)
     {

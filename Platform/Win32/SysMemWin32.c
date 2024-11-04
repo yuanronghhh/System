@@ -33,7 +33,7 @@ SysSize sys_real_get_msize(void* block) {
 }
 
 void sys_real_leaks_init(void) {
-#if USE_DEBUGGER
+#if USE_VLD
   VLDSetOptions(VLD_OPT_SKIP_CRTSTARTUP_LEAKS
       | VLD_OPT_AGGREGATE_DUPLICATES
       | VLD_OPT_MODULE_LIST_INCLUDE
@@ -43,7 +43,7 @@ void sys_real_leaks_init(void) {
 }
 
 void sys_real_leaks_report(void) {
-#if USE_DEBUGGER
+#if USE_VLD
   wchar_t *wname;
   SysInt size;
   const SysChar *leakfile;

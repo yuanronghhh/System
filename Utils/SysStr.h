@@ -69,6 +69,9 @@ SYS_API SysChar * sys_strrstr (const SysChar *haystack,
 
 SYS_API int sys_ascii_xdigit_value (SysChar c);
 SYS_API int sys_ascii_digit_value (SysChar c);
+SYS_API SysInt sys_ascii_strcasecmp (
+    const SysChar *s1,
+    const SysChar *s2);
 
 SYS_END_DECLS
 

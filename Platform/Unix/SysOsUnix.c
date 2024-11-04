@@ -121,3 +121,9 @@ SysInt64 sys_get_real_time (void) {
 
   return (((SysInt64) r.tv_sec) * 1000000) + r.tv_usec;
 }
+
+SysChar * sys_os_getlocale (void) {
+  sys_warning_N("%s", "not implemented");
+
+  return NULL;
+}

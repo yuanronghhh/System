@@ -970,12 +970,11 @@ err_out:
  *     This value must be freed with sys_free(). If an error occurs,
  *     %NULL will be returned and @error set.
  **/
-  SysChar * sys_utf16_to_utf8 (const SysUniChar2  *str,
-               SysLong             len,
-               SysLong            *items_read,
-               SysLong            *items_written,
-               SysError          **error)
-{
+SysChar * sys_utf16_to_utf8 (const SysUniChar2  *str,
+    SysLong             len,
+    SysLong            *items_read,
+    SysLong            *items_written,
+    SysError          **error) {
   /* This function and sys_utf16_to_ucs4 are almost exactly identical -
    * The lines that differ are marked.
    */
@@ -1251,13 +1250,11 @@ err_out:
  *     This value must be freed with sys_free(). If an error occurs,
  *     %NULL will be returned and @error set.
  */
-  SysUniChar2 *
-               sys_utf8_to_utf16 (const SysChar *str,
-                   SysLong        len,
-                   SysLong       *items_read,
-                   SysLong       *items_written,
-                   SysError     **error)
-{
+SysUniChar2 * sys_utf8_to_utf16 (const SysChar *str,
+    SysLong        len,
+    SysLong       *items_read,
+    SysLong       *items_written,
+    SysError     **error) {
   SysUniChar2 *result = NULL;
   SysInt n16;
   const SysChar *in;

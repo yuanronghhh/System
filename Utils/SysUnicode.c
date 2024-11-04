@@ -698,7 +698,7 @@ sys_unichar_type (SysUniChar c)
 LocaleType sys_unicode_get_locale_type (void)
 {
 #ifdef SYS_OS_WIN32
-  char *tem = sys_win32_getlocale ();
+  char *tem = sys_os_getlocale ();
   char locale[2];
 
   locale[0] = tem[0];
