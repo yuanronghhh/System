@@ -119,12 +119,95 @@ void sys_fcloseall(void) {
   _fcloseall();
 }
 
+static int sys_win32_readlink_utf8 (const SysChar  *filename,
+                       SysChar        *buf,
+                       SysSize         buf_size,
+                       SysChar       **alloc_buf,
+                       SysBool      terminate) {
+  wchar_t *wfilename;
+  int result;
+  wchar_t *buf_utf16;
+  SysLong tmp_len;
+  SysChar *tmp;
+
+  sys_return_val_if_fail ((buf != NULL || alloc_buf != NULL) &&
+                        (buf == NULL || alloc_buf == NULL),
+                        -1);
+
+  wfilename = sys_utf8_to_utf16 (filename, -1, NULL, NULL, NULL);
+
+  if (wfilename == NULL)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+
+  result = _sys_win32_readlink_utf16_handle (wfilename, NULL, NULL,
+                                           NULL, 0, &buf_utf16, terminate);
+
+  sys_free (wfilename);
+
+  if (result <= 0)
+    return result;
+
+  tmp = sys_utf16_to_utf8 (buf_utf16,
+                         result / sizeof (SysUniChar2),
+                         NULL,
+                         &tmp_len,
+                         NULL);
+
+  sys_free (buf_utf16);
+
+  if (tmp == NULL)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+
+  if (alloc_buf)
+    {
+      *alloc_buf = tmp;
+      return tmp_len;
+    }
+
+  if ((SysSize) tmp_len > buf_size)
+    tmp_len = buf_size;
+
+  memcpy (buf, tmp, tmp_len);
+  sys_free (tmp);
+
+  return tmp_len;
+}
+
+
 SysChar *sys_file_read_link(const SysChar  *filename, SysError **error) {
   sys_return_val_if_fail(filename == NULL, NULL);
 
-  sys_warning_N("%s", "not implements");
+  SysChar *buffer;
+  SysSize read_size;
 
-  return NULL;
+  sys_return_val_if_fail (filename != NULL, NULL);
+  sys_return_val_if_fail (error == NULL || *error == NULL, NULL);
+
+  read_size = sys_win32_readlink_utf8 (filename, NULL, 0, &buffer, true);
+  if (read_size < 0) {
+
+    int saved_errno = errno;
+    if (error)
+      set_file_error (error,
+          filename,
+          SYS_("Failed to read the symbolic link “%s”: %s"),
+          saved_errno);
+    return NULL;
+
+  } else if (read_size == 0) {
+
+    return strdup ("");
+
+  } else {
+
+    return buffer;
+  }
 }
 
 SysBool sys_file_state_get_by_filename(const SysChar *filename, SysFileState* state) {
@@ -243,7 +326,7 @@ _sys_win32_copy_and_maybe_terminate (const SysUChar *data,
   else
     {
       /* Note that SubstituteNameLength is USHORT, so to_copy + 2, being
-       * gsize, never overflows.
+       * SysSize, never overflows.
        */
       *alloc_buf = sys_malloc (to_copy + extra_bytes);
       memcpy (*alloc_buf, data, to_copy);
@@ -301,8 +384,7 @@ _sys_win32_readlink_handle_raw (HANDLE      h,
                               SysUniChar2  *buf,
                               SysSize       buf_size,
                               SysUniChar2 **alloc_buf,
-                              SysBool    terminate)
-{
+                              SysBool    terminate) {
   DWORD error_code;
   DWORD returned_bytes = 0;
   BYTE *data = NULL;
@@ -358,14 +440,12 @@ _sys_win32_readlink_handle_raw (HANDLE      h,
   return _sys_win32_copy_and_maybe_terminate (data, to_copy, buf, buf_size, alloc_buf, terminate);
 }
 
-static int
-_sys_win32_readlink_utf16_raw (const SysUniChar2  *filename,
+static int _sys_win32_readlink_utf16_raw (const SysUniChar2  *filename,
                              DWORD            *reparse_tag,
                              SysUniChar2        *buf,
                              SysSize             buf_size,
                              SysUniChar2       **alloc_buf,
-                             SysBool          terminate)
-{
+                             SysBool          terminate) {
   HANDLE h;
   DWORD attributes;
   DWORD to_copy;
@@ -421,7 +501,7 @@ static SysBool _sys_win32_strip_extended_ntobjm_prefix (SysUniChar2 *str,
   const SysSize    ntobjm_prefix_len = wcslen (ntobjm_prefix);
   const SysSize    ntobjm_prefix_len_bytes = sizeof (SysUniChar2) * ntobjm_prefix_len;
   const SysSize    ntobjm_prefix_with_drive_len_bytes = sizeof (SysUniChar2) * (ntobjm_prefix_len + 2);
-  SysBool do_move = FALSE;
+  SysBool do_move = false;
   SysSize move_shift = 0;
 
   if ((*str_size) * sizeof (SysUniChar2) > extended_prefix_with_drive_len_bytes &&
@@ -432,7 +512,7 @@ static SysBool _sys_win32_strip_extended_ntobjm_prefix (SysUniChar2 *str,
       iswalpha (str[extended_prefix_len]) &&
       str[extended_prefix_len + 1] == L':')
    {
-     do_move = TRUE;
+     do_move = true;
      move_shift = extended_prefix_len;
    }
   else if ((*str_size) * sizeof (SysUniChar2) > ntobjm_prefix_with_drive_len_bytes &&
@@ -443,7 +523,7 @@ static SysBool _sys_win32_strip_extended_ntobjm_prefix (SysUniChar2 *str,
            iswalpha (str[ntobjm_prefix_len]) &&
            str[ntobjm_prefix_len + 1] == L':')
     {
-      do_move = TRUE;
+      do_move = true;
       move_shift = ntobjm_prefix_len;
     }
 
@@ -459,15 +539,13 @@ static SysBool _sys_win32_strip_extended_ntobjm_prefix (SysUniChar2 *str,
 }
 
 
-static int
-_sys_win32_readlink_utf16_handle (const SysUniChar2  *filename,
+static int _sys_win32_readlink_utf16_handle (const SysUniChar2  *filename,
                                 HANDLE            file_handle,
                                 DWORD            *reparse_tag,
                                 SysUniChar2        *buf,
                                 SysSize             buf_size,
                                 SysUniChar2       **alloc_buf,
-                                SysBool          terminate)
-{
+                                SysBool          terminate) {
   int   result;
   SysSize string_size;
 
@@ -581,7 +659,7 @@ _sys_win32_fill_statbuf_from_handle_info (const wchar_t                    *file
           dot = last_dot;
           name = &last_dot[1];
         }
-      while (TRUE);
+      while (true);
 
       if ((dot != NULL &&
           (wcsicmp (dot, L".exe") == 0 ||
@@ -636,7 +714,7 @@ static int _sys_win32_stat_utf16_no_trailing_slashes (const SysUniChar2    *file
   struct __stat64 statbuf;
   BY_HANDLE_FILE_INFORMATION handle_info;
   FILE_STANDARD_INFO std_info;
-  SysBool is_symlink = FALSE;
+  SysBool is_symlink = false;
   wchar_t *filename_target = NULL;
   DWORD immediate_attributes;
   DWORD open_flags;
@@ -712,7 +790,7 @@ static int _sys_win32_stat_utf16_no_trailing_slashes (const SysUniChar2    *file
                                       &reparse_tag,
                                       NULL, 0,
                                       for_symlink ? NULL : &filename_target,
-                                      TRUE) < 0)
+                                      true) < 0)
     {
       CloseHandle (file_handle);
       return -1;
@@ -801,3 +879,4 @@ SysInt sys_lstat(const SysChar *filename, struct stat * buf) {
 
   return retval;
 }
+

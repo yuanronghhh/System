@@ -71,6 +71,7 @@ def rename_glib(file):
             .replace("GLIB_", "SYS_")\
             .replace("G_UNICHAR_", "SYS_UNICHAR_")\
             .replace("g_filename", "sys_filename")\
+            .replace("_g_win32", "_sys_win32")\
             .replace("GUINT_TO_POINTER", "UINT_TO_POINTER")\
             .replace("\t", "        ")\
             .replace("g_error", "sys_error")\

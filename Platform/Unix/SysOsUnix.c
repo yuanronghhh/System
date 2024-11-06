@@ -1,4 +1,5 @@
 #include <System/Utils/SysError.h>
+#include <System/Utils/SysStr.h>
 #include <System/Platform/Common/SysOsPrivate.h>
 
 // static SysInt dev_null = -1;
@@ -123,7 +124,7 @@ SysInt64 sys_get_real_time (void) {
 }
 
 SysChar * sys_os_getlocale (void) {
-  sys_warning_N("%s", "not implemented");
+  const char *locale = setlocale (LC_CTYPE, NULL);
 
-  return NULL;
+  return sys_strdup(locale);
 }
