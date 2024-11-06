@@ -83,6 +83,7 @@ SYS_API const SysChar* sys_strerror(SysInt errnum);
 SysBool sys_error_matches (const SysError *error,
                  SysQuark        domain,
                  SysInt          code);
+SysChar *sys_error_message(SysInt err);
 
 void sys_error_setup(void);
 void sys_error_teardown(void);

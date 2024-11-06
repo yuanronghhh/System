@@ -15,7 +15,7 @@ set(INC_SYS
   ${PTHREAD_INCLUDE_DIRS}
   ${VLD_INCLUDE_DIRS}
   ${OPENSSL_INCLUDE_DIRS}
-  ${LIBICONV_INCLUDE_DIRS}
+  ${ICONV_INCLUDE_DIRS}
 )
 
 set(ANDROID_SYS_SRC
@@ -206,6 +206,7 @@ set(SRC
   ./Fundamental/SysCommonCore.h
   ./Fundamental/SysCommon.h
   ./Fundamental/SysCommon.c
+  ./Fundamental/SysCommonBase.h
   ./Fundamental/SysCommonTypes.h
 
   ./SysConfig.h
@@ -227,6 +228,6 @@ target_link_libraries(System
   ${DBG_LIBRAREIS}
   ${VLD_LIBRARIES}
   ${ANDROID_LIBRARIES}
-  ${LIBICONV_LIBRARIES}
+  ${ICONV_LIBRARIES}
 )
 set_property(TARGET System PROPERTY FOLDER CstProject)

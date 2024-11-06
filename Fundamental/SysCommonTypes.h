@@ -1,6 +1,8 @@
 #ifndef __SYS_COMMON_TYPES_H__
 #define __SYS_COMMON_TYPES_H__
 
+#include <System/Fundamental/SysCommonBase.h>
+
 #define SYSINT64_CONSTANT(val)    (val##L)
 #define SYSUINT64_CONSTANT(val)    (val##UL)
 

@@ -58,6 +58,15 @@ struct _SysWin32PrivateStat
   SysTimeSpec st_mtim;
 };
 
+
+static int _sys_win32_readlink_utf16_handle (const SysUniChar2  *filename,
+                                HANDLE            file_handle,
+                                DWORD            *reparse_tag,
+                                SysUniChar2        *buf,
+                                SysSize             buf_size,
+                                SysUniChar2       **alloc_buf,
+                                SysBool          terminate);
+
 static SysChar exepath[MAX_PATH];
 
 FILE *sys_fopen(const SysChar *filename, const SysChar * mode) {
@@ -194,15 +203,15 @@ SysChar *sys_file_read_link(const SysChar  *filename, SysError **error) {
 
     int saved_errno = errno;
     if (error)
-      set_file_error (error,
-          filename,
+      sys_error_set_N (error,
           SYS_("Failed to read the symbolic link “%s”: %s"),
+          filename,
           saved_errno);
     return NULL;
 
   } else if (read_size == 0) {
 
-    return strdup ("");
+    return sys_strdup ("");
 
   } else {
 

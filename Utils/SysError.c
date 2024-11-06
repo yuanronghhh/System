@@ -228,6 +228,11 @@ const SysChar* sys_strerror(SysInt errnum) {
   return sys_real_strerr(errnum);
 }
 
+SysChar *sys_error_message(SysInt err) {
+
+  return sys_error_real_message(err);
+}
+
 SysBool sys_error_matches (const SysError *error,
                  SysQuark        domain,
                  SysInt          code) {

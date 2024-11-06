@@ -6,6 +6,7 @@
 #include <System/DataTypes/SysArray.h>
 #include <System/DataTypes/SysBytes.h>
 #include <System/DataTypes/SysHashTable.h>
+#include <System/Utils/SysUtf8.h>
 #include <System/Utils/SysStr.h>
 #include <System/Utils/SysPath.h>
 
@@ -1207,7 +1208,7 @@ windows_default_tzname (void)
               key_name = NULL;
             }
           else
-            key_name = sys_utf16_to_utf8 (key_name_w, NULL);
+            key_name = sys_utf16_to_utf8 (key_name_w, -1, NULL, NULL, NULL);
         }
       RegCloseKey (key);
     }
@@ -1288,12 +1289,12 @@ rules_from_windows_time_zone (const SysChar   *identifier,
     return 0;
 
   subkey = sys_strlcat (resys_key, sizeof(resys_key), key_name);
-  subkey_w = sys_utf8_to_utf16 (subkey, NULL);
+  subkey_w = sys_utf8_to_utf16 (subkey, -1, NULL, NULL, NULL);
   if (subkey_w == NULL)
     goto utf16_conv_failed;
 
   subkey_dynamic = sys_strlcat (subkey, sizeof(resys_key), "\\Dynamic DST");
-  subkey_dynamic_w = sys_utf8_to_utf16 (subkey_dynamic, NULL);
+  subkey_dynamic_w = sys_utf8_to_utf16 (subkey_dynamic, -1, NULL, NULL, NULL);
   if (subkey_dynamic_w == NULL)
     goto utf16_conv_failed;
 

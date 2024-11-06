@@ -357,10 +357,10 @@ sys_get_console_charset (const char **charset)
         }
       else if (GetLastError () != ERROR_INVALID_HANDLE)
         {
-          SysChar *emsg = sys_win32_error_message (GetLastError ());
+          SysChar *emsg = sys_error_message (GetLastError ());
           sys_warning_N ("Failed to determine console output code page: %s. "
                      "Falling back to UTF-8", emsg);
-          sys_free (emsg);
+          sys_free(emsg);
         }
     }
   /* fall-back to UTF-8 if the rest failed (it's a universal default) */

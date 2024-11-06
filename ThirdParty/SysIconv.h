@@ -1,7 +1,7 @@
 #ifndef __SYS_ICONV_H__
 #define __SYS_ICONV_H__
 
-#include <System/Fundamental/SysCommon.h>
+#include <System/Fundamental/SysCommonBase.h>
 
 SYS_BEGIN_DECLS
 

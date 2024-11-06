@@ -4,5 +4,6 @@
 #include <System/Utils/SysError.h>
 
 const SysChar* sys_real_strerr(SysInt errnum);
+SysChar * sys_error_real_message (SysInt error);
 
 #endif
