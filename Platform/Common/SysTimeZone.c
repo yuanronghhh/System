@@ -324,7 +324,7 @@ zone_for_constant_offset(SysTimeZone* gtz, const SysChar* name)
   gtz->transitions = NULL;
 }
 
-#if defined(G_OS_UNIX) && defined(__sun) && defined(__SVR4)
+#if defined(SYS_OS_UNIX) && defined(__sun) && defined(__SVR4)
 /*
  * only used by Illumos distros or Solaris < 11: parse the /etc/default/init
  * text file looking for TZ= followed by the timezone, possibly quoted
@@ -397,9 +397,9 @@ zone_identifier_illumos(void)
 static const SysChar*
 zone_info_base_dir(void)
 {
-  if (sys_file_test("/usr/share/zoneinfo", SYS_FILE_TEST_IS_DIR))
+  if (sys_file_is_dir("/usr/share/zoneinfo"))
     return "/usr/share/zoneinfo";     /* Most distros */
-  else if (sys_file_test("/usr/share/lib/zoneinfo", SYS_FILE_TEST_IS_DIR))
+  else if (sys_file_is_dir("/usr/share/lib/zoneinfo"))
     return "/usr/share/lib/zoneinfo"; /* Illumos distros */
 
   /* need a better fallback case */
@@ -422,9 +422,9 @@ zone_identifier_unix(void)
 
   if (resolved_identifier != NULL)
   {
-    if (!g_path_is_absolute(resolved_identifier))
+    if (!sys_path_is_absolute(resolved_identifier))
     {
-      SysChar* absolute_resolved_identifier = sys_build_filename("/etc", resolved_identifier, NULL);
+      SysChar* absolute_resolved_identifier = sys_path_build_filename("/etc", resolved_identifier, NULL);
       sys_free(resolved_identifier);
       resolved_identifier = sys_steal_pointer(&absolute_resolved_identifier);
     }
@@ -450,10 +450,8 @@ zone_identifier_unix(void)
   }
   else
   {
-    not_a_symlink_to_zoneinfo = sys_error_matches(read_link_err,
-      SYS_FILE_ERROR,
-      SYS_FILE_ERROR_INVAL);
-    sys_clear_error(&read_link_err);
+    not_a_symlink_to_zoneinfo = true;
+    sys_clear_pointer(&read_link_err, sys_error_free);
   }
 
   if (resolved_identifier == NULL)
@@ -489,7 +487,7 @@ zone_identifier_unix(void)
   else
   {
     /* Resolve relative path */
-    canonical_path = sys_canonicalize_filename(resolved_identifier, "/etc");
+    canonical_path = sys_path_canonicalize_filename(resolved_identifier, "/etc");
     sys_free(resolved_identifier);
     resolved_identifier = sys_steal_pointer(&canonical_path);
   }
@@ -499,7 +497,7 @@ zone_identifier_unix(void)
     tzdir = zone_info_base_dir();
 
   /* Strip the prefix and slashes if possible. */
-  if (sys_str_has_prefix(resolved_identifier, tzdir))
+  if (sys_str_startswith(resolved_identifier, tzdir))
   {
     prefix_len = strlen(tzdir);
     while (*(resolved_identifier + prefix_len) == '/')
@@ -543,7 +541,7 @@ zone_info_unix(const SysChar* identifier,
     if (sys_path_is_absolute(identifier))
       filename = sys_strdup(identifier);
     else
-      filename = sys_build_filename(tzdir, identifier, NULL);
+      filename = sys_path_build_filename(tzdir, identifier, NULL);
   }
   else
   {
@@ -677,7 +675,7 @@ init_zone_from_iana_info(SysTimeZone* gtz,
     {
       TransitionInfo t_info;
       TransitionInfo* footer_t_info
-        = &g_array_index(footertz->t_info, TransitionInfo, index);
+        = &sys_array_index(footertz->t_info, TransitionInfo, index);
       t_info.gmt_offset = footer_t_info->gmt_offset;
       t_info.is_dst = footer_t_info->is_dst;
       t_info.abbrev = sys_steal_pointer(&footer_t_info->abbrev);
@@ -689,7 +687,7 @@ init_zone_from_iana_info(SysTimeZone* gtz,
     for (index = 0; index < extra_time_count; index++)
     {
       Transition* footer_transition
-        = &g_array_index(footertz->transitions, Transition, index);
+        = &sys_array_index(footertz->transitions, Transition, index);
       if (time_count <= 0
         || last_explicit_transition_time < footer_transition->time)
       {
@@ -1743,7 +1741,7 @@ sys_time_zone_new_identifier(const SysChar* identifier)
     SYS_LOCK(tz_default);
 #ifdef SYS_OS_UNIX
     resolved_identifier = zone_identifier_unix();
-#elif defined (G_OS_WIN32)
+#elif defined (SYS_OS_WIN32)
     resolved_identifier = windows_default_tzname();
 #endif
     if (tz_default)
@@ -1788,7 +1786,7 @@ sys_time_zone_new_identifier(const SysChar* identifier)
       init_zone_from_iana_info(tz, zoneinfo, sys_steal_pointer(&resolved_identifier));
       sys_bytes_unref(zoneinfo);
     }
-#elif defined (G_OS_WIN32)
+#elif defined (SYS_OS_WIN32)
     if ((rules_num = rules_from_windows_time_zone(identifier,
       resolved_identifier,
       &rules)))
@@ -1799,7 +1797,7 @@ sys_time_zone_new_identifier(const SysChar* identifier)
 #endif
   }
 
-#if defined (G_OS_WIN32)
+#if defined (SYS_OS_WIN32)
   if (tz->t_info == NULL)
   {
     if (identifier == NULL)

@@ -2,6 +2,7 @@
 #include <System/Platform/Common/SysThread.h>
 #include <System/DataTypes/SysArray.h>
 #include <System/Utils/SysStr.h>
+#include <System/Utils/SysConvert.h>
 #include <System/Utils/SysUtf8.h>
 
 /**
@@ -2390,14 +2391,14 @@ sys_date_strftime (SysChar       *s,
 
   if (error)
     {
-      sys_warning_N (SYS_STRLOC "Error converting format to locale encoding: %s", error->message);
+      sys_warning_N ("Error converting format to locale encoding: %s", error->message);
       sys_error_free (error);
 
       s[0] = '\0';
       return 0;
     }
 
-  tmpbufsize = MAX (128, locale_format_len * 2);
+  tmpbufsize = max (128, locale_format_len * 2);
   while (true)
     {
       tmpbuf = sys_malloc (tmpbufsize);
@@ -2415,7 +2416,7 @@ sys_date_strftime (SysChar       *s,
 
           if (tmpbufsize > 65536)
             {
-              sys_warning_N (SYS_STRLOC "Maximum buffer size for sys_date_strftime exceeded: giving up");
+              sys_warning_N ("%s","Maximum buffer size for sys_date_strftime exceeded: giving up");
               sys_free (locale_format);
 
               s[0] = '\0';
@@ -2432,7 +2433,7 @@ sys_date_strftime (SysChar       *s,
 
   if (error)
     {
-      sys_warning_N (SYS_STRLOC "Error converting results of strftime to UTF-8: %s", error->message);
+      sys_warning_N ("Error converting results of strftime to UTF-8: %s", error->message);
       sys_error_free (error);
 
       sys_assert (convbuf == NULL);

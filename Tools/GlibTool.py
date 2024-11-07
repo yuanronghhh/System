@@ -70,6 +70,11 @@ def rename_glib(file):
     data = f.read()
     ndata = data\
             .replace("gmirror", "sysmirror")\
+            .replace("g_path_", "sys_path_")\
+            .replace("g_canonicalize_filename", "sys_path_canonicalize_filename")\
+            .replace("g_build_filename", "sys_path_build_filename")\
+            .replace("g_array_index", "sys_array_index")\
+            .replace("g_str_has_prefix", "sys_str_startswith")\
             .replace("G_OS_WIN32", "SYS_OS_WIN32")\
             .replace("GNormalizeMode", "SysNormalizeMode")\
             .replace("g_unicode_", "sys_unicode_")\
