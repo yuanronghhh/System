@@ -169,13 +169,13 @@ open_converter (const SysChar *to_codeset,
       if (error)
         {
           if (errno == EINVAL)
-            sys_error_set_N (error, "%s",
-                         SYS_("Conversion from character set “%s” to “%s” is not supported"),
-                         from_codeset, to_codeset);
+            sys_error_set_N (error, 
+                SYS_("Conversion from character set \"%s\" to \"%s\" is not supported"),
+                from_codeset, to_codeset);
           else
-            sys_error_set_N (error, "%s",
-                         SYS_("Could not open converter from “%s” to “%s”"),
-                         from_codeset, to_codeset);
+            sys_error_set_N (error,
+                SYS_("Could not open converter from \"%s\" to \"%s\""),
+                from_codeset, to_codeset);
         }
     }
   
@@ -521,8 +521,8 @@ sys_convert_with_fallback (const SysChar *str,
           {
             /* Error converting fallback string - fatal
             */
-            sys_error_set_N (error, "%s",
-                SYS_("Cannot convert fallback “%s” to codeset “%s”"),
+            sys_error_set_N (error,
+                SYS_("Cannot convert fallback “%s” to codeset \"%s\""),
                 insert_str, to_codeset);
             have_error = true;
             break;
@@ -1119,7 +1119,7 @@ sys_unescape_uri_string (const char *escaped,
     return NULL;
 
   if (len < 0)
-    len = strlen (escaped);
+    len = (SysInt)strlen (escaped);
 
   result = sys_malloc (len + 1);
 
@@ -1256,8 +1256,8 @@ SysChar * sys_filename_from_uri (const SysChar *uri,
 
   if (strchr (path_part, '#') != NULL)
   {
-    sys_error_set_N (error, "%s",
-        SYS_("The local file URI “%s” may not include a “#”"),
+    sys_error_set_N (error,
+        SYS_("The local file URI “%s” may not include a \"#\""),
         uri);
     return NULL;
   }
@@ -1279,7 +1279,7 @@ SysChar * sys_filename_from_uri (const SysChar *uri,
       return NULL;
     }
 
-    unescaped_hostname = sys_unescape_uri_string (host_part, path_part - host_part, "", true);
+    unescaped_hostname = sys_unescape_uri_string (host_part, (SysInt)(path_part - host_part), "", true);
 
     if (unescaped_hostname == NULL ||
         !hostname_validate (unescaped_hostname))

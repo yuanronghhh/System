@@ -1,5 +1,8 @@
 #include <System/Platform/Common/SysDate.h>
 #include <System/Platform/Common/SysThread.h>
+#include <System/DataTypes/SysArray.h>
+#include <System/Utils/SysStr.h>
+#include <System/Utils/SysUtf8.h>
 
 /**
  * this code from glib Thread
@@ -343,8 +346,8 @@ sys_date_update_dmy (const SysDate *const_d)
   
 #ifdef SYS_ENABLE_DEBUG
   if (!sys_date_valid_dmy (day, m, y)) 
-    sys_warning ("OOPS julian: %u  computed dmy: %u %u %u",
-	       d->julian_days, day, m, y);
+    sys_warning_N ("OOPS julian: %u  computed dmy: %u %u %u",
+               d->julian_days, day, m, y);
 #endif
   
   d->month = m;
@@ -606,7 +609,7 @@ sys_date_get_iso8601_week_of_year (const SysDate *d)
  */
 SysInt
 sys_date_days_between (const SysDate *d1,
-		     const SysDate *d2)
+                     const SysDate *d2)
 {
   sys_return_val_if_fail (sys_date_valid (d1), 0);
   sys_return_val_if_fail (sys_date_valid (d2), 0);
@@ -837,24 +840,24 @@ sys_date_prepare_to_parse (const SysChar      *str,
 
       while (i < 13) 
         {
-	  SysChar *casefold;
-	  
+          SysChar *casefold;
+          
           sys_date_set_dmy (&d, 1, i, 1976);
-	  
+          
           sys_return_if_fail (sys_date_valid (&d));
-	  
+          
           sys_date_strftime (buf, 127, "%b", &d);
 
-	  casefold = sys_utf8_casefold (buf, -1);
+          casefold = sys_utf8_casefold (buf, -1);
           sys_free (short_month_names[i]);
           short_month_names[i] = sys_utf8_normalize (casefold, -1, SYS_NORMALIZE_ALL);
-	  sys_free (casefold);
-	  
+          sys_free (casefold);
+          
           sys_date_strftime (buf, 127, "%B", &d);
-	  casefold = sys_utf8_casefold (buf, -1);
+          casefold = sys_utf8_casefold (buf, -1);
           sys_free (lonsys_month_names[i]);
           lonsys_month_names[i] = sys_utf8_normalize (casefold, -1, SYS_NORMALIZE_ALL);
-	  sys_free (casefold);
+          sys_free (casefold);
           
           sys_date_strftime (buf, 127, "%Ob", &d);
           casefold = sys_utf8_casefold (buf, -1);
@@ -930,7 +933,7 @@ sys_date_prepare_to_parse (const SysChar      *str,
         }
       if (usinsys_twodigit_years)
         {
-	  DEBUSYS_MSG (("**Using twodigit years with cutoff year: %u", twodigit_start_year));
+          DEBUSYS_MSG (("**Using twodigit years with cutoff year: %u", twodigit_start_year));
         }
       { 
         SysChar *strings[3];
@@ -1023,10 +1026,6 @@ sys_date_set_parse (SysDate       *d,
 
   sys_date_prepare_to_parse (str, &pt);
   
-  DEBUSYS_MSG (("Found %d ints, '%d' '%d' '%d' and written out month %d",
-	      pt.num_ints, pt.n[0], pt.n[1], pt.n[2], pt.month));
-  
-  
   if (pt.num_ints == 4) 
     {
       SYS_UNLOCK (sys_date_global);
@@ -1045,44 +1044,44 @@ sys_date_set_parse (SysDate       *d,
           switch (dmy_order[j])
             {
             case SYS_DATE_MONTH:
-	    {
-	      if (pt.num_ints == 2 && pt.month != SYS_DATE_BAD_MONTH)
-		{
-		  m = pt.month;
-		  ++j;      /* skip months, but don't skip this number */
-		  continue;
-		}
-	      else 
-		m = pt.n[i];
-	    }
-	    break;
+            {
+              if (pt.num_ints == 2 && pt.month != SYS_DATE_BAD_MONTH)
+                {
+                  m = pt.month;
+                  ++j;      /* skip months, but don't skip this number */
+                  continue;
+                }
+              else 
+                m = pt.n[i];
+            }
+            break;
             case SYS_DATE_DAY:
-	    {
-	      if (pt.num_ints == 2 && pt.month == SYS_DATE_BAD_MONTH)
-		{
-		  day = 1;
-		  ++j;      /* skip days, since we may have month/year */
-		  continue;
-		}
-	      day = pt.n[i];
-	    }
-	    break;
+            {
+              if (pt.num_ints == 2 && pt.month == SYS_DATE_BAD_MONTH)
+                {
+                  day = 1;
+                  ++j;      /* skip days, since we may have month/year */
+                  continue;
+                }
+              day = pt.n[i];
+            }
+            break;
             case SYS_DATE_YEAR:
-	    {
-	      y  = pt.n[i];
-	      
-	      if (locale_era_adjust != 0)
-	        {
-		  y += locale_era_adjust;
-	        }
+            {
+              y  = pt.n[i];
+              
+              if (locale_era_adjust != 0)
+                {
+                  y += locale_era_adjust;
+                }
 
-	      y = convert_twodigit_year (y);
-	    }
-	    break;
+              y = convert_twodigit_year (y);
+            }
+            break;
             default:
               break;
             }
-	  
+          
           ++i;
           ++j;
         }
@@ -1099,10 +1098,10 @@ sys_date_set_parse (SysDate       *d,
             y = SYS_DATE_BAD_YEAR; /* avoids ambiguity */
         }
       else if (pt.num_ints == 2)
-	{
-	  if (m == SYS_DATE_BAD_MONTH && pt.month != SYS_DATE_BAD_MONTH)
-	    m = pt.month;
-	}
+        {
+          if (m == SYS_DATE_BAD_MONTH && pt.month != SYS_DATE_BAD_MONTH)
+            m = pt.month;
+        }
     }
   else if (pt.num_ints == 1) 
     {
@@ -1116,7 +1115,7 @@ sys_date_set_parse (SysDate       *d,
       else
         {
           /* Try yyyymmdd and yymmdd */
-	  
+          
           m   = (pt.n[0]/100) % 100;
           day = pt.n[0] % 100;
           y   = pt.n[0]/10000;
@@ -1191,7 +1190,7 @@ _sys_localtime (time_t timet, struct tm *out_tm)
  */
 void         
 sys_date_set_time_t (SysDate *date,
-		   time_t timet)
+                   time_t timet)
 {
   struct tm tm;
   SysBool success;
@@ -1219,55 +1218,7 @@ sys_date_set_time_t (SysDate *date,
   
   date->dmy    = true;
 
-#ifndef SYS_DISABLE_CHECKS
-  if (!success)
-    sys_return_if_fail_warning (SYS_LOSYS_DOMAIN, "sys_date_set_time", "localtime() == NULL");
-#endif
 }
-
-
-/**
- * sys_date_set_time:
- * @date: a #SysDate.
- * @time_: #GTime value to set.
- *
- * Sets the value of a date from a #GTime value.
- * The time to date conversion is done using the user's current timezone.
- *
- * Deprecated: 2.10: Use sys_date_set_time_t() instead.
- */
-SYS_GNUC_BEGIN_IGNORE_DEPRECATIONS
-void
-sys_date_set_time (SysDate *date,
-		 GTime  time_)
-{
-  sys_date_set_time_t (date, (time_t) time_);
-}
-SYS_GNUC_END_IGNORE_DEPRECATIONS
-
-/**
- * sys_date_set_time_val:
- * @date: a #SysDate 
- * @timeval: #GTimeVal value to set
- *
- * Sets the value of a date from a #GTimeVal value.  Note that the
- * @tv_usec member is ignored, because #SysDate can't make use of the
- * additional precision.
- *
- * The time to date conversion is done using the user's current timezone.
- *
- * Since: 2.10
- * Deprecated: 2.62: #GTimeVal is not year-2038-safe. Use sys_date_set_time_t()
- *    instead.
- */
-SYS_GNUC_BEGIN_IGNORE_DEPRECATIONS
-void
-sys_date_set_time_val (SysDate    *date,
-		     GTimeVal *timeval)
-{
-  sys_date_set_time_t (date, (time_t) timeval->tv_sec);
-}
-SYS_GNUC_END_IGNORE_DEPRECATIONS
 
 /**
  * sys_date_set_month:
@@ -1895,8 +1846,8 @@ sys_date_to_struct_tm (const SysDate *d,
  */
 void
 sys_date_clamp (SysDate       *date,
-	      const SysDate *min_date,
-	      const SysDate *max_date)
+              const SysDate *min_date,
+              const SysDate *max_date)
 {
   sys_return_if_fail (sys_date_valid (date));
 
@@ -1942,10 +1893,10 @@ sys_date_order (SysDate *date1,
 #ifdef SYS_OS_WIN32
 static SysBool
 append_month_name (SysArray     *result,
-		   LCID        lcid,
-		   SYSTEMTIME *systemtime,
-		   SysBool    abbreviated,
-		   SysBool    alternative)
+                   LCID        lcid,
+                   SYSTEMTIME *systemtime,
+                   SysBool    abbreviated,
+                   SysBool    alternative)
 {
   int n;
   WORD base;
@@ -1960,7 +1911,7 @@ append_month_name (SysArray     *result,
 
       sys_array_set_size (result, result->len + n);
       if (GetLocaleInfoW (lcid, base + systemtime->wMonth - 1,
-                          ((wchar_t *) result->data) + result->len - n, n) != n)
+                          ((wchar_t *) result->pdata) + result->len - n, n) != n)
         return false;
 
       sys_array_set_size (result, result->len - 1);
@@ -1981,16 +1932,16 @@ append_month_name (SysArray     *result,
 
       sys_array_set_size (result, result->len + n);
       if (GetDateFormatW (lcid, 0, systemtime, lpFormat,
-                          ((wchar_t *) result->data) + result->len - n, n) != n)
+                          ((wchar_t *) result->pdata) + result->len - n, n) != n)
         return false;
 
       /* We have obtained a day number as two digits and the month name.
        * Now let's get rid of those two digits: overwrite them with the
        * month name.
        */
-      memmove (((wchar_t *) result->data) + result->len - n,
-	       ((wchar_t *) result->data) + result->len - n + 2,
-	       (n - 2) * sizeof (wchar_t));
+      memmove (((wchar_t *) result->pdata) + result->len - n,
+               ((wchar_t *) result->pdata) + result->len - n + 2,
+               (n - 2) * sizeof (wchar_t));
       sys_array_set_size (result, result->len - 3);
     }
 
@@ -1999,10 +1950,10 @@ append_month_name (SysArray     *result,
 
 static SysSize
 win32_strftime_helper (const SysDate     *d,
-		       const SysChar     *format,
-		       const struct tm *tm,
-		       SysChar           *s,
-		       SysSize	        slen)
+                       const SysChar     *format,
+                       const struct tm *tm,
+                       SysChar           *s,
+                       SysSize                slen)
 {
   SYSTEMTIME systemtime;
   TIME_ZONE_INFORMATION tzinfo;
@@ -2010,10 +1961,10 @@ win32_strftime_helper (const SysDate     *d,
   int n, k;
   SysArray *result;
   const SysChar *p;
-  gunichar c, modifier;
+  SysUniChar c, modifier;
   const wchar_t digits[] = L"0123456789";
   SysChar *convbuf;
-  glong convlen = 0;
+  SysLong convlen = 0;
   SysSize retval;
 
   systemtime.wYear = tm->tm_year + 1900;
@@ -2026,326 +1977,326 @@ win32_strftime_helper (const SysDate     *d,
   systemtime.wMilliseconds = 0;
   
   lcid = GetThreadLocale ();
-  result = sys_array_sized_new (false, false, sizeof (wchar_t), MAX (128, strlen (format) * 2));
+  result = sys_array_sized_new (false, false, sizeof (wchar_t), (SysUInt)max (128, strlen (format) * 2));
 
   p = format;
   while (*p)
     {
       c = sys_utf8_get_char (p);
       if (c == '%')
-	{
-	  p = sys_utf8_next_char (p);
-	  if (!*p)
-	    {
-	      s[0] = '\0';
-	      sys_array_free (result, true);
+        {
+          p = sys_utf8_next_char (p);
+          if (!*p)
+            {
+              s[0] = '\0';
+              sys_array_free (result, true);
 
-	      return 0;
-	    }
+              return 0;
+            }
 
-	  modifier = '\0';
-	  c = sys_utf8_get_char (p);
-	  if (c == 'E' || c == 'O')
-	    {
-	      /* "%OB", "%Ob", and "%Oh" are supported, ignore other modified
-	       * conversion specifiers for now.
-	       */
-	      modifier = c;
-	      p = sys_utf8_next_char (p);
-	      if (!*p)
-		{
-		  s[0] = '\0';
-		  sys_array_free (result, true);
+          modifier = '\0';
+          c = sys_utf8_get_char (p);
+          if (c == 'E' || c == 'O')
+            {
+              /* "%OB", "%Ob", and "%Oh" are supported, ignore other modified
+               * conversion specifiers for now.
+               */
+              modifier = c;
+              p = sys_utf8_next_char (p);
+              if (!*p)
+                {
+                  s[0] = '\0';
+                  sys_array_free (result, true);
 
-		  return 0;
-		}
+                  return 0;
+                }
 
-	      c = sys_utf8_get_char (p);
-	    }
+              c = sys_utf8_get_char (p);
+            }
 
-	  switch (c)
-	    {
-	    case 'a':
-	      if (systemtime.wDayOfWeek == 0)
-		k = 6;
-	      else
-		k = systemtime.wDayOfWeek - 1;
-	      n = GetLocaleInfoW (lcid, LOCALE_SABBREVDAYNAME1+k, NULL, 0);
-	      sys_array_set_size (result, result->len + n);
-	      GetLocaleInfoW (lcid, LOCALE_SABBREVDAYNAME1+k, ((wchar_t *) result->data) + result->len - n, n);
-	      sys_array_set_size (result, result->len - 1);
-	      break;
-	    case 'A':
-	      if (systemtime.wDayOfWeek == 0)
-		k = 6;
-	      else
-		k = systemtime.wDayOfWeek - 1;
-	      n = GetLocaleInfoW (lcid, LOCALE_SDAYNAME1+k, NULL, 0);
-	      sys_array_set_size (result, result->len + n);
-	      GetLocaleInfoW (lcid, LOCALE_SDAYNAME1+k, ((wchar_t *) result->data) + result->len - n, n);
-	      sys_array_set_size (result, result->len - 1);
-	      break;
-	    case 'b':
-	    case 'h':
+          switch (c)
+            {
+            case 'a':
+              if (systemtime.wDayOfWeek == 0)
+                k = 6;
+              else
+                k = systemtime.wDayOfWeek - 1;
+              n = GetLocaleInfoW (lcid, LOCALE_SABBREVDAYNAME1+k, NULL, 0);
+              sys_array_set_size (result, result->len + n);
+              GetLocaleInfoW (lcid, LOCALE_SABBREVDAYNAME1+k, ((wchar_t *) result->pdata) + result->len - n, n);
+              sys_array_set_size (result, result->len - 1);
+              break;
+            case 'A':
+              if (systemtime.wDayOfWeek == 0)
+                k = 6;
+              else
+                k = systemtime.wDayOfWeek - 1;
+              n = GetLocaleInfoW (lcid, LOCALE_SDAYNAME1+k, NULL, 0);
+              sys_array_set_size (result, result->len + n);
+              GetLocaleInfoW (lcid, LOCALE_SDAYNAME1+k, ((wchar_t *) result->pdata) + result->len - n, n);
+              sys_array_set_size (result, result->len - 1);
+              break;
+            case 'b':
+            case 'h':
               if (!append_month_name (result, lcid, &systemtime, true, modifier == 'O'))
                 {
                   /* Ignore the error; this placeholder will be replaced with nothing */
                 }
-	      break;
-	    case 'B':
+              break;
+            case 'B':
               if (!append_month_name (result, lcid, &systemtime, false, modifier == 'O'))
                 {
                   /* Ignore the error; this placeholder will be replaced with nothing */
                 }
-	      break;
-	    case 'c':
-	      n = GetDateFormatW (lcid, 0, &systemtime, NULL, NULL, 0);
-	      if (n > 0)
-		{
-		  sys_array_set_size (result, result->len + n);
-		  GetDateFormatW (lcid, 0, &systemtime, NULL, ((wchar_t *) result->data) + result->len - n, n);
-		  sys_array_set_size (result, result->len - 1);
-		}
-	      sys_array_append_vals (result, L" ", 1);
-	      n = GetTimeFormatW (lcid, 0, &systemtime, NULL, NULL, 0);
-	      if (n > 0)
-		{
-		  sys_array_set_size (result, result->len + n);
-		  GetTimeFormatW (lcid, 0, &systemtime, NULL, ((wchar_t *) result->data) + result->len - n, n);
-		  sys_array_set_size (result, result->len - 1);
-		}
-	      break;
-	    case 'C':
-	      sys_array_append_vals (result, digits + systemtime.wYear/1000, 1);
-	      sys_array_append_vals (result, digits + (systemtime.wYear/1000)%10, 1);
-	      break;
-	    case 'd':
-	      sys_array_append_vals (result, digits + systemtime.wDay/10, 1);
-	      sys_array_append_vals (result, digits + systemtime.wDay%10, 1);
-	      break;
-	    case 'D':
-	      sys_array_append_vals (result, digits + systemtime.wMonth/10, 1);
-	      sys_array_append_vals (result, digits + systemtime.wMonth%10, 1);
-	      sys_array_append_vals (result, L"/", 1);
-	      sys_array_append_vals (result, digits + systemtime.wDay/10, 1);
-	      sys_array_append_vals (result, digits + systemtime.wDay%10, 1);
-	      sys_array_append_vals (result, L"/", 1);
-	      sys_array_append_vals (result, digits + (systemtime.wYear/10)%10, 1);
-	      sys_array_append_vals (result, digits + systemtime.wYear%10, 1);
-	      break;
-	    case 'e':
-	      if (systemtime.wDay >= 10)
-		sys_array_append_vals (result, digits + systemtime.wDay/10, 1);
-	      else
-		sys_array_append_vals (result, L" ", 1);
-	      sys_array_append_vals (result, digits + systemtime.wDay%10, 1);
-	      break;
+              break;
+            case 'c':
+              n = GetDateFormatW (lcid, 0, &systemtime, NULL, NULL, 0);
+              if (n > 0)
+                {
+                  sys_array_set_size (result, result->len + n);
+                  GetDateFormatW (lcid, 0, &systemtime, NULL, ((wchar_t *) result->pdata) + result->len - n, n);
+                  sys_array_set_size (result, result->len - 1);
+                }
+              sys_array_append_vals (result, L" ", 1);
+              n = GetTimeFormatW (lcid, 0, &systemtime, NULL, NULL, 0);
+              if (n > 0)
+                {
+                  sys_array_set_size (result, result->len + n);
+                  GetTimeFormatW (lcid, 0, &systemtime, NULL, ((wchar_t *) result->pdata) + result->len - n, n);
+                  sys_array_set_size (result, result->len - 1);
+                }
+              break;
+            case 'C':
+              sys_array_append_vals (result, (const SysPointer)(digits + systemtime.wYear/1000), 1);
+              sys_array_append_vals (result, (const SysPointer)(digits + (systemtime.wYear/1000)%10), 1);
+              break;
+            case 'd':
+              sys_array_append_vals (result, (const SysPointer)(digits + systemtime.wDay/10), 1);
+              sys_array_append_vals (result, (const SysPointer)(digits + systemtime.wDay%10), 1);
+              break;
+            case 'D':
+              sys_array_append_vals (result, (const SysPointer)(digits + systemtime.wMonth/10), 1);
+              sys_array_append_vals (result, (const SysPointer)(digits + systemtime.wMonth%10), 1);
+              sys_array_append_vals (result, L"/", 1);
+              sys_array_append_vals (result, (const SysPointer)(digits + systemtime.wDay/10), 1);
+              sys_array_append_vals (result, (const SysPointer)(digits + systemtime.wDay%10), 1);
+              sys_array_append_vals (result, L"/", 1);
+              sys_array_append_vals (result, (const SysPointer)(digits + (systemtime.wYear/10)%10), 1);
+              sys_array_append_vals (result, (const SysPointer)(digits + systemtime.wYear%10), 1);
+              break;
+            case 'e':
+              if (systemtime.wDay >= 10)
+                sys_array_append_vals (result, (const SysPointer)(digits + systemtime.wDay/10), 1);
+              else
+                sys_array_append_vals (result, L" ", 1);
+              sys_array_append_vals (result, (const SysPointer)(digits + systemtime.wDay%10), 1);
+              break;
 
-	      /* A SysDate has no time fields, so for now we can
-	       * hardcode all time conversions into zeros (or 12 for
-	       * %I). The alternative code snippets in the #else
-	       * branches are here ready to be taken into use when
-	       * needed by a sys_strftime() or sys_date_and_time_format()
-	       * or whatever.
-	       */
-	    case 'H':
+              /* A SysDate has no time fields, so for now we can
+               * hardcode all time conversions into zeros (or 12 for
+               * %I). The alternative code snippets in the #else
+               * branches are here ready to be taken into use when
+               * needed by a sys_strftime() or sys_date_and_time_format()
+               * or whatever.
+               */
+            case 'H':
 #if 1
-	      sys_array_append_vals (result, L"00", 2);
+              sys_array_append_vals (result, L"00", 2);
 #else
-	      sys_array_append_vals (result, digits + systemtime.wHour/10, 1);
-	      sys_array_append_vals (result, digits + systemtime.wHour%10, 1);
+              sys_array_append_vals (result, digits + systemtime.wHour/10, 1);
+              sys_array_append_vals (result, digits + systemtime.wHour%10, 1);
 #endif
-	      break;
-	    case 'I':
+              break;
+            case 'I':
 #if 1
-	      sys_array_append_vals (result, L"12", 2);
+              sys_array_append_vals (result, L"12", 2);
 #else
-	      if (systemtime.wHour == 0)
-		sys_array_append_vals (result, L"12", 2);
-	      else
-		{
-		  sys_array_append_vals (result, digits + (systemtime.wHour%12)/10, 1);
-		  sys_array_append_vals (result, digits + (systemtime.wHour%12)%10, 1);
-		}
+              if (systemtime.wHour == 0)
+                sys_array_append_vals (result, L"12", 2);
+              else
+                {
+                  sys_array_append_vals (result, digits + (systemtime.wHour%12)/10, 1);
+                  sys_array_append_vals (result, digits + (systemtime.wHour%12)%10, 1);
+                }
 #endif
-	      break;
-	    case  'j':
-	      sys_array_append_vals (result, digits + (tm->tm_yday+1)/100, 1);
-	      sys_array_append_vals (result, digits + ((tm->tm_yday+1)/10)%10, 1);
-	      sys_array_append_vals (result, digits + (tm->tm_yday+1)%10, 1);
-	      break;
-	    case 'm':
-	      sys_array_append_vals (result, digits + systemtime.wMonth/10, 1);
-	      sys_array_append_vals (result, digits + systemtime.wMonth%10, 1);
-	      break;
-	    case 'M':
+              break;
+            case  'j':
+              sys_array_append_vals (result, (const SysPointer)(digits + (tm->tm_yday+1)/100), 1);
+              sys_array_append_vals (result, (const SysPointer)(digits + ((tm->tm_yday+1)/10)%10), 1);
+              sys_array_append_vals (result, (const SysPointer)(digits + (tm->tm_yday+1)%10), 1);
+              break;
+            case 'm':
+              sys_array_append_vals (result, (const SysPointer)(digits + systemtime.wMonth/10), 1);
+              sys_array_append_vals (result, (const SysPointer)(digits + systemtime.wMonth%10), 1);
+              break;
+            case 'M':
 #if 1
-	      sys_array_append_vals (result, L"00", 2);
+              sys_array_append_vals (result, L"00", 2);
 #else
-	      sys_array_append_vals (result, digits + systemtime.wMinute/10, 1);
-	      sys_array_append_vals (result, digits + systemtime.wMinute%10, 1);
+              sys_array_append_vals (result, digits + systemtime.wMinute/10, 1);
+              sys_array_append_vals (result, digits + systemtime.wMinute%10, 1);
 #endif
-	      break;
-	    case 'n':
-	      sys_array_append_vals (result, L"\n", 1);
-	      break;
-	    case 'p':
-	      n = GetTimeFormatW (lcid, 0, &systemtime, L"tt", NULL, 0);
-	      if (n > 0)
-		{
-		  sys_array_set_size (result, result->len + n);
-		  GetTimeFormatW (lcid, 0, &systemtime, L"tt", ((wchar_t *) result->data) + result->len - n, n);
-		  sys_array_set_size (result, result->len - 1);
-		}
-	      break;
-	    case 'r':
-	      /* This is a rather odd format. Hard to say what to do.
-	       * Let's always use the POSIX %I:%M:%S %p
-	       */
+              break;
+            case 'n':
+              sys_array_append_vals (result, L"\n", 1);
+              break;
+            case 'p':
+              n = GetTimeFormatW (lcid, 0, &systemtime, L"tt", NULL, 0);
+              if (n > 0)
+                {
+                  sys_array_set_size (result, result->len + n);
+                  GetTimeFormatW (lcid, 0, &systemtime, L"tt", ((wchar_t *) result->pdata) + result->len - n, n);
+                  sys_array_set_size (result, result->len - 1);
+                }
+              break;
+            case 'r':
+              /* This is a rather odd format. Hard to say what to do.
+               * Let's always use the POSIX %I:%M:%S %p
+               */
 #if 1
-	      sys_array_append_vals (result, L"12:00:00", 8);
+              sys_array_append_vals (result, L"12:00:00", 8);
 #else
-	      if (systemtime.wHour == 0)
-		sys_array_append_vals (result, L"12", 2);
-	      else
-		{
-		  sys_array_append_vals (result, digits + (systemtime.wHour%12)/10, 1);
-		  sys_array_append_vals (result, digits + (systemtime.wHour%12)%10, 1);
-		}
-	      sys_array_append_vals (result, L":", 1);
-	      sys_array_append_vals (result, digits + systemtime.wMinute/10, 1);
-	      sys_array_append_vals (result, digits + systemtime.wMinute%10, 1);
-	      sys_array_append_vals (result, L":", 1);
-	      sys_array_append_vals (result, digits + systemtime.wSecond/10, 1);
-	      sys_array_append_vals (result, digits + systemtime.wSecond%10, 1);
-	      sys_array_append_vals (result, L" ", 1);
+              if (systemtime.wHour == 0)
+                sys_array_append_vals (result, L"12", 2);
+              else
+                {
+                  sys_array_append_vals (result, digits + (systemtime.wHour%12)/10, 1);
+                  sys_array_append_vals (result, digits + (systemtime.wHour%12)%10, 1);
+                }
+              sys_array_append_vals (result, L":", 1);
+              sys_array_append_vals (result, digits + systemtime.wMinute/10, 1);
+              sys_array_append_vals (result, digits + systemtime.wMinute%10, 1);
+              sys_array_append_vals (result, L":", 1);
+              sys_array_append_vals (result, digits + systemtime.wSecond/10, 1);
+              sys_array_append_vals (result, digits + systemtime.wSecond%10, 1);
+              sys_array_append_vals (result, L" ", 1);
 #endif
-	      n = GetTimeFormatW (lcid, 0, &systemtime, L"tt", NULL, 0);
-	      if (n > 0)
-		{
-		  sys_array_set_size (result, result->len + n);
-		  GetTimeFormatW (lcid, 0, &systemtime, L"tt", ((wchar_t *) result->data) + result->len - n, n);
-		  sys_array_set_size (result, result->len - 1);
-		}
-	      break;
-	    case 'R':
+              n = GetTimeFormatW (lcid, 0, &systemtime, L"tt", NULL, 0);
+              if (n > 0)
+                {
+                  sys_array_set_size (result, result->len + n);
+                  GetTimeFormatW (lcid, 0, &systemtime, L"tt", ((wchar_t *) result->pdata) + result->len - n, n);
+                  sys_array_set_size (result, result->len - 1);
+                }
+              break;
+            case 'R':
 #if 1
-	      sys_array_append_vals (result, L"00:00", 5);
+              sys_array_append_vals (result, L"00:00", 5);
 #else
-	      sys_array_append_vals (result, digits + systemtime.wHour/10, 1);
-	      sys_array_append_vals (result, digits + systemtime.wHour%10, 1);
-	      sys_array_append_vals (result, L":", 1);
-	      sys_array_append_vals (result, digits + systemtime.wMinute/10, 1);
-	      sys_array_append_vals (result, digits + systemtime.wMinute%10, 1);
+              sys_array_append_vals (result, digits + systemtime.wHour/10, 1);
+              sys_array_append_vals (result, digits + systemtime.wHour%10, 1);
+              sys_array_append_vals (result, L":", 1);
+              sys_array_append_vals (result, digits + systemtime.wMinute/10, 1);
+              sys_array_append_vals (result, digits + systemtime.wMinute%10, 1);
 #endif
-	      break;
-	    case 'S':
+              break;
+            case 'S':
 #if 1
-	      sys_array_append_vals (result, L"00", 2);
+              sys_array_append_vals (result, L"00", 2);
 #else
-	      sys_array_append_vals (result, digits + systemtime.wSecond/10, 1);
-	      sys_array_append_vals (result, digits + systemtime.wSecond%10, 1);
+              sys_array_append_vals (result, digits + systemtime.wSecond/10, 1);
+              sys_array_append_vals (result, digits + systemtime.wSecond%10, 1);
 #endif
-	      break;
-	    case 't':
-	      sys_array_append_vals (result, L"\t", 1);
-	      break;
-	    case 'T':
+              break;
+            case 't':
+              sys_array_append_vals (result, L"\t", 1);
+              break;
+            case 'T':
 #if 1
-	      sys_array_append_vals (result, L"00:00:00", 8);
+              sys_array_append_vals (result, L"00:00:00", 8);
 #else
-	      sys_array_append_vals (result, digits + systemtime.wHour/10, 1);
-	      sys_array_append_vals (result, digits + systemtime.wHour%10, 1);
-	      sys_array_append_vals (result, L":", 1);
-	      sys_array_append_vals (result, digits + systemtime.wMinute/10, 1);
-	      sys_array_append_vals (result, digits + systemtime.wMinute%10, 1);
-	      sys_array_append_vals (result, L":", 1);
-	      sys_array_append_vals (result, digits + systemtime.wSecond/10, 1);
-	      sys_array_append_vals (result, digits + systemtime.wSecond%10, 1);
+              sys_array_append_vals (result, digits + systemtime.wHour/10, 1);
+              sys_array_append_vals (result, digits + systemtime.wHour%10, 1);
+              sys_array_append_vals (result, L":", 1);
+              sys_array_append_vals (result, digits + systemtime.wMinute/10, 1);
+              sys_array_append_vals (result, digits + systemtime.wMinute%10, 1);
+              sys_array_append_vals (result, L":", 1);
+              sys_array_append_vals (result, digits + systemtime.wSecond/10, 1);
+              sys_array_append_vals (result, digits + systemtime.wSecond%10, 1);
 #endif
-	      break;
-	    case 'u':
-	      if (systemtime.wDayOfWeek == 0)
-		sys_array_append_vals (result, L"7", 1);
-	      else
-		sys_array_append_vals (result, digits + systemtime.wDayOfWeek, 1);
-	      break;
-	    case 'U':
-	      n = sys_date_get_sunday_week_of_year (d);
-	      sys_array_append_vals (result, digits + n/10, 1);
-	      sys_array_append_vals (result, digits + n%10, 1);
-	      break;
-	    case 'V':
-	      n = sys_date_get_iso8601_week_of_year (d);
-	      sys_array_append_vals (result, digits + n/10, 1);
-	      sys_array_append_vals (result, digits + n%10, 1);
-	      break;
-	    case 'w':
-	      sys_array_append_vals (result, digits + systemtime.wDayOfWeek, 1);
-	      break;
-	    case 'W':
-	      n = sys_date_get_monday_week_of_year (d);
-	      sys_array_append_vals (result, digits + n/10, 1);
-	      sys_array_append_vals (result, digits + n%10, 1);
-	      break;
-	    case 'x':
-	      n = GetDateFormatW (lcid, 0, &systemtime, NULL, NULL, 0);
-	      if (n > 0)
-		{
-		  sys_array_set_size (result, result->len + n);
-		  GetDateFormatW (lcid, 0, &systemtime, NULL, ((wchar_t *) result->data) + result->len - n, n);
-		  sys_array_set_size (result, result->len - 1);
-		}
-	      break;
-	    case 'X':
-	      n = GetTimeFormatW (lcid, 0, &systemtime, NULL, NULL, 0);
-	      if (n > 0)
-		{
-		  sys_array_set_size (result, result->len + n);
-		  GetTimeFormatW (lcid, 0, &systemtime, NULL, ((wchar_t *) result->data) + result->len - n, n);
-		  sys_array_set_size (result, result->len - 1);
-		}
-	      break;
-	    case 'y':
-	      sys_array_append_vals (result, digits + (systemtime.wYear/10)%10, 1);
-	      sys_array_append_vals (result, digits + systemtime.wYear%10, 1);
-	      break;
-	    case 'Y':
-	      sys_array_append_vals (result, digits + systemtime.wYear/1000, 1);
-	      sys_array_append_vals (result, digits + (systemtime.wYear/100)%10, 1);
-	      sys_array_append_vals (result, digits + (systemtime.wYear/10)%10, 1);
-	      sys_array_append_vals (result, digits + systemtime.wYear%10, 1);
-	      break;
-	    case 'Z':
-	      n = GetTimeZoneInformation (&tzinfo);
-	      if (n == TIME_ZONE_ID_UNKNOWN || n == TIME_ZONE_ID_STANDARD)
-		sys_array_append_vals (result, tzinfo.StandardName, wcslen (tzinfo.StandardName));
-	      else if (n == TIME_ZONE_ID_DAYLIGHT)
-		sys_array_append_vals (result, tzinfo.DaylightName, wcslen (tzinfo.DaylightName));
-	      break;
-	    case '%':
-	      sys_array_append_vals (result, L"%", 1);
-	      break;
-	    }      
-	} 
+              break;
+            case 'u':
+              if (systemtime.wDayOfWeek == 0)
+                sys_array_append_vals (result, L"7", 1);
+              else
+                sys_array_append_vals (result, (const SysPointer)(digits + systemtime.wDayOfWeek), 1);
+              break;
+            case 'U':
+              n = sys_date_get_sunday_week_of_year (d);
+              sys_array_append_vals (result, (const SysPointer)(digits + n/10), 1);
+              sys_array_append_vals (result, (const SysPointer)(digits + n%10), 1);
+              break;
+            case 'V':
+              n = sys_date_get_iso8601_week_of_year (d);
+              sys_array_append_vals (result, (const SysPointer)(digits + n/10), 1);
+              sys_array_append_vals (result, (const SysPointer)(digits + n%10), 1);
+              break;
+            case 'w':
+              sys_array_append_vals (result, (const SysPointer)(digits + systemtime.wDayOfWeek), 1);
+              break;
+            case 'W':
+              n = sys_date_get_monday_week_of_year (d);
+              sys_array_append_vals (result, (const SysPointer)(digits + n/10), 1);
+              sys_array_append_vals (result, (const SysPointer)(digits + n%10), 1);
+              break;
+            case 'x':
+              n = GetDateFormatW (lcid, 0, &systemtime, NULL, NULL, 0);
+              if (n > 0)
+                {
+                  sys_array_set_size (result, result->len + n);
+                  GetDateFormatW (lcid, 0, &systemtime, NULL, ((wchar_t *) result->pdata) + result->len - n, n);
+                  sys_array_set_size (result, result->len - 1);
+                }
+              break;
+            case 'X':
+              n = GetTimeFormatW (lcid, 0, &systemtime, NULL, NULL, 0);
+              if (n > 0)
+                {
+                  sys_array_set_size (result, result->len + n);
+                  GetTimeFormatW (lcid, 0, &systemtime, NULL, ((wchar_t *) result->pdata) + result->len - n, n);
+                  sys_array_set_size (result, result->len - 1);
+                }
+              break;
+            case 'y':
+              sys_array_append_vals (result, (const SysPointer)(digits + (systemtime.wYear/10)%10), 1);
+              sys_array_append_vals (result, (const SysPointer)(digits + systemtime.wYear%10), 1);
+              break;
+            case 'Y':
+              sys_array_append_vals (result, (const SysPointer)(digits + systemtime.wYear/1000), 1);
+              sys_array_append_vals (result, (const SysPointer)(digits + (systemtime.wYear/100)%10), 1);
+              sys_array_append_vals (result, (const SysPointer)(digits + (systemtime.wYear/10)%10), 1);
+              sys_array_append_vals (result, (const SysPointer)(digits + systemtime.wYear%10), 1);
+              break;
+            case 'Z':
+              n = GetTimeZoneInformation (&tzinfo);
+              if (n == TIME_ZONE_ID_UNKNOWN || n == TIME_ZONE_ID_STANDARD)
+                sys_array_append_vals (result, tzinfo.StandardName, (SysUInt)wcslen (tzinfo.StandardName));
+              else if (n == TIME_ZONE_ID_DAYLIGHT)
+                sys_array_append_vals (result, tzinfo.DaylightName, (SysUInt)wcslen (tzinfo.DaylightName));
+              break;
+            case '%':
+              sys_array_append_vals (result, L"%", 1);
+              break;
+            }      
+        } 
       else if (c <= 0xFFFF)
-	{
-	  wchar_t wc = c;
-	  sys_array_append_vals (result, &wc, 1);
-	}
+        {
+          wchar_t wc = c;
+          sys_array_append_vals (result, &wc, 1);
+        }
       else
-	{
-	  glong nwc;
-	  wchar_t *ws;
+        {
+          SysLong nwc;
+          wchar_t *ws;
 
-	  ws = sys_ucs4_to_utf16 (&c, 1, NULL, &nwc, NULL);
-	  sys_array_append_vals (result, ws, nwc);
-	  sys_free (ws);
-	}
+          ws = sys_ucs4_to_utf16 (&c, 1, NULL, &nwc, NULL);
+          sys_array_append_vals (result, ws, nwc);
+          sys_free (ws);
+        }
       p = sys_utf8_next_char (p);
     }
   
-  convbuf = sys_utf16_to_utf8 ((wchar_t *) result->data, result->len, NULL, &convlen, NULL);
+  convbuf = sys_utf16_to_utf8 ((wchar_t *) result->pdata, result->len, NULL, &convlen, NULL);
   sys_array_free (result, true);
 
   if (!convbuf)
@@ -2360,7 +2311,7 @@ win32_strftime_helper (const SysDate     *d,
       /* Ensure only whole characters are copied into the buffer. */
       SysChar *end = sys_utf8_find_prev_char (convbuf, convbuf + slen);
       sys_assert (end != NULL);
-      convlen = end - convbuf;
+      convlen = (SysLong)(end - convbuf);
 
       /* Return 0 because the buffer isn't large enough. */
       retval = 0;
@@ -2400,9 +2351,6 @@ win32_strftime_helper (const SysDate     *d,
  *
  * Returns: number of characters written to the buffer, or 0 the buffer was too small
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
-
 SysSize     
 sys_date_strftime (SysChar       *s, 
                  SysSize        slen, 
@@ -2442,7 +2390,7 @@ sys_date_strftime (SysChar       *s,
 
   if (error)
     {
-      sys_warning (SYS_STRLOC "Error converting format to locale encoding: %s", error->message);
+      sys_warning_N (SYS_STRLOC "Error converting format to locale encoding: %s", error->message);
       sys_error_free (error);
 
       s[0] = '\0';
@@ -2467,7 +2415,7 @@ sys_date_strftime (SysChar       *s,
 
           if (tmpbufsize > 65536)
             {
-              sys_warning (SYS_STRLOC "Maximum buffer size for sys_date_strftime exceeded: giving up");
+              sys_warning_N (SYS_STRLOC "Maximum buffer size for sys_date_strftime exceeded: giving up");
               sys_free (locale_format);
 
               s[0] = '\0';
@@ -2484,7 +2432,7 @@ sys_date_strftime (SysChar       *s,
 
   if (error)
     {
-      sys_warning (SYS_STRLOC "Error converting results of strftime to UTF-8: %s", error->message);
+      sys_warning_N (SYS_STRLOC "Error converting results of strftime to UTF-8: %s", error->message);
       sys_error_free (error);
 
       sys_assert (convbuf == NULL);
@@ -2515,5 +2463,3 @@ sys_date_strftime (SysChar       *s,
   return retval;
 #endif
 }
-
-#pragma GCC diagnostic pop

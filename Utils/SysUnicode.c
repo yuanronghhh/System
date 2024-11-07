@@ -771,7 +771,7 @@ output_special_case (SysChar *out_buffer,
   if (which == 1)
     p += strlen (p) + 1;
 
-  len = strlen (p);
+  len = (SysInt)strlen (p);
   if (out_buffer)
     memcpy (out_buffer, p, len);
 

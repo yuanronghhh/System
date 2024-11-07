@@ -65,12 +65,6 @@ SysInt sys_lstat(const SysChar *pathname, struct stat * state) {
   return lstat(pathname, state);
 }
 
-SysBool sys_file_state_is_dir (SysFileState *state) {
-  sys_return_val_if_fail(state != NULL, false);
-
-  return state->is_dir;
-}
-
 /**
  * sys_file_read_link:
  *    read value of a symbolic link like readlink

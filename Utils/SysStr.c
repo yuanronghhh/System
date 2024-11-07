@@ -27,7 +27,7 @@ SysChar *sys_strchug (SysChar *string)
 }
 
 SysBool sys_str_trim_end(SysChar *string, const SysChar c) {
-  sys_return_val_if_fail (string != NULL, NULL);
+  sys_return_val_if_fail (string != NULL, false);
 
   SysChar * p = strrchr(string, c);
   if(!p) { return false;}

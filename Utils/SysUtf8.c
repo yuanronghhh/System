@@ -213,7 +213,7 @@ SysLong sys_utf8_strlen (const SysChar *p,
 
       p = sys_utf8_next_char (p);
 
-      while (p - start < max && *p)
+      while ((SysInt)(p - start) < max && *p)
         {
           ++len;
           p = sys_utf8_next_char (p);
@@ -222,7 +222,7 @@ SysLong sys_utf8_strlen (const SysChar *p,
       /* only do the last len increment if we got a complete
        * char (don't count partial chars)
        */
-      if (p - start <= max)
+      if (p - start <= (SysInt)max)
         ++len;
     }
 
@@ -880,7 +880,7 @@ sys_utf8_to_ucs4 (const SysChar *str,
 
 err_out:
   if (items_read)
-    *items_read = in - str;
+    *items_read = (SysLong)(in - str);
 
   return result;
 }
@@ -924,7 +924,7 @@ SysChar * sys_ucs4_to_utf8 (const SysUniChar *str,
   *p = '\0';
 
   if (items_written)
-    *items_written = p - result;
+    *items_written = (SysLong)(p - result);
 
 err_out:
   if (items_read)
@@ -1080,11 +1080,11 @@ next2:
 
   if (items_written)
     /********** DIFFERENT for UTF8/UCS4 **********/
-    *items_written = out - result;
+    *items_written = (SysLong)(out - result);
 
 err_out:
   if (items_read)
-    *items_read = in - str;
+    *items_read = (SysLong)(in - str);
 
   return result;
 }
@@ -1218,11 +1218,11 @@ next2:
 
   if (items_written)
     /********** DIFFERENT for UTF8/UCS4 **********/
-    *items_written = (out - result) / sizeof (SysUniChar);
+    *items_written = (SysLong)((out - result) / sizeof (SysUniChar));
 
 err_out:
   if (items_read)
-    *items_read = in - str;
+    *items_read = (SysLong)(in - str);
 
   return (SysUniChar *)result;
 }
@@ -1337,7 +1337,7 @@ SysUniChar2 * sys_utf8_to_utf16 (const SysChar *str,
 
 err_out:
   if (items_read)
-    *items_read = in - str;
+    *items_read = (SysLong)(in - str);
 
   return result;
 }
@@ -1523,7 +1523,7 @@ fast_validate_len (const char *str,
 
   sys_assert (max_len >= 0);
 
-  for (p = str; ((p - str) < max_len) && *p; p++)
+  for (p = str; ((p - str) < (SysLong)max_len) && *p; p++)
   {
     if (*(SysUChar *)p < 128)
       /* done */;

@@ -9,8 +9,8 @@ typedef unsigned long long SysUInt64;
 #define UINT_TO_POINTER(o) ((SysPointer)(SysUInt64)(o))
 #define INT_TO_POINTER(o) ((SysPointer)(SysInt64)(o))
 
-#define SYS_INT64_CONSTANT(val)	(val##L)
-#define SYS_UINT64_CONSTANT(val)	(val##UL)
+#define SYS_INT64_CONSTANT(val)	(val##LL)
+#define SYS_UINT64_CONSTANT(val)	(val##ULL)
 #define SYS_INT64_MODIFIER "l"
 #define SYS_INT64_FORMAT "li"
 #define SYS_UINT64_FORMAT "lu"
@@ -21,6 +21,12 @@ typedef unsigned long long SysUInt64;
 #define SYS_MININT64 INT64_MIN
 #define SYS_MAXINT64 INT64_MAX
 #define SYS_MAXUINT64 UINT64_MAX
+#define SYS_MAXUINT UINT_MAX
+#define SYS_MAXUINT32	((SysUInt32) 0xffffffff)
+
+#define SYS_MININT16	((SysInt16) (-SYS_MAXINT16 - 1))
+#define SYS_MAXINT16	((SysInt16)  0x7fff)
+#define SYS_MAXUINT16	((SysUInt16) 0xffff)
 
 #define SIZEOF_INT 8
 #define SYS_DEBUG ${DEBUG}

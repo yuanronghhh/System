@@ -155,6 +155,9 @@ set(SRC
   ./Utils/SysUtf8.c
   ./Utils/SysUnicode.h
   ./Utils/SysUnicode.c
+  ./Utils/SysUnicodeDecomp.h
+  ./Utils/SysUnicodeDecomp.c
+  ./Utils/SysUnicodeComp.h
   ./Utils/SysUnicodeMirrorTable.h
   ./Utils/SysUnicodeScriptTable.h
   ./Utils/SysUnicodeTable.h
@@ -181,6 +184,8 @@ set(SRC
   ./Platform/Common/SysTimeZone.c
   ./Platform/Common/SysDateTime.h
   ./Platform/Common/SysDateTime.c
+  ./Platform/Common/SysDate.h
+  ./Platform/Common/SysDate.c
   ./Platform/Common/SysFile.h
   ./Platform/Common/SysFile.c
   ./Platform/Common/SysMemPrivate.h

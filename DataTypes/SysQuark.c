@@ -119,7 +119,7 @@ quark_strdup (const SysChar *string)
 
   copy = quark_block + quark_block_offset;
   memcpy (copy, string, len);
-  quark_block_offset += len;
+  quark_block_offset += (SysInt)len;
 
   return copy;
 }

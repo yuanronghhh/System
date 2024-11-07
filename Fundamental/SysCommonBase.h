@@ -47,6 +47,7 @@ typedef bool SysBool;
 typedef int SysRef;
 typedef void* SysPointer;
 typedef int SysInt;
+typedef short SysShort;
 typedef unsigned short SysUShort;
 typedef unsigned int SysUInt;
 typedef float SysFloat;

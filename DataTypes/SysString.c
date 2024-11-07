@@ -14,7 +14,7 @@ static void sys_string_expand (SysString *string,
   if SYS_UNLIKELY ((SYS_MAXSIZE - string->len - 1) < len)
     sys_error_N ("adding %ul to string would overflow", len);
 
-  string->allocated_len = sys_nearest_pow (string->len + len + 1);
+  string->allocated_len = sys_nearest_pow ((SysUInt)(string->len + len + 1));
   /* If the new size is bigger than SYS_MAXSIZE / 2, only allocate enough
    * memory for this string and don't over-allocate.
    */
@@ -70,7 +70,7 @@ SysString * sys_string_new (const SysChar *init) {
     string = sys_string_sized_new (2);
 
   } else {
-    SysInt len;
+    SysSize len;
 
     len = strlen (init);
     string = sys_string_sized_new (len + 2);
@@ -956,7 +956,7 @@ SysString *sys_string_ascii_down (SysString *string) {
 
   sys_return_val_if_fail (string != NULL, NULL);
 
-  n = string->len;
+  n = (SysInt)string->len;
   s = string->str;
 
   while (n) {
@@ -985,7 +985,7 @@ SysString *sys_string_ascii_up (SysString *string) {
 
   sys_return_val_if_fail (string != NULL, NULL);
 
-  n = string->len;
+  n = (SysInt)string->len;
   s = string->str;
 
   while (n) {
@@ -1015,7 +1015,7 @@ SysString *sys_string_down (SysString *string) {
 
   sys_return_val_if_fail (string != NULL, NULL);
 
-  n = string->len;
+  n = (SysLong)string->len;
   s = (SysUChar *) string->str;
 
   while (n)
@@ -1047,7 +1047,7 @@ SysString * sys_string_up (SysString *string) {
 
   sys_return_val_if_fail (string != NULL, NULL);
 
-  n = string->len;
+  n = (SysLong)string->len;
   s = (SysUChar *) string->str;
 
   while (n)

@@ -180,7 +180,7 @@ static int sys_win32_readlink_utf8 (const SysChar  *filename,
     }
 
   if ((SysSize) tmp_len > buf_size)
-    tmp_len = buf_size;
+    tmp_len = (SysLong)buf_size;
 
   memcpy (buf, tmp, tmp_len);
   sys_free (tmp);
@@ -292,7 +292,7 @@ _sys_win32_filetime_to_unix_time (const FILETIME *ft,
   result -= filetime_unix_epoch_offset;
 
   if (nsec)
-    *nsec = (result % hundreds_of_usec_per_sec) * 100;
+    *nsec = (SysInt32)(result % hundreds_of_usec_per_sec) * 100;
 
   return result / hundreds_of_usec_per_sec;
 }
@@ -342,7 +342,7 @@ _sys_win32_copy_and_maybe_terminate (const SysUChar *data,
     }
 
   if (!terminate)
-    return to_copy;
+    return (SysInt)to_copy;
 
   if (buf)
     buf_in_chars = (char *) buf;
@@ -383,7 +383,7 @@ _sys_win32_copy_and_maybe_terminate (const SysUChar *data,
       buf_in_chars[0] = 0;
     }
 
-  return to_copy;
+  return (SysInt)to_copy;
 }
 
 
@@ -592,7 +592,7 @@ static int _sys_win32_readlink_utf16_handle (const SysUniChar2  *filename,
   string_size = result / sizeof (SysUniChar2);
   _sys_win32_strip_extended_ntobjm_prefix (buf ? buf : *alloc_buf, &string_size);
 
-  return string_size * sizeof (SysUniChar2);
+  return (SysInt)(string_size * sizeof (SysUniChar2));
 }
 
 static int
@@ -678,7 +678,7 @@ _sys_win32_fill_statbuf_from_handle_info (const wchar_t                    *file
         statbuf->st_mode |= S_IXUSR | S_IXGRP | S_IXOTH;
     }
 
-  statbuf->st_nlink = handle_info->nNumberOfLinks;
+  statbuf->st_nlink = (SysShort)handle_info->nNumberOfLinks;
   statbuf->st_uid = statbuf->st_gid = 0;
   statbuf->st_size = (((SysUInt64) handle_info->nFileSizeHigh) << 32) | handle_info->nFileSizeLow;
   statbuf->st_ctime = _sys_win32_filetime_to_unix_time (&handle_info->ftCreationTime, NULL);
@@ -846,7 +846,7 @@ _sys_win32_stat_utf8 (const SysChar       *filename,
       (sys_path_is_absolute (filename) && len <= (SysSize) (sys_path_skip_root (filename) - filename)))
     len = strlen (filename);
 
-  wfilename = sys_utf8_to_utf16 (filename, len, NULL, NULL, NULL);
+  wfilename = sys_utf8_to_utf16 (filename, (SysULong)len, NULL, NULL, NULL);
 
   if (wfilename == NULL)
     {
@@ -881,7 +881,7 @@ SysInt sys_lstat(const SysChar *filename, struct stat * buf) {
   buf->st_uid = w32_buf.st_uid;
   buf->st_gid = w32_buf.st_gid;
   buf->st_rdev = w32_buf.st_dev;
-  buf->st_size = w32_buf.st_size;
+  buf->st_size = (SysLong)w32_buf.st_size;
   buf->st_atime = w32_buf.st_atim.tv_sec;
   buf->st_mtime = w32_buf.st_mtim.tv_sec;
   buf->st_ctime = w32_buf.st_ctim.tv_sec;

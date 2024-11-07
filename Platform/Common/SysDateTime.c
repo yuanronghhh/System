@@ -520,7 +520,7 @@ ymd_to_days (SysInt year,
 
   days += day;
 
-  return days;
+  return (SysInt)days;
 }
 
 static void
@@ -685,7 +685,7 @@ sys_date_time_from_instant (SysTimeZone *tz,
 
   instant += offset;
 
-  datetime->days = instant / USEC_PER_DAY;
+  datetime->days = (SysInt32)(instant / USEC_PER_DAY);
   datetime->usec = instant % USEC_PER_DAY;
 
   if (datetime->days < 1 || 3652059 < datetime->days)
@@ -741,7 +741,7 @@ static SysBool sys_date_time_deal_with_date_change (SysDateTime *datetime) {
   full_time *= USEC_PER_SECOND;
   full_time += usec;
 
-  datetime->days = full_time / USEC_PER_DAY;
+  datetime->days = (SysInt32)(full_time / USEC_PER_DAY);
   datetime->usec = full_time % USEC_PER_DAY;
 
   /* maybe daylight time caused us to shift to a different day,
@@ -998,7 +998,7 @@ get_iso8601_seconds (const SysChar *text, SysSize length, SysDouble *value)
 
   /* Ignore leap seconds, see sys_date_time_new_from_iso8601() */
   if (v >= 60.0 && v <= 61.0)
-    v = 59.0;
+    v = (SysUInt64)59.0;
 
   i++;
   if (i == length)
@@ -1150,7 +1150,7 @@ parse_iso8601_timezone (const SysChar *text, SysSize length, SysSize *tz_offset)
     }
 
   /* Look for '+' or '-' of offset */
-  for (i = length - 1; i >= 0; i--)
+  for (i = (SysInt)(length - 1); i >= 0; i--)
     if (text[i] == '+' || text[i] == '-')
       {
         offset_sign = text[i] == '-' ? -1 : 1;
@@ -1158,7 +1158,7 @@ parse_iso8601_timezone (const SysChar *text, SysSize length, SysSize *tz_offset)
       }
   if (i < 0)
     return NULL;
-  tz_length = length - i;
+  tz_length = (SysInt)(length - i);
 
   /* +hh:mm or -hh:mm */
   if (tz_length == 6 && text[i+3] == ':')
@@ -1412,14 +1412,14 @@ sys_date_time_new (SysTimeZone *tz,
    * is 1000000.  This is not a problem with precision, it's just how
    * FP numbers work.
    * See https://bugzilla.gnome.org/show_bug.cgi?id=697715. */
-  usec = seconds * USEC_PER_SECOND;
+  usec = (SysInt64)(seconds * USEC_PER_SECOND);
   usecd = (usec + 1) * 1e-6;
   if (usecd <= seconds) {
     usec++;
   }
 
   full_time += UNIX_EPOCH_START * SEC_PER_DAY;
-  datetime->days = full_time / SEC_PER_DAY;
+  datetime->days = (SysInt32)(full_time / SEC_PER_DAY);
   datetime->usec = (full_time % SEC_PER_DAY) * USEC_PER_SECOND;
   datetime->usec += usec % USEC_PER_SECOND;
 
@@ -1715,7 +1715,7 @@ SysDateTime*
 sys_date_time_add_seconds (SysDateTime *datetime,
                          SysDouble    seconds)
 {
-  return sys_date_time_add (datetime, seconds * USEC_PER_SECOND);
+  return sys_date_time_add (datetime, (SysTimeSpan)(seconds * USEC_PER_SECOND));
 }
 
 /**
@@ -1810,7 +1810,7 @@ sys_date_time_add_full (SysDateTime *datetime,
   /* split into days and usec of a new datetime */
   new = sys_date_time_alloc (datetime->tz);
   new->interval = interval;
-  new->days = full_time / USEC_PER_DAY;
+  new->days = (SysInt32)(full_time / USEC_PER_DAY);
   new->usec = full_time % USEC_PER_DAY;
 
   /* XXX validate */
@@ -1890,7 +1890,7 @@ sys_date_time_hash (const SysPointer datetime)
 {
   sys_return_val_if_fail (datetime != NULL, 0);
 
-  return sys_date_time_to_instant ((SysDateTime *) datetime);
+  return (SysUInt)sys_date_time_to_instant ((SysDateTime *) datetime);
 }
 
 /**
@@ -2263,7 +2263,7 @@ sys_date_time_get_hour (SysDateTime *datetime)
 {
   sys_return_val_if_fail (datetime != NULL, 0);
 
-  return (datetime->usec / USEC_PER_HOUR);
+  return (SysInt)(datetime->usec / USEC_PER_HOUR);
 }
 
 /**
@@ -2798,7 +2798,7 @@ static SysBool sys_date_time_format_utf8 (SysDateTime   *datetime,
 
   while (*utf8_format)
     {
-      len = strcspn (utf8_format, "%");
+      len = (SysUInt)strcspn (utf8_format, "%");
       if (len)
         sys_string_append_len (outstr, utf8_format, len);
 

@@ -15,6 +15,10 @@ def rename_tbox(file):
             .replace("SysBool", "tb_bool_t")\
             .replace("NULL", "tb_null_t")\
             .replace("sys_debug_N", "tb_trace_d")\
+            .replace("g_ascii_isalnum", "isalnum")\
+            .replace(" gunichar ", " SysUniChar ")\
+            .replace(" glong ", " SysLong ")\
+            .replace("g_ascii_isalpha", "isalpha")\
             .replace("sys_error_N", "tb_trace_e")\
             .replace("sys_info_N", "tb_trace_i")\
             .replace("tb_return_if_fail", "tb_assert_and_check_return")\
@@ -66,6 +70,12 @@ def rename_glib(file):
     data = f.read()
     ndata = data\
             .replace("gmirror", "sysmirror")\
+            .replace("G_OS_WIN32", "SYS_OS_WIN32")\
+            .replace("GNormalizeMode", "SysNormalizeMode")\
+            .replace("g_unicode_", "sys_unicode_")\
+            .replace("g_unichar", "sys_unichar")\
+            .replace("G_OS_UNIX", "SYS_OS_UNIX")\
+            .replace("g_time_zone", "sys_time_zone")\
             .replace("G_N_ELEMENTS", "ARRAY_SIZE")\
             .replace("SYS_N_ELEMENTS", "ARRAY_SIZE")\
             .replace("GLIB_", "SYS_")\
