@@ -9,7 +9,7 @@ static SysChar buff[1024];
  * Returns: Void
  */
 const SysChar* sys_real_strerr(SysInt errnum) {
-  SysInt err = strerror_r(errnum, buff, sizeof(buff));
+  SysChar* err = strerror_r(errnum, buff, sizeof(buff));
 
-  return buff;
+  return err;
 }
