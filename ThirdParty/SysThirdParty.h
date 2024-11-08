@@ -5,6 +5,9 @@
 
 SYS_BEGIN_DECLS
 
+SYS_DIAGNOSTIC_PUSH
+#include <System/ThirdParty/SysThirdWarning.h>
+
 #if USE_OPENSSL
 #include <System/ThirdParty/SysOpenssl.h>
 #endif
@@ -17,6 +20,8 @@ SYS_BEGIN_DECLS
 #include <System/ThirdParty/SysIconv.h>
 #include <System/ThirdParty/SysLibCharSet.h>
 #endif
+
+SYS_DIAGNOSTIC_POP
 
 SYS_END_DECLS
 

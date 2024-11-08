@@ -64,12 +64,14 @@ SysHArray* sys_harray_new_with_free_func(SysDestroyFunc element_free_func) {
 }
 
 void sys_harray_destroy(SysHArray* self) {
+  SysPointer* sp;
+
   if (self->element_free_func) {
     for (SysUInt i = 0; i < self->len; ++i) {
       self->element_free_func(self->pdata[i]);
     }
 
-    SysPointer *sp = sys_steal_pointer(&self->pdata);
+    sp = sys_steal_pointer(&self->pdata);
 
     if(sp != NULL) {
       sys_free(sp);

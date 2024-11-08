@@ -718,7 +718,7 @@ void sys_tree_foreach_node (SysTree             *tree,
     }
 }
 
-void sys_tree_traverse (SysTree         *tree,
+static void sys_tree_traverse (SysTree         *tree,
                  SysTraverseFunc  traverse_func,
                  SysTraverseType  traverse_type,
                  SysPointer       user_data) {

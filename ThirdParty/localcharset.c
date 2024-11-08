@@ -196,7 +196,7 @@ _sys_locale_charset_raw (void)
 
 #if !(defined WIN32_NATIVE || defined OS2)
 
-# if HAVE_LANGINFO_CODESET
+#ifdef HAVE_LANGINFO_CODESET
 
   /* Most systems support nl_langinfo (CODESET) nowadays.  */
   codeset = nl_langinfo (CODESET);

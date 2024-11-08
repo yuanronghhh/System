@@ -42,7 +42,7 @@ SysBool sys_str_strip(SysChar *s) {
 }
 
 SysChar * sys_strchomp (SysChar *string) {
-  SysSize len;
+  SysSSize len;
 
   sys_return_val_if_fail (string != NULL, NULL);
 
@@ -73,9 +73,9 @@ SysChar **sys_strsplit(const SysChar * s, const SysChar *delim, SysInt * count) 
 
   SysChar **ptrs;
   SysChar* sp, *nsp;
-  SysSize sp_size;
-  SysSize s_len;
-  SysSize delim_len;
+  SysSSize sp_size;
+  SysSSize s_len;
+  SysSSize delim_len;
   SysInt delim_count;
 
   sp = (SysChar *)s;
@@ -118,7 +118,7 @@ SysChar **sys_strsplit(const SysChar * s, const SysChar *delim, SysInt * count) 
  *   simple method for concat string, use sys_strinsys_* for better api.
  *
  *  example:
- *    SysSize mlen = 200, len = 0;
+ *    SysSSize mlen = 200, len = 0;
  *    SysChar *s = sys_str_newsize(SysChar, mlen);
  *    sys_strmcat(&s, &mlen, &len, "var");
  *    sys_strmcat(&s, &mlen, &len, "=");
@@ -131,16 +131,16 @@ SysChar **sys_strsplit(const SysChar * s, const SysChar *delim, SysInt * count) 
  *
  * Returns: v1 string length.
  */
-void sys_strmcat(SysChar** v1, SysSize* v1_max, SysSize* len, const SysChar* v2) {
+void sys_strmcat(SysChar** v1, SysSSize* v1_max, SysSSize* len, const SysChar* v2) {
   sys_return_if_fail(*v1 != NULL);
   sys_return_if_fail(v2 != NULL);
   sys_return_if_fail(v1_max != NULL && "sys_strcat max_len should not be null.");
 
   SysChar *nstr;
-  SysSize nearup;
-  SysSize v1len;
-  SysSize v2len;
-  SysSize nlen;
+  SysSSize nearup;
+  SysSSize v1len;
+  SysSSize v2len;
+  SysSSize nlen;
 
   v1len = strlen(*v1);
   v2len = strlen(v2);
@@ -182,7 +182,7 @@ void sys_strmcat(SysChar** v1, SysSize* v1_max, SysSize* len, const SysChar* v2)
  * Returns: a newly-allocated string containing all the string arguments
  */
 SysChar* sys_strconcat (const SysChar *string1, ...) {
-  SysSize   l;
+  SysSSize   l;
   va_list args;
   SysChar   *s;
   SysChar   *concat;
@@ -221,13 +221,13 @@ SysChar* sys_strconcat (const SysChar *string1, ...) {
  *
  * Returns: return v1
  */
-SysChar* sys_strlcat(SysChar* v1, SysSize v1_max, const SysChar* v2) {
+SysChar* sys_strlcat(SysChar* v1, SysSSize v1_max, const SysChar* v2) {
   sys_return_val_if_fail(v1 != NULL, NULL);
   sys_return_val_if_fail(v2 != NULL, NULL);
 
-  SysSize v1_len = sys_strlen(v1, v1_max);
-  SysSize v2_len = strlen(v2);
-  SysSize nlen = v1_len + v2_len;
+  SysSSize v1_len = sys_strlen(v1, v1_max);
+  SysSSize v2_len = strlen(v2);
+  SysSSize nlen = v1_len + v2_len;
 
   if (nlen > v1_max) {
     sys_warning_N("string has no enough space ? %s", v1);
@@ -281,7 +281,7 @@ SysChar* sys_strpcpy(SysChar* dst, const SysChar* src) {
 SysChar* sys_strdup(const SysChar *s) {
   sys_return_val_if_fail(s != NULL, NULL);
 
-  SysSize len = strlen(s);
+  SysSSize len = strlen(s);
   SysChar *n = sys_new(SysChar, len + 1);
   memcpy(n, s, len);
   n[len] = '\0';
@@ -294,7 +294,7 @@ SysChar* sys_strdup(const SysChar *s) {
  *
  * Returns: new alloc str.
  */
-SysChar* sys_strndup(const SysChar *s, SysSize len) {
+SysChar* sys_strndup(const SysChar *s, SysSSize len) {
   sys_return_val_if_fail(s != NULL, NULL);
 
   SysChar *n = sys_new(SysChar, len + 1);
@@ -382,7 +382,7 @@ void sys_print(const SysChar *str) {
  *
  * Returns: length of string.
  */
-SysInt sys_snprintf(SysChar *str, SysSize size, const SysChar *format, ...) {
+SysInt sys_snprintf(SysChar *str, SysSSize size, const SysChar *format, ...) {
   SysInt len;
 
   va_list args;
@@ -426,13 +426,13 @@ SysChar *sys_strdup_printf(const SysChar *format, ...) {
  *
  * Returns: joined string with delimiter.
  */
-SysChar* sys_strjoin_array(const SysChar *delim, const SysChar **arr, SysSize *dstlen) {
+SysChar* sys_strjoin_array(const SysChar *delim, const SysChar **arr, SysSSize *dstlen) {
   sys_return_val_if_fail(delim != NULL, NULL);
   sys_return_val_if_fail(arr != NULL, NULL);
 
   SysChar *nstr, *ptr;
-  SysSize len;
-  SysSize dlen = strlen(delim);
+  SysSSize len;
+  SysSSize dlen = strlen(delim);
 
   const SysChar **na = arr;
   if (!(*na)) {
@@ -461,8 +461,8 @@ SysChar* sys_strjoin_array(const SysChar *delim, const SysChar **arr, SysSize *d
 
 SysChar *sys_strjoinv(const SysChar *delim, va_list args) {
   SysChar *s, *nstr, *ptr;
-  SysSize len;
-  SysSize dlen;
+  SysSSize len;
+  SysSSize dlen;
   va_list nargs;
 
   dlen = strlen(delim);
@@ -520,7 +520,7 @@ SysChar *_sys_strjoin(const SysChar *delim, ...) {
  *
  * Returns: buffer
  */
-SysChar* sys_bin_str_full(SysChar *buffer, SysSize bufsize, SysSize const sbyte, void const *const ptr) {
+SysChar* sys_bin_str_full(SysChar *buffer, SysSSize bufsize, SysSSize const sbyte, void const *const ptr) {
   SysUChar *b = (SysUChar *)ptr;
   SysUChar byte;
 
@@ -548,8 +548,8 @@ SysChar* sys_bin_str_full(SysChar *buffer, SysSize bufsize, SysSize const sbyte,
  *
  * Returns: length of string
  */
-SysSize sys_strlen(const SysChar *s, SysSize max) {
-  SysSize len;
+SysSSize sys_strlen(const SysChar *s, SysSSize max) {
+  SysSSize len;
 
   for (len = 0; len < max; len++, s++) {
     if (!*s) {
@@ -652,7 +652,7 @@ SysInt64 sys_str_to_int64(const SysChar *str) {
  *
  * Returns: void
  */
-SysChar* sys_str_newsize(SysSize size) {
+SysChar* sys_str_newsize(SysSSize size) {
   sys_return_val_if_fail(size > 1, NULL);
 
   SysChar *nstr;
@@ -681,7 +681,7 @@ SysChar* sys_str_newsize(SysSize size) {
  *    %NULL if not found.
  */
 SysChar * sys_strstr_len (const SysChar *haystack,
-    SysSize       haystack_len,
+    SysSSize       haystack_len,
     const SysChar *needle) {
   sys_return_val_if_fail (haystack != NULL, NULL);
   sys_return_val_if_fail (needle != NULL, NULL);
@@ -691,10 +691,10 @@ SysChar * sys_strstr_len (const SysChar *haystack,
   else
   {
     const SysChar *p = haystack;
-    SysSize needle_len = strlen (needle);
-    SysSize haystack_len_unsigned = haystack_len;
+    SysSSize needle_len = strlen (needle);
+    SysSSize haystack_len_unsigned = haystack_len;
     const SysChar *end;
-    SysSize i;
+    SysSSize i;
 
     if (needle_len == 0)
       return (SysChar *)haystack;
@@ -733,9 +733,9 @@ next:
  */
 SysChar * sys_strrstr (const SysChar *haystack,
     const SysChar *needle) {
-  SysSize i;
-  SysSize needle_len;
-  SysSize haystack_len;
+  SysSSize i;
+  SysSSize needle_len;
+  SysSSize haystack_len;
   const SysChar *p;
 
   sys_return_val_if_fail (haystack != NULL, NULL);
@@ -782,7 +782,7 @@ next:
  *    %NULL if not found.
  */
 SysChar * sys_strrstr_len (const SysChar *haystack,
-    SysSize        haystack_len,
+    SysSSize        haystack_len,
     const SysChar *needle) {
   sys_return_val_if_fail (haystack != NULL, NULL);
   sys_return_val_if_fail (needle != NULL, NULL);
@@ -793,10 +793,10 @@ SysChar * sys_strrstr_len (const SysChar *haystack,
   }
   else
   {
-    SysSize needle_len = strlen (needle);
+    SysSSize needle_len = strlen (needle);
     const SysChar *haystack_max = haystack + haystack_len;
     const SysChar *p = haystack;
-    SysSize i;
+    SysSSize i;
 
     while (p < haystack_max && *p)
       p++;

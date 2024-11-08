@@ -519,9 +519,6 @@ void sys_hnode_traverse (SysHNode    *root,
     case SYS_LEVEL_ORDER:
       sys_hnode_depth_traverse_level (root, flags, depth, func, user_data);
       break;
-    default:
-      sys_warning_N("Bad SYS_LEVEL_ORDER: %d", order);
-      break;
   }
 }
 
@@ -657,11 +654,13 @@ void sys_hnode_children_foreach (SysHNode    *hnode,
 }
 
 void sys_hnode_handle_bfs_r(SysHNode *self, SysHNodeFunc func, SysPointer user_data) {
-  sys_return_if_fail(SYS_IS_HDATA(self));
-
   SysHNode* node;
   SysHNode* nnode;
-  SysQueue* queue = sys_queue_new();
+  SysQueue* queue;
+
+  sys_return_if_fail(SYS_IS_HDATA(self));
+
+  queue = sys_queue_new();
 
   sys_queue_push_head(queue, (SysPointer)self);
 
@@ -715,10 +714,12 @@ void sys_hnode_handle_ft_r(SysHNode *self, SysHNodeFunc func, SysPointer user_da
 }
 
 SysHNode* sys_hnode_append(SysHNode *parent, SysHNode *node) {
+  SysHNode* last_child;
+
   sys_return_val_if_fail(SYS_IS_HDATA(parent), NULL);
   sys_return_val_if_fail(SYS_IS_HDATA(node), NULL);
-
-  SysHNode *last_child = sys_hnode_get_last_child(parent);
+  
+  last_child = sys_hnode_get_last_child(parent);
   sys_hnode_insert_after(parent, last_child, node);
   parent->last_child = node;
 

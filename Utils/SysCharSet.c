@@ -189,8 +189,7 @@ sys_get_charset (const char **charset)
  *
  * Returns: %true if the returned charset is UTF-8
  */
-SysBool _sys_get_time_charset (const char **charset)
-{
+static SysBool _sys_get_time_charset (const char **charset) {
   static SysPrivate cache_private = SYS_PRIVATE_INIT (charset_cache_free);
   GCharsetCache *cache = sys_private_get (&cache_private);
   const SysChar *raw;
@@ -228,9 +227,7 @@ SysBool _sys_get_time_charset (const char **charset)
  *
  * Returns: %true if the returned charset is UTF-8
  */
-SysBool
-_sys_get_ctype_charset (const char **charset)
-{
+static SysBool _sys_get_ctype_charset (const char **charset) {
   static SysPrivate cache_private = SYS_PRIVATE_INIT (charset_cache_free);
   GCharsetCache *cache = sys_private_get (&cache_private);
   const SysChar *raw;

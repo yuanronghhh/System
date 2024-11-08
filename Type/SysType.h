@@ -39,7 +39,7 @@ static void type_name##_class_init(TypeName##Class *o);                \
 static void type_name##_dispose(SysObject *o);                         \
 static SysTypeClass* type_name##_parent_class = NULL;                  \
 static SysInt TypeName##_private_offset = 0;                           \
-SysPointer type_name##_get_private(TypeName* o) {                      \
+static SysPointer type_name##_get_private(TypeName* o) {                      \
    return (((SysUInt8 *)o) + TypeName##_private_offset); \
 } \
 static void type_name##_class_intern_init (SysPointer kclass) \

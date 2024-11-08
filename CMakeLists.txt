@@ -213,6 +213,8 @@ set(SRC
   ./Fundamental/SysCommon.c
   ./Fundamental/SysCommonBase.h
   ./Fundamental/SysCommonTypes.h
+  ./ThirdParty/SysThirdParty.h
+  ./ThirdParty/SysThirdWarning.h
 
   ./SysConfig.h
   ./SysConfig.h.in

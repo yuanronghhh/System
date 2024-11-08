@@ -142,7 +142,7 @@ static SysBool win32_execute_child(SysSubProcessWin32 *pwin32,
   STARTUPINFO *si = &pwin32->s_si;
   PROCESS_INFORMATION *pi = &pwin32->s_pi;
   SysChar *cmdstr;
-  SysSize cmdlen = 0;
+  SysSSize cmdlen = 0;
 
   ZeroMemory(si, sizeof(*si));
   si->cb = sizeof(si);
@@ -177,13 +177,12 @@ static SysBool win32_execute_child(SysSubProcessWin32 *pwin32,
 }
 
 static SysSubProcessWin32 *sys_real_subprocess_internal(SysSubProcessOption* option) {
-  sys_return_val_if_fail(option != NULL, NULL);
-
   SysSubProcessWin32 *pwin32;
-
   HANDLE std0read = NULL, std0write = NULL;
   HANDLE std1read = NULL, std1write = NULL;
   HANDLE std2read = NULL, std2write = NULL;
+
+  sys_return_val_if_fail(option != NULL, NULL);
 
   pwin32 = sys_new0(SysSubProcessWin32, 1);
 

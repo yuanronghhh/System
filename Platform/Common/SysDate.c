@@ -905,6 +905,7 @@ sys_date_prepare_to_parse (const SysChar      *str,
             case 76:
               usinsys_twodigit_years = true;
               SYS_GNUC_FALLTHROUGH;
+              break;
             case 1976:
               dmy_order[i] = SYS_DATE_YEAR;
               break;
@@ -1007,9 +1008,9 @@ sys_date_set_parse (SysDate       *d,
   SysDateParseTokens pt;
   SysUInt m = SYS_DATE_BAD_MONTH, day = SYS_DATE_BAD_DAY, y = SYS_DATE_BAD_YEAR;
   SysSize str_len;
-  
+
   sys_return_if_fail (d != NULL);
-  
+
   /* set invalid */
   sys_date_clear (d, 1);
 
@@ -1026,68 +1027,62 @@ sys_date_set_parse (SysDate       *d,
   SYS_LOCK (sys_date_global);
 
   sys_date_prepare_to_parse (str, &pt);
-  
-  if (pt.num_ints == 4) 
-    {
-      SYS_UNLOCK (sys_date_global);
-      return; /* presumably a typo; bail out. */
-    }
-  
-  if (pt.num_ints > 1)
-    {
-      int i = 0;
-      int j = 0;
-      
-      sys_assert (pt.num_ints < 4); /* i.e., it is 2 or 3 */
-      
-      while (i < pt.num_ints && j < 3) 
-        {
-          switch (dmy_order[j])
-            {
-            case SYS_DATE_MONTH:
-            {
-              if (pt.num_ints == 2 && pt.month != SYS_DATE_BAD_MONTH)
-                {
-                  m = pt.month;
-                  ++j;      /* skip months, but don't skip this number */
-                  continue;
-                }
-              else 
-                m = pt.n[i];
-            }
-            break;
-            case SYS_DATE_DAY:
-            {
-              if (pt.num_ints == 2 && pt.month == SYS_DATE_BAD_MONTH)
-                {
-                  day = 1;
-                  ++j;      /* skip days, since we may have month/year */
-                  continue;
-                }
-              day = pt.n[i];
-            }
-            break;
-            case SYS_DATE_YEAR:
-            {
-              y  = pt.n[i];
-              
-              if (locale_era_adjust != 0)
-                {
-                  y += locale_era_adjust;
-                }
 
-              y = convert_twodigit_year (y);
-            }
-            break;
-            default:
-              break;
-            }
-          
-          ++i;
-          ++j;
+  if (pt.num_ints == 4) 
+  {
+    SYS_UNLOCK (sys_date_global);
+    return; /* presumably a typo; bail out. */
+  }
+
+  if (pt.num_ints > 1)
+  {
+    int i = 0;
+    int j = 0;
+
+    sys_assert (pt.num_ints < 4); /* i.e., it is 2 or 3 */
+
+    while (i < pt.num_ints && j < 3) 
+    {
+      switch (dmy_order[j])
+      {
+        case SYS_DATE_MONTH: {
+          if (pt.num_ints == 2 && pt.month != SYS_DATE_BAD_MONTH)
+          {
+            m = pt.month;
+            ++j;      /* skip months, but don't skip this number */
+            continue;
+          }
+          else 
+            m = pt.n[i];
         }
-      
-      
+        break;
+        case SYS_DATE_DAY: {
+          if (pt.num_ints == 2 && pt.month == SYS_DATE_BAD_MONTH)
+          {
+            day = 1;
+            ++j;      /* skip days, since we may have month/year */
+            continue;
+          }
+          day = pt.n[i];
+        }
+        break;
+        case SYS_DATE_YEAR: {
+          y  = pt.n[i];
+
+          if (locale_era_adjust != 0)
+          {
+            y += locale_era_adjust;
+          }
+
+          y = convert_twodigit_year (y);
+        }
+        break;
+      }
+
+      ++i;
+      ++j;
+    }
+
       if (pt.num_ints == 3 && !sys_date_valid_dmy (day, m, y))
         {
           /* Try YYYY MM DD */
@@ -1143,9 +1138,7 @@ sys_date_set_parse (SysDate       *d,
   SYS_UNLOCK (sys_date_global);
 }
 
-SysBool
-_sys_localtime (time_t timet, struct tm *out_tm)
-{
+static SysBool _sys_localtime (time_t timet, struct tm *out_tm) {
   SysBool success = true;
 
 #ifdef HAVE_LOCALTIME_R
@@ -1739,10 +1732,7 @@ sys_date_get_sunday_weeks_in_year (SysDateYear year)
  * Returns: 0 for equal, less than zero if @lhs is less than @rhs,
  *     greater than zero if @lhs is greater than @rhs
  */
-SysInt         
-sys_date_compare (const SysDate *lhs, 
-                const SysDate *rhs)
-{
+SysInt sys_date_compare (const SysDate *lhs, const SysDate *rhs) {
   sys_return_val_if_fail (lhs != NULL, 0);
   sys_return_val_if_fail (rhs != NULL, 0);
   sys_return_val_if_fail (sys_date_valid (lhs), 0);
@@ -1772,9 +1762,9 @@ sys_date_compare (const SysDate *lhs,
                   else if (lhs->day > rhs->day)              return 1;
                   else                                       return 0;
                 }
-              
+
             }
-          
+
         }
       else
         {
@@ -1782,10 +1772,10 @@ sys_date_compare (const SysDate *lhs,
           if (!rhs->julian) sys_date_update_julian (rhs);
           sys_return_val_if_fail (lhs->julian, 0);
           sys_return_val_if_fail (rhs->julian, 0);
+
+          return 0;
         }
-      
     }
-  return 0; /* warnings */
 }
 
 /**
@@ -1801,34 +1791,34 @@ sys_date_to_struct_tm (const SysDate *d,
                      struct tm   *tm)
 {
   SysDateWeekday day;
-     
+
   sys_return_if_fail (sys_date_valid (d));
   sys_return_if_fail (tm != NULL);
-  
+
   if (!d->dmy) 
     sys_date_update_dmy (d);
 
   sys_return_if_fail (d->dmy != 0);
-  
+
   /* zero all the irrelevant fields to be sure they're valid */
-  
+
   /* On Linux and maybe other systems, there are weird non-POSIX
    * fields on the end of struct tm that choke strftime if they
    * contain garbage.  So we need to 0 the entire struct, not just the
    * fields we know to exist. 
    */
-  
+
   memset (tm, 0x0, sizeof (struct tm));
-  
+
   tm->tm_mday = d->day;
   tm->tm_mon  = d->month - 1; /* 0-11 goes in tm */
   tm->tm_year = ((int)d->year) - 1900; /* X/Open says tm_year can be negative */
-  
+
   day = sys_date_get_weekday (d);
   if (day == 7) day = 0; /* struct tm wants days since Sunday, so Sunday is 0 */
-  
+
   tm->tm_wday = (int)day;
-  
+
   tm->tm_yday = sys_date_get_day_of_year (d) - 1; /* 0 to 365 */
   tm->tm_isdst = -1; /* -1 means "information not available" */
 }
@@ -1848,8 +1838,7 @@ sys_date_to_struct_tm (const SysDate *d,
 void
 sys_date_clamp (SysDate       *date,
               const SysDate *min_date,
-              const SysDate *max_date)
-{
+              const SysDate *max_date) {
   sys_return_if_fail (sys_date_valid (date));
 
   if (min_date != NULL)
@@ -1878,73 +1867,70 @@ sys_date_clamp (SysDate       *date,
  */
 void
 sys_date_order (SysDate *date1,
-              SysDate *date2)
-{
+              SysDate *date2) {
   sys_return_if_fail (sys_date_valid (date1));
   sys_return_if_fail (sys_date_valid (date2));
 
   if (sys_date_compare (date1, date2) > 0)
-    {
-      SysDate tmp = *date1;
-      *date1 = *date2;
-      *date2 = tmp;
-    }
+  {
+    SysDate tmp = *date1;
+    *date1 = *date2;
+    *date2 = tmp;
+  }
 }
 
 #ifdef SYS_OS_WIN32
-static SysBool
-append_month_name (SysArray     *result,
+static SysBool append_month_name (SysArray     *result,
                    LCID        lcid,
                    SYSTEMTIME *systemtime,
                    SysBool    abbreviated,
-                   SysBool    alternative)
-{
+                   SysBool    alternative) {
   int n;
   WORD base;
   LPCWSTR lpFormat;
 
   if (alternative)
-    {
-      base = abbreviated ? LOCALE_SABBREVMONTHNAME1 : LOCALE_SMONTHNAME1;
-      n = GetLocaleInfoW (lcid, base + systemtime->wMonth - 1, NULL, 0);
-      if (n == 0)
-        return false;
+  {
+    base = abbreviated ? LOCALE_SABBREVMONTHNAME1 : LOCALE_SMONTHNAME1;
+    n = GetLocaleInfoW (lcid, base + systemtime->wMonth - 1, NULL, 0);
+    if (n == 0)
+      return false;
 
-      sys_array_set_size (result, result->len + n);
-      if (GetLocaleInfoW (lcid, base + systemtime->wMonth - 1,
-                          ((wchar_t *) result->pdata) + result->len - n, n) != n)
-        return false;
+    sys_array_set_size (result, result->len + n);
+    if (GetLocaleInfoW (lcid, base + systemtime->wMonth - 1,
+          ((wchar_t *) result->pdata) + result->len - n, n) != n)
+      return false;
 
-      sys_array_set_size (result, result->len - 1);
-    }
+    sys_array_set_size (result, result->len - 1);
+  }
   else
-    {
-      /* According to MSDN, this is the correct method to obtain
-       * the form of the month name used when formatting a full
-       * date; it must be a genitive case in some languages.
-       *
-       * (n == 0) indicates an error, whereas (n < 2) is something we’d never
-       * expect from the given format string, and would break the subsequent code.
-       */
-      lpFormat = abbreviated ? L"ddMMM" : L"ddMMMM";
-      n = GetDateFormatW (lcid, 0, systemtime, lpFormat, NULL, 0);
-      if (n < 2)
-        return false;
+  {
+    /* According to MSDN, this is the correct method to obtain
+     * the form of the month name used when formatting a full
+     * date; it must be a genitive case in some languages.
+     *
+     * (n == 0) indicates an error, whereas (n < 2) is something we’d never
+     * expect from the given format string, and would break the subsequent code.
+     */
+    lpFormat = abbreviated ? L"ddMMM" : L"ddMMMM";
+    n = GetDateFormatW (lcid, 0, systemtime, lpFormat, NULL, 0);
+    if (n < 2)
+      return false;
 
-      sys_array_set_size (result, result->len + n);
-      if (GetDateFormatW (lcid, 0, systemtime, lpFormat,
-                          ((wchar_t *) result->pdata) + result->len - n, n) != n)
-        return false;
+    sys_array_set_size (result, result->len + n);
+    if (GetDateFormatW (lcid, 0, systemtime, lpFormat,
+          ((wchar_t *) result->pdata) + result->len - n, n) != n)
+      return false;
 
-      /* We have obtained a day number as two digits and the month name.
-       * Now let's get rid of those two digits: overwrite them with the
-       * month name.
-       */
-      memmove (((wchar_t *) result->pdata) + result->len - n,
-               ((wchar_t *) result->pdata) + result->len - n + 2,
-               (n - 2) * sizeof (wchar_t));
-      sys_array_set_size (result, result->len - 3);
-    }
+    /* We have obtained a day number as two digits and the month name.
+     * Now let's get rid of those two digits: overwrite them with the
+     * month name.
+     */
+    memmove (((wchar_t *) result->pdata) + result->len - n,
+        ((wchar_t *) result->pdata) + result->len - n + 2,
+        (n - 2) * sizeof (wchar_t));
+    sys_array_set_size (result, result->len - 3);
+  }
 
   return true;
 }

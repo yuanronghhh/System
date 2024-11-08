@@ -9,9 +9,9 @@
  */
 
 static void sys_string_expand (SysString *string,
-    SysSize    len) {
+    SysSSize    len) {
   /* Detect potential overflow */
-  if SYS_UNLIKELY ((SYS_MAXSIZE - string->len - 1) < len)
+  if SYS_UNLIKELY ((SysSSize)(SYS_MAXSIZE - string->len - 1) < len)
     sys_error_N ("adding %ul to string would overflow", len);
 
   string->allocated_len = sys_nearest_pow ((SysUInt)(string->len + len + 1));
@@ -25,7 +25,7 @@ static void sys_string_expand (SysString *string,
 }
 
 static inline void sys_string_maybe_expand (SysString *string,
-    SysSize    len) {
+    SysSSize    len) {
   if (SYS_UNLIKELY (string->len + len >= string->allocated_len))
     sys_string_expand (string, len);
 }
@@ -41,7 +41,7 @@ static inline void sys_string_maybe_expand (SysString *string,
  *
  * Returns: (transfer full): the new #SysString
  */
-SysString * sys_string_sized_new (SysSize dfl_size) {
+SysString * sys_string_sized_new (SysSSize dfl_size) {
   SysString *string = sys_slice_new (SysString);
 
   string->allocated_len = 0;
@@ -70,7 +70,7 @@ SysString * sys_string_new (const SysChar *init) {
     string = sys_string_sized_new (2);
 
   } else {
-    SysSize len;
+    SysSSize len;
 
     len = strlen (init);
     string = sys_string_sized_new (len + 2);
@@ -130,7 +130,7 @@ SysString * sys_string_new_take (SysChar *init) {
  * Returns: (transfer full): a new #SysString
  */
 SysString *sys_string_new_len (const SysChar *init,
-    SysSize       len) {
+    SysSSize       len) {
   SysString *string;
 
   if (len < 0) {
@@ -219,7 +219,7 @@ SysChar * sys_string_free_and_steal (SysString *string) {
  * Since: 2.34
  */
 SysBytes* sys_string_free_to_bytes (SysString *string) {
-  SysSize len;
+  SysSSize len;
   SysChar *buf;
 
   sys_return_val_if_fail (string != NULL, NULL);
@@ -247,9 +247,9 @@ SysBool sys_string_equal (const SysString *v,
   SysChar *p, *q;
   SysString *string1 = (SysString *) v;
   SysString *string2 = (SysString *) v2;
-  SysSize i = string1->len;
+  SysSSize i = string1->len;
 
-  if (i != string2->len)
+  if (i != (SysSSize)string2->len)
     return false;
 
   p = string1->str;
@@ -275,7 +275,7 @@ SysBool sys_string_equal (const SysString *v,
  */
 SysUInt sys_string_hash (const SysString *str) {
   const SysChar *p = str->str;
-  SysSize n = str->len;
+  SysSSize n = str->len;
   SysUInt h = 0;
 
   /* 31 bit hash function */
@@ -329,7 +329,7 @@ SysString *sys_string_assign (SysString *string,
  * Returns: (transfer none): @string
  */
 SysString *sys_string_truncate (SysString *string,
-    SysSize len) {
+    SysSSize len) {
   sys_return_val_if_fail (string != NULL, NULL);
 
   string->len = min (len, string->len);
@@ -352,7 +352,7 @@ SysString *sys_string_truncate (SysString *string,
  * Returns: (transfer none): @string
  */
 SysString *sys_string_set_size (SysString *string,
-    SysSize    len) {
+    SysSSize    len) {
   sys_return_val_if_fail (string != NULL, NULL);
 
   if (len >= string->allocated_len)
@@ -386,10 +386,10 @@ SysString *sys_string_set_size (SysString *string,
  * Returns: (transfer none): @string
  */
 SysString *sys_string_insert_len (SysString     *string,
-    SysSize       pos,
+    SysSSize       pos,
     const SysChar *val,
-    SysSize       len) {
-  SysSize len_unsigned, pos_unsigned;
+    SysSSize       len) {
+  SysSSize len_unsigned, pos_unsigned;
 
   sys_return_val_if_fail (string != NULL, NULL);
   sys_return_val_if_fail (len == 0 || val != NULL, string);
@@ -422,8 +422,8 @@ SysString *sys_string_insert_len (SysString     *string,
    */
   if (SYS_UNLIKELY (val >= string->str && val <= string->str + string->len))
   {
-    SysSize offset = val - string->str;
-    SysSize precount = 0;
+    SysSSize offset = val - string->str;
+    SysSSize precount = 0;
 
     sys_string_maybe_expand (string, len_unsigned);
     val = string->str + offset;
@@ -519,7 +519,7 @@ SysString *sys_string_append (SysString     *string,
  */
 SysString *sys_string_append_len (SysString     *string,
     const SysChar *val,
-    SysSize       len) {
+    SysSSize       len) {
   return sys_string_insert_len (string, -1, val, len);
 }
 
@@ -592,7 +592,7 @@ SysString *              sys_string_prepend (SysString     *string,
  */
 SysString *              sys_string_prepend_len (SysString     *string,
     const SysChar *val,
-    SysSize       len) {
+    SysSSize       len) {
   return sys_string_insert_len (string, 0, val, len);
 }
 
@@ -642,7 +642,7 @@ SysString *              sys_string_prepend_unichar (SysString  *string,
  * Returns: (transfer none): @string
  */
 SysString *              sys_string_insert (SysString     *string,
-    SysSize       pos,
+    SysSSize       pos,
     const SysChar *val) {
   return sys_string_insert_len (string, pos, val, -1);
 }
@@ -658,9 +658,9 @@ SysString *              sys_string_insert (SysString     *string,
  * Returns: (transfer none): @string
  */
 SysString *              sys_string_insert_c (SysString *string,
-    SysSize   pos,
+    SysSSize   pos,
     SysChar    c) {
-  SysSize pos_unsigned;
+  SysSSize pos_unsigned;
 
   sys_return_val_if_fail (string != NULL, NULL);
 
@@ -669,7 +669,7 @@ SysString *              sys_string_insert_c (SysString *string,
   if (pos < 0)
     pos = string->len;
   else
-    sys_return_val_if_fail ((SysSize) pos <= string->len, string);
+    sys_return_val_if_fail ((SysSSize) pos <= string->len, string);
   pos_unsigned = pos;
 
   /* If not just an append, move the old stuff */
@@ -699,7 +699,7 @@ SysString *              sys_string_insert_c (SysString *string,
  * Returns: (transfer none): @string
  */
 SysString *              sys_string_insert_unichar (SysString  *string,
-    SysSize    pos,
+    SysSSize    pos,
     SysUniChar  wc) {
   SysInt charlen, first, i;
   SysChar *dest;
@@ -743,11 +743,11 @@ SysString *              sys_string_insert_unichar (SysString  *string,
 
   } else {
 
-    sys_return_val_if_fail ((SysSize) pos <= string->len, string);
+    sys_return_val_if_fail ((SysSSize) pos <= string->len, string);
   }
 
   /* If not just an append, move the old stuff */
-  if ((SysSize) pos < string->len) {
+  if (pos < (SysSSize)string->len) {
 
     memmove (string->str + pos + charlen, string->str + pos, string->len - pos);
   }
@@ -782,7 +782,7 @@ SysString *              sys_string_insert_unichar (SysString  *string,
  * Since: 2.14
  */
 SysString *              sys_string_overwrite (SysString     *string,
-    SysSize        pos,
+  SysSize        pos,
     const SysChar *val) {
   sys_return_val_if_fail (val != NULL, string);
   return sys_string_overwrite_len (string, pos, val, strlen (val));
@@ -803,10 +803,10 @@ SysString *              sys_string_overwrite (SysString     *string,
  * Since: 2.14
  */
 SysString *              sys_string_overwrite_len (SysString     *string,
-    SysSize        pos,
+  SysSize        pos,
     const SysChar *val,
-    SysSize       len) {
-  SysSize end;
+    SysSSize       len) {
+  SysSSize end;
 
   sys_return_val_if_fail (string != NULL, NULL);
 
@@ -821,12 +821,12 @@ SysString *              sys_string_overwrite_len (SysString     *string,
 
   end = pos + len;
 
-  if (end > string->len)
+  if (end > (SysSSize)string->len)
     sys_string_maybe_expand (string, end - string->len);
 
   memcpy (string->str + pos, val, len);
 
-  if (end > string->len)
+  if (end > (SysSSize)string->len)
   {
     string->str[end] = '\0';
     string->len = end;
@@ -848,24 +848,24 @@ SysString *              sys_string_overwrite_len (SysString     *string,
  * Returns: (transfer none): @string
  */
 SysString *              sys_string_erase (SysString *string,
-    SysSize   pos,
-    SysSize   len) {
-  SysSize len_unsigned, pos_unsigned;
+    SysSSize   pos,
+    SysSSize   len) {
+  SysSSize len_unsigned, pos_unsigned;
 
   sys_return_val_if_fail (string != NULL, NULL);
   sys_return_val_if_fail (pos >= 0, string);
   pos_unsigned = pos;
 
-  sys_return_val_if_fail (pos_unsigned <= string->len, string);
+  sys_return_val_if_fail (pos_unsigned <= (SysSSize)string->len, string);
 
   if (len < 0)
     len_unsigned = string->len - pos_unsigned;
   else
   {
     len_unsigned = len;
-    sys_return_val_if_fail (pos_unsigned + len_unsigned <= string->len, string);
+    sys_return_val_if_fail (pos_unsigned + len_unsigned <= (SysSSize)string->len, string);
 
-    if (pos_unsigned + len_unsigned < string->len)
+    if (pos_unsigned + len_unsigned < (SysSSize)string->len)
       memmove (string->str + pos_unsigned,
           string->str + pos_unsigned + len_unsigned,
           string->len - (pos_unsigned + len_unsigned));
@@ -905,7 +905,7 @@ sys_string_replace (SysString     *string,
     const SysChar *find,
     const SysChar *replace,
     SysUInt        limit) {
-  SysSize f_len, r_len, pos;
+  SysSSize f_len, r_len, pos;
   SysChar *cur, *next;
   SysUInt n = 0;
 
@@ -961,7 +961,7 @@ SysString *sys_string_ascii_down (SysString *string) {
 
   while (n) {
 
-    *s = tolower (*s);
+    *s = (SysChar)tolower (*s);
     s++;
     n--;
   }
@@ -989,7 +989,7 @@ SysString *sys_string_ascii_up (SysString *string) {
   s = string->str;
 
   while (n) {
-    *s = tolower (*s);
+    *s = (SysChar)tolower (*s);
     s++;
     n--;
   }

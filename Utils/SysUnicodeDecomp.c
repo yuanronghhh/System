@@ -59,9 +59,9 @@ sys_unichar_combining_class (SysUniChar uc)
  **/
 void
 sys_unicode_canonical_ordering (SysUniChar *string,
-                              SysSize     len)
+                              SysSSize     len)
 {
-  SysSize i;
+  SysSSize i;
   int swap = 1;
 
   while (swap)
@@ -74,7 +74,7 @@ sys_unicode_canonical_ordering (SysUniChar *string,
           int next = COMBINING_CLASS (string[i + 1]);
           if (next != 0 && last > next)
             {
-              SysSize j;
+              SysSSize j;
               /* Percolate item leftward through string.  */
               for (j = i + 1; j > 0; --j)
                 {
@@ -102,7 +102,7 @@ sys_unicode_canonical_ordering (SysUniChar *string,
 static void
 decompose_hangul (SysUniChar s,
                   SysUniChar *r,
-                  SysSize *result_len)
+                  SysSSize *result_len)
 {
   SysInt SIndex = s - SBase;
   SysInt TIndex = SIndex % TCount;
@@ -181,10 +181,8 @@ find_decomposition (SysUniChar ch,
  * Deprecated: 2.30: Use the more flexible sys_unichar_fully_decompose()
  *   instead.
  **/
-SysUniChar *
-sys_unicode_canonical_decomposition (SysUniChar ch,
-                                   SysSize   *result_len)
-{
+static SysUniChar * sys_unicode_canonical_decomposition (SysUniChar ch,
+                                   SysSSize   *result_len) {
   const SysChar *decomp;
   const SysChar *p;
   SysUniChar *r;
@@ -305,15 +303,13 @@ combine (SysUniChar  a,
   return false;
 }
 
-SysUniChar *
-_sys_utf8_normalize_wc (const SysChar    *str,
-                      SysSize          max_len,
-                      SysNormalizeMode  mode)
-{
-  SysSize n_wc;
+static SysUniChar * _sys_utf8_normalize_wc (const SysChar    *str,
+                      SysSSize          max_len,
+                      SysNormalizeMode  mode) {
+  SysSSize n_wc;
   SysUniChar *wc_buffer;
   const char *p;
-  SysSize last_start;
+  SysSSize last_start;
   SysBool do_compat = (mode == SYS_NORMALIZE_NFKC ||
                         mode == SYS_NORMALIZE_NFKD);
   SysBool do_compose = (mode == SYS_NORMALIZE_NFC ||
@@ -352,7 +348,7 @@ _sys_utf8_normalize_wc (const SysChar    *str,
         }
       else if (wc >= SBase && wc < SBase + SCount)
         {
-          SysSize result_len;
+          SysSSize result_len;
           decompose_hangul (wc, NULL, &result_len);
           n_wc += result_len;
         }
@@ -379,11 +375,11 @@ _sys_utf8_normalize_wc (const SysChar    *str,
       SysUniChar wc = sys_utf8_get_char (p);
       const SysChar *decomp;
       int cc;
-      SysSize old_n_wc = n_wc;
+      SysSSize old_n_wc = n_wc;
           
       if (wc >= SBase && wc < SBase + SCount)
         {
-          SysSize result_len;
+          SysSSize result_len;
           decompose_hangul (wc, wc_buffer + n_wc, &result_len);
           n_wc += result_len;
         }
@@ -428,7 +424,7 @@ _sys_utf8_normalize_wc (const SysChar    *str,
 
   if (do_compose && n_wc > 0)
     {
-      SysSize i, j;
+      SysSSize i, j;
       int last_cc = 0;
       last_start = 0;
       
@@ -504,7 +500,7 @@ _sys_utf8_normalize_wc (const SysChar    *str,
  **/
 SysChar *
 sys_utf8_normalize (const SysChar    *str,
-                  SysSize          len,
+                  SysSSize          len,
                   SysNormalizeMode  mode)
 {
   SysUniChar *result_wc = _sys_utf8_normalize_wc (str, len, mode);
@@ -692,11 +688,11 @@ sys_unichar_compose (SysUniChar  a,
  *
  * Since: 2.30
  **/
-SysSize
+SysSSize
 sys_unichar_fully_decompose (SysUniChar  ch,
                            SysBool  compat,
                            SysUniChar *result,
-                           SysSize     result_len)
+                           SysSSize     result_len)
 {
   const SysChar *decomp;
   const SysChar *p;
@@ -704,7 +700,7 @@ sys_unichar_fully_decompose (SysUniChar  ch,
   /* Hangul syllable */
   if (ch >= SBase && ch < SBase + SCount)
     {
-      SysSize len, i;
+      SysSSize len, i;
       SysUniChar buffer[3];
       decompose_hangul (ch, result ? buffer : NULL, &len);
       if (result)
@@ -715,7 +711,7 @@ sys_unichar_fully_decompose (SysUniChar  ch,
   else if ((decomp = find_decomposition (ch, compat)) != NULL)
     {
       /* Found it.  */
-      SysSize len, i;
+      SysSSize len, i;
 
       len = sys_utf8_strlen (decomp, -1);
 

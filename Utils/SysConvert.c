@@ -119,7 +119,7 @@ sys_iconv_open (const SysChar  *to_codeset,
  *
  * Returns: count of non-reversible conversions, or -1 on error
  **/
-SysSize 
+SysSSize 
 sys_iconv (GIConv   converter,
          SysChar  **inbuf,
          SysSize   *inbytes_left,
@@ -192,10 +192,10 @@ close_converter (GIConv cd)
 }
 
 SysChar* sys_convert_with_iconv (const SysChar *str,
-                      SysSize       len,
+                      SysSSize       len,
                       GIConv       converter,
-                      SysSize       *bytes_read, 
-                      SysSize       *bytes_written, 
+                      SysSSize       *bytes_read, 
+                      SysSSize       *bytes_written, 
                       SysError     **error)
 {
   SysChar *dest;
@@ -203,8 +203,8 @@ SysChar* sys_convert_with_iconv (const SysChar *str,
   const SysChar *p;
   SysSize inbytes_remaining;
   SysSize outbytes_remaining;
-  SysSize err;
-  SysSize outbuf_size;
+  SysSSize err;
+  SysSSize outbuf_size;
   SysBool have_error = false;
   SysBool done = false;
   SysBool reset = false;
@@ -228,7 +228,7 @@ SysChar* sys_convert_with_iconv (const SysChar *str,
       else
         err = sys_iconv (converter, (char **)&p, &inbytes_remaining, &outp, &outbytes_remaining);
 
-      if (err == (SysSize) -1)
+      if (err == (SysSSize) -1)
         {
           switch (errno)
             {
@@ -238,7 +238,7 @@ SysChar* sys_convert_with_iconv (const SysChar *str,
               break;
             case E2BIG:
               {
-                SysSize used = outp - dest;
+                SysSSize used = outp - dest;
                 
                 outbuf_size *= 2;
                 dest = sys_realloc (dest, outbuf_size);
@@ -314,11 +314,11 @@ SysChar* sys_convert_with_iconv (const SysChar *str,
 }
 
 SysChar* sys_convert (const SysChar *str,
-           SysSize       len,  
+           SysSSize       len,  
            const SysChar *to_codeset,
            const SysChar *from_codeset,
-           SysSize       *bytes_read, 
-           SysSize       *bytes_written, 
+           SysSSize       *bytes_read, 
+           SysSSize       *bytes_written, 
            SysError     **error) {
   SysChar *res;
   GIConv cd;
@@ -399,12 +399,12 @@ SysChar* sys_convert (const SysChar *str,
  **/
 SysChar*
 sys_convert_with_fallback (const SysChar *str,
-                         SysSize       len,    
+                         SysSSize       len,    
                          const SysChar *to_codeset,
                          const SysChar *from_codeset,
                          const SysChar *fallback,
-                         SysSize       *bytes_read,
-                         SysSize       *bytes_written,
+                         SysSSize       *bytes_read,
+                         SysSSize       *bytes_written,
                          SysError     **error)
 {
   SysChar *utf8;
@@ -412,13 +412,13 @@ sys_convert_with_fallback (const SysChar *str,
   SysChar *outp;
   const SysChar *insert_str = NULL;
   const SysChar *p;
-  SysSize inbytes_remaining;   
+  SysSSize inbytes_remaining;   
   const SysChar *save_p = NULL;
-  SysSize save_inbytes = 0;
+  SysSSize save_inbytes = 0;
   SysSize outbytes_remaining; 
-  SysSize err;
+  SysSSize err;
   GIConv cd;
-  SysSize outbuf_size;
+  SysSSize outbuf_size;
   SysBool have_error = false;
   SysBool done = false;
 
@@ -497,7 +497,7 @@ sys_convert_with_fallback (const SysChar *str,
     err = sys_iconv (cd, (char **)&p, &inbytes_tmp, &outp, &outbytes_remaining);
     inbytes_remaining = inbytes_tmp;
 
-    if (err == (SysSize) -1)
+    if (err == (SysSSize) -1)
     {
       switch (errno)
       {
@@ -506,7 +506,7 @@ sys_convert_with_fallback (const SysChar *str,
           break;
         case E2BIG:
           {
-            SysSize used = outp - dest;
+            SysSSize used = outp - dest;
 
             outbuf_size *= 2;
             dest = sys_realloc (dest, outbuf_size);
@@ -546,6 +546,7 @@ sys_convert_with_fallback (const SysChar *str,
           }
           /* if p is null */
           SYS_GNUC_FALLTHROUGH;
+          break;
         default:
           {
             int errsv = errno;
@@ -608,11 +609,11 @@ sys_convert_with_fallback (const SysChar *str,
  * 
  */
 static SysChar * strdup_len (const SysChar *string,
-    SysSize       len,
-    SysSize       *bytes_read,
-    SysSize       *bytes_written,
+    SysSSize       len,
+    SysSSize       *bytes_read,
+    SysSSize       *bytes_written,
     SysError     **error) {
-  SysSize real_len;
+  SysSSize real_len;
   const SysChar *end_valid;
 
   if (!sys_utf8_validate (string, len, &end_valid))
@@ -658,16 +659,16 @@ typedef enum
  */
   static SysChar *
 convert_checked (const SysChar      *string,
-    SysSize            len,
+    SysSSize            len,
     const SysChar      *to_codeset,
     const SysChar      *from_codeset,
     ConvertCheckFlags flags,
-    SysSize            *bytes_read,
-    SysSize            *bytes_written,
+    SysSSize            *bytes_read,
+    SysSSize            *bytes_written,
     SysError          **error)
 {
   SysChar *out;
-  SysSize outbytes;
+  SysSSize outbytes;
 
   if ((flags & CONVERT_CHECK_NO_NULS_IN_INPUT) && len > 0)
   {
@@ -711,9 +712,9 @@ convert_checked (const SysChar      *string,
 }
 
 SysChar * sys_locale_to_utf8 (const SysChar  *opsysstring,
-    SysSize        len,            
-    SysSize        *bytes_read,    
-    SysSize        *bytes_written,
+    SysSSize        len,            
+    SysSSize        *bytes_read,    
+    SysSSize        *bytes_written,
     SysError      **error) {
   const char *charset;
 
@@ -731,10 +732,10 @@ SysChar * sys_locale_to_utf8 (const SysChar  *opsysstring,
  *
  * Returns: The converted string, or %NULL on an error.
  */
-SysChar * _sys_time_locale_to_utf8 (const SysChar *opsysstring,
-    SysSize       len,
-    SysSize       *bytes_read,
-    SysSize       *bytes_written,
+static SysChar * _sys_time_locale_to_utf8 (const SysChar *opsysstring,
+    SysSSize       len,
+    SysSSize       *bytes_read,
+    SysSSize       *bytes_written,
     SysError     **error) {
   const char *charset;
 
@@ -752,13 +753,11 @@ SysChar * _sys_time_locale_to_utf8 (const SysChar *opsysstring,
  *
  * Returns: The converted string, or %NULL on an error.
  */
-  SysChar *
-_sys_ctype_locale_to_utf8 (const SysChar *opsysstring,
-    SysSize       len,
-    SysSize       *bytes_read,
-    SysSize       *bytes_written,
-    SysError     **error)
-{
+static SysChar * _sys_ctype_locale_to_utf8 (const SysChar *opsysstring,
+    SysSSize       len,
+    SysSSize       *bytes_read,
+    SysSSize       *bytes_written,
+    SysError     **error) {
   const char *charset;
 
   if (_sys_get_ctype_charset (&charset))
@@ -770,9 +769,9 @@ _sys_ctype_locale_to_utf8 (const SysChar *opsysstring,
 }
 
 SysChar * sys_locale_from_utf8 (const SysChar *utf8string,
-    SysSize       len,            
-    SysSize       *bytes_read,    
-    SysSize       *bytes_written,
+    SysSSize       len,            
+    SysSSize       *bytes_read,    
+    SysSSize       *bytes_written,
     SysError     **error) {
   const SysChar *charset;
 
@@ -906,9 +905,9 @@ get_filename_charset (const SysChar **filename_charset)
 }
 
 SysChar* sys_filename_to_utf8 (const SysChar *opsysstring, 
-    SysSize       len,           
-    SysSize       *bytes_read,   
-    SysSize       *bytes_written,
+    SysSSize       len,           
+    SysSSize       *bytes_read,   
+    SysSSize       *bytes_written,
     SysError     **error) {
   const SysChar *charset;
 
@@ -924,9 +923,9 @@ SysChar* sys_filename_to_utf8 (const SysChar *opsysstring,
 }
 
 SysChar* sys_filename_from_utf8 (const SysChar *utf8string,
-    SysSize       len,            
-    SysSize       *bytes_read,    
-    SysSize       *bytes_written,
+    SysSSize       len,            
+    SysSSize       *bytes_read,    
+    SysSSize       *bytes_written,
     SysError     **error) {
   const SysChar *charset;
 
@@ -1413,9 +1412,7 @@ SysChar * sys_filename_from_uri (const SysChar *uri,
  *
  * Since: 2.6
  */
-  SysChar **
-            sys_uri_list_extract_uris (const SysChar *uri_list)
-{
+static SysChar ** sys_uri_list_extract_uris (const SysChar *uri_list) {
   SysPtrArray *uris;
   const SysChar *p, *q;
 
@@ -1542,14 +1539,14 @@ SysChar * sys_filename_display_name (const SysChar *filename) {
 /* Binary compatibility versions. Not for newly compiled code. */
 
 SYS_API SysChar *sys_filename_to_utf8_utf8   (const SysChar  *opsysstring,
-    SysSize        len,
-    SysSize        *bytes_read,
-    SysSize        *bytes_written,
+    SysSSize        len,
+    SysSSize        *bytes_read,
+    SysSSize        *bytes_written,
     SysError      **error) SYS_GNUC_MALLOC;
 SYS_API SysChar *sys_filename_from_utf8_utf8 (const SysChar  *utf8string,
-    SysSize        len,
-    SysSize        *bytes_read,
-    SysSize        *bytes_written,
+    SysSSize        len,
+    SysSSize        *bytes_read,
+    SysSSize        *bytes_written,
     SysError      **error) SYS_GNUC_MALLOC;
 SYS_API SysChar *sys_filename_from_uri_utf8  (const SysChar  *uri,
     SysChar       **hostname,
@@ -1560,18 +1557,18 @@ SYS_API SysChar *sys_filename_to_uri_utf8    (const SysChar  *filename,
 
   SysChar *
 sys_filename_to_utf8_utf8 (const SysChar *opsysstring,
-    SysSize       len,
-    SysSize       *bytes_read,
-    SysSize       *bytes_written,
+    SysSSize       len,
+    SysSSize       *bytes_read,
+    SysSSize       *bytes_written,
     SysError     **error)
 {
   return sys_filename_to_utf8 (opsysstring, len, bytes_read, bytes_written, error);
 }
 
 SysChar * sys_filename_from_utf8_utf8 (const SysChar *utf8string,
-    SysSize       len,
-    SysSize       *bytes_read,
-    SysSize       *bytes_written,
+    SysSSize       len,
+    SysSSize       *bytes_read,
+    SysSSize       *bytes_written,
     SysError     **error)
 {
   return sys_filename_from_utf8 (utf8string, len, bytes_read, bytes_written, error);

@@ -9,7 +9,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,
   DWORD     fdwReason,
   LPVOID    lpvReserved);
 
-HMODULE win32dll;
+static HMODULE win32dll;
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL,DWORD fdwReason, LPVOID lpvReserved) {
   UNUSED(lpvReserved);
@@ -315,6 +315,8 @@ SysChar * sys_os_getlocale (void) {
         case SUBLANG_AZERI_CYRILLIC:
           script = "@Cyrl";
           break;
+        default:
+          break;
         }
       break;
     case LANG_SERBIAN:                /* LANG_CROATIAN == LANG_SERBIAN */
@@ -323,6 +325,8 @@ SysChar * sys_os_getlocale (void) {
         case SUBLANG_SERBIAN_LATIN:
         case 0x06: /* Serbian (Latin) - Bosnia and Herzegovina */
           script = "@Latn";
+          break;
+        default:
           break;
         }
       break;
@@ -335,7 +339,11 @@ SysChar * sys_os_getlocale (void) {
         case SUBLANG_UZBEK_CYRILLIC:
           script = "@Cyrl";
           break;
+        default:
+          break;
         }
+      break;
+    default:
       break;
     }
 

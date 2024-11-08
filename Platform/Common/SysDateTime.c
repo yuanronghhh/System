@@ -956,8 +956,8 @@ SysDateTime * sys_date_time_new_from_unix_utc (SysInt64 t) {
 
 
 /* Parse integers in the form d (week days), dd (hours etc), ddd (ordinal days) or dddd (years) */
-static SysBool get_iso8601_int (const SysChar *text, SysSize length, SysInt *value) {
-  SysSize i;
+static SysBool get_iso8601_int (const SysChar *text, SysSSize length, SysInt *value) {
+  SysSSize i;
   SysUInt v = 0;
 
   if (length < 1 || length > 4)
@@ -976,10 +976,8 @@ static SysBool get_iso8601_int (const SysChar *text, SysSize length, SysInt *val
 }
 
 /* Parse seconds in the form ss or ss.sss (variable length decimal) */
-static SysBool
-get_iso8601_seconds (const SysChar *text, SysSize length, SysDouble *value)
-{
-  SysSize i;
+static SysBool get_iso8601_seconds (const SysChar *text, SysSSize length, SysDouble *value) {
+  SysSSize i;
   SysUInt64 divisor = 1, v = 0;
 
   if (length < 2)
@@ -997,7 +995,7 @@ get_iso8601_seconds (const SysChar *text, SysSize length, SysDouble *value)
     return false;
 
   /* Ignore leap seconds, see sys_date_time_new_from_iso8601() */
-  if (v >= 60.0 && v <= 61.0)
+  if (v >= (SysUInt64)60.0 && v <= (SysUInt64)61.0)
     v = (SysUInt64)59.0;
 
   i++;
@@ -1015,7 +1013,7 @@ get_iso8601_seconds (const SysChar *text, SysSize length, SysDouble *value)
       divisor *= 10;
     }
 
-  *value = (SysDouble) v / divisor;
+  *value = (SysDouble)(v / divisor);
   return true;
 }
 
@@ -1070,7 +1068,7 @@ sys_date_time_new_week (SysTimeZone *tz, SysInt year, SysInt week, SysInt week_d
 }
 
 static SysDateTime *
-parse_iso8601_date (const SysChar *text, SysSize length,
+parse_iso8601_date (const SysChar *text, SysSSize length,
                     SysInt hour, SysInt minute, SysDouble seconds, SysTimeZone *tz)
 {
   /* YYYY-MM-DD */
@@ -1136,7 +1134,7 @@ parse_iso8601_date (const SysChar *text, SysSize length,
 }
 
 static SysTimeZone *
-parse_iso8601_timezone (const SysChar *text, SysSize length, SysSize *tz_offset)
+parse_iso8601_timezone (const SysChar *text, SysSSize length, SysSSize *tz_offset)
 {
   SysInt i, tz_length, offset_hours, offset_minutes;
   SysInt offset_sign = 1;
@@ -1201,10 +1199,10 @@ parse_iso8601_timezone (const SysChar *text, SysSize length, SysSize *tz_offset)
 }
 
 static SysBool
-parse_iso8601_time (const SysChar *text, SysSize length,
+parse_iso8601_time (const SysChar *text, SysSSize length,
                     SysInt *hour, SysInt *minute, SysDouble *seconds, SysTimeZone **tz)
 {
-  SysSize tz_offset = -1;
+  SysSSize tz_offset = -1;
 
   /* Check for timezone suffix */
   *tz = parse_iso8601_timezone (text, length, &tz_offset);
@@ -1413,7 +1411,7 @@ sys_date_time_new (SysTimeZone *tz,
    * FP numbers work.
    * See https://bugzilla.gnome.org/show_bug.cgi?id=697715. */
   usec = (SysInt64)(seconds * USEC_PER_SECOND);
-  usecd = (usec + 1) * 1e-6;
+  usecd = (SysDouble)(usec + 1) * 1e-6;
   if (usecd <= seconds) {
     usec++;
   }
@@ -2606,7 +2604,7 @@ static const SysChar * const *
 initialize_alt_digits (void)
 {
   SysUInt i;
-  SysSize digit_len;
+  SysSSize digit_len;
   SysChar *digit;
   const SysChar *locale_digit;
 #define N_DIGITS 10
@@ -2628,7 +2626,7 @@ initialize_alt_digits (void)
       if (digit == NULL)
         return NULL;
 
-      sys_assert (digit_len < (SysSize) (buffer + sizeof (buffer) - buffer_end));
+      sys_assert (digit_len < (SysSSize) (buffer + sizeof (buffer) - buffer_end));
 
       alt_digits[i] = buffer_end;
       buffer_end = sys_stpcpy (buffer_end, digit);
@@ -2660,7 +2658,7 @@ static void format_number (SysString     *str,
   if (use_alt_digits)
     {
       static const SysChar * const *alt_digits = NULL;
-      static SysSize initialised;
+      static SysSSize initialised;
 
       if SYS_UNLIKELY (sys_once_init_enter (&initialised))
         {
@@ -2761,7 +2759,7 @@ string_append (SysString     *string,
                SysBool     s_is_utf8)
 {
   SysChar *utf8;
-  SysSize  utf8_len;
+  SysSSize  utf8_len;
 
   if (s_is_utf8)
     {

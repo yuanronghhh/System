@@ -138,6 +138,7 @@ SysInt sys_fprintf(FILE* const fp,SysChar const* const format, ...) {
 }
 
 SysInt sys_vfprintf(FILE* const fp, SysChar const* const format,va_list args) {
+
   return vfprintf(fp, format, args);
 }
 

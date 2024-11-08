@@ -638,10 +638,10 @@ SysBool sys_unichar_decompose (SysUniChar  ch,
                               SysUniChar *a,
                               SysUniChar *b);
 
-SysSize sys_unichar_fully_decompose (SysUniChar  ch,
+SysSSize sys_unichar_fully_decompose (SysUniChar  ch,
                                  SysBool  compat,
                                  SysUniChar *result,
-                                 SysSize     result_len);
+                                 SysSSize     result_len);
 
 /**
  * SYS_UNICHAR_MAX_DECOMPOSITION_LENGTH:
@@ -659,17 +659,17 @@ SysSize sys_unichar_fully_decompose (SysUniChar  ch,
    decomposed characters in the string according to their combining
    classes.  See the Unicode manual for more information.  */
 void sys_unicode_canonical_ordering (SysUniChar *string,
-                                   SysSize     len);
+                                   SysSSize     len);
 
 LocaleType sys_unicode_get_locale_type (void);
 
-SysSize sys_unicode_real_toupper (const SysChar *str,
-              SysSize       max_len,
+SysSSize sys_unicode_real_toupper (const SysChar *str,
+              SysSSize       max_len,
               SysChar       *out_buffer,
               LocaleType   locale_type);
 
-SysSize sys_unicode_real_tolower (const SysChar *str,
-              SysSize       max_len,
+SysSSize sys_unicode_real_tolower (const SysChar *str,
+              SysSSize       max_len,
               SysChar       *out_buffer,
               LocaleType   locale_type);
 

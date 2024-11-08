@@ -14,7 +14,7 @@ static void sys_object_class_init(SysObjectClass* self);
 
 static SysTypeClass* sys_object_parent_class = NULL;
 static SysInt SysObject_private_offset;
-SysPointer sys_object_get_private(SysObject* o) {
+static SysPointer sys_object_get_private(SysObject* o) {
   return (((SysUInt8*)o) + SysObject_private_offset);
 }
 static void sys_object_class_intern_init(SysPointer cls) {
@@ -48,7 +48,7 @@ static void sys_object_dispose_i(SysObject *self) {
   sys_return_if_fail(self != NULL);
 }
 
-SysObject* _sys_object_new_from_instance(SysObject *o) {
+static SysObject* _sys_object_new_from_instance(SysObject *o) {
   sys_return_val_if_fail(o != NULL, NULL);
 
   SysType type = sys_type_from_instance(o);

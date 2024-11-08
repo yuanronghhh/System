@@ -14,8 +14,8 @@ struct _SysString {
 SysString*     sys_string_new               (const SysChar     *init);
 SysString*     sys_string_new_take          (SysChar           *init);
 SysString*     sys_string_new_len           (const SysChar     *init,
-                                         SysSize           len);
-SysString*     sys_string_sized_new         (SysSize            dfl_size);
+                                         SysSSize           len);
+SysString*     sys_string_sized_new         (SysSSize            dfl_size);
 SysChar*      sys_string_free             (SysString         *string,
                                          SysBool         free_segment);
 SysChar*       sys_string_free_and_steal    (SysString         *string);
@@ -27,18 +27,18 @@ SysUInt        sys_string_hash              (const SysString   *str);
 SysString*     sys_string_assign            (SysString         *string,
                                          const SysChar     *rval);
 SysString*     sys_string_truncate          (SysString         *string,
-                                         SysSize            len);
+                                         SysSSize            len);
 SysString*     sys_string_set_size          (SysString         *string,
-                                         SysSize            len);
+                                         SysSSize            len);
 SysString*     sys_string_insert_len        (SysString         *string,
-                                         SysSize           pos,
+                                         SysSSize           pos,
                                          const SysChar     *val,
-                                         SysSize           len);
+                                         SysSSize           len);
 SysString*     sys_string_append            (SysString         *string,
                                          const SysChar     *val);
 SysString*     sys_string_append_len        (SysString         *string,
                                          const SysChar     *val,
-                                         SysSize           len);
+                                         SysSSize           len);
 SysString*     sys_string_append_c          (SysString         *string,
                                          SysChar            c);
 SysString*     sys_string_append_unichar    (SysString         *string,
@@ -51,15 +51,15 @@ SysString*     sys_string_prepend_unichar   (SysString         *string,
                                          SysUniChar         wc);
 SysString*     sys_string_prepend_len       (SysString         *string,
                                          const SysChar     *val,
-                                         SysSize           len);
+                                         SysSSize           len);
 SysString*     sys_string_insert            (SysString         *string,
-                                         SysSize           pos,
+                                         SysSSize           pos,
                                          const SysChar     *val);
 SysString*     sys_string_insert_c          (SysString         *string,
-                                         SysSize           pos,
+                                         SysSSize           pos,
                                          SysChar            c);
 SysString*     sys_string_insert_unichar    (SysString         *string,
-                                         SysSize           pos,
+                                         SysSSize           pos,
                                          SysUniChar         wc);
 SysString*     sys_string_overwrite         (SysString         *string,
                                          SysSize            pos,
@@ -67,10 +67,10 @@ SysString*     sys_string_overwrite         (SysString         *string,
 SysString*     sys_string_overwrite_len     (SysString         *string,
                                          SysSize            pos,
                                          const SysChar     *val,
-                                         SysSize           len);
+                                         SysSSize           len);
 SysString*     sys_string_erase             (SysString         *string,
-                                         SysSize           pos,
-                                         SysSize           len);
+                                         SysSSize           pos,
+                                         SysSSize           len);
 SysUInt         sys_string_replace          (SysString         *string,
                                          const SysChar     *find,
                                          const SysChar     *replace,
@@ -89,6 +89,8 @@ void         sys_string_append_vprintf    (SysString         *string,
 void         sys_string_append_printf     (SysString         *string,
                                          const SysChar     *format,
                                          ...);
+SysString *sys_string_down (SysString *string);
+SysString * sys_string_up (SysString *string);
 
 SYS_END_DECLS
 

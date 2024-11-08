@@ -199,7 +199,7 @@ sys_bytes_new_from_bytes (SysBytes  *bytes,
   /* Avoid referencing intermediate SysBytes. In practice, this should
    * only loop once.
    */
-  while (bytes->free_func == (SysPointer)sys_bytes_unref)
+  while (bytes->free_func == (SysDestroyFunc)sys_bytes_unref)
     bytes = bytes->user_data;
 
   sys_return_val_if_fail (bytes != NULL, NULL);

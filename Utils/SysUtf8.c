@@ -192,7 +192,7 @@ sys_utf8_prev_char (const SysChar *p)
  * Returns: the length of the string in characters
  */
 SysLong sys_utf8_strlen (const SysChar *p,
-               SysSize       max)
+               SysSSize       max)
 {
   SysLong len = 0;
   const SysChar *start = p;
@@ -405,7 +405,7 @@ sys_utf8_pointer_to_offset (const SysChar *str,
 SysChar *
 sys_utf8_strncpy (SysChar       *dest,
                 const SysChar *src,
-                SysSize        n)
+                SysSSize        n)
 {
   const SysChar *s = src;
   while (n && *s)
@@ -500,7 +500,7 @@ sys_unichar_to_utf8 (SysUniChar c,
  */
 SysChar *
 sys_utf8_strchr (const char *p,
-               SysSize      len,
+               SysSSize      len,
                SysUniChar    c)
 {
   SysChar ch[10];
@@ -528,7 +528,7 @@ sys_utf8_strchr (const char *p,
  */
 SysChar *
 sys_utf8_strrchr (const char *p,
-                SysSize      len,
+                SysSSize      len,
                 SysUniChar    c)
 {
   SysChar ch[10];
@@ -547,9 +547,9 @@ sys_utf8_strrchr (const char *p,
  */
 static inline SysUniChar
 sys_utf8_get_char_extended (const  SysChar *p,
-                          SysSize max_len)
+                          SysSSize max_len)
 {
-  SysSize i, len;
+  SysSSize i, len;
   SysUniChar min_code;
   SysUniChar wc = (SysUChar) *p;
   const SysUniChar partial_sequence = (SysUniChar) -2;
@@ -598,9 +598,9 @@ sys_utf8_get_char_extended (const  SysChar *p,
       return malformed_sequence;
     }
 
-  if (SYS_UNLIKELY (max_len >= 0 && len > (SysSize) max_len))
+  if (SYS_UNLIKELY (max_len >= 0 && len > (SysSSize) max_len))
     {
-      for (i = 1; i < (SysSize) max_len; i++)
+      for (i = 1; i < (SysSSize) max_len; i++)
         {
           if ((((SysUChar *)p)[i] & 0xc0) != 0x80)
             return malformed_sequence;
@@ -652,7 +652,7 @@ sys_utf8_get_char_extended (const  SysChar *p,
  */
 SysUniChar
 sys_utf8_get_char_validated (const SysChar *p,
-                           SysSize       max_len)
+                           SysSSize       max_len)
 {
   SysUniChar result;
 
@@ -783,8 +783,8 @@ sys_utf8_to_ucs4_fast (const SysChar *str,
   return result;
 }
 
-static SysPointer try_malloc_n (SysSize n_blocks,
-    SysSize n_block_bytes,
+static SysPointer try_malloc_n (SysSSize n_blocks,
+    SysSSize n_block_bytes,
     SysError **error) {
 
   SysPointer ptr = sys_try_malloc_n (n_blocks, n_block_bytes);
@@ -1516,7 +1516,7 @@ error:
 
   static const SysChar *
 fast_validate_len (const char *str,
-    SysSize      max_len)
+    SysSSize      max_len)
 
 {
   const SysChar *p;
@@ -1623,7 +1623,7 @@ error:
  */
   SysBool
 sys_utf8_validate (const char   *str,
-    SysSize        max_len,
+    SysSSize        max_len,
     const SysChar **end)
 
 {
@@ -1659,7 +1659,7 @@ sys_utf8_validate (const char   *str,
  */
   SysBool
          sys_utf8_validate_len (const char   *str,
-             SysSize         max_len,
+             SysSSize         max_len,
              const SysChar **end)
 
 {
@@ -1718,7 +1718,7 @@ sys_unichar_validate (SysUniChar ch)
  */
   SysChar *
            sys_utf8_strreverse (const SysChar *str,
-               SysSize       len)
+               SysSSize       len)
 {
   SysChar *r, *result;
   const SysChar *p;
@@ -1764,11 +1764,11 @@ sys_unichar_validate (SysUniChar ch)
  */
   SysChar *
            sys_utf8_make_valid (const SysChar *str,
-               SysSize       len)
+               SysSSize       len)
 {
   SysString *string;
   const SysChar *remainder, *invalid;
-  SysSize remaininsys_bytes, valid_bytes;
+  SysSSize remaininsys_bytes, valid_bytes;
 
   sys_return_val_if_fail (str != NULL, NULL);
 
@@ -1829,7 +1829,7 @@ sys_unichar_validate (SysUniChar ch)
  **/
   SysChar *
 sys_utf8_casefold (const SysChar *str,
-    SysSize       len)
+    SysSSize       len)
 {
   SysString *result;
   const char *p;
@@ -1889,9 +1889,9 @@ next:
  **/
   SysChar *
 sys_utf8_strdown (const SysChar *str,
-    SysSize       len)
+    SysSSize       len)
 {
-  SysSize result_len;
+  SysSSize result_len;
   LocaleType locale_type;
   SysChar *result;
 
@@ -1924,11 +1924,10 @@ sys_utf8_strdown (const SysChar *str,
  * Returns: a newly allocated string, with all characters
  *    converted to uppercase.
  **/
-  SysChar *
-sys_utf8_strup (const SysChar *str,
-    SysSize       len)
-{
-  SysSize result_len;
+SysChar * sys_utf8_strup (const SysChar *str,
+    SysSSize       len) {
+
+  SysSSize result_len;
   LocaleType locale_type;
   SysChar *result;
 

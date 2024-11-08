@@ -250,8 +250,6 @@ sys_unichar_isspace (SysUniChar c)
     case '\r':
     case '\f':
       return true;
-      break;
-      
     default:
       {
         return IS (TYPE(c),
@@ -260,7 +258,6 @@ sys_unichar_isspace (SysUniChar c)
                    OR (SYS_UNICODE_PARAGRAPH_SEPARATOR,
                   0)))) ? true : false;
       }
-      break;
     }
 }
 
@@ -778,14 +775,14 @@ output_special_case (SysChar *out_buffer,
   return len;
 }
 
-SysSize sys_unicode_real_toupper (const SysChar *str,
-              SysSize       max_len,
+SysSSize sys_unicode_real_toupper (const SysChar *str,
+              SysSSize       max_len,
               SysChar       *out_buffer,
               LocaleType   locale_type)
 {
   const SysChar *p = str;
   const char *last = NULL;
-  SysSize len = 0;
+  SysSSize len = 0;
   SysBool last_was_i = false;
 
   while ((max_len < 0 || p < str + max_len) && *p)
@@ -809,7 +806,7 @@ SysSize sys_unicode_real_toupper (const SysChar *str,
                    * I think only E WITH DOT ABOVE occurs in practice
                    * which could simplify this considerably.
                    */
-                  SysSize decomp_len, i;
+                  SysSSize decomp_len, i;
                   SysUniChar decomp[SYS_UNICHAR_MAX_DECOMPOSITION_LENGTH];
 
                   decomp_len = sys_unichar_fully_decompose (c, false, decomp, ARRAY_SIZE (decomp));
@@ -879,7 +876,7 @@ SysSize sys_unicode_real_toupper (const SysChar *str,
         }
       else
         {
-          SysSize char_len = sys_utf8_skip[*(SysUChar *)last];
+          SysSSize char_len = sys_utf8_skip[*(SysUChar *)last];
 
           if (out_buffer)
             memcpy (out_buffer + len, last, char_len);
@@ -914,14 +911,14 @@ has_more_above (const SysChar *str)
   return false;
 }
 
-SysSize sys_unicode_real_tolower (const SysChar *str,
-              SysSize       max_len,
+SysSSize sys_unicode_real_tolower (const SysChar *str,
+              SysSSize       max_len,
               SysChar       *out_buffer,
               LocaleType   locale_type)
 {
   const SysChar *p = str;
   const char *last = NULL;
-  SysSize len = 0;
+  SysSSize len = 0;
 
   while ((max_len < 0 || p < str + max_len) && *p)
     {
@@ -1036,7 +1033,7 @@ SysSize sys_unicode_real_tolower (const SysChar *str,
         }
       else
         {
-          SysSize char_len = sys_utf8_skip[*(SysUChar *)last];
+          SysSSize char_len = sys_utf8_skip[*(SysUChar *)last];
 
           if (out_buffer)
             memcpy (out_buffer + len, last, char_len);

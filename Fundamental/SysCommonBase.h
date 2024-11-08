@@ -70,6 +70,26 @@ typedef SysUInt32 SysUniChar;
 #define SYS_STMT_START do
 #define SYS_STMT_END while(0)
 
+#if defined(__GNUC__)
+#define SYS_PRAGMA(x) _Pragma(#x)
+#define SYS_DIAGNOSTIC_IGNORE(warningName) SYS_PRAGMA(GCC diagnostic ignored #warningName)
+#define SYS_WARNING_DISABLE_ALL SYS_DIAGNOSTIC_IGNORE(-Wall)
+#define SYS_DIAGNOSTIC_PUSH SYS_PRAGMA(GCC diagnostic push)
+#define SYS_DIAGNOSTIC_POP SYS_PRAGMA(GCC diagnostic pop)
+#elif defined(__clang__)
+#define SYS_PRAGMA(x) _Pragma(#x)
+#define SYS_DIAGNOSTIC_IGNORE(warningName) SYS_PRAGMA(clang diagnostic ignored #warningName)
+#define SYS_WARNING_DISABLE_ALL SYS_DIAGNOSTIC_IGNORE(-Wall)
+#define SYS_DIAGNOSTIC_PUSH SYS_PRAGMA(clang diagnostic push)
+#define SYS_DIAGNOSTIC_POP SYS_PRAGMA(clang diagnostic pop)
+#elif defined(_MSC_VER)
+#define SYS_PRAGMA(x)
+#define SYS_DIAGNOSTIC_IGNORE(warningName)
+#define SYS_WARNING_DISABLE_ALL
+#define SYS_DIAGNOSTIC_PUSH
+#define SYS_DIAGNOSTIC_POP
+#endif
+
 #if defined(__GNUC__) && (__GNUC__ >= 3)
 #define SYS_GNUC_FALLTHROUGH __attribute__((fallthrough))
 #define SYS_UNLIKELY(cond) (__builtin_expect ((cond), 0))

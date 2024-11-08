@@ -32,7 +32,7 @@ SysBHeap *sys_bheap_new(SysBHeapFunc func, SysDestroyFunc node_free) {
 }
 
 static SysInt compare_func(const void* a, const void* b, SysPointer user_data) {
-  SysBHeapFunc score_func = user_data;
+  SysBHeapFunc score_func = (SysBHeapFunc)user_data;
   SysDouble sa = score_func((SysPointer)(*(SysUInt64 *)a));
   SysDouble sb = score_func((SysPointer)(*(SysUInt64 *)b));
 
@@ -55,7 +55,7 @@ SysBHeapIter *sys_bheap_iter_new(SysBHeap *hp) {
     iter->len,
     sizeof(SysPointer),
     (SysCompareDataFunc)compare_func,
-    hp->score_func);
+    (SysPointer)hp->score_func);
 
   return iter;
 }
@@ -210,7 +210,7 @@ SysBool sys_bheap_remove(SysBHeap *hp, SysPointer node) {
     }
   }
 
-  sys_assert("node not found.");
+  sys_assert(true && "node not found.");
 
   return false;
 }

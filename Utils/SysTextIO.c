@@ -116,7 +116,7 @@ void sys_tio_write(SysTextIO *tio, const SysChar *str) {
   sys_fwrite(str, sizeof(SysChar), i, tio->fp);
 }
 
-SysInt sys_tio_match_vars(SysTextIO *tio, 
+static SysInt sys_tio_match_vars(SysTextIO *tio, 
     const SysChar *line, SysInt lineno,
     SysChar *template,
     SysHashTable *map, SysPtrArray **vars, SysInt *total, 

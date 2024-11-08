@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+#define _CRT_INTERNAL_NONSTDC_NAMES 1
 #include <System/Platform/Win32/dirent.h>
 #include <shellapi.h>
 #include <Psapi.h>

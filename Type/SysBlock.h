@@ -21,6 +21,7 @@ struct _SysBlock {
 
 SYS_API SysPointer _sys_block_ref(SysBlock* self);
 SYS_API void _sys_block_unref(SysBlock* self);
+SYS_API void _sys_block_free(SysBlock* self);
 
 SYS_API void sys_block_set_unref_hook(SysRefHook hook);
 SYS_API void sys_block_set_ref_hook(SysRefHook hook);

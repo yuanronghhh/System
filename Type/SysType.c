@@ -131,7 +131,7 @@ SysHArray *sys_type_get_properties(SysType type) {
 }
 
 /* SysType */
-void sys_type_ht_insert(SysTypeNode *node) {
+static void sys_type_ht_insert(SysTypeNode *node) {
   sys_return_if_fail(node->name != NULL);
 
   sys_assert(ht != NULL && "sys types should be initiated before use.");
@@ -139,11 +139,11 @@ void sys_type_ht_insert(SysTypeNode *node) {
   sys_hash_table_insert(ht, node->name, node);
 }
 
-void sys_type_ht_remove(SysTypeNode* node) {
+static void sys_type_ht_remove(SysTypeNode* node) {
   sys_hash_table_remove(ht, (SysPointer)node->name);
 }
 
-SysTypeNode* sys_type_make_node(const SysTypeNode* pnode,
+static SysTypeNode* sys_type_make_node(const SysTypeNode* pnode,
     const SysTypeInfo *info,
     SysInt flags) {
   SysTypeNode* node;
@@ -487,7 +487,7 @@ void sys_type_class_unref(SysTypeClass *cls) {
   sys_type_class_free(cls);
 }
 
-SysTypeNode *sys_type_node_ref(SysTypeNode *node) {
+static SysTypeNode *sys_type_node_ref(SysTypeNode *node) {
   SysTypeNode *pnode;
   SysTypeClass *cls, *pcls;
 
@@ -608,7 +608,7 @@ SysTypeInstance *sys_type_instance_new(SysTypeNode *node, SysSize count) {
   return instance;
 }
 
-void sys_instance_destroy(SysTypeInstance *instance) {
+static void sys_instance_destroy(SysTypeInstance *instance) {
   sys_return_if_fail(instance != NULL);
   SysTypeClass *cls;
 
@@ -759,7 +759,7 @@ static IFaceEntry* instance_get_interface(IFaceEntry **ifaces,
   return NULL;
 }
 
-SysTypeInterface* sys_type_class_get_iface(SysTypeNode *node, SysType iface_type) {
+static SysTypeInterface* sys_type_class_get_iface(SysTypeNode *node, SysType iface_type) {
   IFaceEntry* entry;
   SysTypeClass *cls;
 

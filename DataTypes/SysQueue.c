@@ -96,10 +96,10 @@ void sys_queue_push_head(SysQueue *queue, SysPointer  data) {
   queue->length++;
 }
 
-void sys_queue_push_nth(SysQueue *queue, SysPointer  data, SysUInt n) {
+void sys_queue_push_nth(SysQueue *queue, SysPointer  data, SysInt n) {
   sys_return_if_fail(queue != NULL);
 
-  if (n < 0 || n >= queue->length) {
+  if (n < 0 || n >= (SysInt)queue->length) {
     sys_queue_push_tail(queue, data);
     return;
   }
@@ -149,7 +149,7 @@ void sys_queue_push_tail_link(SysQueue *queue, SysList *link) {
 }
 
 void sys_queue_push_nth_link(SysQueue *queue,
-    SysUInt n,
+    SysInt n,
     SysList *link_) {
   SysList *next;
   SysList *prev;
@@ -157,7 +157,7 @@ void sys_queue_push_nth_link(SysQueue *queue,
   sys_return_if_fail(queue != NULL);
   sys_return_if_fail(link_ != NULL);
 
-  if (n < 0 || n >= queue->length) {
+  if (n < 0 || n >= (SysInt)queue->length) {
     sys_queue_push_tail_link(queue, link_);
     return;
   }

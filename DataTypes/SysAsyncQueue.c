@@ -80,46 +80,6 @@ sys_async_queue_ref (SysAsyncQueue *queue)
 }
 
 /**
- * sys_async_queue_ref_unlocked:
- * @queue: a #SysAsyncQueue
- *
- * Increases the reference count of the asynchronous @queue by 1.
- *
- * Deprecated: 2.8: Reference counting is done atomically.
- * so sys_async_queue_ref() can be used regardless of the @queue's
- * lock.
- */
-void
-sys_async_queue_ref_unlocked (SysAsyncQueue *queue)
-{
-  sys_return_if_fail (queue);
-
-  sys_atomic_int_inc (&queue->ref_count);
-}
-
-/**
- * sys_async_queue_unref_and_unlock:
- * @queue: a #SysAsyncQueue
- *
- * Decreases the reference count of the asynchronous @queue by 1
- * and releases the lock. This function must be called while holding
- * the @queue's lock. If the reference count went to 0, the @queue
- * will be destroyed and the memory allocated will be freed.
- *
- * Deprecated: 2.8: Reference counting is done atomically.
- * so sys_async_queue_unref() can be used regardless of the @queue's
- * lock.
- */
-void
-sys_async_queue_unref_and_unlock (SysAsyncQueue *queue)
-{
-  sys_return_if_fail (queue);
-
-  sys_mutex_unlock (&queue->mutex);
-  sys_async_queue_unref (queue);
-}
-
-/**
  * sys_async_queue_clear_full:
  * @queue: a #SysAsyncQueue.
  *
@@ -564,16 +524,4 @@ sys_async_queue_push_front_unlocked (SysAsyncQueue *queue,
   sys_queue_push_tail (&queue->queue, item);
   if (queue->waiting_threads > 0)
     sys_cond_signal (&queue->cond);
-}
-
-/*
- * Private API
- */
-
-SysMutex *
-_sys_async_queue_get_mutex (SysAsyncQueue *queue)
-{
-  sys_return_val_if_fail (queue, NULL);
-
-  return &queue->mutex;
 }

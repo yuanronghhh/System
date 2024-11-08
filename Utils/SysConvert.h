@@ -55,7 +55,7 @@ typedef struct _GIConv *GIConv;
 
 GIConv sys_iconv_open   (const SysChar  *to_codeset,
                        const SysChar  *from_codeset);
-SysSize  sys_iconv        (GIConv        converter,
+SysSSize  sys_iconv        (GIConv        converter,
                        SysChar       **inbuf,
                        SysSize        *inbytes_left,
                        SysChar       **outbuf,
@@ -64,53 +64,53 @@ SysInt   sys_iconv_close  (GIConv        converter);
 
 
 SysChar* sys_convert               (const SysChar  *str,
-                                SysSize        len,            
+                                SysSSize        len,            
                                 const SysChar  *to_codeset,
                                 const SysChar  *from_codeset,
-                                SysSize        *bytes_read,     
-                                SysSize        *bytes_written,  
+                                SysSSize        *bytes_read,     
+                                SysSSize        *bytes_written,  
                                 SysError      **error) SYS_GNUC_MALLOC;
 SysChar* sys_convert_with_iconv    (const SysChar  *str,
-                                SysSize        len,
+                                SysSSize        len,
                                 GIConv        converter,
-                                SysSize        *bytes_read,     
-                                SysSize        *bytes_written,  
+                                SysSSize        *bytes_read,     
+                                SysSSize        *bytes_written,  
                                 SysError      **error) SYS_GNUC_MALLOC;
 SysChar* sys_convert_with_fallback (const SysChar  *str,
-                                SysSize        len,            
+                                SysSSize        len,            
                                 const SysChar  *to_codeset,
                                 const SysChar  *from_codeset,
                                 const SysChar  *fallback,
-                                SysSize        *bytes_read,     
-                                SysSize        *bytes_written,  
+                                SysSSize        *bytes_read,     
+                                SysSSize        *bytes_written,  
                                 SysError      **error) SYS_GNUC_MALLOC;
 
 
 /* Convert between libc's idea of strings and UTF-8.
  */
 SysChar* sys_locale_to_utf8   (const SysChar  *opsysstring,
-                           SysSize        len,            
-                           SysSize        *bytes_read,     
-                           SysSize        *bytes_written,  
+                           SysSSize        len,            
+                           SysSSize        *bytes_read,     
+                           SysSSize        *bytes_written,  
                            SysError      **error) SYS_GNUC_MALLOC;
 SysChar* sys_locale_from_utf8 (const SysChar  *utf8string,
-                           SysSize        len,            
-                           SysSize        *bytes_read,     
-                           SysSize        *bytes_written,  
+                           SysSSize        len,            
+                           SysSSize        *bytes_read,     
+                           SysSSize        *bytes_written,  
                            SysError      **error) SYS_GNUC_MALLOC;
 
 /* Convert between the operating system (or C runtime)
  * representation of file names and UTF-8.
  */
 SysChar* sys_filename_to_utf8   (const SysChar  *opsysstring,
-                             SysSize        len,            
-                             SysSize        *bytes_read,     
-                             SysSize        *bytes_written,  
+                             SysSSize        len,            
+                             SysSSize        *bytes_read,     
+                             SysSSize        *bytes_written,  
                              SysError      **error) SYS_GNUC_MALLOC;
 SysChar* sys_filename_from_utf8 (const SysChar  *utf8string,
-                             SysSize        len,            
-                             SysSize        *bytes_read,     
-                             SysSize        *bytes_written,  
+                             SysSSize        len,            
+                             SysSSize        *bytes_read,     
+                             SysSSize        *bytes_written,  
                              SysError      **error) SYS_GNUC_MALLOC;
 
 SysChar *sys_filename_from_uri (const SysChar *uri,

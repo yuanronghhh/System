@@ -29,7 +29,7 @@ extern const SysChar * const sys_utf8_skip;
 
 SysUniChar sys_utf8_get_char           (const SysChar  *p) SYS_GNUC_PURE;
 SysUniChar sys_utf8_get_char_validated (const  SysChar *p,
-                                    SysSize        max_len) SYS_GNUC_PURE;
+                                    SysSSize        max_len) SYS_GNUC_PURE;
 
 SysChar*   sys_utf8_offset_to_pointer (const SysChar *str,
                                    SysLong        offset) SYS_GNUC_PURE;
@@ -42,7 +42,7 @@ SysChar*   sys_utf8_find_prev_char    (const SysChar *str,
                                    const SysChar *p) SYS_GNUC_PURE;
 
 SysLong    sys_utf8_strlen            (const SysChar *p,
-                                   SysSize       max) SYS_GNUC_PURE;
+                                   SysSSize       max) SYS_GNUC_PURE;
 
 SysChar   *sys_utf8_substring         (const SysChar *str,
                                    SysLong        start_pos,
@@ -50,18 +50,18 @@ SysChar   *sys_utf8_substring         (const SysChar *str,
 
 SysChar   *sys_utf8_strncpy           (SysChar       *dest,
                                    const SysChar *src,
-                                   SysSize        n);
+                                   SysSSize        n);
 
 /* Find the UTF-8 character corresponding to ch, in string p. These
    functions are equivalants to strchr and strrchr */
 SysChar* sys_utf8_strchr  (const SysChar *p,
-                       SysSize       len,
+                       SysSSize       len,
                        SysUniChar     c);
 SysChar* sys_utf8_strrchr (const SysChar *p,
-                       SysSize       len,
+                       SysSSize       len,
                        SysUniChar     c);
 SysChar* sys_utf8_strreverse (const SysChar *str,
-                          SysSize len);
+                          SysSSize len);
 
 SysUniChar2 *sys_utf8_to_utf16     (const SysChar      *str,
                                 SysLong             len,
@@ -101,18 +101,18 @@ SysInt      sys_unichar_to_utf8 (SysUniChar    c,
                              SysChar      *outbuf);
 
 SysBool sys_utf8_validate (const SysChar  *str,
-                          SysSize        max_len,
+                          SysSSize        max_len,
                           const SysChar **end);
 SysBool sys_utf8_validate_len (const SysChar  *str,
-                              SysSize         max_len,
+                              SysSSize         max_len,
                               const SysChar **end);
 
 SysChar *sys_utf8_strup   (const SysChar *str,
-                       SysSize       len) SYS_GNUC_MALLOC;
+                       SysSSize       len) SYS_GNUC_MALLOC;
 SysChar *sys_utf8_strdown (const SysChar *str,
-                       SysSize       len) SYS_GNUC_MALLOC;
+                       SysSSize       len) SYS_GNUC_MALLOC;
 SysChar *sys_utf8_casefold (const SysChar *str,
-                        SysSize       len) SYS_GNUC_MALLOC;
+                        SysSSize       len) SYS_GNUC_MALLOC;
 
 /**
  * SysNormalizeMode:
@@ -150,32 +150,32 @@ typedef enum {
 } SysNormalizeMode;
 
 SysChar *sys_utf8_normalize (const SysChar   *str,
-                         SysSize         len,
+                         SysSSize         len,
                          SysNormalizeMode mode) SYS_GNUC_MALLOC;
 
 SysInt   sys_utf8_collate     (const SysChar *str1,
                            const SysChar *str2) SYS_GNUC_PURE;
 SysChar *sys_utf8_collate_key (const SysChar *str,
-                           SysSize       len) SYS_GNUC_MALLOC;
+                           SysSSize       len) SYS_GNUC_MALLOC;
 SysChar *sys_utf8_collate_key_for_filename (const SysChar *str,
-                                        SysSize       len) SYS_GNUC_MALLOC;
+                                        SysSSize       len) SYS_GNUC_MALLOC;
 
 SysChar *sys_utf8_make_valid (const SysChar *str,
-                          SysSize       len) SYS_GNUC_MALLOC;
+                          SysSSize       len) SYS_GNUC_MALLOC;
 
 SysBool sys_utf8_validate (const SysChar  *str,
-                          SysSize        max_len,
+                          SysSSize        max_len,
                           const SysChar **end);
 SysBool sys_utf8_validate_len (const SysChar  *str,
-                              SysSize         max_len,
+                              SysSSize         max_len,
                               const SysChar **end);
 
 SysChar *sys_utf8_strup   (const SysChar *str,
-                       SysSize       len) SYS_GNUC_MALLOC;
+                       SysSSize       len) SYS_GNUC_MALLOC;
 SysChar *sys_utf8_strdown (const SysChar *str,
-                       SysSize       len) SYS_GNUC_MALLOC;
+                       SysSSize       len) SYS_GNUC_MALLOC;
 SysChar *sys_utf8_casefold (const SysChar *str,
-                        SysSize       len) SYS_GNUC_MALLOC;
+                        SysSSize       len) SYS_GNUC_MALLOC;
 
 
 SYS_END_DECLS

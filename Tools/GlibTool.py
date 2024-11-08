@@ -98,6 +98,7 @@ def rename_glib(file):
             .replace("GError", "SysError")\
             .replace("GThread", "SysThread")\
             .replace("gsize", "SysSize")\
+            .replace("gssize", "SysSSize")\
             .replace("GPrivate", "SysPrivate")\
             .replace("gushort", "SysUShort")\
             .replace("guint", "SysUInt")\
@@ -114,7 +115,6 @@ def rename_glib(file):
             .replace("g_string", "sys_string")\
             .replace("GString", "SysString")\
             .replace("gstring", "string")\
-            .replace("gssize", "SysSize")\
             .replace("gstr", "str")\
             .replace("GBytes", "SysBytes")\
             .replace("g_strerror", "sys_strerr")\

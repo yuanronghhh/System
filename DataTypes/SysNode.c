@@ -526,9 +526,6 @@ void sys_node_traverse (SysNode    *root,
     case SYS_LEVEL_ORDER:
       sys_node_depth_traverse_level (root, flags, depth, func, data);
       break;
-    default:
-      sys_warning_N("Bad SYS_LEVEL_ORDER: %d", order);
-      break;
   }
 }
 

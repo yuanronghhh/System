@@ -190,10 +190,10 @@ static int sys_win32_readlink_utf8 (const SysChar  *filename,
 
 
 SysChar *sys_file_read_link(const SysChar  *filename, SysError **error) {
-  sys_return_val_if_fail(filename == NULL, NULL);
-
   SysChar *buffer;
-  SysSize read_size;
+  SysInt read_size;
+
+  sys_return_val_if_fail(filename == NULL, NULL);
 
   sys_return_val_if_fail (filename != NULL, NULL);
   sys_return_val_if_fail (error == NULL || *error == NULL, NULL);
@@ -240,39 +240,29 @@ static int w32_error_to_errno (DWORD error_code) {
     {
     case ERROR_ACCESS_DENIED:
       return EACCES;
-      break;
     case ERROR_ALREADY_EXISTS:
     case ERROR_FILE_EXISTS:
       return EEXIST;
     case ERROR_FILE_NOT_FOUND:
       return ENOENT;
-      break;
     case ERROR_INVALID_FUNCTION:
       return EFAULT;
-      break;
     case ERROR_INVALID_HANDLE:
       return EBADF;
-      break;
     case ERROR_INVALID_PARAMETER:
       return EINVAL;
-      break;
     case ERROR_LOCK_VIOLATION:
     case ERROR_SHARING_VIOLATION:
       return EACCES;
-      break;
     case ERROR_NOT_ENOUGH_MEMORY:
     case ERROR_OUTOFMEMORY:
       return ENOMEM;
-      break;
     case ERROR_NOT_SAME_DEVICE:
       return EXDEV;
-      break;
     case ERROR_PATH_NOT_FOUND:
       return ENOENT; /* or ELOOP, or ENAMETOOLONG */
-      break;
     default:
       return EIO;
-      break;
     }
 }
 
@@ -861,23 +851,24 @@ _sys_win32_stat_utf8 (const SysChar       *filename,
   return result;
 }
 
-int sys_win32_lstat_utf8 (const SysChar       *filename,
+static int sys_win32_lstat_utf8 (const SysChar       *filename,
                     SysWin32PrivateStat *buf)
 {
   return _sys_win32_stat_utf8 (filename, buf, true);
 }
 
 SysInt sys_lstat(const SysChar *filename, struct stat * buf) {
+  SysWin32PrivateStat w32_buf;
+  int retval;
+
   sys_return_val_if_fail(buf != NULL, -1);
   sys_return_val_if_fail(filename != NULL, -1);
-
-  SysWin32PrivateStat w32_buf;
-  int retval = sys_win32_lstat_utf8 (filename, &w32_buf);
-
+  
+  retval = sys_win32_lstat_utf8(filename, &w32_buf);
   buf->st_dev = w32_buf.st_dev;
-  buf->st_ino = w32_buf.st_ino;
+  buf->st_ino = (SysUShort)w32_buf.st_ino;
   buf->st_mode = w32_buf.st_mode;
-  buf->st_nlink = w32_buf.st_nlink;
+  buf->st_nlink = (SysShort)w32_buf.st_nlink;
   buf->st_uid = w32_buf.st_uid;
   buf->st_gid = w32_buf.st_gid;
   buf->st_rdev = w32_buf.st_dev;

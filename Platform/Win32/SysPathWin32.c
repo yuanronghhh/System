@@ -18,9 +18,10 @@ SysChar *sys_real_path_getcwd(void) {
 }
 
 SysBool sys_real_path_exists(const SysChar *path) {
-  sys_return_val_if_fail(path != NULL, false);
   SysWChar *wname;
   DWORD attr;
+
+  sys_return_val_if_fail(path != NULL, false);
 
   wname = sys_mbyte_to_wchar(path, NULL);
   attr = GetFileAttributesW(wname);

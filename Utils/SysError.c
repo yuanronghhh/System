@@ -13,7 +13,7 @@ static SysChar* errColors[] = {
   "\033[1;35m",
 };
 
-#if SYS_OS_ANDROID
+#if defined(SYS_OS_ANDROID)
 static SysChar g_android_tag[255] = {0};
 static SysInt androidPrior[] = {
   ANDROID_LOG_UNKNOWN,
@@ -32,7 +32,7 @@ static SYS_INLINE SysChar* get_color(SYS_LOG_LEVEL level) {
   return errColors[level];
 }
 
-#if SYS_OS_ANDROID
+#if defined(SYS_OS_ANDROID)
 void sys_set_android_log_tag(const SysChar *tag) {
   SysSize len = strlen(tag);
   sys_return_if_fail(len <= 255);
@@ -62,7 +62,7 @@ static SysInt sys_log_fprintf(FILE* std, SYS_LOG_LEVEL level, const SysChar *for
   va_list args;
   va_start(args, format);
 
-#if SYS_OS_ANDROID
+#if defined(SYS_OS_ANDROID)
   len = __android_log_vprint(androidPrior[level], &g_android_tag[0], format, args);
 #else
   len = sys_vfprintf(std, format, args);
@@ -76,7 +76,7 @@ static SysInt sys_log_fprintf(FILE* std, SYS_LOG_LEVEL level, const SysChar *for
 static SysInt sys_log_vfprintf(FILE* std, SYS_LOG_LEVEL level, const SysChar* format, va_list args) {
   SysInt len;
 
-#if SYS_OS_ANDROID
+#if defined(SYS_OS_ANDROID)
   len = __android_log_vprint(androidPrior[level], &g_android_tag[0], format, args);
 #else
   len = sys_vfprintf(std, format, args);
@@ -100,7 +100,7 @@ void sys_vlog(SYS_LOG_ARGS_N FILE* std, SYS_LOG_LEVEL level, const SysChar* form
 void sys_log(SYS_LOG_ARGS_N FILE* std, SYS_LOG_LEVEL level, const SysChar* format, ...) {
   va_list args;
   va_start(args, format);
-#if SYS_OS_ANDROID
+#if defined(SYS_OS_ANDROID)
   __android_log_vprint(androidPrior[level], &g_android_tag[0], format, args);
 #else
   sys_vlog(SYS_LOG_ARGS_P std, level, format, args);

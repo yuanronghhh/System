@@ -31,6 +31,7 @@ void sys_pqueue_unlink(SysPQueue *queue, SysPNode *plink);
 void sys_pqueue_push_tail_link(SysPQueue *queue, SysPNode *plink);
 void sys_pqueue_push_head_link(SysPQueue *queue, SysPNode *plink);
 void sys_pqueue_free_full(SysPQueue *queue, SysDestroyFunc free_func);
+void sys_pqueue_free(SysPQueue* queue);
 
 SYS_END_DECLS
 

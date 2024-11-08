@@ -8343,7 +8343,7 @@ static const decomposition decomp_table[] =
   { 0x2fa1d, 18067, SYS_UNICODE_NOT_PRESENT_OFFSET }
 };
 
-static const SysChar decomp_expansion_string[] = 
+static const SysChar decomp_expansion_string[] =
   "\x20\0" /* offset 0 */
   "\x20\xcc\x88\0" /* offset 2 */
   "\x61\0" /* offset 6 */
