@@ -62,28 +62,29 @@ SysSSize  sys_iconv        (GIConv        converter,
                        SysSize        *outbytes_left);
 SysInt   sys_iconv_close  (GIConv        converter);
 
+SysChar* sys_convert (const SysChar *str,
+           SysSSize       len,  
+           const SysChar *to_codeset,
+           const SysChar *from_codeset,
+           SysSize       *bytes_read, 
+     SysSize       *bytes_written, 
+     SysError     **error);
 
-SysChar* sys_convert               (const SysChar  *str,
-                                SysSSize        len,            
-                                const SysChar  *to_codeset,
-                                const SysChar  *from_codeset,
-                                SysSSize        *bytes_read,     
-                                SysSSize        *bytes_written,  
-                                SysError      **error) SYS_GNUC_MALLOC;
-SysChar* sys_convert_with_iconv    (const SysChar  *str,
-                                SysSSize        len,
-                                GIConv        converter,
-                                SysSSize        *bytes_read,     
-                                SysSSize        *bytes_written,  
-                                SysError      **error) SYS_GNUC_MALLOC;
-SysChar* sys_convert_with_fallback (const SysChar  *str,
-                                SysSSize        len,            
-                                const SysChar  *to_codeset,
-                                const SysChar  *from_codeset,
-                                const SysChar  *fallback,
-                                SysSSize        *bytes_read,     
-                                SysSSize        *bytes_written,  
-                                SysError      **error) SYS_GNUC_MALLOC;
+SysChar* sys_convert_with_iconv (const SysChar *str,
+                      SysSSize       len,
+                      GIConv       converter,
+                      SysSize       *bytes_read, 
+                      SysSize       *bytes_written, 
+                      SysError     **error);
+
+SysChar* sys_convert_with_fallback (const SysChar *str,
+                         SysSSize       len,    
+                         const SysChar *to_codeset,
+                         const SysChar *from_codeset,
+                         const SysChar *fallback,
+                         SysSize       *bytes_read,
+                         SysSize       *bytes_written,
+                         SysError     **error) SYS_GNUC_MALLOC;
 
 
 /* Convert between libc's idea of strings and UTF-8.

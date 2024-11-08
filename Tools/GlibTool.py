@@ -71,6 +71,8 @@ def rename_glib(file):
     ndata = data\
             .replace("gmirror", "sysmirror")\
             .replace("g_path_", "sys_path_")\
+            .replace("g_convert", "sys_convert")\
+            .replace("g_propagate_error", "sys_error_propagate")\
             .replace("g_canonicalize_filename", "sys_path_canonicalize_filename")\
             .replace("g_build_filename", "sys_path_build_filename")\
             .replace("g_array_index", "sys_array_index")\

@@ -194,8 +194,8 @@ close_converter (GIConv cd)
 SysChar* sys_convert_with_iconv (const SysChar *str,
                       SysSSize       len,
                       GIConv       converter,
-                      SysSSize       *bytes_read, 
-                      SysSSize       *bytes_written, 
+                      SysSize       *bytes_read, 
+                      SysSize       *bytes_written, 
                       SysError     **error)
 {
   SysChar *dest;
@@ -203,8 +203,8 @@ SysChar* sys_convert_with_iconv (const SysChar *str,
   const SysChar *p;
   SysSize inbytes_remaining;
   SysSize outbytes_remaining;
-  SysSSize err;
-  SysSSize outbuf_size;
+  SysSize err;
+  SysSize outbuf_size;
   SysBool have_error = false;
   SysBool done = false;
   SysBool reset = false;
@@ -228,7 +228,7 @@ SysChar* sys_convert_with_iconv (const SysChar *str,
       else
         err = sys_iconv (converter, (char **)&p, &inbytes_remaining, &outp, &outbytes_remaining);
 
-      if (err == (SysSSize) -1)
+      if (err == (SysSize) -1)
         {
           switch (errno)
             {
@@ -238,7 +238,7 @@ SysChar* sys_convert_with_iconv (const SysChar *str,
               break;
             case E2BIG:
               {
-                SysSSize used = outp - dest;
+                SysSize used = outp - dest;
                 
                 outbuf_size *= 2;
                 dest = sys_realloc (dest, outbuf_size);
@@ -256,8 +256,7 @@ SysChar* sys_convert_with_iconv (const SysChar *str,
               {
                 int errsv = errno;
 
-                sys_error_set_N (error, "%s",
-                             SYS_("Error during conversion: %s"),
+                sys_error_set_N (error, SYS_("Error during conversion: %s"),
                              sys_strerror (errsv));
               }
               have_error = true;
@@ -268,7 +267,7 @@ SysChar* sys_convert_with_iconv (const SysChar *str,
         {
           /* @err gives the number of replacement characters used. */
           sys_error_set_N (error, "%s",
-                               SYS_("Unrepresentable character in conversion input"));
+              SYS_("Unrepresentable character in conversion input"));
           have_error = true;
         }
       else 
@@ -317,9 +316,10 @@ SysChar* sys_convert (const SysChar *str,
            SysSSize       len,  
            const SysChar *to_codeset,
            const SysChar *from_codeset,
-           SysSSize       *bytes_read, 
-           SysSSize       *bytes_written, 
-           SysError     **error) {
+           SysSize       *bytes_read, 
+     SysSize       *bytes_written, 
+     SysError     **error)
+{
   SysChar *res;
   GIConv cd;
 
@@ -341,70 +341,23 @@ SysChar* sys_convert (const SysChar *str,
     }
 
   res = sys_convert_with_iconv (str, len, cd,
-                              bytes_read, bytes_written,
-                              error);
+            bytes_read, bytes_written,
+            error);
 
   close_converter (cd);
 
   return res;
 }
 
-/**
- * sys_convert_with_fallback:
- * @str:          (array length=len) (element-type SysUInt8):
- *                the string to convert.
- * @len:          the length of the string in bytes, or -1 if the string is
- *                 nul-terminated (Note that some encodings may allow nul
- *                 bytes to occur inside strings. In that case, using -1
- *                 for the @len parameter is unsafe)
- * @to_codeset:   name of character set into which to convert @str
- * @from_codeset: character set of @str.
- * @fallback:     UTF-8 string to use in place of characters not
- *                present in the target encoding. (The string must be
- *                representable in the target encoding). 
- *                If %NULL, characters not in the target encoding will 
- *                be represented as Unicode escapes \uxxxx or \Uxxxxyyyy.
- * @bytes_read:   (out) (optional): location to store the number of bytes in
- *                the input string that were successfully converted, or %NULL.
- *                Even if the conversion was successful, this may be 
- *                less than @len if there were partial characters
- *                at the end of the input.
- * @bytes_written: (out) (optional): the number of bytes stored in
- *                 the output buffer (not including the terminating nul).
- * @error:        location to store the error occurring, or %NULL to ignore
- *                errors. Any of the errors in #SysConvertError may occur.
- *
- * Converts a string from one character set to another, possibly
- * including fallback sequences for characters not representable
- * in the output. Note that it is not guaranteed that the specification
- * for the fallback sequences in @fallback will be honored. Some
- * systems may do an approximate conversion from @from_codeset
- * to @to_codeset in their iconv() functions, 
- * in which case GLib will simply return that approximate conversion.
- *
- * Note that you should use sys_iconv() for streaming conversions. 
- * Despite the fact that @bytes_read can return information about partial
- * characters, the sys_convert_... functions are not generally suitable
- * for streaming. If the underlying converter maintains internal state,
- * then this won't be preserved across successive calls to sys_convert(),
- * sys_convert_with_iconv() or sys_convert_with_fallback(). (An example of
- * this is the GNU C converter for CP1255 which does not emit a base
- * character until it knows that the next character is not a mark that
- * could combine with the base character.)
- *
- * Returns: (array length=bytes_written) (element-type SysUInt8) (transfer full):
- *          If the conversion was successful, a newly allocated buffer
- *          containing the converted string, which must be freed with sys_free().
- *          Otherwise %NULL and @error will be set.
- **/
-SysChar*
-sys_convert_with_fallback (const SysChar *str,
+
+
+SysChar* sys_convert_with_fallback (const SysChar *str,
                          SysSSize       len,    
                          const SysChar *to_codeset,
                          const SysChar *from_codeset,
                          const SysChar *fallback,
-                         SysSSize       *bytes_read,
-                         SysSSize       *bytes_written,
+                         SysSize       *bytes_read,
+                         SysSize       *bytes_written,
                          SysError     **error)
 {
   SysChar *utf8;
@@ -412,70 +365,69 @@ sys_convert_with_fallback (const SysChar *str,
   SysChar *outp;
   const SysChar *insert_str = NULL;
   const SysChar *p;
-  SysSSize inbytes_remaining;   
+  SysSize inbytes_remaining;   
   const SysChar *save_p = NULL;
-  SysSSize save_inbytes = 0;
+  SysSize save_inbytes = 0;
   SysSize outbytes_remaining; 
-  SysSSize err;
+  SysSize err;
   GIConv cd;
-  SysSSize outbuf_size;
+  SysSize outbuf_size;
   SysBool have_error = false;
   SysBool done = false;
 
   SysError *local_error = NULL;
-
+  
   sys_return_val_if_fail (str != NULL, NULL);
   sys_return_val_if_fail (to_codeset != NULL, NULL);
   sys_return_val_if_fail (from_codeset != NULL, NULL);
-
+     
   if (len < 0)
     len = strlen (str);
-
+  
   /* Try an exact conversion; we only proceed if this fails
    * due to an illegal sequence in the input string.
    */
   dest = sys_convert (str, len, to_codeset, from_codeset, 
-      bytes_read, bytes_written, &local_error);
+                    bytes_read, bytes_written, &local_error);
   if (!local_error)
     return dest;
 
   sys_assert (dest == NULL);
 
-  if (!sys_error_matches (local_error, SYS_CONVERT_ERROR, SYS_CONVERT_ERROR_ILLEGAL_SEQUENCE)) {
-
-    sys_error_propagate (error, local_error);
-    return NULL;
-
-  } else {
+  if (!sys_error_matches (local_error, SYS_CONVERT_ERROR, SYS_CONVERT_ERROR_ILLEGAL_SEQUENCE))
+    {
+      sys_error_propagate (error, local_error);
+      return NULL;
+    }
+  else
     sys_error_free (local_error);
-  }
 
   local_error = NULL;
-
+  
   /* No go; to proceed, we need a converter from "UTF-8" to
    * to_codeset, and the string as UTF-8.
    */
   cd = open_converter (to_codeset, "UTF-8", error);
   if (cd == (GIConv) -1)
-  {
-    if (bytes_read)
-      *bytes_read = 0;
-
-    if (bytes_written)
-      *bytes_written = 0;
-
-    return NULL;
-  }
+    {
+      if (bytes_read)
+        *bytes_read = 0;
+      
+      if (bytes_written)
+        *bytes_written = 0;
+      
+      return NULL;
+    }
 
   utf8 = sys_convert (str, len, "UTF-8", from_codeset, 
-      bytes_read, &inbytes_remaining, error);
+                    bytes_read, &inbytes_remaining, error);
   if (!utf8)
-  {
-    close_converter (cd);
-    if (bytes_written)
-      *bytes_written = 0;
-    return NULL;
-  }
+    {
+      close_converter (cd);
+      if (bytes_written)
+        *bytes_written = 0;
+      return NULL;
+    }
 
   /* Now the heart of the code. We loop through the UTF-8 string, and
    * whenever we hit an offending character, we form fallback, convert
@@ -492,99 +444,96 @@ sys_convert_with_fallback (const SysChar *str,
   outp = dest = sys_malloc (outbuf_size);
 
   while (!done && !have_error)
-  {
-    SysSize inbytes_tmp = inbytes_remaining;
-    err = sys_iconv (cd, (char **)&p, &inbytes_tmp, &outp, &outbytes_remaining);
-    inbytes_remaining = inbytes_tmp;
-
-    if (err == (SysSSize) -1)
     {
-      switch (errno)
-      {
-        case EINVAL:
-          sys_assert_not_reached();
-          break;
-        case E2BIG:
-          {
-            SysSSize used = outp - dest;
+      SysSize inbytes_tmp = inbytes_remaining;
+      err = sys_iconv (cd, (char **)&p, &inbytes_tmp, &outp, &outbytes_remaining);
+      inbytes_remaining = inbytes_tmp;
 
-            outbuf_size *= 2;
-            dest = sys_realloc (dest, outbuf_size);
+      if (err == (SysSize) -1)
+        {
+          switch (errno)
+            {
+            case EINVAL:
+              sys_assert_not_reached();
+              break;
+            case E2BIG:
+              {
+                SysSize used = outp - dest;
 
-            outp = dest + used;
-            outbytes_remaining = outbuf_size - used - NUL_TERMINATOR_LENGTH;
+                outbuf_size *= 2;
+                dest = sys_realloc (dest, outbuf_size);
+                
+                outp = dest + used;
+                outbytes_remaining = outbuf_size - used - NUL_TERMINATOR_LENGTH;
+                
+                break;
+              }
+            case EILSEQ:
+              if (save_p)
+                {
+                  /* Error converting fallback string - fatal
+                   */
+                  sys_error_set_N (error, SYS_("Cannot convert fallback “%s” to codeset “%s”"),
+                               insert_str, to_codeset);
+                  have_error = true;
+                  break;
+                }
+              else if (p)
+                {
+                  if (!fallback)
+                    { 
+                      SysUniChar ch = sys_utf8_get_char (p);
+                      insert_str = sys_strdup_printf (ch < 0x10000 ? "\\u%04x" : "\\U%08x",
+                                                    ch);
+                    }
+                  else
+                    insert_str = fallback;
+                  
+                  save_p = sys_utf8_next_char (p);
+                  save_inbytes = inbytes_remaining - (save_p - p);
+                  p = insert_str;
+                  inbytes_remaining = strlen (p);
+                  break;
+                }
+              /* if p is null */
+              SYS_GNUC_FALLTHROUGH;
+            default:
+              {
+                int errsv = errno;
 
-            break;
-          }
-        case EILSEQ:
-          if (save_p)
-          {
-            /* Error converting fallback string - fatal
-            */
-            sys_error_set_N (error,
-                SYS_("Cannot convert fallback “%s” to codeset \"%s\""),
-                insert_str, to_codeset);
-            have_error = true;
-            break;
-          }
-          else if (p)
-          {
-            if (!fallback)
-            { 
-              SysUniChar ch = sys_utf8_get_char (p);
-              insert_str = sys_strdup_printf (ch < 0x10000 ? "\\u%04x" : "\\U%08x",
-                  ch);
+                sys_error_set_N (error, SYS_("Error during conversion: %s"),
+                             sys_strerror (errsv));
+              }
+
+              have_error = true;
+              break;
             }
-            else
-              insert_str = fallback;
-
-            save_p = sys_utf8_next_char (p);
-            save_inbytes = inbytes_remaining - (save_p - p);
-            p = insert_str;
-            inbytes_remaining = strlen (p);
-            break;
-          }
-          /* if p is null */
-          SYS_GNUC_FALLTHROUGH;
-          break;
-        default:
-          {
-            int errsv = errno;
-
-            sys_error_set_N (error, "%s",
-                SYS_("Error during conversion: %s"),
-                sys_strerror (errsv));
-          }
-
-          have_error = true;
-          break;
-      }
-    }
-    else
-    {
-      if (save_p)
-      {
-        if (!fallback)
-          sys_free ((SysChar *)insert_str);
-        p = save_p;
-        inbytes_remaining = save_inbytes;
-        save_p = NULL;
-      }
-      else if (p)
-      {
-        /* call sys_iconv with NULL inbuf to cleanup shift state */
-        p = NULL;
-        inbytes_remaining = 0;
-      }
+        }
       else
-        done = true;
+        {
+          if (save_p)
+            {
+              if (!fallback)
+                sys_free ((SysChar *)insert_str);
+              p = save_p;
+              inbytes_remaining = save_inbytes;
+              save_p = NULL;
+            }
+          else if (p)
+            {
+              /* call sys_iconv with NULL inbuf to cleanup shift state */
+              p = NULL;
+              inbytes_remaining = 0;
+            }
+          else
+            done = true;
+        }
     }
-  }
 
   /* Cleanup
-  */
+   */
   memset (outp, 0, NUL_TERMINATOR_LENGTH);
-
+  
   close_converter (cd);
 
   if (bytes_written)
@@ -593,15 +542,16 @@ sys_convert_with_fallback (const SysChar *str,
   sys_free (utf8);
 
   if (have_error)
-  {
-    if (save_p && !fallback)
-      sys_free ((SysChar *)insert_str);
-    sys_free (dest);
-    return NULL;
-  }
+    {
+      if (save_p && !fallback)
+        sys_free ((SysChar *)insert_str);
+      sys_free (dest);
+      return NULL;
+    }
   else
     return dest;
 }
+
 
 /*
  * sys_locale_to_utf8

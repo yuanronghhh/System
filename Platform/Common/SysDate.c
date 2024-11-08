@@ -904,7 +904,7 @@ sys_date_prepare_to_parse (const SysChar      *str,
               break;
             case 76:
               usinsys_twodigit_years = true;
-              SYS_GNUC_FALLTHROUGH;
+              // SYS_GNUC_FALLTHROUGH;
               break;
             case 1976:
               dmy_order[i] = SYS_DATE_YEAR;

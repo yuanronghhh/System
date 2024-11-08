@@ -33,7 +33,7 @@ SYS_API SysInt sys_asprintf(SysChar** str, const SysChar* format, ...);
 SYS_API SysChar* sys_strdup_printf(const SysChar* format, ...);
 SYS_API void sys_print(const SysChar* str);
 SYS_API void sys_strcpy(SysChar* __restrict dst, const SysChar* __restrict src);
-SYS_API SysChar* sys_strncpy(SysChar* __restrict dst, const SysChar* __restrict src, SysSSize n);
+SYS_API SysChar* sys_strncpy(SysChar* __restrict dst, const SysChar* __restrict src, SysSize n);
 SYS_API SysSSize sys_strlen(const SysChar* s, SysSSize max);
 SYS_API SysBool sys_str_equal(const SysChar* s1, const SysChar* s2);
 SYS_API SysInt sys_strcmp(const SysChar* s1, const SysChar* s2);
@@ -48,7 +48,7 @@ SYS_API SysChar* sys_str_newsize(SysSSize size);
 SYS_API void sys_strmcat(SysChar** v1, SysSSize* v1_max, SysSSize* len, const SysChar* v2);
 SYS_API SysChar* sys_strlcat(SysChar* v1, SysSSize v1_max, const SysChar* v2);
 SYS_API SysChar* sys_strconcat (const SysChar *string1, ...);
-SYS_API SysInt sys_vsprintf(SysChar* str, SysSSize size, const SysChar* format, va_list args);
+SYS_API SysInt sys_vsprintf(SysChar* str, SysSize size, const SysChar* format, va_list args);
 
 SYS_API SysChar * sys_strchomp (SysChar *string);
 SYS_API SysBool sys_str_strip(SysChar *s);

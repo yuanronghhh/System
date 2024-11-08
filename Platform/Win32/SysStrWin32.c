@@ -38,13 +38,13 @@ void sys_strcpy(SysChar *__restrict dst, const SysChar *__restrict src) {
   dst[n] = '\0';
 }
 
-SysChar *sys_strncpy(SysChar * __restrict dst, const SysChar * __restrict src, SysSSize n) {
+SysChar *sys_strncpy(SysChar * __restrict dst, const SysChar * __restrict src, SysSize n) {
   memcpy(dst, src, n);
   dst[n] = '\0';
   return dst;
 }
 
-SysInt sys_vsprintf(SysChar *str, SysSSize size, const SysChar *format, va_list args) {
+SysInt sys_vsprintf(SysChar *str, SysSize size, const SysChar *format, va_list args) {
   return vsprintf_s(str, size, format, args);
 }
 
