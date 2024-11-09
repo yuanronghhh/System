@@ -26,10 +26,10 @@ SysBool     sys_string_equal             (const SysString   *v,
 SysUInt        sys_string_hash              (const SysString   *str);
 SysString*     sys_string_assign            (SysString         *string,
                                          const SysChar     *rval);
-SysString*     sys_string_truncate          (SysString         *string,
-                                         SysSSize            len);
+SysString *sys_string_truncate (SysString *string,
+    SysSize len);
 SysString*     sys_string_set_size          (SysString         *string,
-                                         SysSSize            len);
+                                         SysSize            len);
 SysString*     sys_string_insert_len        (SysString         *string,
                                          SysSSize           pos,
                                          const SysChar     *val,

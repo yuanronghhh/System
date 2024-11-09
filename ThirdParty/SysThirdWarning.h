@@ -1,4 +1,4 @@
-#if __clang__
+#if defined(__clang__)
 SYS_DIAGNOSTIC_IGNORE(-Wunused-function)
 SYS_DIAGNOSTIC_IGNORE(-Wunused-variable)
 SYS_DIAGNOSTIC_IGNORE(-Wstrict-prototypes)
@@ -14,4 +14,5 @@ SYS_DIAGNOSTIC_IGNORE(-Wunused-macros)
 SYS_DIAGNOSTIC_IGNORE(-Wreserved-identifier)
 SYS_DIAGNOSTIC_IGNORE(-Wreserved-macro-identifier)
 SYS_DIAGNOSTIC_IGNORE(-Wnonportable-system-include-path)
+SYS_DIAGNOSTIC_IGNORE(-Wimplicit-int-float-conversion)
 #endif

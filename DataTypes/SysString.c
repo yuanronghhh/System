@@ -329,7 +329,7 @@ SysString *sys_string_assign (SysString *string,
  * Returns: (transfer none): @string
  */
 SysString *sys_string_truncate (SysString *string,
-    SysSSize len) {
+    SysSize len) {
   sys_return_val_if_fail (string != NULL, NULL);
 
   string->len = min (len, string->len);
@@ -352,7 +352,7 @@ SysString *sys_string_truncate (SysString *string,
  * Returns: (transfer none): @string
  */
 SysString *sys_string_set_size (SysString *string,
-    SysSSize    len) {
+    SysSize    len) {
   sys_return_val_if_fail (string != NULL, NULL);
 
   if (len >= string->allocated_len)
@@ -389,7 +389,7 @@ SysString *sys_string_insert_len (SysString     *string,
     SysSSize       pos,
     const SysChar *val,
     SysSSize       len) {
-  SysSSize len_unsigned, pos_unsigned;
+  SysSize len_unsigned, pos_unsigned;
 
   sys_return_val_if_fail (string != NULL, NULL);
   sys_return_val_if_fail (len == 0 || val != NULL, string);
@@ -422,8 +422,8 @@ SysString *sys_string_insert_len (SysString     *string,
    */
   if (SYS_UNLIKELY (val >= string->str && val <= string->str + string->len))
   {
-    SysSSize offset = val - string->str;
-    SysSSize precount = 0;
+    SysSize offset = val - string->str;
+    SysSize precount = 0;
 
     sys_string_maybe_expand (string, len_unsigned);
     val = string->str + offset;
@@ -660,7 +660,7 @@ SysString *              sys_string_insert (SysString     *string,
 SysString *              sys_string_insert_c (SysString *string,
     SysSSize   pos,
     SysChar    c) {
-  SysSSize pos_unsigned;
+  SysSize pos_unsigned;
 
   sys_return_val_if_fail (string != NULL, NULL);
 
@@ -669,7 +669,7 @@ SysString *              sys_string_insert_c (SysString *string,
   if (pos < 0)
     pos = string->len;
   else
-    sys_return_val_if_fail ((SysSSize) pos <= string->len, string);
+    sys_return_val_if_fail (pos <= (SysSSize)string->len, string);
   pos_unsigned = pos;
 
   /* If not just an append, move the old stuff */
@@ -743,7 +743,7 @@ SysString *              sys_string_insert_unichar (SysString  *string,
 
   } else {
 
-    sys_return_val_if_fail ((SysSSize) pos <= string->len, string);
+    sys_return_val_if_fail ( pos <= (SysSSize)string->len, string);
   }
 
   /* If not just an append, move the old stuff */
