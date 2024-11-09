@@ -89,15 +89,16 @@ SysChar* sys_convert_with_fallback (const SysChar *str,
 
 /* Convert between libc's idea of strings and UTF-8.
  */
-SysChar* sys_locale_to_utf8   (const SysChar  *opsysstring,
-                           SysSSize        len,            
-                           SysSSize        *bytes_read,     
-                           SysSSize        *bytes_written,  
-                           SysError      **error) SYS_GNUC_MALLOC;
+SysChar * sys_locale_to_utf8 (const SysChar  *opsysstring,
+    SysSSize        len,            
+    SysSize        *bytes_read,    
+    SysSize        *bytes_written,
+    SysError      **error);
+
 SysChar* sys_locale_from_utf8 (const SysChar  *utf8string,
                            SysSSize        len,            
-                           SysSSize        *bytes_read,     
-                           SysSSize        *bytes_written,  
+                           SysSize        *bytes_read,     
+                           SysSize        *bytes_written,  
                            SysError      **error) SYS_GNUC_MALLOC;
 
 /* Convert between the operating system (or C runtime)
@@ -105,13 +106,13 @@ SysChar* sys_locale_from_utf8 (const SysChar  *utf8string,
  */
 SysChar* sys_filename_to_utf8   (const SysChar  *opsysstring,
                              SysSSize        len,            
-                             SysSSize        *bytes_read,     
-                             SysSSize        *bytes_written,  
+                             SysSize        *bytes_read,     
+                             SysSize        *bytes_written,  
                              SysError      **error) SYS_GNUC_MALLOC;
 SysChar* sys_filename_from_utf8 (const SysChar  *utf8string,
                              SysSSize        len,            
-                             SysSSize        *bytes_read,     
-                             SysSSize        *bytes_written,  
+                             SysSize        *bytes_read,     
+                             SysSize        *bytes_written,  
                              SysError      **error) SYS_GNUC_MALLOC;
 
 SysChar *sys_filename_from_uri (const SysChar *uri,

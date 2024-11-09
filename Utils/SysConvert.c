@@ -488,16 +488,14 @@ SysChar* sys_convert_with_fallback (const SysChar *str,
                     }
                   else
                     insert_str = fallback;
-                  
+
                   save_p = sys_utf8_next_char (p);
                   save_inbytes = inbytes_remaining - (save_p - p);
                   p = insert_str;
                   inbytes_remaining = strlen (p);
                   break;
                 }
-              /* if p is null */
-              SYS_GNUC_FALLTHROUGH;
-            default:
+              else
               {
                 int errsv = errno;
 
@@ -506,7 +504,6 @@ SysChar* sys_convert_with_fallback (const SysChar *str,
               }
 
               have_error = true;
-              break;
             }
         }
       else
@@ -560,8 +557,8 @@ SysChar* sys_convert_with_fallback (const SysChar *str,
  */
 static SysChar * strdup_len (const SysChar *string,
     SysSSize       len,
-    SysSSize       *bytes_read,
-    SysSSize       *bytes_written,
+    SysSize       *bytes_read,
+    SysSize       *bytes_written,
     SysError     **error) {
   SysSSize real_len;
   const SysChar *end_valid;
@@ -607,18 +604,16 @@ typedef enum
  * On error, @bytes_read will be set to the byte offset after the last valid
  * sequence in @string, and @bytes_written will be set to 0.
  */
-  static SysChar *
-convert_checked (const SysChar      *string,
+static SysChar * convert_checked (const SysChar      *string,
     SysSSize            len,
     const SysChar      *to_codeset,
     const SysChar      *from_codeset,
     ConvertCheckFlags flags,
-    SysSSize            *bytes_read,
-    SysSSize            *bytes_written,
-    SysError          **error)
-{
+    SysSize            *bytes_read,
+    SysSize            *bytes_written,
+    SysError          **error) {
   SysChar *out;
-  SysSSize outbytes;
+  SysSize outbytes;
 
   if ((flags & CONVERT_CHECK_NO_NULS_IN_INPUT) && len > 0)
   {
@@ -663,8 +658,8 @@ convert_checked (const SysChar      *string,
 
 SysChar * sys_locale_to_utf8 (const SysChar  *opsysstring,
     SysSSize        len,            
-    SysSSize        *bytes_read,    
-    SysSSize        *bytes_written,
+    SysSize        *bytes_read,    
+    SysSize        *bytes_written,
     SysError      **error) {
   const char *charset;
 
@@ -684,8 +679,8 @@ SysChar * sys_locale_to_utf8 (const SysChar  *opsysstring,
  */
 static SysChar * _sys_time_locale_to_utf8 (const SysChar *opsysstring,
     SysSSize       len,
-    SysSSize       *bytes_read,
-    SysSSize       *bytes_written,
+    SysSize       *bytes_read,
+    SysSize       *bytes_written,
     SysError     **error) {
   const char *charset;
 
@@ -705,8 +700,8 @@ static SysChar * _sys_time_locale_to_utf8 (const SysChar *opsysstring,
  */
 static SysChar * _sys_ctype_locale_to_utf8 (const SysChar *opsysstring,
     SysSSize       len,
-    SysSSize       *bytes_read,
-    SysSSize       *bytes_written,
+    SysSize       *bytes_read,
+    SysSize       *bytes_written,
     SysError     **error) {
   const char *charset;
 
@@ -720,8 +715,8 @@ static SysChar * _sys_ctype_locale_to_utf8 (const SysChar *opsysstring,
 
 SysChar * sys_locale_from_utf8 (const SysChar *utf8string,
     SysSSize       len,            
-    SysSSize       *bytes_read,    
-    SysSSize       *bytes_written,
+    SysSize       *bytes_read,    
+    SysSize       *bytes_written,
     SysError     **error) {
   const SysChar *charset;
 
@@ -856,8 +851,8 @@ get_filename_charset (const SysChar **filename_charset)
 
 SysChar* sys_filename_to_utf8 (const SysChar *opsysstring, 
     SysSSize       len,           
-    SysSSize       *bytes_read,   
-    SysSSize       *bytes_written,
+    SysSize       *bytes_read,   
+    SysSize       *bytes_written,
     SysError     **error) {
   const SysChar *charset;
 
@@ -874,8 +869,8 @@ SysChar* sys_filename_to_utf8 (const SysChar *opsysstring,
 
 SysChar* sys_filename_from_utf8 (const SysChar *utf8string,
     SysSSize       len,            
-    SysSSize       *bytes_read,    
-    SysSSize       *bytes_written,
+    SysSize       *bytes_read,    
+    SysSize       *bytes_written,
     SysError     **error) {
   const SysChar *charset;
 
@@ -1490,13 +1485,13 @@ SysChar * sys_filename_display_name (const SysChar *filename) {
 
 SYS_API SysChar *sys_filename_to_utf8_utf8   (const SysChar  *opsysstring,
     SysSSize        len,
-    SysSSize        *bytes_read,
-    SysSSize        *bytes_written,
+    SysSize        *bytes_read,
+    SysSize        *bytes_written,
     SysError      **error) SYS_GNUC_MALLOC;
 SYS_API SysChar *sys_filename_from_utf8_utf8 (const SysChar  *utf8string,
     SysSSize        len,
-    SysSSize        *bytes_read,
-    SysSSize        *bytes_written,
+    SysSize        *bytes_read,
+    SysSize        *bytes_written,
     SysError      **error) SYS_GNUC_MALLOC;
 SYS_API SysChar *sys_filename_from_uri_utf8  (const SysChar  *uri,
     SysChar       **hostname,
@@ -1505,20 +1500,18 @@ SYS_API SysChar *sys_filename_to_uri_utf8    (const SysChar  *filename,
     const SysChar  *hostname,
     SysError      **error) SYS_GNUC_MALLOC;
 
-  SysChar *
-sys_filename_to_utf8_utf8 (const SysChar *opsysstring,
+SysChar * sys_filename_to_utf8_utf8 (const SysChar *opsysstring,
     SysSSize       len,
-    SysSSize       *bytes_read,
-    SysSSize       *bytes_written,
-    SysError     **error)
-{
+    SysSize       *bytes_read,
+    SysSize       *bytes_written,
+    SysError     **error) {
   return sys_filename_to_utf8 (opsysstring, len, bytes_read, bytes_written, error);
 }
 
 SysChar * sys_filename_from_utf8_utf8 (const SysChar *utf8string,
     SysSSize       len,
-    SysSSize       *bytes_read,
-    SysSSize       *bytes_written,
+    SysSize       *bytes_read,
+    SysSize       *bytes_written,
     SysError     **error)
 {
   return sys_filename_from_utf8 (utf8string, len, bytes_read, bytes_written, error);

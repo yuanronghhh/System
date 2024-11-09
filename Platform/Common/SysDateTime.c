@@ -2753,13 +2753,11 @@ sys_date_time_format_locale (SysDateTime   *datetime,
   return success;
 }
 
-static inline SysBool
-string_append (SysString     *string,
+static inline SysBool string_append (SysString     *string,
                const SysChar *s,
-               SysBool     s_is_utf8)
-{
+               SysBool     s_is_utf8) {
   SysChar *utf8;
-  SysSSize  utf8_len;
+  SysSize  utf8_len;
 
   if (s_is_utf8)
     {
