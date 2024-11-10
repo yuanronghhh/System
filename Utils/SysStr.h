@@ -45,7 +45,7 @@ SYS_API SysChar* sys_strdup(const SysChar* s);
 SYS_API SysChar* sys_strpncpy(SysChar* dst, SysInt n, const SysChar* src);
 SYS_API SysChar* sys_strpcpy(SysChar* dst, const SysChar* src);
 SYS_API SysChar* sys_str_newsize(SysSSize size);
-SYS_API void sys_strmcat(SysChar** v1, SysSSize* v1_max, SysSSize* len, const SysChar* v2);
+SYS_API void sys_strmcat(SysChar** v1, SysSize* v1_max, SysSize* len, const SysChar* v2);
 SYS_API SysChar* sys_strlcat(SysChar* v1, SysSSize v1_max, const SysChar* v2);
 SYS_API SysChar* sys_strconcat (const SysChar *string1, ...);
 SYS_API SysInt sys_vsprintf(SysChar* str, SysSize size, const SysChar* format, va_list args);

@@ -131,16 +131,16 @@ SysChar **sys_strsplit(const SysChar * s, const SysChar *delim, SysInt * count) 
  *
  * Returns: v1 string length.
  */
-void sys_strmcat(SysChar** v1, SysSSize* v1_max, SysSSize* len, const SysChar* v2) {
+void sys_strmcat(SysChar** v1, SysSize* v1_max, SysSize* len, const SysChar* v2) {
   sys_return_if_fail(*v1 != NULL);
   sys_return_if_fail(v2 != NULL);
   sys_return_if_fail(v1_max != NULL && "sys_strcat max_len should not be null.");
 
   SysChar *nstr;
-  SysSSize nearup;
-  SysSSize v1len;
-  SysSSize v2len;
-  SysSSize nlen;
+  SysSize nearup;
+  SysSize v1len;
+  SysSize v2len;
+  SysSize nlen;
 
   v1len = strlen(*v1);
   v2len = strlen(v2);
