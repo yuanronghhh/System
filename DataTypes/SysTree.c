@@ -718,34 +718,6 @@ void sys_tree_foreach_node (SysTree             *tree,
     }
 }
 
-static void sys_tree_traverse (SysTree         *tree,
-                 SysTraverseFunc  traverse_func,
-                 SysTraverseType  traverse_type,
-                 SysPointer       user_data) {
-  sys_return_if_fail (tree != NULL);
-
-  if (!tree->root)
-    return;
-
-  switch (traverse_type) {
-    case SYS_PRE_ORDER:
-      sys_tree_node_pre_order (tree->root, traverse_func, user_data);
-      break;
-
-    case SYS_IN_ORDER:
-      sys_tree_node_in_order (tree->root, traverse_func, user_data);
-      break;
-
-    case SYS_POST_ORDER:
-      sys_tree_node_post_order (tree->root, traverse_func, user_data);
-      break;
-
-    case SYS_LEVEL_ORDER:
-      sys_warning_N("%s", "sys_tree_traverse(): traverse type SYS_LEVEL_ORDER isn't implemented.");
-      break;
-    }
-}
-
 SysTreeNode* sys_tree_search_node (SysTree         *tree,
                     SysCompareFunc   search_func,
                     const SysPointer  user_data) {

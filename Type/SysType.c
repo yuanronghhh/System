@@ -139,10 +139,6 @@ static void sys_type_ht_insert(SysTypeNode *node) {
   sys_hash_table_insert(ht, node->name, node);
 }
 
-static void sys_type_ht_remove(SysTypeNode* node) {
-  sys_hash_table_remove(ht, (SysPointer)node->name);
-}
-
 static SysTypeNode* sys_type_make_node(const SysTypeNode* pnode,
     const SysTypeInfo *info,
     SysInt flags) {
@@ -606,15 +602,6 @@ SysTypeInstance *sys_type_instance_new(SysTypeNode *node, SysSize count) {
   instance = (SysTypeInstance *)((SysChar *)mp + priv_psize);
 
   return instance;
-}
-
-static void sys_instance_destroy(SysTypeInstance *instance) {
-  sys_return_if_fail(instance != NULL);
-  SysTypeClass *cls;
-
-  cls = sys_instance_get_class(instance, SysTypeClass);
-
-  instance_destroy(instance, cls);
 }
 
 void sys_type_instance_free(SysTypeInstance *instance) {

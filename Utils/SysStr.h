@@ -14,6 +14,7 @@ SYS_BEGIN_DECLS
 #define sys_str_startswith(s1, s2) (strncmp(s1, s2, strlen(s2)) == 0)
 #define sys_strjoin(delim, ...) _sys_strjoin(delim, __VA_ARGS__, NULL)
 #define SYS_STR_MULTILINE(...) #__VA_ARGS__
+#define SYS_STRINGIFY(name) #name
 
 SYS_API SysWChar * sys_mbyte_to_wchar(const SysChar * mbyte, SysInt * nsize);
 SYS_API SysChar* sys_wchar_to_mbyte(const SysWChar* wchar, SysInt * nsize);
