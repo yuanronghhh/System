@@ -127,7 +127,7 @@ SysBool sys_get_filename_charsets (const SysChar ***filename_charsets);
 
 SysChar *sys_filename_display_basename (const SysChar *filename) SYS_GNUC_MALLOC;
 
-SysChar **g_uri_list_extract_uris (const SysChar *uri_list);
+SysChar **sys_uri_list_extract_uris (const SysChar *uri_list);
 
 SYS_END_DECLS
 

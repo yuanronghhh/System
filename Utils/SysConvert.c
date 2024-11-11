@@ -473,7 +473,7 @@ SysChar* sys_convert_with_fallback (const SysChar *str,
                 {
                   /* Error converting fallback string - fatal
                    */
-                  sys_error_set_N (error, SYS_("Cannot convert fallback “%s” to codeset “%s”"),
+                  sys_error_set_N (error, SYS_("Cannot convert fallback \"%s\" to codeset \"% s\""),
                                insert_str, to_codeset);
                   have_error = true;
                   break;
@@ -1357,7 +1357,7 @@ SysChar * sys_filename_from_uri (const SysChar *uri,
  *
  * Since: 2.6
  */
-static SysChar ** sys_uri_list_extract_uris (const SysChar *uri_list) {
+SysChar ** sys_uri_list_extract_uris (const SysChar *uri_list) {
   SysPtrArray *uris;
   const SysChar *p, *q;
 

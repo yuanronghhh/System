@@ -2884,7 +2884,7 @@ next_mod:
               sys_date_time_get_day_of_month (datetime));
           break;
         case 'e':
-          format_number (outstr, alt_digits, pad_set ? pad : "\u2007", 2,
+          format_number (outstr, alt_digits, pad_set ? pad : "\x5c\x75\x32\x30\x30\x37", 2,
               sys_date_time_get_day_of_month (datetime));
           break;
         case 'f':
@@ -2932,11 +2932,11 @@ next_mod:
               sys_date_time_get_day_of_year (datetime));
           break;
         case 'k':
-          format_number (outstr, alt_digits, pad_set ? pad : "\u2007", 2,
+          format_number (outstr, alt_digits, pad_set ? pad : "\x5c\x75\x32\x30\x30\x37", 2,
               sys_date_time_get_hour (datetime));
           break;
         case 'l':
-          format_number (outstr, alt_digits, pad_set ? pad : "\u2007", 2,
+          format_number (outstr, alt_digits, pad_set ? pad : "\x5c\x75\x32\x30\x30\x37", 2,
               (sys_date_time_get_hour (datetime) + 11) % 12 + 1);
           break;
         case 'm':
