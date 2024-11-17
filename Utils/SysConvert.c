@@ -814,7 +814,7 @@ sys_get_filename_charsets (const SysChar ***filename_charsets)
     NULL
   };
 
-#ifdef SYS_OS_WIN32
+#if defined(SYS_OS_WIN32)
   /* On Windows GLib pretends that the filename charset is UTF-8 */
   if (filename_charsets)
     *filename_charsets = charsets;

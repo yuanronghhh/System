@@ -46,11 +46,11 @@ void sys_break(void) {
     return;
   }
 
-#if SYS_OS_WIN32
+#if defined(SYS_OS_WIN32)
   if (IsDebuggerPresent ()) {
     DebugBreak();
   }
-#elif SYS_OS_UNIX
+#elif defined(SYS_OS_UNIX)
   // __asm__ __volatile__("int $03");
   raise(SIGTRAP);
 #endif
