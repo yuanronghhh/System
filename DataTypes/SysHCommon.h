@@ -13,7 +13,7 @@ SYS_BEGIN_DECLS
 #define SYS_IS_HDATA(o) SYS_HDATA_CHECK((SysHData *)o)
 
 struct _SysHData {
-  SysUInt check;
+  SysSize check;
 };
 
 SysPointer _sys_hdata_b_cast(SysPointer self, SysInt offsize);

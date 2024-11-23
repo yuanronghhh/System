@@ -1,5 +1,5 @@
-#ifndef __SYS_GC_H__
-#define __SYS_GC_H__
+#ifndef __SYS_BLOCK_H__
+#define __SYS_BLOCK_H__
 
 #include <System/Type/SysTypeCommon.h>
 

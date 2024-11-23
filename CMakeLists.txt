@@ -119,6 +119,8 @@ set(SRC
   ./DataTypes/SysArray.c
   ./DataTypes/SysList.h
   ./DataTypes/SysList.c
+  ./DataTypes/SysHList.h
+  ./DataTypes/SysHList.c
   ./DataTypes/SysHCommon.h
   ./DataTypes/SysHCommon.c
   ./DataTypes/SysSList.h
@@ -150,6 +152,8 @@ set(SRC
   ./Type/SysObject.c
   ./Type/SysParam.h
   ./Type/SysParam.c
+  ./Type/SysMarkSweep.h
+  ./Type/SysMarkSweep.c
 
   ./Utils/SysUtf8.h
   ./Utils/SysUtf8.c

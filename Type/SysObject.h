@@ -55,7 +55,7 @@ SYS_API SysBool _sys_object_is_a(SysObject *self, SysType type);
 SYS_API void _sys_object_init_type(void);
 
 #define SYS_OBJECT_PROPERTY_BEGIN { \
-  SysParamContext priv_param = {}; \
+  SysParamContext priv_param = {0}; \
 
 #define SYS_OBJECT_PROPERTY_END }
 

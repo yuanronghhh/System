@@ -38,6 +38,13 @@ SYS_BEGIN_DECLS
 
 #define sys_clear_pointer(pp, destroy) _sys_clear_pointer((void **)(pp), (SysDestroyFunc)destroy)
 
+/* cleanup */
+#if defined(__clang__) || defined(__GNUC__)
+#define sys_cleanup(func) __attribute__((cleanup(func)))
+#else
+#define sys_cleanup(func) 
+#endif
+
 SYS_API void sys_memcpy(
   SysPointer  const dst,
   SysSize     const dst_size,

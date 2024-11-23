@@ -4,34 +4,39 @@
  * license under GNU Lesser General Public
  */
 
-#define _sys_hslist_alloc0()       sys_slice_new0 (SysHSList)
-#define _sys_hslist_alloc()        sys_slice_new (SysHSList)
-#define _sys_hslist_free1(hslist)   sys_slice_free (SysHSList, hslist)
+#define _sys_hslist_alloc0()       sys_slice_new0 (SysHsList)
+#define _sys_hslist_alloc()        sys_slice_new (SysHsList)
+#define _sys_hslist_free1(hslist)   sys_slice_free (SysHsList, hslist)
 
-SysHSList* sys_hslist_alloc (void) {
+SysHsList* sys_hslist_alloc (void) {
   return _sys_hslist_alloc0 ();
 }
 
-void sys_hslist_free (SysHSList *list) {
-  sys_slice_free_chain (SysHSList, list, next);
+void sys_hslist_init(SysHsList *list) {
+  sys_hdata_init((SysHData *)list);
+  list->next = NULL;
 }
 
-void sys_hslist_free_1 (SysHSList *list) {
+void sys_hslist_free (SysHsList *list) {
+  sys_slice_free_chain (SysHsList, list, next);
+}
+
+void sys_hslist_free_1 (SysHsList *list) {
   _sys_hslist_free1 (list);
 }
 
-void sys_hslist_free_full (SysHSList         *list,
+void sys_hslist_free_full (SysHsList         *list,
     SysDestroyFunc  free_func) {
   sys_hslist_foreach (list, node) {
     free_func(node);
   }
 }
 
-SysHSList* sys_hslist_append (SysHSList   *list,
-                SysHSList *new_list) {
+SysHsList* sys_hslist_append (SysHsList   *list,
+                SysHsList *new_list) {
   sys_return_val_if_fail(new_list != NULL, NULL);
 
-  SysHSList *last;
+  SysHsList *last;
 
   new_list->next = NULL;
 
@@ -46,8 +51,8 @@ SysHSList* sys_hslist_append (SysHSList   *list,
     return new_list;
 }
 
-SysHSList* sys_hslist_prepend (SysHSList   *list,
-                 SysHSList  *new_list) {
+SysHsList* sys_hslist_prepend (SysHsList   *list,
+                 SysHsList  *new_list) {
   sys_return_val_if_fail(new_list != NULL, NULL);
 
   new_list->next = list;
@@ -55,13 +60,13 @@ SysHSList* sys_hslist_prepend (SysHSList   *list,
   return new_list;
 }
 
-SysHSList* sys_hslist_insert (SysHSList   *list,
-                SysHSList   *new_list,
+SysHsList* sys_hslist_insert (SysHsList   *list,
+                SysHsList   *new_list,
                 SysInt      position) {
   sys_return_val_if_fail(new_list != NULL, NULL);
 
-  SysHSList *prev_list;
-  SysHSList *tmp_list;
+  SysHsList *prev_list;
+  SysHsList *tmp_list;
 
   if (position < 0)
     return sys_hslist_append (list, new_list);
@@ -89,9 +94,9 @@ SysHSList* sys_hslist_insert (SysHSList   *list,
   return list;
 }
 
-SysHSList* sys_hslist_insert_before (SysHSList  *hslist,
-                       SysHSList  *sibling,
-                       SysHSList *new_list) {
+SysHsList* sys_hslist_insert_before (SysHsList  *hslist,
+                       SysHsList  *sibling,
+                       SysHsList *new_list) {
   sys_return_val_if_fail(new_list != NULL, NULL);
 
   if (!hslist)
@@ -102,7 +107,7 @@ SysHSList* sys_hslist_insert_before (SysHSList  *hslist,
     }
   else
     {
-      SysHSList *node, *last = NULL;
+      SysHsList *node, *last = NULL;
 
       for (node = hslist; node; last = node, node = last->next)
         if (node == sibling)
@@ -125,7 +130,7 @@ SysHSList* sys_hslist_insert_before (SysHSList  *hslist,
     }
 }
 
-SysHSList * sys_hslist_concat (SysHSList *list1, SysHSList *list2) {
+SysHsList * sys_hslist_concat (SysHsList *list1, SysHsList *list2) {
   if (list2)
     {
       if (list1)
@@ -137,10 +142,10 @@ SysHSList * sys_hslist_concat (SysHSList *list1, SysHSList *list2) {
   return list1;
 }
 
-static inline SysHSList* _sys_hslist_remove_link (SysHSList *list,
-                      SysHSList *link) {
-  SysHSList *tmp = NULL;
-  SysHSList **previous_ptr = &list;
+static inline SysHsList* _sys_hslist_remove_link (SysHsList *list,
+                      SysHsList *link) {
+  SysHsList *tmp = NULL;
+  SysHsList **previous_ptr = &list;
 
   while (*previous_ptr)
     {
@@ -158,28 +163,28 @@ static inline SysHSList* _sys_hslist_remove_link (SysHSList *list,
   return list;
 }
 
-SysHSList* sys_hslist_remove_link (SysHSList *list,
-                     SysHSList *link_) {
+SysHsList* sys_hslist_remove_link (SysHsList *list,
+                     SysHsList *link_) {
   return _sys_hslist_remove_link (list, link_);
 }
 
-SysHSList* sys_hslist_delete_link (SysHSList *list,
-                     SysHSList *link_) {
+SysHsList* sys_hslist_delete_link (SysHsList *list,
+                     SysHsList *link_) {
   list = _sys_hslist_remove_link (list, link_);
   _sys_hslist_free1 (link_);
 
   return list;
 }
 
-SysHSList* sys_hslist_copy (SysHSList *list) {
+SysHsList* sys_hslist_copy (SysHsList *list) {
   return sys_hslist_copy_deep (list, NULL, NULL);
 }
 
-SysHSList* sys_hslist_copy_deep (SysHSList *list,
+SysHsList* sys_hslist_copy_deep (SysHsList *list,
     SysCopyFunc func,
     SysPointer user_data) {
-  SysHSList *new_list = NULL;
-  SysHSList *last;
+  SysHsList *new_list = NULL;
+  SysHsList *last;
 
   sys_return_val_if_fail(list != NULL, NULL);
   sys_return_val_if_fail(func != NULL, NULL);
@@ -202,12 +207,12 @@ SysHSList* sys_hslist_copy_deep (SysHSList *list,
   return new_list;
 }
 
-SysHSList* sys_hslist_reverse (SysHSList *list) {
-  SysHSList *prev = NULL;
+SysHsList* sys_hslist_reverse (SysHsList *list) {
+  SysHsList *prev = NULL;
 
   while (list)
     {
-      SysHSList *next = list->next;
+      SysHsList *next = list->next;
 
       list->next = prev;
 
@@ -218,7 +223,7 @@ SysHSList* sys_hslist_reverse (SysHSList *list) {
   return prev;
 }
 
-SysHSList* sys_hslist_nth (SysHSList *list,
+SysHsList* sys_hslist_nth (SysHsList *list,
              SysUInt   n) {
   while (n-- > 0 && list)
     list = list->next;
@@ -226,7 +231,7 @@ SysHSList* sys_hslist_nth (SysHSList *list,
   return list;
 }
 
-SysHSList* sys_hslist_nth_data (SysHSList   *list,
+SysHsList* sys_hslist_nth_data (SysHsList   *list,
                   SysUInt     n) {
   while (n-- > 0 && list)
     list = list->next;
@@ -234,8 +239,8 @@ SysHSList* sys_hslist_nth_data (SysHSList   *list,
   return list;
 }
 
-SysHSList* sys_hslist_find_custom (SysHSList        *list,
-                     const SysHSList *new_list,
+SysHsList* sys_hslist_find_custom (SysHsList        *list,
+                     const SysHsList *new_list,
                      SysCompareFunc   func) {
   sys_return_val_if_fail (func != NULL, list);
 
@@ -249,8 +254,8 @@ SysHSList* sys_hslist_find_custom (SysHSList        *list,
   return NULL;
 }
 
-SysInt sys_hslist_position (SysHSList *list,
-                  SysHSList *llink) {
+SysInt sys_hslist_position (SysHsList *list,
+                  SysHsList *llink) {
   SysInt i;
 
   i = 0;
@@ -265,8 +270,8 @@ SysInt sys_hslist_position (SysHSList *list,
   return -1;
 }
 
-SysInt sys_hslist_index (SysHSList        *list,
-               const SysHSList *new_list) {
+SysInt sys_hslist_index (SysHsList        *list,
+               const SysHsList *new_list) {
   SysInt i;
 
   i = 0;
@@ -281,7 +286,7 @@ SysInt sys_hslist_index (SysHSList        *list,
   return -1;
 }
 
-SysHSList* sys_hslist_last (SysHSList *list) {
+SysHsList* sys_hslist_last (SysHsList *list) {
   if (list)
     {
       while (list->next)
@@ -291,7 +296,7 @@ SysHSList* sys_hslist_last (SysHSList *list) {
   return list;
 }
 
-SysUInt sys_hslist_length (SysHSList *list) {
+SysUInt sys_hslist_length (SysHsList *list) {
   SysUInt length;
 
   length = 0;
@@ -304,14 +309,14 @@ SysUInt sys_hslist_length (SysHSList *list) {
   return length;
 }
 
-static SysHSList* sys_hslist_insert_sorted_real (SysHSList   *list,
-                            SysHSList  *new_list,
+static SysHsList* sys_hslist_insert_sorted_real (SysHsList   *list,
+                            SysHsList  *new_list,
                             SysFunc     func,
                             SysPointer  user_data) {
   sys_return_val_if_fail(new_list != NULL, NULL);
 
-  SysHSList *tmp_list = list;
-  SysHSList *prev_list = NULL;
+  SysHsList *tmp_list = list;
+  SysHsList *prev_list = NULL;
   SysInt cmp;
 
   sys_return_val_if_fail (func != NULL, list);
@@ -352,24 +357,24 @@ static SysHSList* sys_hslist_insert_sorted_real (SysHSList   *list,
     }
 }
 
-SysHSList* sys_hslist_insert_sorted (SysHSList       *list,
-                       SysHSList*     new_list,
+SysHsList* sys_hslist_insert_sorted (SysHsList       *list,
+                       SysHsList*     new_list,
                        SysCompareFunc  func) {
   return sys_hslist_insert_sorted_real (list, new_list, (SysFunc) func, NULL);
 }
 
-SysHSList* sys_hslist_insert_sorted_with_data (SysHSList           *list,
-                                 SysHSList * new_list,
+SysHsList* sys_hslist_insert_sorted_with_data (SysHsList           *list,
+                                 SysHsList * new_list,
                                  SysCompareDataFunc  func,
                                  SysPointer          user_data) {
   return sys_hslist_insert_sorted_real (list, new_list, (SysFunc) func, user_data);
 }
 
-static SysHSList * sys_hslist_sort_merge (SysHSList   *l1,
-                    SysHSList   *l2,
+static SysHsList * sys_hslist_sort_merge (SysHsList   *l1,
+                    SysHsList   *l2,
                     SysFunc     compare_func,
                     SysPointer  user_data) {
-  SysHSList list, *l;
+  SysHsList list, *l;
   SysInt cmp;
 
   l=&list;
@@ -394,10 +399,10 @@ static SysHSList * sys_hslist_sort_merge (SysHSList   *l1,
   return list.next;
 }
 
-static SysHSList * sys_hslist_sort_real (SysHSList   *list,
+static SysHsList * sys_hslist_sort_real (SysHsList   *list,
                    SysFunc     compare_func,
                    SysPointer  user_data) {
-  SysHSList *l1, *l2;
+  SysHsList *l1, *l2;
 
   if (!list)
     return NULL;
@@ -423,20 +428,20 @@ static SysHSList * sys_hslist_sort_real (SysHSList   *list,
       user_data);
 }
 
-SysHSList * sys_hslist_sort (SysHSList       *list,
+SysHsList * sys_hslist_sort (SysHsList       *list,
               SysCompareFunc  compare_func) {
   return sys_hslist_sort_real (list, (SysFunc) compare_func, NULL);
 }
 
-SysHSList * sys_hslist_sort_with_data (SysHSList           *list,
+SysHsList * sys_hslist_sort_with_data (SysHsList           *list,
                         SysCompareDataFunc  compare_func,
                         SysPointer          user_data) {
   return sys_hslist_sort_real (list, (SysFunc) compare_func, user_data);
 }
 
-void (sys_clear_hslist) (SysHSList         **hslist_ptr,
+void (sys_clear_hslist) (SysHsList         **hslist_ptr,
                  SysDestroyFunc   destroy) {
-  SysHSList *hslist;
+  SysHsList *hslist;
 
   hslist = *hslist_ptr;
   if (hslist)

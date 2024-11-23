@@ -27,6 +27,7 @@
 #include <System/DataTypes/SysValue.h>
 #include <System/DataTypes/SysHashTable.h>
 #include <System/DataTypes/SysList.h>
+#include <System/DataTypes/SysHList.h>
 #include <System/DataTypes/SysSList.h>
 #include <System/DataTypes/SysHsList.h>
 #include <System/DataTypes/SysQueue.h>
@@ -41,6 +42,7 @@
 #include <System/Type/SysObject.h>
 #include <System/Type/SysParam.h>
 #include <System/Type/SysBlock.h>
+#include <System/Type/SysMarkSweep.h>
 #include <System/Type/SysTypeCommon.h>
 
 #include <System/Utils/SysError.h>
