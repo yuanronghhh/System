@@ -41,7 +41,7 @@
 #include <System/Type/SysType.h>
 #include <System/Type/SysObject.h>
 #include <System/Type/SysParam.h>
-#include <System/Type/SysBlock.h>
+#include <System/Type/SysRefBlock.h>
 #include <System/Type/SysMarkSweep.h>
 #include <System/Type/SysTypeCommon.h>
 

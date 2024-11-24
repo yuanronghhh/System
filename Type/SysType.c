@@ -455,9 +455,14 @@ static void iface_entry_free(IFaceEntry *entry) {
 }
 
 void sys_type_class_free(SysTypeClass *cls) {
+  SysRefBlock *b;
+  SysTypeNode *node;
+  SysType type;
+
   sys_return_if_fail(cls != NULL);
 
-  SysTypeNode *node = sys_type_node(sys_type_from_class(cls));
+  type = sys_type_from_class(cls);
+  node = sys_type_node(type);
 
   if (node->data.instance.class_finalize) {
     node->data.instance.class_finalize(node->data.instance.class_ptr);
@@ -469,7 +474,8 @@ void sys_type_class_free(SysTypeClass *cls) {
       sys_clear_pointer(&cls->ifaces, sys_free);
     }
 
-    sys_free(node->data.instance.class_ptr);
+    b = SYS_REF_BLOCK(node->data.instance.class_ptr);
+    sys_ref_block_unref(b);
   }
 }
 
@@ -499,7 +505,8 @@ static SysTypeNode *sys_type_node_ref(SysTypeNode *node) {
       cls = node->data.instance.class_ptr;
 
       if(cls == NULL) {
-        cls = (SysTypeClass *)sys_block_new((SysType)node, node->data.instance.class_size);
+        cls = (SysTypeClass *)sys_ref_block_new(node->data.instance.class_size);
+        cls->type = NODE_TYPE(node);
         node->data.instance.class_ptr = cls;
 
         for (SysInt i = node->n_supers; i > 0; i--) {
@@ -549,12 +556,10 @@ SysBool sys_type_instance_create(
   sys_return_val_if_fail(instance != NULL, false);
 
   SysTypeNode *pnode;
-
   SysTypeClass *cls = sys_type_node_class_ref(node);
   if(cls == NULL) { return false; }
   instance->type_class = cls;
 
-  sys_block_create((SysBlock *)instance, NODE_TYPE(node));
 
   for (SysInt i = node->n_supers; i > 0; i--) {
     SysType p = node->supers[i];
@@ -592,33 +597,39 @@ SysTypeInstance *sys_type_instance_new(SysTypeNode *node, SysSize count) {
   sys_return_val_if_fail(node != NULL, NULL);
 
   SysTypeInstance *instance;
-  SysBlock *mp;
+  SysRefBlock *mp;
 
-  SysType type = NODE_TYPE(node);
   SysInt priv_psize = 0;
   priv_psize = node->data.instance.private_size;
 
-  mp = sys_block_new(type, (priv_psize + node->data.instance.instance_size) * count);
+  mp = sys_ref_block_new((priv_psize + node->data.instance.instance_size) * count);
   instance = (SysTypeInstance *)((SysChar *)mp + priv_psize);
+  instance->type = NODE_TYPE(node);
 
   return instance;
 }
 
 void sys_type_instance_free(SysTypeInstance *instance) {
-  sys_return_if_fail(instance != NULL);
   SysTypeNode *node;
   SysChar *real_ptr;
   SysTypeClass *cls;
+  SysType type;
+  SysRefBlock *b;
+
+  sys_return_if_fail(instance != NULL);
 
   cls = sys_instance_get_class(instance, SysTypeClass);
-  node = sys_type_node(sys_type_from_class(cls));
+  type = sys_type_from_class(cls);
+  node = sys_type_node(type);
 
   if(!instance_destroy(instance, cls)) {
     return;
   }
 
   real_ptr = ((SysChar*)instance) - node->data.instance.private_size;
-  sys_block_free((SysBlock *)real_ptr);
+
+  b = SYS_REF_BLOCK(real_ptr);
+  sys_ref_block_free(b);
 }
 
 const SysChar *sys_type_node_name(SysTypeNode *node) {
@@ -712,12 +723,16 @@ SysTypeNode* sys_type_node(SysType utype) {
   else
     node = static_fundamental_type_nodes[utype >> SYS_TYPE_FUNDAMENTAL_SHIFT];
 
-  if(!sys_ref_count_check(node, MAX_REF_NODE)) {
-
-    sys_error_N("type cast failed: %p", utype);
-  }
+  sys_return_val_if_fail(node != NULL, NULL);
+  sys_return_val_if_fail(node->name != NULL, NULL);
+  sys_return_val_if_fail(sys_ref_count_check(node, MAX_REF_NODE), NULL);
 
   return node;
+}
+
+SysBool sys_type_node_is_a(SysTypeNode *child, SysTypeNode *parent) {
+
+  return NODE_IS_ANCESTOR(parent, child);
 }
 
 SysBool sys_type_is_a(SysType child, SysType parent) {

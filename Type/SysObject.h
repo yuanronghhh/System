@@ -9,6 +9,7 @@ SYS_BEGIN_DECLS
 #define sys_class_cast_check(cls, stype) _sys_class_cast_check((SysObjectClass *)cls, stype)
 
 #define SYS_OBJECT(o) ((SysObject *)sys_object_cast_check(o, SYS_TYPE_OBJECT))
+#define SYS_IS_OBJECT(o) (sys_object_cast_check(o, SYS_TYPE_OBJECT))
 #define SYS_OBJECT_CLASS(cls) ((SysObjectClass *)sys_class_cast_check(cls, SYS_TYPE_OBJECT))
 #define SYS_OBJECT_GET_CLASS(o) sys_instance_get_class(o, SysObjectClass)
 
@@ -38,16 +39,16 @@ SYS_API SysPointer _sys_object_ref(SysObject* self);
 SYS_API void _sys_object_create(SysObject* self, SysType type);
 SYS_API void _sys_object_destroy(SysObject* self);
 
-#define sys_object_is_a(o, type) _sys_object_is_a(SYS_OBJECT(o), type)
-#define sys_object_dclone(o) _sys_object_dclone(SYS_OBJECT(o))
+#define sys_object_is_a(o, type) _sys_object_is_a((SysObject *)o, type)
+#define sys_object_dclone(o) _sys_object_dclone((SysObject *)o)
 #define sys_object_get_type_name(o) _sys_object_get_type_name(SYS_OBJECT(o))
 
 SYS_API SysType sys_object_get_type(void);
 SYS_API SysPointer sys_object_new(SysType type, const SysChar * first, ...);
 
-#define sys_object_set_unref_hook(hook) sys_block_set_unref_hook((SysRefHook)hook)
-#define sys_object_set_ref_hook(hook) sys_block_set_ref_hook((SysRefHook)hook)
-#define sys_object_set_new_hook(hook) sys_block_set_new_hook((SysRefHook)hook)
+void sys_object_set_unref_hook(SysRefHook hook);
+void sys_object_set_ref_hook(SysRefHook hook);
+void sys_object_set_new_hook(SysRefHook hook);
 
 SYS_API void * _sys_object_cast_check(SysObject* self, SysType ttype);
 SYS_API void * _sys_class_cast_check(SysObjectClass* cls, SysType ttype);

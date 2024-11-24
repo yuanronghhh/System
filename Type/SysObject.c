@@ -6,6 +6,10 @@
 #include <System/Utils/SysStr.h>
 #include <System/Platform/Common/SysThread.h>
 
+static SysRefHook sys_unref_debug_func = NULL;
+static SysRefHook sys_ref_debug_func = NULL;
+static SysRefHook sys_new_debug_func = NULL;
+
 static void sys_object_base_class_init(SysObjectClass* self);
 static void sys_object_base_finalize(SysObject* self);
 
@@ -48,6 +52,18 @@ static void sys_object_dispose_i(SysObject *self) {
   sys_return_if_fail(self != NULL);
 }
 
+void sys_object_set_unref_hook(SysRefHook hook) {
+  sys_unref_debug_func = hook;
+}
+
+void sys_object_set_ref_hook(SysRefHook hook) {
+  sys_ref_debug_func = hook;
+}
+
+void sys_object_set_new_hook(SysRefHook hook) {
+  sys_new_debug_func = hook;
+}
+
 static SysObject* _sys_object_new_from_instance(SysObject *o) {
   sys_return_val_if_fail(o != NULL, NULL);
 
@@ -79,50 +95,98 @@ SysObject* _sys_object_dclone(SysObject *o) {
 }
 
 void _sys_object_create(SysObject *o, SysType type) {
-  SysTypeNode *node = sys_type_node(type);
+  SysTypeNode *node;
+  SysRefBlock *b;
 
+  node = sys_type_node(type);
+  b = SYS_REF_BLOCK(o);
+
+  if(sys_new_debug_func) {
+    sys_new_debug_func(o,
+        type,
+        sys_type_node_name(node),
+        sys_ref_count_get(b));
+  }
   sys_type_instance_create((SysTypeInstance *)o, node);
-  sys_block_new_hook(SYS_BLOCK(o));
 }
 
 SysPointer sys_object_new(SysType type, const SysChar * first, ...) {
-  SysTypeNode *node = sys_type_node(type);
-  SysTypeInstance *instance = sys_type_instance_new(node, 1);
+  SysTypeNode *node;
+  SysTypeInstance *o;
+  SysRefBlock *b;
 
-  sys_block_new_hook((SysBlock *)instance);
-  if (!sys_type_instance_create(instance, node)) {
+  node = sys_type_node(type);
+  o = sys_type_instance_new(node, 1);
 
-    sys_type_instance_free(instance);
+  if(sys_new_debug_func) {
+    b = SYS_REF_BLOCK(o);
+
+    sys_new_debug_func((SysObject *)o,
+        type,
+        sys_type_node_name(node),
+        sys_ref_count_get(b));
   }
 
-  return instance;
+  if (!sys_type_instance_create(o, node)) {
+
+    sys_type_instance_free(o);
+  }
+
+  return o;
 }
 
 SysPointer _sys_object_ref(SysObject* self) {
-  sys_return_val_if_fail(sys_block_ref_valid_check(self), NULL);
-  SysBlock *o = (SysBlock *)self;
   SysObjectClass* cls;
+  SysTypeNode *node;
+  SysRefBlock *b;
+  SysType type;
 
+  sys_return_val_if_fail(SYS_IS_OBJECT(self), NULL);
+
+  b = SYS_REF_BLOCK(self);
+  type = sys_type_from_instance(self);
+  node = sys_type_node(type);
   cls = SYS_OBJECT_GET_CLASS(self);
-  sys_block_ref_hook(o);
+
+  if(sys_ref_debug_func) {
+
+    sys_ref_debug_func(self,
+        type,
+        sys_type_node_name(node),
+        sys_ref_count_get(b));
+  }
 
   if(cls->ref) {
 
     cls->ref(self);
   }
 
-  return sys_block_ref(self);
+  sys_ref_block_ref(b);
+
+  return self;
 }
 
 void _sys_object_destroy(SysObject* self) {
-  sys_return_if_fail(self != NULL);
-  sys_return_if_fail(sys_block_ref_valid_check(self));
-
+  SysTypeNode *node;
+  SysRefBlock *b;
   SysObjectClass* cls;
-  SysBlock *o = (SysBlock *)self;
+  SysType type;
 
-  sys_block_unref_hook(o);
-  if(!sys_ref_count_dec(o)) {
+  sys_return_if_fail(self != NULL);
+  sys_return_if_fail(SYS_IS_OBJECT(self));
+
+  b = SYS_REF_BLOCK(self);
+  type = sys_type_from_instance(self);
+  node = sys_type_node(type);
+  if(sys_unref_debug_func) {
+
+    sys_unref_debug_func(self,
+        type,
+        sys_type_node_name(node),
+        sys_ref_count_get(b));
+  }
+
+  if(!sys_ref_count_dec(b)) {
     return;
   }
 
@@ -134,21 +198,32 @@ void _sys_object_destroy(SysObject* self) {
 }
 
 void _sys_object_unref(SysObject* self) {
-  sys_return_if_fail(self != NULL);
-  sys_return_if_fail(sys_block_ref_valid_check(self));
-
+  SysTypeNode *node;
+  SysRefBlock *b;
   SysObjectClass* cls;
-  SysBlock *o = (SysBlock *)self;
+  SysType type;
+
+  sys_return_if_fail(self != NULL);
+  sys_return_if_fail(SYS_IS_OBJECT(self));
+
+  b = SYS_REF_BLOCK(self);
+  type = sys_type_from_instance(self);
+  node = sys_type_node(type);
+  if(sys_unref_debug_func) {
+
+    sys_unref_debug_func(self,
+        type,
+        sys_type_node_name(node),
+        sys_ref_count_get(b));
+  }
 
   cls = SYS_OBJECT_GET_CLASS(self);
-  sys_block_unref_hook(o);
-
   if(cls->unref) {
 
     cls->unref(self);
   }
 
-  if(!sys_ref_count_dec(o)) {
+  if(!sys_ref_count_dec(b)) {
     return;
   }
 
@@ -157,7 +232,7 @@ void _sys_object_unref(SysObject* self) {
     cls->dispose(self);
   }
 
-  sys_block_free((SysBlock *)self);
+  sys_ref_block_free(b);
 }
 
 static void sys_object_init(SysObject *self) {
@@ -174,27 +249,28 @@ static void sys_object_class_init(SysObjectClass *cls) {
 }
 
 void * _sys_object_cast_check(SysObject* self, SysType ttype) {
-  if (self == NULL) { return NULL; }
-  sys_return_val_if_fail(sys_block_ref_check(self), NULL);
+  SysTypeNode *node;
+  SysTypeNode* tnode;
+  SysType type;
 
-  SysType type = sys_type_from_instance(self);
+  if (self == NULL) { return NULL; }
+  sys_return_val_if_fail(self->instance.type >= 0, NULL);
+
+  type = sys_type_from_instance(self);
   sys_assert(type != 0);
 
-  SysTypeNode *node = sys_type_node(type);
-  SysTypeNode* tnode;
-
+  node = sys_type_node(type);
   if(!sys_type_node_check(node)) {
     sys_warning_N("%s", "Object check node Failed");
     return NULL;
   }
-
   tnode = sys_type_node(ttype);
 
   if (sys_type_node_is(tnode, SYS_NODE_INTERFACE)) {
 
   } else {
 
-    if (!sys_type_is_a(type, ttype)) {
+    if (!sys_type_node_is_a(node, tnode)) {
       sys_warning_N("Object check node failed: %p, %s to %s",
           self,
           sys_type_node_name(node),
@@ -230,7 +306,7 @@ void* _sys_class_cast_check(SysObjectClass* cls, SysType ttype) {
 
 SysBool _sys_object_is_a(SysObject *self, SysType type) {
   sys_return_val_if_fail(self != NULL, false);
-  sys_return_val_if_fail(sys_block_ref_check(self), false);
+  sys_return_val_if_fail(SYS_IS_OBJECT(self), false);
 
   SysType otype = sys_type_from_instance(self);
 
@@ -239,7 +315,7 @@ SysBool _sys_object_is_a(SysObject *self, SysType type) {
 
 const SysChar* _sys_object_get_type_name(SysObject *self) {
   sys_return_val_if_fail(self != NULL, NULL);
-  sys_return_val_if_fail(sys_block_ref_check(self), NULL);
+  sys_return_val_if_fail(SYS_IS_OBJECT(self), NULL);
 
   SysType tp = sys_type_from_instance(self);
   SysTypeNode *node = sys_type_node(tp);

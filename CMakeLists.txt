@@ -1,5 +1,6 @@
 add_use_name(iconv 1)
 add_use_name(openssl 1)
+add_use_name(ms_gc 0)
 
 if(WIN32)
   add_use_name(vld 1)
@@ -154,6 +155,8 @@ set(SRC
   ./Type/SysParam.c
   ./Type/SysMarkSweep.h
   ./Type/SysMarkSweep.c
+  ./Type/SysRefBlock.h
+  ./Type/SysRefBlock.c
 
   ./Utils/SysUtf8.h
   ./Utils/SysUtf8.c

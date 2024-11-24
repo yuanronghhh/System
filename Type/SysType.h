@@ -1,7 +1,7 @@
 #ifndef __SYS_TYPE_H__
 #define __SYS_TYPE_H__
 
-#include <System/Type/SysBlock.h>
+#include <System/Type/SysRefBlock.h>
 
 SYS_BEGIN_DECLS
 
@@ -21,12 +21,12 @@ SYS_BEGIN_DECLS
 #define SYS_TYPE_OBJECT                           SYS_TYPE_MAKE_FUNDAMENTAL(20)
 #define SYS_TYPE_BLOCK                            SYS_TYPE_MAKE_FUNDAMENTAL(22)
 
-#define sys_type_from_instance(o) sys_type_from_sys_block(o)
-#define sys_type_from_class(o) sys_type_from_sys_block(o)
+#define sys_type_from_instance(o) (((SysTypeInstance *)o)->type)
+#define sys_type_from_class(o) (((SysTypeClass *)o)->type)
 #define sys_instance_get_class(o, TypeName) ((TypeName *)((SysTypeInstance *)o)->type_class)
 #define sys_class_get_parent_class(o, TypeName) (TypeName *)_sys_type_parent_class(sys_type_from_class(o))
 
-#define SYS_TYPE_GET_INTERFACE(o, iface_type) _sys_type_get_interface((((SysTypeInstance *)o)->parent.type), iface_type)
+#define SYS_TYPE_GET_INTERFACE(o, iface_type) _sys_type_get_interface((((SysTypeInstance *)o)->type), iface_type)
 
 #define SYS_ADD_PRIVATE(TypeName) \
 { \
@@ -134,15 +134,16 @@ struct _SysTypeInfo {
 };
 
 struct _SysTypeClass {
-  SysBlock parent;
+  SysType type;
 
   /* limit 255 interface count for class */
   SysUInt8 n_ifaces;
   IFaceEntry **ifaces;
 };
 
+/* hidden block before */
 struct _SysTypeInstance {
-  SysBlock parent;
+  SysType type;
   SysTypeClass *type_class;
 };
 
@@ -181,6 +182,7 @@ SYS_API void sys_type_class_unref(SysTypeClass *cls);
 SYS_API void sys_type_class_free(SysTypeClass *cls);
 SYS_API void sys_type_class_adjust_private_offset (SysTypeClass *cls, SysInt * private_offset);
 SYS_API SysTypeClass *sys_type_class_ref(SysType type);
+SYS_API SysBool sys_type_node_is_a(SysTypeNode *child, SysTypeNode *parent);
 SYS_API SysBool sys_type_is_a(SysType child, SysType parent);
 SYS_API SysTypeNode * sys_type_make_fundamental_node(const SysTypeNode * pnode, SysType ftype, const SysTypeInfo * info);
 SYS_API void sys_type_prop_set(SysType tp, SysParam *param);
