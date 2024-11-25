@@ -196,43 +196,13 @@ def update_object_data(f):
         f.write(data)
         f.close()
 
-def glfw_to_iface():
-    func_data = """\
-void (*create) (FrWindow* window, SysInt width, SysInt height, const SysChar *title, FrWindow *share);
-FrMonitor* (*get_primary_monitor) ();
-void (*set_error_callback) (FrWindowErrFunc callback);
-SysPointer (*get_user_pointer) (FrWindow *window);
-void (*set_user_pointer) (FrWindow *window, SysPointer user_data);
-void (*get_framebuffer_size) (FrWindow *window, SysInt *width, SysInt *height);
-void (*get_window_size) (FrWindow *window, SysInt *width, SysInt *height);
-void (*set_window_size) (FrWindow *window, SysInt width, SysInt height);
-void (*set_window_title) (FrWindow *window, const SysChar *title);
-void (*set_window_opacity) (FrWindow *window, SysDouble opacity);
-void (*set_window_should_close) (FrWindow *window, SysBool bvalue);
-void (*set_window_focus_callback) (FrWindow *window, SysFunc func);
-void (*set_window_pos_callback) (FrWindow *window, SysFunc func);
-void (*set_window_refresh_callback) (FrWindow *window, SysFunc func);
-void (*set_framebuffer_size_callback) (FrWindow *window, SysFunc func);
-void (*set_window_size_callback) (FrWindow *window, SysFunc func);
-void (*set_key_callback) (FrWindow *window, SysFunc func);
-void (*set_mouse_button_callback) (FrWindow *window, SysFunc func);
-void (*set_cursor_pos_callback) (FrWindow *window, SysFunc func);
-void (*set_window_close_callback) (FrWindow *window, SysFunc func);
-void (*set_scroll_callback) (FrWindow *window, SysFunc func);
-void (*set_cursor_enter_callback) (FrWindow *window, SysFunc func);
-void (*set_window_maximize_callback) (FrWindow *window, SysFunc func);
-void (*swap_buffers) (FrWindow *window);
-void (*destroy_window) (FrWindow *window);
-const SysChar* (*get_key_name) (SysInt key, SysInt scancode);
-SysInt (*get_key) (FrWindow *window, SysInt key);
-void (*wait_events_timeout) (SysDouble sec);
-void (*wait_events) (void);
-void (*post_empty_event) (void);
-void (*poll_events) (void);
-void (*terminate) (void);
-void (*window_hit) (SysInt p, SysInt v);
+
+iface_func_data = """\
+  void (*render_get_size) (FrRender *render, SysInt *width, SysInt *height);
 """
-    for line in func_data.split("\n"):
+
+def iface_to_hook():
+    for line in iface_func_data.split("\n"):
         if not line:
             continue
 
@@ -242,6 +212,18 @@ void (*window_hit) (SysInt p, SysInt v);
         line = line[idx1+2:idx2]
         nname = line
         print("iface->%s = fr_glfw_%s;" % (nname, nname))
+
+def iface_to_define():
+    for line in iface_func_data.split("\n"):
+        if not line:
+            continue
+
+        idx1 = line.find('(')
+        idx2 = line.find(")")
+
+        line = line[idx1+2:idx2]
+        nname = line
+        print("#define fr_window_%s fr_i_window_%s" % (nname, nname))
 
 def rename_gobject():
     wk = os.getcwd() + "/Cst"
@@ -260,4 +242,4 @@ def rename_gobject():
             rename_data(fname)
 
 if __name__ == '__main__':
-    glfw_to_iface()
+    iface_to_define()
