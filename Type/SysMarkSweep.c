@@ -106,18 +106,21 @@ void sys_ms_block_free(SysMsBlock* o) {
   ms_block_remove(o);
 }
 
-SysPointer sys_ms_block_alloc(SysSize size) {
-  SysSize bsize;
-  SysMsBlock* o;
+void sys_ms_block_create(SysMsBlock *o, SysSize size) {
   SysHList *hlist;
 
-  bsize = sizeof(SysMsBlock);
-  o = sys_malloc0(bsize + size);
-  o->bptr = (SysChar *)o + bsize;
+  o->bptr = (SysChar *)o + sizeof(SysMsBlock);
   hlist = SYS_HLIST(o);
   sys_hlist_init(hlist);
 
   g_block_list = sys_hlist_prepend(g_block_list, hlist);
+}
+
+SysPointer sys_ms_block_alloc(SysSize size) {
+  SysSize bsize = sizeof(SysMsBlock);
+  SysMsBlock *o = sys_malloc0(bsize + size);
+
+  sys_ms_block_create(o, size);
 
   return o->bptr;
 }
