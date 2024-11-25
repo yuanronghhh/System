@@ -51,6 +51,7 @@ typedef short SysShort;
 typedef unsigned short SysUShort;
 typedef unsigned int SysUInt;
 typedef float SysFloat;
+typedef void SysVoid;
 typedef char SysChar;
 typedef unsigned char u_char;
 typedef unsigned char SysUChar;
