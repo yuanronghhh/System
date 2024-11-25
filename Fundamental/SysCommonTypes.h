@@ -102,6 +102,7 @@ typedef SysInt     (*SysCompareDataFunc) (const void* a, const void* b, SysPoint
 typedef SysBool    (*SysEqualFunc) (const SysPointer a, const SysPointer b);
 typedef SysInt     (*SysEqualDataFunc) (const void* a, const void* b, void *user_data);
 typedef void       (*SysDestroyFunc) (void* data);
+typedef void       (*SysCleanUpFunc) (void** data);
 typedef SysPointer (*SysCopyFunc) (const SysPointer src, SysPointer data);
 
 /* system types */
