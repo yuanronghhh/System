@@ -4,6 +4,9 @@
 #include <System/Platform/Common/SysMem.h>
 #include <System/Platform/Common/SysThread.h>
 
+#define SYS_MS_MAP(o) ((SysMsMap *)o)
+#define SYS_MS_BLOCK(o) ((SysMsBlock *)o)
+
 static SysMutex gc_lock;
 /* SysMsMap */
 static SysHList* g_map_list = NULL;
@@ -34,28 +37,45 @@ void _sys_ptr_clean(SysPointer *o) {
   *o = NULL;
 }
 
-void ms_block_mark(SysMsMap *o) {
+static void ms_map_remove (SysMsMap *o) {
+
+  g_map_list = sys_hlist_delete_link(g_map_list, SYS_HLIST(o));
+}
+
+static void ms_block_remove (SysMsBlock *o) {
+
+  g_block_list = sys_hlist_delete_link(g_block_list, SYS_HLIST(o));
+}
+
+static void ms_block_mark(SysMsMap *o) {
   SysMsMap *mp;
   SysMsBlock *nb;
-  SysHList *nlist = SYS_HLIST(o);
+  SysHList *node = SYS_HLIST(o);
 
-  sys_hlist_foreach(nlist, node) {
-    mp = (SysMsMap *)node;
-    if(*mp->addr == NULL) {
+  while(node) {
+    mp = SYS_MS_MAP(node);
+    if(*mp->addr == SYS_MS_INIT_VALUE) {
       continue;
     }
+    node = node->next;
 
-    nb = *mp->addr;
-    nb->marked = true;
+    if(*mp->addr == NULL) {
+      sys_ms_map_free(mp);
+
+    } else {
+
+      nb = *mp->addr;
+      nb->marked = true;
+    }
   }
 }
 
-void ms_block_sweep(SysMsBlock *o) {
+static void ms_block_sweep(SysMsBlock *o) {
   SysMsBlock *b;
   SysHList *node = SYS_HLIST(o);
 
   while(node) {
-    b = (SysMsBlock *)node;
+    b = SYS_MS_BLOCK(node);
     if(b->bptr == NULL) {
       continue;
     }
@@ -66,51 +86,67 @@ void ms_block_sweep(SysMsBlock *o) {
     }
 
     node = node->next;
-
-    sys_free(b->bptr);
-    g_block_list = sys_hlist_delete_link(g_block_list, SYS_HLIST(b));
+    sys_ms_block_free(b);
   }
 }
 
-SysPointer _sys_ms_alloc(SysInt type, SysSize size) {
+void sys_ms_block_free(SysMsBlock* o) {
+  sys_free(o->bptr);
+  o->bptr = NULL;
+  ms_block_remove(o);
+}
+
+SysPointer sys_ms_block_alloc(SysSize size) {
   SysSize bsize;
   SysMsBlock* o;
+  SysHList *hlist;
 
   bsize = sizeof(SysMsBlock);
   o = sys_malloc0(bsize + size);
-  o->type = type;
   o->bptr = (SysChar *)o + bsize;
-  g_block_list = sys_hlist_prepend(g_block_list, SYS_HLIST(o));
+  hlist = SYS_HLIST(o);
+  sys_hlist_init(hlist);
+
+  g_block_list = sys_hlist_prepend(g_block_list, hlist);
 
   return o->bptr;
 }
 
-SysChar* sys_ms_alloc_str(const SysChar *str) {
+SysChar* sys_ms_block_alloc_str(const SysChar *str) {
   SysSize len;
 
   SysChar *nstr;
 
   len = strlen(str);
-  nstr = _sys_ms_alloc(SYS_MS_STACK, len + 1);
+  nstr = sys_ms_block_alloc(len + 1);
   memcpy(nstr, str, len + 1);
 
   return nstr;
 }
 
+void sys_ms_map_free(SysMsMap *o) {
+  o->addr = NULL;
+  ms_map_remove(o);
+}
+
 SysMsMap *sys_ms_map_alloc(void **addr) {
-  SysMsMap *o = sys_new0(SysMsMap, 1);
+  SysMsMap *o;
+  SysHList *hlist;
+
+  o = sys_new0(SysMsMap, 1);
   o->addr = addr;
+
+  hlist = SYS_HLIST(o);
+  sys_hlist_init(hlist);
+
+  g_map_list = sys_hlist_prepend(g_map_list, hlist);
+
   return o;
 }
 
 void sys_ms_register_var(void **addr) {
-  SysMsMap *map;
-
   sys_mutex_lock(&gc_lock);
-
-  map = sys_ms_map_alloc(addr);
-  sys_ms_register_map(map);
-
+  sys_ms_map_alloc(addr);
   sys_mutex_unlock(&gc_lock);
 }
 
@@ -120,6 +156,10 @@ void sys_ms_register_map(SysMsMap *map) {
 }
 
 void sys_ms_collect(void) {
-  ms_block_mark((SysMsMap *)g_map_list);
-  ms_block_sweep((SysMsBlock *)g_block_list);
+  sys_mutex_lock(&gc_lock);
+
+  ms_block_mark(SYS_MS_MAP(g_map_list));
+  ms_block_sweep(SYS_MS_BLOCK(g_block_list));
+
+  sys_mutex_unlock(&gc_lock);
 }

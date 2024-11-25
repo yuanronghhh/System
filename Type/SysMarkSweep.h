@@ -6,9 +6,11 @@
 
 SYS_BEGIN_DECLS
 
+#define SYS_MS_INIT_VALUE UINT_TO_POINTER(0xCCCCCCCC)
+
 #define SYS_DECLARE(var) \
   sys_cleanup(_sys_ptr_clean) \
-  SysPointer var = NULL; \
+  SysPointer var = SYS_MS_INIT_VALUE; \
   sys_ms_register_var(&var); \
 
 #define sys_alloca_s(struct_type) \
@@ -16,8 +18,6 @@ SYS_BEGIN_DECLS
 
 #define sys_alloca_ptr() \
   sys_alloca(sizeof(SysPointer))
-
-#define sys_ms_alloc(size) _sys_ms_alloc(SYS_MS_HEAP, size)
 
 struct _SysMsMap {
   SysHList list;
@@ -28,9 +28,6 @@ struct _SysMsBlock {
   SysHList parent;
 
   /* <private> */
-
-  /* stakc / heap */
-  SysInt type;
   SysPointer bptr;
   SysBool marked;
 };
@@ -46,9 +43,13 @@ SYS_API void _sys_ptr_clean(SysPointer *o);
 SYS_API void sys_ms_register_map(SysMsMap *map);
 SYS_API void sys_ms_register_var(void **addr);
 SYS_API void sys_ms_collect(void);
+
 SYS_API SysMsMap *sys_ms_map_alloc(void**addr);
-SYS_API SysPointer _sys_ms_alloc(SysInt type, SysSize size);
-SYS_API SysChar* sys_ms_alloc_str(const SysChar *str);
+SYS_API void sys_ms_map_free(SysMsMap *o);
+
+SYS_API void sys_ms_block_free(SysMsBlock* o);
+SYS_API SysPointer sys_ms_block_alloc(SysSize size);
+SYS_API SysChar* sys_ms_block_alloc_str(const SysChar *str);
 
 SYS_API void sys_ms_setup(void);
 SYS_API void sys_ms_teardown(void);
