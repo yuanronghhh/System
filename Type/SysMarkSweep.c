@@ -33,10 +33,6 @@ void sys_ms_teardown(void) {
   sys_mutex_clear(&gc_lock);
 }
 
-void _sys_ptr_clean(SysPointer *o) {
-  *o = NULL;
-}
-
 static void ms_map_remove (SysMsMap *o) {
 
   g_map_list = sys_hlist_delete_link(g_map_list, SYS_HLIST(o));
@@ -49,23 +45,24 @@ static void ms_block_remove (SysMsBlock *o) {
 
 static void ms_block_mark(SysMsMap *o) {
   SysMsMap *mp;
-  SysMsBlock *nb;
+  SysMsBlock *b;
   SysHList *node = SYS_HLIST(o);
 
   while(node) {
     mp = SYS_MS_MAP(node);
-    if(*mp->addr == SYS_MS_INIT_VALUE) {
-      continue;
-    }
     node = node->next;
 
-    if(*mp->addr == NULL) {
+    if(*mp->addr == SYS_MS_INIT_VALUE) {
+      continue;
+
+    } else if(*mp->addr == NULL) {
       sys_ms_map_free(mp);
 
     } else {
+      b = (SysMsBlock *)(((SysChar *)*mp->addr) - sizeof(SysMsBlock));
+      if(!SYS_IS_HDATA(b)) { continue; }
 
-      nb = *mp->addr;
-      nb->marked = true;
+      b->marked = true;
     }
   }
 }
@@ -76,6 +73,8 @@ static void ms_block_sweep(SysMsBlock *o) {
 
   while(node) {
     b = SYS_MS_BLOCK(node);
+    node = node->next;
+
     if(b->bptr == NULL) {
       continue;
     }
@@ -85,13 +84,11 @@ static void ms_block_sweep(SysMsBlock *o) {
       continue;
     }
 
-    node = node->next;
     sys_ms_block_free(b);
   }
 }
 
 void sys_ms_block_free(SysMsBlock* o) {
-  sys_free(o->bptr);
   o->bptr = NULL;
   ms_block_remove(o);
 }
