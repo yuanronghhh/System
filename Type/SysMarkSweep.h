@@ -10,11 +10,12 @@ SYS_BEGIN_DECLS
 #define SYS_DECLARE_BEGIN(var, TypeName, func) \
   sys_cleanup(func) \
   TypeName* var = SYS_MS_INIT_VALUE; \
-  sys_ms_register_var((void **)&var); \
+  sys_ms_register_var((void **)&var);
 
 #define SYS_MS_DEFINE_CLEAN_FUNC(TypeName)       \
-  static void TypeName##_cleanup(TypeName **o) { \
-    *o = NULL;                                   \
+  static void TypeName##_cleanup(TypeName **addr) { \
+    sys_ms_unregister_var((void **)addr);           \
+    *addr = NULL;                                   \
   }
 
 #define SYS_DECLARE_PTR(TypeName, var) SYS_DECLARE_BEGIN(var, TypeName, TypeName##_cleanup)
@@ -37,6 +38,22 @@ struct _SysMsBlock {
   SysBool marked;
 };
 
+SYS_API void sys_ms_lock(void);
+SYS_API void sys_ms_unlock(void);
+SYS_API void sys_ms_register_var(void **addr);
+SYS_API void sys_ms_unregister_var(void **addr);
+SYS_API void sys_ms_collect(void);
+
+SYS_API SysMsMap *sys_ms_map_alloc(void**addr);
+SYS_API void sys_ms_map_free(SysMsMap *o);
+
+SYS_API void sys_ms_block_free(SysMsBlock* o);
+SYS_API SysPointer sys_ms_block_alloc(SysSize size);
+SYS_API SysChar* sys_ms_block_alloc_str(const SysChar *str);
+
+SYS_API void sys_ms_setup(void);
+SYS_API void sys_ms_teardown(void);
+
 SYS_MS_DEFINE_CLEAN_FUNC(SysBool);
 SYS_MS_DEFINE_CLEAN_FUNC(SysRef);
 SYS_MS_DEFINE_CLEAN_FUNC(SysPointer);
@@ -57,22 +74,6 @@ SYS_MS_DEFINE_CLEAN_FUNC(SysDouble);
 SYS_MS_DEFINE_CLEAN_FUNC(SysSize);
 SYS_MS_DEFINE_CLEAN_FUNC(SysSSize);
 SYS_MS_DEFINE_CLEAN_FUNC(SysWChar);
-
-SYS_API void sys_ms_lock(void);
-SYS_API void sys_ms_unlock(void);
-SYS_API void sys_ms_register_map(SysMsMap *map);
-SYS_API void sys_ms_register_var(void **addr);
-SYS_API void sys_ms_collect(void);
-
-SYS_API SysMsMap *sys_ms_map_alloc(void**addr);
-SYS_API void sys_ms_map_free(SysMsMap *o);
-
-SYS_API void sys_ms_block_free(SysMsBlock* o);
-SYS_API SysPointer sys_ms_block_alloc(SysSize size);
-SYS_API SysChar* sys_ms_block_alloc_str(const SysChar *str);
-
-SYS_API void sys_ms_setup(void);
-SYS_API void sys_ms_teardown(void);
 
 SYS_END_DECLS
 

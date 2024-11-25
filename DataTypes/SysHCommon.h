@@ -5,7 +5,7 @@
 
 SYS_BEGIN_DECLS
 
-#define SYS_HDATA_CHECK_VALUE 0xdeadbeef
+#define SYS_HDATA_CHECK_VALUE 0xCCCCCCCC
 #define SYS_HDATA_CHECK(o) (o != NULL && (o)->check == SYS_HDATA_CHECK_VALUE)
 #define SYS_HDATA_F_CAST(o, TypeName, member) ((TypeName *)_sys_hdata_f_cast(o, offsetof(TypeName, member)))
 #define SYS_HDATA_B_CAST(o, TypeName, member) ((TypeName *)_sys_hdata_b_cast(o, offsetof(TypeName, member)))

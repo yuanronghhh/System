@@ -29,6 +29,16 @@ void sys_ms_setup(void) {
 }
 
 void sys_ms_teardown(void) {
+  SysMsBlock *b;
+  SysHList *node;
+
+  node = SYS_HLIST(g_block_list);
+  while(node) {
+    b = SYS_MS_BLOCK(node);
+    node = node->next;
+
+    sys_info_N("memory leak block: %p", b->bptr);
+  }
 
   sys_mutex_clear(&gc_lock);
 }
@@ -60,7 +70,10 @@ static void ms_block_mark(SysMsMap *o) {
 
     } else {
       b = (SysMsBlock *)(((SysChar *)*mp->addr) - sizeof(SysMsBlock));
-      if(!SYS_IS_HDATA(b)) { continue; }
+      if(!SYS_IS_HDATA(b)) {
+
+        sys_error_N("pointer reference to invalid block: %lx", mp->addr);
+      }
 
       b->marked = true;
     }
@@ -141,15 +154,26 @@ SysMsMap *sys_ms_map_alloc(void **addr) {
   return o;
 }
 
-void sys_ms_register_var(void **addr) {
+void sys_ms_unregister_var(void **addr) {
   sys_mutex_lock(&gc_lock);
-  sys_ms_map_alloc(addr);
+
+  SysMsMap *map = SYS_MS_MAP(g_map_list);
+  if(map->addr != addr) {
+
+    sys_warning_N("stack free failed: %lx", addr);
+    return;
+  }
+
+  sys_ms_map_free(map);
   sys_mutex_unlock(&gc_lock);
 }
 
-void sys_ms_register_map(SysMsMap *map) {
+void sys_ms_register_var(void **addr) {
+  sys_mutex_lock(&gc_lock);
 
-  g_map_list = sys_hlist_prepend(g_map_list, SYS_HLIST(map));
+  sys_ms_map_alloc(addr);
+
+  sys_mutex_unlock(&gc_lock);
 }
 
 void sys_ms_collect(void) {
