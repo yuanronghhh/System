@@ -559,7 +559,7 @@ SysBool sys_type_instance_create(
   SysTypeClass *cls = sys_type_node_class_ref(node);
   if(cls == NULL) { return false; }
   instance->type_class = cls;
-
+  instance->type = NODE_TYPE(node);
 
   for (SysInt i = node->n_supers; i > 0; i--) {
     SysType p = node->supers[i];
@@ -604,7 +604,6 @@ SysTypeInstance *sys_type_instance_new(SysTypeNode *node, SysSize count) {
 
   mp = sys_ref_block_new((priv_psize + node->data.instance.instance_size) * count);
   instance = (SysTypeInstance *)((SysChar *)mp + priv_psize);
-  instance->type = NODE_TYPE(node);
 
   return instance;
 }
