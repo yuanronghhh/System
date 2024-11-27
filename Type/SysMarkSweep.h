@@ -1,16 +1,29 @@
 #ifndef __SYS_MARKSWEEP_H__
 #define __SYS_MARKSWEEP_H__
 
-#include <System/Type/SysTypeCommon.h>
+#include <System/DataTypes/SysTypeCommon.h>
 #include <System/DataTypes/SysHList.h>
 
 SYS_BEGIN_DECLS
 
 #define SYS_MS_INIT_VALUE UINT_TO_POINTER(0xCCCCCCCC)
+
+#define SYS_MS_ALLOCA(map) \
+  map = sys_alloca(SysMsMap, 1); \
+  sys_hlist_init(SYS_HLIST(map));
+
+#define SYS_MS_REGISTER_VAR(TypeName, var) \
+  { \
+    SysMsMap *msMap; \
+    SYS_MS_ALLOCA(msMap); \
+    msMap->addr = (void **)&(var); \
+    sys_ms_map_push_head(msMap); \
+  }
+
 #define SYS_DECLARE_BEGIN(var, TypeName, func) \
   sys_cleanup(func) \
   TypeName* var = SYS_MS_INIT_VALUE; \
-  sys_ms_register_var((void **)&var);
+  SYS_MS_REGISTER_VAR(TypeName, var);
 
 #define SYS_MS_DEFINE_CLEAN_FUNC(TypeName)       \
   static void TypeName##_cleanup(TypeName **addr) { \
@@ -28,7 +41,10 @@ SYS_BEGIN_DECLS
 
 struct _SysMsMap {
   SysHList list;
+
+  /* <private> */
   void** addr;
+  SysDestroyFunc destroy;
 };
 
 struct _SysMsBlock {
@@ -38,13 +54,14 @@ struct _SysMsBlock {
   SysBool marked;
 };
 
+
 SYS_API void sys_ms_lock(void);
 SYS_API void sys_ms_unlock(void);
-SYS_API void sys_ms_register_var(void **addr);
 SYS_API void sys_ms_unregister_var(void **addr);
 SYS_API void sys_ms_collect(void);
 
-SYS_API SysMsMap *sys_ms_map_alloc(void**addr);
+SYS_API void sys_ms_map_push_head(SysMsMap *o);
+SYS_API void sys_ms_map_push_tail(SysMsMap *o);
 SYS_API void sys_ms_map_free(SysMsMap *o);
 
 SYS_API void sys_ms_block_free(SysMsBlock* o);

@@ -1,6 +1,6 @@
 #include <System/Type/SysMarkSweep.h>
 #include <System/Type/SysObject.h>
-#include <System/DataTypes/SysHList.h>
+#include <System/DataTypes/SysHQueue.h>
 #include <System/Platform/Common/SysMem.h>
 #include <System/Platform/Common/SysThread.h>
 
@@ -9,7 +9,7 @@
 
 static SysMutex gc_lock;
 /* SysMsMap */
-static SysHList* g_map_list = NULL;
+static SysHQueue* g_map_list = NULL;
 /* SysMsBlock */
 static SysHList* g_block_list = NULL;
 
@@ -41,11 +41,6 @@ void sys_ms_teardown(void) {
   }
 
   sys_mutex_clear(&gc_lock);
-}
-
-static void ms_map_remove (SysMsMap *o) {
-
-  g_map_list = sys_hlist_delete_link(g_map_list, SYS_HLIST(o));
 }
 
 static void ms_block_remove (SysMsBlock *o) {
@@ -139,7 +134,12 @@ SysChar* sys_ms_block_alloc_str(const SysChar *str) {
 
 void sys_ms_map_free(SysMsMap *o) {
   o->addr = NULL;
-  ms_map_remove(o);
+  sys_hqueue_unlink(g_map_list, SYS_HLIST(o));
+
+  if(o->destroy) {
+
+    o->destroy(o);
+  }
 }
 
 SysMsMap *sys_ms_map_alloc(void **addr) {
@@ -152,9 +152,14 @@ SysMsMap *sys_ms_map_alloc(void **addr) {
   hlist = SYS_HLIST(o);
   sys_hlist_init(hlist);
 
-  g_map_list = sys_hlist_prepend(g_map_list, hlist);
+  sys_hqueue_push_head_link(g_map_list, hlist);
 
   return o;
+}
+
+void sys_ms_map_push_head(SysMsMap *o) {
+
+  sys_hqueue_push_head(g_map_list, SYS_HLIST(o));
 }
 
 void sys_ms_unregister_var(void **addr) {
