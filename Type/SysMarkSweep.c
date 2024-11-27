@@ -69,7 +69,7 @@ static void ms_block_mark(SysMsMap *o) {
       b = (SysMsBlock *)(((SysChar *)*mp->addr) - sizeof(SysMsBlock));
       if(!SYS_IS_HDATA(b)) {
 
-        sys_warning_N("pointer reference to invalid block: %lx", mp->addr);
+        sys_warning_N("pointer reference to invalid block: %p", mp->addr);
         continue;
       }
 
@@ -161,7 +161,7 @@ void sys_ms_unregister_map(void **addr, SysMsMap *map) {
 
   if(map->addr != addr) {
 
-    sys_warning_N("stack free failed: %lx", addr);
+    sys_warning_N("stack free failed: %p", addr);
     return;
   }
 
