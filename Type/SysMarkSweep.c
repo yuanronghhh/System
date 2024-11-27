@@ -9,7 +9,7 @@
 
 static SysMutex gc_lock;
 /* SysMsMap */
-static SysHQueue* g_map_list = NULL;
+static SysHQueue g_map_list;
 /* SysMsBlock */
 static SysHList* g_block_list = NULL;
 
@@ -25,6 +25,7 @@ void sys_ms_unlock(void) {
 
 void sys_ms_setup(void) {
   g_block_list = NULL;
+  sys_hqueue_init(&g_map_list);
   sys_mutex_init(&gc_lock);
 }
 
@@ -40,6 +41,7 @@ void sys_ms_teardown(void) {
     sys_info_N("memory leak block: %p", b->bptr);
   }
 
+  sys_hqueue_clear(&g_map_list);
   sys_mutex_clear(&gc_lock);
 }
 
@@ -67,7 +69,8 @@ static void ms_block_mark(SysMsMap *o) {
       b = (SysMsBlock *)(((SysChar *)*mp->addr) - sizeof(SysMsBlock));
       if(!SYS_IS_HDATA(b)) {
 
-        sys_error_N("pointer reference to invalid block: %lx", mp->addr);
+        sys_warning_N("pointer reference to invalid block: %lx", mp->addr);
+        continue;
       }
 
       b->marked = true;
@@ -101,7 +104,7 @@ void sys_ms_block_free(SysMsBlock* o) {
   ms_block_remove(o);
 }
 
-void sys_ms_block_create(SysMsBlock *o, SysSize size) {
+static void sys_ms_block_create(SysMsBlock *o, SysSize size) {
   SysHList *hlist;
 
   o->bptr = (SysChar *)o + sizeof(SysMsBlock);
@@ -132,9 +135,15 @@ SysChar* sys_ms_block_alloc_str(const SysChar *str) {
   return nstr;
 }
 
+void sys_ms_map_init(SysMsMap *o) {
+  sys_hlist_init(SYS_HLIST(o));
+  o->destroy = NULL;
+  o->addr = NULL;
+}
+
 void sys_ms_map_free(SysMsMap *o) {
   o->addr = NULL;
-  sys_hqueue_unlink(g_map_list, SYS_HLIST(o));
+  sys_hqueue_unlink(&g_map_list, SYS_HLIST(o));
 
   if(o->destroy) {
 
@@ -142,30 +151,14 @@ void sys_ms_map_free(SysMsMap *o) {
   }
 }
 
-SysMsMap *sys_ms_map_alloc(void **addr) {
-  SysMsMap *o;
-  SysHList *hlist;
-
-  o = sys_new0(SysMsMap, 1);
-  o->addr = addr;
-
-  hlist = SYS_HLIST(o);
-  sys_hlist_init(hlist);
-
-  sys_hqueue_push_head_link(g_map_list, hlist);
-
-  return o;
-}
-
 void sys_ms_map_push_head(SysMsMap *o) {
 
-  sys_hqueue_push_head(g_map_list, SYS_HLIST(o));
+  sys_hqueue_push_head(&g_map_list, SYS_HLIST(o));
 }
 
-void sys_ms_unregister_var(void **addr) {
+void sys_ms_unregister_map(void **addr, SysMsMap *map) {
   sys_mutex_lock(&gc_lock);
 
-  SysMsMap *map = SYS_MS_MAP(g_map_list);
   if(map->addr != addr) {
 
     sys_warning_N("stack free failed: %lx", addr);
@@ -176,18 +169,15 @@ void sys_ms_unregister_var(void **addr) {
   sys_mutex_unlock(&gc_lock);
 }
 
-void sys_ms_register_var(void **addr) {
-  sys_mutex_lock(&gc_lock);
-
-  sys_ms_map_alloc(addr);
-
-  sys_mutex_unlock(&gc_lock);
+void sys_ms_unregister_var(void **addr) {
+  SysMsMap *map = SYS_MS_MAP(sys_hqueue_peek_head(&g_map_list));
+  sys_ms_unregister_map(addr, map);
 }
 
 void sys_ms_collect(void) {
   sys_mutex_lock(&gc_lock);
 
-  ms_block_mark(SYS_MS_MAP(g_map_list));
+  ms_block_mark(SYS_MS_MAP(sys_hqueue_peek_head(&g_map_list)));
   ms_block_sweep(SYS_MS_BLOCK(g_block_list));
 
   sys_mutex_unlock(&gc_lock);

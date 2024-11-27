@@ -1,21 +1,21 @@
 #ifndef __SYS_MARKSWEEP_H__
 #define __SYS_MARKSWEEP_H__
 
-#include <System/DataTypes/SysTypeCommon.h>
+#include <System/Type/SysTypeCommon.h>
 #include <System/DataTypes/SysHList.h>
 
 SYS_BEGIN_DECLS
 
 #define SYS_MS_INIT_VALUE UINT_TO_POINTER(0xCCCCCCCC)
 
-#define SYS_MS_ALLOCA(map) \
-  map = sys_alloca(SysMsMap, 1); \
-  sys_hlist_init(SYS_HLIST(map));
+#define sys_ms_alloca(map) \
+  map = sys_alloca(sizeof(SysMsMap)); \
+  sys_ms_map_init(map)
 
 #define SYS_MS_REGISTER_VAR(TypeName, var) \
   { \
     SysMsMap *msMap; \
-    SYS_MS_ALLOCA(msMap); \
+    sys_ms_alloca(msMap); \
     msMap->addr = (void **)&(var); \
     sys_ms_map_push_head(msMap); \
   }
@@ -34,10 +34,12 @@ SYS_BEGIN_DECLS
 #define SYS_DECLARE_PTR(TypeName, var) SYS_DECLARE_BEGIN(var, TypeName, TypeName##_cleanup)
 
 #define sys_alloca_s(struct_type) \
-  (struct_type)_sys_alloca(sizeof(struct_type))
+  (struct_type)sys_alloca(sizeof(struct_type))
 
 #define sys_alloca_ptr() \
   sys_alloca(sizeof(SysPointer))
+
+#define sys_ms_block_new(TypeName, nsize) sys_ms_block_alloc((SysSize)nsize * sizeof(TypeName))
 
 struct _SysMsMap {
   SysHList list;
@@ -58,10 +60,12 @@ struct _SysMsBlock {
 SYS_API void sys_ms_lock(void);
 SYS_API void sys_ms_unlock(void);
 SYS_API void sys_ms_unregister_var(void **addr);
+SYS_API void sys_ms_unregister_map(void **addr, SysMsMap *map);
 SYS_API void sys_ms_collect(void);
 
 SYS_API void sys_ms_map_push_head(SysMsMap *o);
 SYS_API void sys_ms_map_push_tail(SysMsMap *o);
+SYS_API void sys_ms_map_init(SysMsMap *o);
 SYS_API void sys_ms_map_free(SysMsMap *o);
 
 SYS_API void sys_ms_block_free(SysMsBlock* o);

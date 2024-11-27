@@ -13,7 +13,7 @@ SysHQueue* sys_hqueue_new(void) {
 void sys_hqueue_free(SysHQueue *queue) {
   sys_return_if_fail(queue != NULL);
 
-  sys_hlist_free(queue->head);
+  // sys_hlist_free(queue->head);
   sys_slice_free(SysHQueue, queue);
 }
 
@@ -26,8 +26,8 @@ void sys_hqueue_init(SysHQueue *queue) {
 
 void sys_hqueue_clear(SysHQueue *queue) {
   sys_return_if_fail(queue != NULL);
+  sys_return_if_fail(sys_hqueue_is_empty(queue));
 
-  sys_hlist_free(queue->head);
   sys_hqueue_init(queue);
 }
 

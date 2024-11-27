@@ -8,6 +8,8 @@
 
 void sys_hlist_init(SysHList *list) {
   sys_hdata_init((SysHData *)list);
+  list->next = NULL;
+  list->prev = NULL;
 }
 
 void sys_hlist_free(SysHList *list) {
