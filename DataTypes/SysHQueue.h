@@ -24,14 +24,11 @@ struct _SysHQueue {
   SysUInt  length;
 };
 
-SYS_API SysHQueue* sys_hqueue_new(void);
-SYS_API void  sys_hqueue_free(SysHQueue *queue);
 SYS_API void  sys_hqueue_init(SysHQueue *queue);
 SYS_API void  sys_hqueue_clear(SysHQueue *queue);
 SYS_API SysBool sys_hqueue_is_empty(SysHQueue *queue);
 SYS_API SysUInt  sys_hqueue_get_length(SysHQueue *queue);
 SYS_API void  sys_hqueue_reverse(SysHQueue *queue);
-SYS_API SysHQueue * sys_hqueue_copy(SysHQueue *queue);
 SYS_API SysHList * sys_hqueue_find(SysHQueue *queue, const SysHList *new_list);
 SYS_API SysHList * sys_hqueue_find_custom(SysHQueue *queue, const SysHList *new_list, SysCompareFunc   func);
 SYS_API void sys_hqueue_push_nth(SysHQueue* queue, SysHList *new_list, SysInt n);

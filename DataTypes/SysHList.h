@@ -8,6 +8,7 @@ SYS_BEGIN_DECLS
 #define SYS_HLIST(o) ((SysHList *)o)
 
 #define sys_hlist_foreach(list, node) for(SysHList *node = list;node;node = node->next)
+#define sys_hlist_remove(list, new_list) sys_hlist_remove_link(list, new_list);
 
 typedef struct _SysHList SysHList;
 
@@ -18,18 +19,13 @@ struct _SysHList {
 };
 
 SYS_API void sys_hlist_init(SysHList *list);
-SYS_API SysHList*   sys_hlist_new(void);
-SYS_API void       sys_hlist_free_1(SysHList *list);
-SYS_API void       sys_hlist_free(SysHList *list);
 SYS_API SysHList* sys_hlist_append(SysHList *list, SysHList *new_list);
 SYS_API SysHList* sys_hlist_prepend(SysHList *list, SysHList *new_list);
 SYS_API SysHList* sys_hlist_insert(SysHList *list, SysHList *new_list, SysInt      position);
 SYS_API SysHList* sys_hlist_insert_before(SysHList *list, SysHList *sibling, SysHList *new_list);
 SYS_API SysHList*   sys_hlist_concat(SysHList *list1, SysHList *list2);
-SYS_API SysHList* sys_hlist_remove(SysHList *list, const SysHList* new_list);
 SYS_API SysHList* sys_hlist_remove_all(SysHList *list, const SysHList* new_list);
 SYS_API SysHList*   sys_hlist_remove_link(SysHList *list, SysHList *llink);
-SYS_API SysHList*   sys_hlist_delete_link(SysHList *list,SysHList *link_);
 SYS_API SysHList*   sys_hlist_reverse(SysHList *list);
 SYS_API SysHList*   sys_hlist_nth(SysHList *list, SysUInt  n);
 SYS_API SysHList* sys_hlist_nth_prev(SysHList* list, SysUInt  n);

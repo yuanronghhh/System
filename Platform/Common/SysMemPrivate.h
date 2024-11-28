@@ -5,13 +5,6 @@
 
 SYS_BEGIN_DECLS
 
-typedef struct _SysMVTable SysMVTable;
-struct _SysMVTable {
-  void *(*malloc) (SysSize size);
-  void (*free) (void *o);
-  SysPointer (*realloc) (void *mem, SysSize size);
-};
-
 void sys_real_memcpy(
   void*       const dst,
   SysSize         const dst_size,

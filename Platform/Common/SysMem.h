@@ -45,6 +45,15 @@ SYS_BEGIN_DECLS
 #define sys_cleanup(func) 
 #endif
 
+typedef struct _SysMVTable SysMVTable;
+
+struct _SysMVTable {
+  void *(*malloc) (SysSize size);
+  void (*free) (void *o);
+  SysPointer (*realloc) (void *mem, SysSize size);
+};
+
+
 SYS_API void sys_memcpy(
   SysPointer  const dst,
   SysSize     const dst_size,
@@ -68,11 +77,10 @@ SYS_API SysSize sys_get_msize(void *block);
 SYS_API SysPointer sys_aligned_malloc(SysSize align, SysSize size);
 SYS_API void sys_aligned_free(void *ptr);
 
+SYS_API void sys_mem_set_vtable(SysMVTable *funcs);
 SYS_API void sys_mem_setup(void);
 SYS_API void sys_mem_teardown(void);
 
-SYS_API void sys_leaks_setup(void);
-SYS_API void sys_leaks_report(void);
 SYS_API const SysChar* sys_leaks_get_file(void);
 SYS_API void sys_leaks_set_file(const SysChar *leakfile);
 

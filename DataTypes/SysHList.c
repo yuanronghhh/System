@@ -12,14 +12,6 @@ void sys_hlist_init(SysHList *list) {
   list->prev = NULL;
 }
 
-void sys_hlist_free(SysHList *list) {
-  sys_slice_free_chain(SysHList, list, next);
-}
-
-void sys_hlist_free_1(SysHList *list) {
-  sys_slice_free(SysHList, list);
-}
-
 SysHList* sys_hlist_append(SysHList *list, SysHList *new_list) {
   SysHList *last;
 
@@ -63,7 +55,6 @@ SysHList* sys_hlist_insert(SysHList *list, SysHList *new_list, SysInt      posit
   if (!tmp_list)
     return sys_hlist_append(list, new_list);
 
-  new_list = sys_slice_new(SysHList);
   new_list->prev = tmp_list->prev;
   tmp_list->prev->next = new_list;
   new_list->next = tmp_list;
@@ -121,7 +112,7 @@ SysHList* sys_hlist_concat(SysHList *list1, SysHList *list2) {
   return list1;
 }
 
-static SYS_INLINE SysHList* _sys_hlist_remove_link(SysHList *list, SysHList *link) {
+SysHList* sys_hlist_remove_link(SysHList *list, SysHList *link) {
   if (link == NULL)
     return list;
 
@@ -150,23 +141,6 @@ static SYS_INLINE SysHList* _sys_hlist_remove_link(SysHList *list, SysHList *lin
   return list;
 }
 
-SysHList* sys_hlist_remove(SysHList *list, const SysHList* new_list) {
-  SysHList *tmp;
-
-  tmp = list;
-  while (tmp) {
-    if (tmp != new_list) {
-      tmp = tmp->next;
-    } else {
-      list = _sys_hlist_remove_link(list, tmp);
-      sys_slice_free(SysHList, tmp);
-
-      break;
-    }
-  }
-  return list;
-}
-
 SysHList* sys_hlist_remove_all(SysHList *list, const SysHList* new_list) {
   SysHList *tmp = list;
 
@@ -183,21 +157,9 @@ SysHList* sys_hlist_remove_all(SysHList *list, const SysHList* new_list) {
       if (next)
         next->prev = tmp->prev;
 
-      sys_slice_free(SysHList, tmp);
       tmp = next;
     }
   }
-  return list;
-}
-
-SysHList* sys_hlist_remove_link(SysHList *list, SysHList *llink) {
-  return _sys_hlist_remove_link(list, llink);
-}
-
-SysHList* sys_hlist_delete_link(SysHList *list, SysHList *link_) {
-  list = _sys_hlist_remove_link(list, link_);
-  sys_slice_free(SysHList, link_);
-
   return list;
 }
 

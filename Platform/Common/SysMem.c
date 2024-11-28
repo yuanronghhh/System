@@ -7,10 +7,10 @@
 
 static SysChar* sys_leakfile = NULL;
 
-static SysMVTable funcs = {
-  .malloc = sys_malloc,
-  .free = sys_free,
-  .realloc = sys_realloc
+static SysMVTable allocatior = {
+  .malloc = malloc,
+  .free = free,
+  .realloc = realloc
 };
 
 void sys_memcpy(
@@ -39,7 +39,7 @@ SysPointer sys_realloc(void *mem, SysSize size) {
   void *nmem = NULL;
 
   if (size) {
-    nmem = realloc(mem, size);
+    nmem = allocatior.realloc(mem, size);
     if (nmem) { return nmem; }
 
     sys_error_N("%s", "realloc failed.");
@@ -60,7 +60,7 @@ void sys_free(void *ptr) {
     return;
   }
 
-  free(ptr);
+  allocatior.free(ptr);
 }
 
 /**
@@ -99,7 +99,7 @@ SysPointer sys_calloc(SysSize count, SysSize size) {
 }
 
 SysPointer sys_malloc(SysSize size) {
-  void *b = malloc(size);
+  void *b = allocatior.malloc(size);
 
   if(b == NULL) {
 
@@ -190,13 +190,15 @@ void _sys_slice_free_chain(SysSize typesize, SysPointer ptr, SysSize offset) {
   }
 }
 
-void sys_mem_setup(void) {
+void sys_mem_set_vtable(SysMVTable *funcs) {
+  sys_return_if_fail(funcs != NULL);
+
+  allocatior.malloc = funcs->malloc;
+  allocatior.free = funcs->free;
+  allocatior.realloc = funcs->realloc;
 }
 
-void sys_mem_teardown(void) {
-}
-
-void sys_leaks_setup(void) {
+static void sys_leaks_setup(void) {
   if(!sys_get_debugger()) { return; }
   sys_real_leaks_init();
 }
@@ -213,7 +215,17 @@ void sys_leaks_set_file(const SysChar *leakfile) {
   SYS_LEAK_IGNORE_END;
 }
 
-void sys_leaks_report(void) {
+static void sys_leaks_report(void) {
   if(!sys_get_debugger()) { return; }
   sys_real_leaks_report();
 }
+
+void sys_mem_setup(void) {
+
+  sys_leaks_setup();
+}
+
+void sys_mem_teardown(void) {
+  sys_leaks_report();
+}
+

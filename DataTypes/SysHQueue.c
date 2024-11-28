@@ -6,17 +6,6 @@
  * license under GNU Lesser General Public
  */
 
-SysHQueue* sys_hqueue_new(void) {
-  return sys_slice_new0(SysHQueue);
-}
-
-void sys_hqueue_free(SysHQueue *queue) {
-  sys_return_if_fail(queue != NULL);
-
-  // sys_hlist_free(queue->head);
-  sys_slice_free(SysHQueue, queue);
-}
-
 void sys_hqueue_init(SysHQueue *queue) {
   sys_return_if_fail(queue != NULL);
 
@@ -48,20 +37,6 @@ void sys_hqueue_reverse(SysHQueue *queue) {
 
   queue->tail = queue->head;
   queue->head = sys_hlist_reverse(queue->head);
-}
-
-SysHQueue *sys_hqueue_copy(SysHQueue *queue) {
-  SysHQueue *result;
-  SysHList *list;
-
-  sys_return_val_if_fail(queue != NULL, NULL);
-
-  result = sys_hqueue_new();
-
-  for (list = queue->head; list != NULL; list = list->next)
-    sys_hqueue_push_tail(result, list);
-
-  return result;
 }
 
 SysHList *sys_hqueue_find(SysHQueue *queue, const SysHList *new_list) {

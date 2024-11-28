@@ -12,9 +12,9 @@ void sys_setup(void) {
   sys_error_setup();
   sys_real_setup();
   // sys_ssl_setup();
-  sys_quark_setup();
-  sys_leaks_setup();
+  sys_mem_setup();
   sys_ms_setup();
+  sys_quark_setup();
   sys_type_setup();
 
   inited = true;
@@ -24,13 +24,13 @@ void sys_teardown(void) {
   if(!inited) {return;}
 
   sys_type_teardown();
-  sys_real_teardown();
   sys_quark_teardown();
+  sys_real_teardown();
   sys_ms_teardown();
   // sys_ssl_teardown();
   sys_error_teardown();
   sys_thread_detach();
-  sys_leaks_report();
+  sys_mem_teardown();
 
   inited = false;
 }

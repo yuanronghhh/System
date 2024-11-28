@@ -4,15 +4,29 @@
 #include <System/Platform/Common/SysMem.h>
 #include <System/Platform/Common/SysThread.h>
 
+#define ms_realloc(o, size) realloc(o, size)
+#define ms_malloc(size) malloc(size)
+#define ms_free(o) free(o)
+#define MS_BSIZE sizeof(SysMsBlock)
+#define ms_b_cast(o) _sys_hdata_b_cast(o, MS_BSIZE)
+#define ms_f_cast(o) _sys_hdata_f_cast(o, MS_BSIZE)
+
 static SysMutex gc_lock;
 /* SysMsMap */
 static SysHQueue g_map_list;
 /* SysMsBlock */
 static SysHList* g_block_list = NULL;
 
+static SysMVTable allocator = {
+  .malloc = sys_ms_block_malloc,
+  .free = sys_ms_block_free,
+  .realloc = sys_ms_block_realloc,
+};
+
 static SysPointer ms_malloc0(SysSize size) {
   void *b = malloc(size);
   memset(b, 0, size);
+
   return b;
 }
 
@@ -26,36 +40,7 @@ void sys_ms_unlock(void) {
   sys_mutex_unlock(&gc_lock);
 }
 
-void sys_ms_setup(void) {
-  g_block_list = NULL;
-
-  sys_mem_set_vtable();
-
-  sys_hqueue_init(&g_map_list);
-  sys_mutex_init(&gc_lock);
-}
-
-void sys_ms_teardown(void) {
-  SysMsBlock *b;
-  SysHList *node;
-
-  node = SYS_HLIST(g_block_list);
-  while(node) {
-    b = SYS_MS_BLOCK(node);
-    node = node->next;
-
-    sys_info_N("memory leak block: %p", b->bptr);
-  }
-
-  sys_hqueue_clear(&g_map_list);
-  sys_mutex_clear(&gc_lock);
-}
-
-static void ms_block_remove (SysMsBlock *o) {
-
-  g_block_list = sys_hlist_delete_link(g_block_list, SYS_HLIST(o));
-}
-
+/* ms block */
 static void ms_block_mark(SysMsMap *o) {
   SysMsMap *mp;
   SysMsBlock *b;
@@ -72,7 +57,7 @@ static void ms_block_mark(SysMsMap *o) {
       sys_ms_map_free(mp);
 
     } else {
-      b = (SysMsBlock *)(((SysChar *)*mp->addr) - sizeof(SysMsBlock));
+      b =  ms_b_cast(*mp->addr);
       if(!SYS_IS_HDATA(b)) {
 
         sys_warning_N("pointer reference to invalid block: %p", mp->addr);
@@ -86,13 +71,15 @@ static void ms_block_mark(SysMsMap *o) {
 
 static void ms_block_sweep(SysMsBlock *o) {
   SysMsBlock *b;
+  SysPointer bptr;
   SysHList *node = SYS_HLIST(o);
 
   while(node) {
     b = SYS_MS_BLOCK(node);
     node = node->next;
+    bptr = ms_f_cast(b);
 
-    if(b->bptr == NULL) {
+    if(bptr == NULL) {
       continue;
     }
 
@@ -101,59 +88,52 @@ static void ms_block_sweep(SysMsBlock *o) {
       continue;
     }
 
-    sys_ms_block_free(b);
+    sys_ms_block_remove(b);
+    ms_free(b);
   }
 }
 
-void sys_ms_block_free(SysMsBlock* o) {
-  o->bptr = NULL;
-  ms_block_remove(o);
+void sys_ms_block_free(SysPointer o) {
+  sys_return_if_fail(o != NULL);
+
+  SysMsBlock *b = ms_b_cast(o);
+  sys_return_if_fail(SYS_IS_HDATA(b));
+
+  sys_ms_block_remove(b);
+  ms_free(b);
 }
 
-static void sys_ms_block_create(SysMsBlock *o, SysSize size) {
-  SysHList *hlist;
+void sys_ms_block_remove(SysMsBlock* o) {
 
-  o->bptr = (SysChar *)o + sizeof(SysMsBlock);
-  hlist = SYS_HLIST(o);
-  sys_hlist_init(hlist);
-
-  g_block_list = sys_hlist_prepend(g_block_list, hlist);
+  g_block_list = sys_hlist_remove_link(g_block_list, SYS_HLIST(o));
 }
 
-SysPointer sys_ms_block_alloc(SysSize size) {
-  SysSize bsize = sizeof(SysMsBlock);
-  SysMsBlock *o = ms_malloc0(bsize + size);
+static void sys_ms_block_create(SysMsBlock *o) {
+  SysHList *ms_list;
 
-  sys_ms_block_create(o, size);
+  ms_list = SYS_HLIST(o);
+  sys_hlist_init(ms_list);
 
-  return o->bptr;
+  g_block_list = sys_hlist_prepend(g_block_list, ms_list);
 }
 
-SysChar* sys_ms_block_format(const SysChar *format, ...) {
-  SysChar *str = NULL;
+SysPointer sys_ms_block_realloc(SysPointer b, SysSize nsize) {
+  SysMsBlock *o = ms_realloc(b, MS_BSIZE + nsize);
 
-  va_list args;
-  va_start(args, format);
+  sys_ms_block_create(o);
 
-  sys_vasprintf(&str, format, args);
-
-  va_end(args);
-
-  return str;
+  return ms_f_cast(o);
 }
 
-SysChar* sys_ms_block_strdup(const SysChar *str) {
-  SysSize len;
+SysPointer sys_ms_block_malloc(SysSize size) {
+  SysMsBlock *o = ms_malloc0(MS_BSIZE + size);
 
-  SysChar *nstr;
+  sys_ms_block_create(o);
 
-  len = strlen(str);
-  nstr = sys_ms_block_alloc(len + 1);
-  memcpy(nstr, str, len + 1);
-
-  return nstr;
+  return ms_f_cast(o);
 }
 
+/* ms map */
 void sys_ms_map_init(SysMsMap *o) {
   sys_hlist_init(SYS_HLIST(o));
   o->destroy = NULL;
@@ -201,3 +181,30 @@ void sys_ms_collect(void) {
 
   sys_mutex_unlock(&gc_lock);
 }
+
+void sys_ms_setup(void) {
+  g_block_list = NULL;
+
+  sys_mem_set_vtable(&allocator);
+  sys_hqueue_init(&g_map_list);
+  sys_mutex_init(&gc_lock);
+}
+
+void sys_ms_teardown(void) {
+  SysMsBlock *b;
+  SysHList *node;
+  SysPointer bptr;
+
+  node = SYS_HLIST(g_block_list);
+  while(node) {
+    b = SYS_MS_BLOCK(node);
+    node = node->next;
+    bptr = ms_f_cast(b);
+
+    sys_info_N("memory leak block: %p", bptr);
+  }
+
+  sys_hqueue_clear(&g_map_list);
+  sys_mutex_clear(&gc_lock);
+}
+
