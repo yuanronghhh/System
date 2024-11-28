@@ -4,14 +4,17 @@
 #include <System/Platform/Common/SysMem.h>
 #include <System/Platform/Common/SysThread.h>
 
-#define SYS_MS_MAP(o) ((SysMsMap *)o)
-#define SYS_MS_BLOCK(o) ((SysMsBlock *)o)
-
 static SysMutex gc_lock;
 /* SysMsMap */
 static SysHQueue g_map_list;
 /* SysMsBlock */
 static SysHList* g_block_list = NULL;
+
+static SysPointer ms_malloc0(SysSize size) {
+  void *b = malloc(size);
+  memset(b, 0, size);
+  return b;
+}
 
 void sys_ms_lock(void) {
 
@@ -25,6 +28,9 @@ void sys_ms_unlock(void) {
 
 void sys_ms_setup(void) {
   g_block_list = NULL;
+
+  sys_mem_set_vtable();
+
   sys_hqueue_init(&g_map_list);
   sys_mutex_init(&gc_lock);
 }
@@ -116,14 +122,27 @@ static void sys_ms_block_create(SysMsBlock *o, SysSize size) {
 
 SysPointer sys_ms_block_alloc(SysSize size) {
   SysSize bsize = sizeof(SysMsBlock);
-  SysMsBlock *o = sys_malloc0(bsize + size);
+  SysMsBlock *o = ms_malloc0(bsize + size);
 
   sys_ms_block_create(o, size);
 
   return o->bptr;
 }
 
-SysChar* sys_ms_block_alloc_str(const SysChar *str) {
+SysChar* sys_ms_block_format(const SysChar *format, ...) {
+  SysChar *str = NULL;
+
+  va_list args;
+  va_start(args, format);
+
+  sys_vasprintf(&str, format, args);
+
+  va_end(args);
+
+  return str;
+}
+
+SysChar* sys_ms_block_strdup(const SysChar *str) {
   SysSize len;
 
   SysChar *nstr;

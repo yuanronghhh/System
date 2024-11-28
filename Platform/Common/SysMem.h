@@ -68,6 +68,9 @@ SYS_API SysSize sys_get_msize(void *block);
 SYS_API SysPointer sys_aligned_malloc(SysSize align, SysSize size);
 SYS_API void sys_aligned_free(void *ptr);
 
+SYS_API void sys_mem_setup(void);
+SYS_API void sys_mem_teardown(void);
+
 SYS_API void sys_leaks_setup(void);
 SYS_API void sys_leaks_report(void);
 SYS_API const SysChar* sys_leaks_get_file(void);

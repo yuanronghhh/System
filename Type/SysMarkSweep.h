@@ -7,6 +7,8 @@
 SYS_BEGIN_DECLS
 
 #define SYS_MS_INIT_VALUE UINT_TO_POINTER(0xCCCCCCCC)
+#define SYS_MS_MAP(o) ((SysMsMap *)o)
+#define SYS_MS_BLOCK(o) ((SysMsBlock *)o)
 
 #define sys_ms_alloca(map) \
   map = sys_alloca(sizeof(SysMsMap)); \
@@ -39,7 +41,10 @@ SYS_BEGIN_DECLS
 #define sys_alloca_ptr() \
   sys_alloca(sizeof(SysPointer))
 
-#define sys_ms_block_new(TypeName, nsize) sys_ms_block_alloc((SysSize)nsize * sizeof(TypeName))
+#define sys_ms_malloc(size) sys_ms_block_alloc(size)
+#define sys_ms_new(TypeName, nsize) sys_ms_block_alloc((SysSize)nsize * sizeof(TypeName))
+#define sys_ms_free(o) sys_ms_block_free(o)
+#define sys_ms_strdup(str) sys_ms_block_strdup(str)
 
 struct _SysMsMap {
   SysHList list;
@@ -70,7 +75,7 @@ SYS_API void sys_ms_map_free(SysMsMap *o);
 
 SYS_API void sys_ms_block_free(SysMsBlock* o);
 SYS_API SysPointer sys_ms_block_alloc(SysSize size);
-SYS_API SysChar* sys_ms_block_alloc_str(const SysChar *str);
+SYS_API SysChar* sys_ms_block_strdup(const SysChar *str);
 
 SYS_API void sys_ms_setup(void);
 SYS_API void sys_ms_teardown(void);

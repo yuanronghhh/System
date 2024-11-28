@@ -7,6 +7,12 @@
 
 static SysChar* sys_leakfile = NULL;
 
+static SysMVTable funcs = {
+  .malloc = sys_malloc,
+  .free = sys_free,
+  .realloc = sys_realloc
+};
+
 void sys_memcpy(
     SysPointer  const dst,
     SysSize     const dst_size,
@@ -49,12 +55,11 @@ SysPointer sys_realloc(void *mem, SysSize size) {
 }
 
 void sys_free(void *ptr) {
-#if !defined(NO_FREE_CHECK) || !NO_FREE_CHECK
   if (ptr == NULL) {
     sys_warning_N("%s", "sys_free block is null.");
     return;
   }
-#endif
+
   free(ptr);
 }
 
@@ -183,6 +188,12 @@ void _sys_slice_free_chain(SysSize typesize, SysPointer ptr, SysSize offset) {
     sys_free(node);
     node = next;
   }
+}
+
+void sys_mem_setup(void) {
+}
+
+void sys_mem_teardown(void) {
 }
 
 void sys_leaks_setup(void) {
