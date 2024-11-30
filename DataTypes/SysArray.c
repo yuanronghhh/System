@@ -82,8 +82,6 @@ SysArray* sys_array_sized_new(SysBool zero_terminated,
     array->elt_size = elt_size;
     array->clear_func = NULL;
 
-    sys_block_ref_count_init(array);
-
     if (array->zero_terminated || reserved_size != 0)
     {
         sys_array_maybe_expand(array, reserved_size);
@@ -106,7 +104,7 @@ SysArray * sys_array_ref(SysArray *array) {
     SysRealArray *rarray = (SysRealArray*)array;
     sys_return_val_if_fail(array, NULL);
 
-    sys_block_ref_count_inc(rarray);
+    sys_block_ref_inc(rarray);
 
     return array;
 }
@@ -123,7 +121,7 @@ void sys_array_unref(SysArray *array) {
     SysRealArray *rarray = (SysRealArray*)array;
     sys_return_if_fail(array);
 
-    if (sys_block_ref_count_dec(rarray))
+    if (sys_block_ref_dec(rarray))
         array_free(rarray, FREE_SEGMENT);
 }
 
@@ -144,7 +142,7 @@ SysChar* sys_array_free(SysArray   *farray,
 
     flags = (free_segment ? FREE_SEGMENT : 0);
 
-        if (!sys_block_ref_count_dec(array))
+        if (!sys_block_ref_dec(array))
         flags |= PRESERVE_WRAPPER;
 
     return array_free(array, flags);
@@ -453,7 +451,7 @@ static SysPtrArray * ptr_array_new(SysUInt reserved_size,
     array->alloc = 0;
     array->element_free_func = element_free_func;
 
-    sys_block_ref_count_init(array);
+    sys_block_ref_init(array);
 
     if (reserved_size != 0)
         sys_ptr_array_maybe_expand(array, reserved_size);
@@ -557,7 +555,7 @@ SysPtrArray* sys_ptr_array_ref(SysPtrArray *array) {
 
     sys_return_val_if_fail(array, NULL);
 
-    sys_block_ref_count_inc(rarray);
+    sys_block_ref_inc(rarray);
 
     return array;
 }
@@ -569,7 +567,7 @@ void sys_ptr_array_unref(SysPtrArray *array) {
 
     sys_return_if_fail(array);
 
-    if (sys_block_ref_count_dec(rarray))
+    if (sys_block_ref_dec(rarray))
         ptr_array_free(array, FREE_SEGMENT);
 }
 
@@ -585,7 +583,7 @@ SysPointer* sys_ptr_array_free(SysPtrArray *array,
     /* if others are holding a reference, preserve the wrapper but
      * do free/return the data
      */
-    if (!sys_block_ref_count_dec(rarray))
+    if (!sys_block_ref_dec(rarray))
         flags |= PRESERVE_WRAPPER;
 
     return ptr_array_free(array, flags);

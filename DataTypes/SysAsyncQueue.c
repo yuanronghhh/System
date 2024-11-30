@@ -74,7 +74,7 @@ sys_async_queue_ref (SysAsyncQueue *queue)
 {
   sys_return_val_if_fail (queue, NULL);
 
-  sys_block_ref_count_inc (queue);
+  sys_block_ref_inc (queue);
 
   return queue;
 }
@@ -109,7 +109,7 @@ sys_async_queue_unref (SysAsyncQueue *queue)
 {
   sys_return_if_fail (queue);
 
-  if (sys_block_ref_count_dec(queue))
+  if (sys_block_ref_dec(queue))
     {
       sys_return_if_fail (queue->waiting_threads == 0);
 

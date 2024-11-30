@@ -1,7 +1,7 @@
 #include <System/Platform/Common/SysThreadPrivate.h>
 #include <System/Platform/Win32/SysThreadWin32.h>
 #include <System/Utils/SysStr.h>
-
+#include <System/Type/SysBlock.h>
 
 static void
 sys_thread_abort (SysInt         status,
@@ -364,7 +364,7 @@ sys_system_thread_free (SysRealThread *thread)
   SysThreadWin32 *wt = (SysThreadWin32 *) thread;
 
   win32_check_for_error (CloseHandle (wt->handle));
-  sys_slice_free (SysThreadWin32, wt);
+  sys_block_free (wt);
 }
 
 void
@@ -419,11 +419,12 @@ sys_system_thread_new (SysThreadFunc proxy,
   const SysChar *message = NULL;
   SysInt thread_prio;
 
-  thread = sys_slice_new0 (SysThreadWin32);
+  thread = sys_block_new (SysThreadWin32, 1);
   thread->proxy = proxy;
   thread->handle = (HANDLE) NULL;
   base_thread = (SysRealThread*)thread;
-  base_thread->ref_count = 2;
+  sys_block_ref_set(base_thread, 2);
+
   base_thread->ours = true;
   base_thread->thread.joinable = true;
   base_thread->thread.func = func;
@@ -477,7 +478,7 @@ error:
   {
     if (thread->handle)
       CloseHandle (thread->handle);
-    sys_slice_free (SysThreadWin32, thread);
+    sys_block_free (thread);
     return NULL;
   }
 }

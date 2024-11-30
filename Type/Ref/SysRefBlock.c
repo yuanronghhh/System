@@ -12,7 +12,7 @@ SysPointer _sys_ref_block_cast_check(SysPointer o) {
   sys_return_val_if_fail(self != NULL, NULL);
 
   if (!sys_ref_count_check(self, MAX_REF_NODE)) {
-    sys_warning_N("block ref check failed: %p", self);
+    sys_warning_N("block ref check failed: %p,%d", self->ref_count);
     return false;
   }
 
@@ -35,7 +35,7 @@ SysPointer sys_real_block_malloc(SysSize size) {
 
 SysPointer sys_real_block_realloc(SysPointer b, SysSize size) {
   SysInt bsize = sizeof(SysRefBlock);
-  SysRefBlock* o = sys_realloc(b, bsize + size);
+  SysRefBlock* o = ms_realloc(b, bsize + size);
 
   sys_ref_block_create(o);
 
@@ -78,7 +78,7 @@ SysPointer sys_real_block_ref(SysBlock* o) {
 
 void sys_real_block_free(SysPointer o) {
   SysRefBlock* self = SYS_REF_BLOCK(o);
-  sys_free(self);
+  ms_free(self);
 }
 
 SysBool sys_real_block_valid_check(SysBlock *o) {

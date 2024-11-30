@@ -1,12 +1,7 @@
 add_use_name(iconv 1)
 add_use_name(openssl 1)
 add_use_name(refcount 1)
-
-if(USE_REFCOUNT)
-  add_use_name(marksweep 0)
-else()
-  add_use_name(marksweep 1)
-endif()
+add_use_name(marksweep 0)
 
 if(WIN32)
   add_use_name(vld 1)

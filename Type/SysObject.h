@@ -30,9 +30,9 @@ struct _SysObject {
 };
 
 #define sys_object_create(o, type) _sys_object_create((SysObject *)o, type)
-#define sys_object_destroy(o) _sys_object_destroy(SYS_OBJECT(o))
-#define sys_object_unref(o) _sys_object_unref(SYS_OBJECT(o))
-#define sys_object_ref(o) _sys_object_ref(SYS_OBJECT(o))
+#define sys_object_destroy(o) _sys_object_destroy((SysObject *)o)
+#define sys_object_unref(o) _sys_object_unref((SysObject *)o)
+#define sys_object_ref(o) _sys_object_ref((SysObject *)o)
 SYS_API void _sys_object_unref(SysObject* self);
 SYS_API SysPointer _sys_object_ref(SysObject* self);
 
@@ -41,7 +41,7 @@ SYS_API void _sys_object_destroy(SysObject* self);
 
 #define sys_object_is_a(o, type) _sys_object_is_a((SysObject *)o, type)
 #define sys_object_dclone(o) _sys_object_dclone((SysObject *)o)
-#define sys_object_get_type_name(o) _sys_object_get_type_name(SYS_OBJECT(o))
+#define sys_object_get_type_name(o) _sys_object_get_type_name((SysObject *)o)
 
 SYS_API SysType sys_object_get_type(void);
 SYS_API SysPointer sys_object_new(SysType type, const SysChar * first, ...);

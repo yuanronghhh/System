@@ -20,7 +20,7 @@ SYS_BEGIN_DECLS
 #define sys_ref_count_get(o) sys_atomic_int_get(&((o)->ref_count))
 #define sys_ref_count_dec(o) sys_atomic_int_dec_and_test(&((o)->ref_count))
 #define sys_ref_count_cmp(o, n) (_sys_atomic_int_get(&((o)->ref_count)) == n)
-#define sys_ref_count_set(o, n) _sys_atomic_int_set(&((o)->ref_count), 0)
+#define sys_ref_count_set(o, n) _sys_atomic_int_set(&((o)->ref_count), n)
 
 SYS_END_DECLS
 

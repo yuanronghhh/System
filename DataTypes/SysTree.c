@@ -4,6 +4,7 @@
  * license under GNU Lesser General Public
  */
 #include <System/DataTypes/SysTree.h>
+#include <System/Type/SysBlock.h>
 
 #define MAX_SYSTREE_HEIGHT 40
 
@@ -14,7 +15,6 @@ struct _SysTree {
   SysDestroyFunc    value_destroy_func;
   SysPointer          key_compare_data;
   SysUInt             nnodes;
-  SysInt              ref_count;
 };
 
 struct _SysTreeNode {
@@ -93,14 +93,13 @@ SysTree* sys_tree_new_full (SysCompareDataFunc key_compare_func,
   
   sys_return_val_if_fail (key_compare_func != NULL, NULL);
   
-  tree = sys_slice_new (SysTree);
+  tree = sys_block_new (SysTree, 1);
   tree->root               = NULL;
   tree->key_compare        = key_compare_func;
   tree->key_destroy_func   = key_destroy_func;
   tree->value_destroy_func = value_destroy_func;
   tree->key_compare_data   = key_compare_data;
   tree->nnodes             = 0;
-  tree->ref_count          = 1;
   
   return tree;
 }
@@ -235,7 +234,7 @@ void sys_tree_remove_all (SysTree *tree) {
 SysTree* sys_tree_ref (SysTree *tree) {
   sys_return_val_if_fail (tree != NULL, NULL);
 
-  sys_atomic_int_inc (&tree->ref_count);
+  sys_block_ref_inc(tree);
 
   return tree;
 }
@@ -243,9 +242,9 @@ SysTree* sys_tree_ref (SysTree *tree) {
 void sys_tree_unref (SysTree *tree) {
   sys_return_if_fail (tree != NULL);
 
-  if (sys_atomic_int_dec_and_test (&tree->ref_count)) {
+  if (sys_block_ref_dec (tree)) {
       sys_tree_remove_all (tree);
-      sys_slice_free (SysTree, tree);
+      sys_block_free (tree);
     }
 }
 

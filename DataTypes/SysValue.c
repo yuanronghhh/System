@@ -122,7 +122,7 @@ SysBool sys_value_set_value(SysValue *self, SysPointer *p) {
 SysValue* sys_value_new(void) {
   SysValue *o = sys_new0(SysValue, 1);
 
-  sys_block_ref_count_init(o);
+  sys_block_ref_init(o);
 
   return o;
 }
@@ -290,14 +290,14 @@ void sys_value_ref(SysValue* value) {
   sys_return_if_fail(value != NULL);
   sys_return_if_fail(sys_block_valid_check(value));
 
-  sys_block_ref_count_inc(value);
+  sys_block_ref_inc(value);
 }
 
 void sys_value_unref(SysValue* self) {
   sys_return_if_fail(self != NULL);
   sys_return_if_fail(sys_block_valid_check(self));
 
-  if (!sys_block_ref_count_dec(self)) {
+  if (!sys_block_ref_dec(self)) {
     return;
   }
 

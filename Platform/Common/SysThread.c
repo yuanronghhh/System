@@ -1,6 +1,7 @@
 #include <System/Platform/Common/SysThreadPrivate.h>
 #include <System/DataTypes/SysSList.h>
 #include <System/Utils/SysStr.h>
+#include <System/Type/SysBlock.h>
 
 /**
  * this code from glib Thread
@@ -90,7 +91,7 @@ void sys_thread_detach(void) {
 SysThread * sys_thread_ref (SysThread *thread) {
   SysRealThread *real = (SysRealThread *) thread;
 
-  sys_atomic_int_inc (&real->ref_count);
+  sys_block_ref_inc(real);
 
   return thread;
 }
@@ -98,12 +99,12 @@ SysThread * sys_thread_ref (SysThread *thread) {
 void sys_thread_unref (SysThread *thread) {
   SysRealThread *real = (SysRealThread *) thread;
 
-  if (sys_atomic_int_dec_and_test (&real->ref_count))
+  if (sys_block_ref_dec (real))
     {
       if (real->ours)
         sys_system_thread_free (real);
       else
-        sys_slice_free (SysRealThread, real);
+        sys_block_free (real);
     }
 }
 
@@ -204,8 +205,7 @@ SysThread* sys_thread_self (void) {
        * This can happen for the main thread and for threads
        * that are not created by GLib.
        */
-      thread = sys_slice_new0 (SysRealThread);
-      thread->ref_count = 1;
+      thread = sys_block_new (SysRealThread, 1);
 
       sys_private_set (&sys_thread_specific_private, thread);
     }

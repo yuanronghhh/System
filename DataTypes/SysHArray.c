@@ -94,7 +94,7 @@ void sys_harray_free(SysHArray* self, SysBool free_segment) {
 void sys_harray_unref(SysHArray* self) {
   sys_return_if_fail(self != NULL);
 
-  if (sys_block_ref_count_dec(self)) {
+  if (sys_block_ref_dec(self)) {
 
     sys_harray_free(self, true);
   }
@@ -103,7 +103,7 @@ void sys_harray_unref(SysHArray* self) {
 SysHArray* sys_harray_ref(SysHArray *self) {
   sys_return_val_if_fail(self != NULL, NULL);
 
-  sys_block_ref_count_inc(self);
+  sys_block_ref_inc(self);
 
   return self;
 }

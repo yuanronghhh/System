@@ -101,13 +101,15 @@ void _sys_object_create(SysObject *o, SysType type) {
   node = sys_type_node(type);
   b = SYS_BLOCK(o);
 
-  if(sys_new_debug_func) {
-    sys_new_debug_func(o,
-        type,
-        sys_type_node_name(node),
-        sys_block_ref_count_get(b));
-  }
+  sys_block_ref_init(o);
   sys_type_instance_create((SysTypeInstance *)o, node);
+
+  if (sys_new_debug_func) {
+      sys_new_debug_func(o,
+          type,
+          sys_type_node_name(node),
+          sys_block_ref_get(b));
+  }
 }
 
 SysPointer sys_object_new(SysType type, const SysChar * first, ...) {
@@ -124,7 +126,7 @@ SysPointer sys_object_new(SysType type, const SysChar * first, ...) {
     sys_new_debug_func((SysObject *)o,
         type,
         sys_type_node_name(node),
-        sys_block_ref_count_get(b));
+        sys_block_ref_get(b));
   }
 
   if (!sys_type_instance_create(o, node)) {
@@ -153,7 +155,7 @@ SysPointer _sys_object_ref(SysObject* self) {
     sys_ref_debug_func(self,
         type,
         sys_type_node_name(node),
-        sys_block_ref_count_get(b));
+        sys_block_ref_get(b));
   }
 
   if(cls->ref) {
@@ -183,10 +185,10 @@ void _sys_object_destroy(SysObject* self) {
     sys_unref_debug_func(self,
         type,
         sys_type_node_name(node),
-        sys_block_ref_count_get(b));
+        sys_block_ref_get(b));
   }
 
-  if(!sys_block_ref_count_dec(b)) {
+  if(!sys_block_ref_dec(b)) {
     return;
   }
 
@@ -214,7 +216,7 @@ void _sys_object_unref(SysObject* self) {
     sys_unref_debug_func(self,
         type,
         sys_type_node_name(node),
-        sys_block_ref_count_get(b));
+        sys_block_ref_get(b));
   }
 
   cls = SYS_OBJECT_GET_CLASS(self);
@@ -223,7 +225,7 @@ void _sys_object_unref(SysObject* self) {
     cls->unref(self);
   }
 
-  if(!sys_block_ref_count_dec(b)) {
+  if(!sys_block_ref_dec(b)) {
     return;
   }
 

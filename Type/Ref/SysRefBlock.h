@@ -14,7 +14,7 @@ struct _SysRefBlock {
 };
 
 #define sys_ref_block_ref_valid_check(o) sys_block_valid_check(o, MAX_REF_NODE)
-#define sys_ref_block_ref_check(o) sys_block_ref_count_check(o, MAX_REF_NODE)
+#define sys_ref_block_ref_check(o) sys_block_ref_check(o, MAX_REF_NODE)
 
 SYS_API void sys_ref_block_set_unref_hook(SysRefHook hook);
 SYS_API void sys_ref_block_set_ref_hook(SysRefHook hook);

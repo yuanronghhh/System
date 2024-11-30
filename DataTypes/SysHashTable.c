@@ -492,7 +492,7 @@ void sys_hash_table_iter_steal(SysHashTableIter *iter) {
 SysHashTable *sys_hash_table_ref(SysHashTable *hash_table) {
   sys_return_val_if_fail(hash_table != NULL, NULL);
 
-  sys_block_ref_count_inc(hash_table);
+  sys_block_ref_inc(hash_table);
 
   return hash_table;
 }
@@ -500,7 +500,7 @@ SysHashTable *sys_hash_table_ref(SysHashTable *hash_table) {
 void sys_hash_table_unref(SysHashTable *hash_table) {
   sys_return_if_fail(hash_table != NULL);
 
-  if (sys_block_ref_count_dec(hash_table)) {
+  if (sys_block_ref_dec(hash_table)) {
     sys_hash_table_remove_all_nodes(hash_table, true, true);
     if (hash_table->keys != hash_table->values)
       sys_free(hash_table->values);
