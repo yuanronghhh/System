@@ -1,6 +1,6 @@
 #include <System/DataTypes/SysHashTable.h>
+#include <System/Type/SysBlock.h>
 #include <System/Utils/SysStr.h>
-#include <System/Platform/Common/SysAtomic.h>
 
 /**
  * this code from glib hashtable
@@ -313,7 +313,7 @@ SysHashTable *sys_hash_table_new_full(SysHashFunc hash_func,
     SysDestroyFunc value_destroy_func) {
   SysHashTable *hash_table;
 
-  hash_table = sys_slice_new(SysHashTable);
+  hash_table = sys_block_new(SysHashTable, 1);
   sys_hash_table_set_shift(hash_table, HASH_TABLE_MIN_SHIFT);
   hash_table->nnodes = 0;
   hash_table->noccupied = 0;
@@ -325,8 +325,6 @@ SysHashTable *sys_hash_table_new_full(SysHashFunc hash_func,
   hash_table->keys = sys_new0(SysPointer, hash_table->size);
   hash_table->values = hash_table->keys;
   hash_table->hashes = sys_new0(SysUInt, hash_table->size);
-
-  sys_ref_count_init(hash_table);
 
   return hash_table;
 }
@@ -494,7 +492,7 @@ void sys_hash_table_iter_steal(SysHashTableIter *iter) {
 SysHashTable *sys_hash_table_ref(SysHashTable *hash_table) {
   sys_return_val_if_fail(hash_table != NULL, NULL);
 
-  sys_ref_count_inc(hash_table);
+  sys_block_ref_count_inc(hash_table);
 
   return hash_table;
 }
@@ -502,7 +500,7 @@ SysHashTable *sys_hash_table_ref(SysHashTable *hash_table) {
 void sys_hash_table_unref(SysHashTable *hash_table) {
   sys_return_if_fail(hash_table != NULL);
 
-  if (sys_ref_count_dec(hash_table)) {
+  if (sys_block_ref_count_dec(hash_table)) {
     sys_hash_table_remove_all_nodes(hash_table, true, true);
     if (hash_table->keys != hash_table->values)
       sys_free(hash_table->values);
@@ -512,7 +510,7 @@ void sys_hash_table_unref(SysHashTable *hash_table) {
       sys_free(hash_table->hashes);
     }
 
-    sys_slice_free(SysHashTable, hash_table);
+    sys_block_free(hash_table);
   }
 }
 

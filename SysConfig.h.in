@@ -32,7 +32,8 @@ typedef unsigned long long SysUInt64;
 #define SYS_DEBUG ${DEBUG}
 #define USE_ICONV ${USE_ICONV}
 #define USE_OPENSSL ${USE_OPENSSL}
-#define USE_MS_GC ${USE_MS_GC}
+#define USE_MARKSWEEP ${USE_MARKSWEEP}
+#define USE_REFCOUNT ${USE_REFCOUNT}
 #define USE_VLD ${USE_VLD}
 
 typedef signed short SysInt16;

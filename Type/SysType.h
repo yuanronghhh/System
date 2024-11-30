@@ -1,7 +1,7 @@
 #ifndef __SYS_TYPE_H__
 #define __SYS_TYPE_H__
 
-#include <System/Type/SysRefBlock.h>
+#include <System/Type/SysBlock.h>
 
 SYS_BEGIN_DECLS
 
@@ -163,7 +163,6 @@ SYS_API void sys_type_imp_interface(SysType instance_type, SysType iface_type, c
 SYS_API SysType sys_node_get_type(SysTypeNode *node);
 SYS_API SysTypeNode* sys_type_node(SysType type);
 SYS_API const SysChar *sys_type_node_name(SysTypeNode *node);
-SYS_API SysBool sys_type_node_check(SysTypeNode *node);
 SYS_API SysBool sys_type_node_is(SysTypeNode *node, SYS_NODE_ENUM tp);
 SYS_API void sys_type_node_unref(SysTypeNode *node);
 SYS_API void sys_type_node_free(SysTypeNode *node);

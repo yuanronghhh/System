@@ -43,7 +43,6 @@ union _TypeData {
 
 struct _SysTypeNode {
   SysChar* name;
-  SysRef ref_count;
 
   SysUInt node_type;
   TypeData data;
@@ -153,7 +152,7 @@ static SysTypeNode* sys_type_make_node(const SysTypeNode* pnode,
 
   nodesize = (SysInt)sizeof(SysTypeNode) + (SysInt)sizeof(SysType) * (pn_supers + 1);
 
-  node = sys_malloc0(nodesize);
+  node = sys_block_malloc(nodesize);
   node->node_type = info->node_type;
   node->name = sys_strdup(info->name);
   node->n_supers = pn_supers;
@@ -215,8 +214,6 @@ static SysTypeNode* sys_type_make_node(const SysTypeNode* pnode,
       sys_abort_N("Not correct declare type for node: %s", info->name);
       break;
   }
-
-  sys_ref_count_init(node);
 
   return node;
 }
@@ -404,11 +401,11 @@ void sys_type_node_free(SysTypeNode *node) {
   }
 
   sys_free(node->name);
-  sys_free(node);
+  sys_block_free(node);
 }
 
 void sys_type_node_unref(SysTypeNode *node) {
-  sys_assert(sys_ref_count_check(node, MAX_REF_NODE));
+  sys_assert(SYS_IS_BLOCK(node));
 
   sys_type_node_free(node);
 }
@@ -455,7 +452,7 @@ static void iface_entry_free(IFaceEntry *entry) {
 }
 
 void sys_type_class_free(SysTypeClass *cls) {
-  SysRefBlock *b;
+  SysBlock *b;
   SysTypeNode *node;
   SysType type;
 
@@ -474,15 +471,15 @@ void sys_type_class_free(SysTypeClass *cls) {
       sys_clear_pointer(&cls->ifaces, sys_free);
     }
 
-    b = SYS_REF_BLOCK(node->data.instance.class_ptr);
-    sys_ref_block_unref(b);
+    b = SYS_BLOCK(node->data.instance.class_ptr);
+    sys_block_unref(b);
   }
 }
 
 void sys_type_class_unref(SysTypeClass *cls) {
-  SysTypeNode *node = sys_type_node(sys_type_from_class(cls));
+  SysTypeNode *node = sys_type_node(cls->type);
 
-  if (!sys_ref_count_dec(node)) {
+  if (!sys_block_ref_count_dec(SYS_BLOCK(node))) {
     return;
   }
 
@@ -493,7 +490,7 @@ static SysTypeNode *sys_type_node_ref(SysTypeNode *node) {
   SysTypeNode *pnode;
   SysTypeClass *cls, *pcls;
 
-  sys_ref_count_inc(node);
+  sys_block_ref(SYS_BLOCK(node));
 
   switch (node->node_type) {
     case SYS_NODE_FUNDAMENTAL:
@@ -505,7 +502,7 @@ static SysTypeNode *sys_type_node_ref(SysTypeNode *node) {
       cls = node->data.instance.class_ptr;
 
       if(cls == NULL) {
-        cls = (SysTypeClass *)sys_ref_block_new(node->data.instance.class_size);
+        cls = (SysTypeClass *)sys_block_malloc(node->data.instance.class_size);
         cls->type = NODE_TYPE(node);
         node->data.instance.class_ptr = cls;
 
@@ -597,12 +594,12 @@ SysTypeInstance *sys_type_instance_new(SysTypeNode *node, SysSize count) {
   sys_return_val_if_fail(node != NULL, NULL);
 
   SysTypeInstance *instance;
-  SysRefBlock *mp;
+  SysBlock *mp;
 
   SysInt priv_psize = 0;
   priv_psize = node->data.instance.private_size;
 
-  mp = sys_ref_block_new((priv_psize + node->data.instance.instance_size) * count);
+  mp = sys_block_malloc((priv_psize + node->data.instance.instance_size) * count);
   instance = (SysTypeInstance *)((SysChar *)mp + priv_psize);
 
   return instance;
@@ -613,7 +610,7 @@ void sys_type_instance_free(SysTypeInstance *instance) {
   SysChar *real_ptr;
   SysTypeClass *cls;
   SysType type;
-  SysRefBlock *b;
+  SysBlock *b;
 
   sys_return_if_fail(instance != NULL);
 
@@ -627,8 +624,8 @@ void sys_type_instance_free(SysTypeInstance *instance) {
 
   real_ptr = ((SysChar*)instance) - node->data.instance.private_size;
 
-  b = SYS_REF_BLOCK(real_ptr);
-  sys_ref_block_free(b);
+  b = SYS_BLOCK(real_ptr);
+  sys_block_free(b);
 }
 
 const SysChar *sys_type_node_name(SysTypeNode *node) {
@@ -695,18 +692,6 @@ SysBool sys_type_node_is(SysTypeNode *node, SYS_NODE_ENUM tp) {
   return node->node_type & tp;
 }
 
-SysBool sys_type_node_check(SysTypeNode *node) {
-  sys_assert(node != NULL);
-
-  if (sys_atomic_int_get(&node->ref_count) < 0
-      || sys_atomic_int_get(&node->n_supers) < 0) {
-
-    return false;
-  }
-
-  return true;
-}
-
 SysType sys_node_get_type(SysTypeNode *node) {
   sys_return_val_if_fail(node != NULL, 0);
 
@@ -724,7 +709,7 @@ SysTypeNode* sys_type_node(SysType utype) {
 
   sys_return_val_if_fail(node != NULL, NULL);
   sys_return_val_if_fail(node->name != NULL, NULL);
-  sys_return_val_if_fail(sys_ref_count_check(node, MAX_REF_NODE), NULL);
+  sys_return_val_if_fail(sys_block_check(SYS_BLOCK(node)), NULL);
 
   return node;
 }

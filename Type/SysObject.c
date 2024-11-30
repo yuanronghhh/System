@@ -96,16 +96,16 @@ SysObject* _sys_object_dclone(SysObject *o) {
 
 void _sys_object_create(SysObject *o, SysType type) {
   SysTypeNode *node;
-  SysRefBlock *b;
+  SysBlock *b;
 
   node = sys_type_node(type);
-  b = SYS_REF_BLOCK(o);
+  b = SYS_BLOCK(o);
 
   if(sys_new_debug_func) {
     sys_new_debug_func(o,
         type,
         sys_type_node_name(node),
-        sys_ref_count_get(b));
+        sys_block_ref_count_get(b));
   }
   sys_type_instance_create((SysTypeInstance *)o, node);
 }
@@ -113,18 +113,18 @@ void _sys_object_create(SysObject *o, SysType type) {
 SysPointer sys_object_new(SysType type, const SysChar * first, ...) {
   SysTypeNode *node;
   SysTypeInstance *o;
-  SysRefBlock *b;
+  SysBlock *b;
 
   node = sys_type_node(type);
   o = sys_type_instance_new(node, 1);
 
   if(sys_new_debug_func) {
-    b = SYS_REF_BLOCK(o);
+    b = SYS_BLOCK(o);
 
     sys_new_debug_func((SysObject *)o,
         type,
         sys_type_node_name(node),
-        sys_ref_count_get(b));
+        sys_block_ref_count_get(b));
   }
 
   if (!sys_type_instance_create(o, node)) {
@@ -138,12 +138,12 @@ SysPointer sys_object_new(SysType type, const SysChar * first, ...) {
 SysPointer _sys_object_ref(SysObject* self) {
   SysObjectClass* cls;
   SysTypeNode *node;
-  SysRefBlock *b;
+  SysBlock *b;
   SysType type;
 
   sys_return_val_if_fail(SYS_IS_OBJECT(self), NULL);
 
-  b = SYS_REF_BLOCK(self);
+  b = SYS_BLOCK(self);
   type = sys_type_from_instance(self);
   node = sys_type_node(type);
   cls = SYS_OBJECT_GET_CLASS(self);
@@ -153,7 +153,7 @@ SysPointer _sys_object_ref(SysObject* self) {
     sys_ref_debug_func(self,
         type,
         sys_type_node_name(node),
-        sys_ref_count_get(b));
+        sys_block_ref_count_get(b));
   }
 
   if(cls->ref) {
@@ -161,21 +161,21 @@ SysPointer _sys_object_ref(SysObject* self) {
     cls->ref(self);
   }
 
-  sys_ref_block_ref(b);
+  sys_block_ref(b);
 
   return self;
 }
 
 void _sys_object_destroy(SysObject* self) {
   SysTypeNode *node;
-  SysRefBlock *b;
+  SysBlock *b;
   SysObjectClass* cls;
   SysType type;
 
   sys_return_if_fail(self != NULL);
   sys_return_if_fail(SYS_IS_OBJECT(self));
 
-  b = SYS_REF_BLOCK(self);
+  b = SYS_BLOCK(self);
   type = sys_type_from_instance(self);
   node = sys_type_node(type);
   if(sys_unref_debug_func) {
@@ -183,10 +183,10 @@ void _sys_object_destroy(SysObject* self) {
     sys_unref_debug_func(self,
         type,
         sys_type_node_name(node),
-        sys_ref_count_get(b));
+        sys_block_ref_count_get(b));
   }
 
-  if(!sys_ref_count_dec(b)) {
+  if(!sys_block_ref_count_dec(b)) {
     return;
   }
 
@@ -199,14 +199,14 @@ void _sys_object_destroy(SysObject* self) {
 
 void _sys_object_unref(SysObject* self) {
   SysTypeNode *node;
-  SysRefBlock *b;
+  SysBlock *b;
   SysObjectClass* cls;
   SysType type;
 
   sys_return_if_fail(self != NULL);
   sys_return_if_fail(SYS_IS_OBJECT(self));
 
-  b = SYS_REF_BLOCK(self);
+  b = SYS_BLOCK(self);
   type = sys_type_from_instance(self);
   node = sys_type_node(type);
   if(sys_unref_debug_func) {
@@ -214,7 +214,7 @@ void _sys_object_unref(SysObject* self) {
     sys_unref_debug_func(self,
         type,
         sys_type_node_name(node),
-        sys_ref_count_get(b));
+        sys_block_ref_count_get(b));
   }
 
   cls = SYS_OBJECT_GET_CLASS(self);
@@ -223,7 +223,7 @@ void _sys_object_unref(SysObject* self) {
     cls->unref(self);
   }
 
-  if(!sys_ref_count_dec(b)) {
+  if(!sys_block_ref_count_dec(b)) {
     return;
   }
 
@@ -232,7 +232,7 @@ void _sys_object_unref(SysObject* self) {
     cls->dispose(self);
   }
 
-  sys_ref_block_free(b);
+  sys_block_free(b);
 }
 
 static void sys_object_init(SysObject *self) {
@@ -260,7 +260,7 @@ void * _sys_object_cast_check(SysObject* self, SysType ttype) {
   sys_assert(type != 0);
 
   node = sys_type_node(type);
-  if(!sys_type_node_check(node)) {
+  if(!sys_block_check(node)) {
     sys_warning_N("%s", "Object check node Failed");
     return NULL;
   }
@@ -290,7 +290,7 @@ void* _sys_class_cast_check(SysObjectClass* cls, SysType ttype) {
   SysTypeNode* node = sys_type_node(type);
   SysTypeNode* tnode;
 
-  if(!sys_type_node_check(node)
+  if(!sys_block_check(node)
       || !sys_type_is_a(type, ttype)
     ) {
     tnode = sys_type_node(ttype);

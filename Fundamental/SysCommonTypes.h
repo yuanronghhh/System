@@ -174,13 +174,23 @@ typedef enum
   SYS_DATE_DECEMBER  = 12
 } SysDateMonth;
 
+typedef enum _SYS_LOG_LEVEL {
+  SYS_LOG_RESET,
+  SYS_LOG_DEBUG,
+  SYS_LOG_INFO,
+  SYS_LOG_WARNING,
+  SYS_LOG_ERROR,
+  SYS_LOG_RECORD
+} SYS_LOG_LEVEL;
+
 typedef SysUInt16 SysDateYear;
 typedef SysUInt8  SysDateDay;   /* day of the month */
+typedef struct _SysMVTable SysMVTable;
 typedef struct _SysDate SysDate;
 typedef struct _TimeZoneRule TimeZoneRule;
 typedef struct _SysTimeZone SysTimeZone;
 typedef struct _TimeZoneDate TimeZoneDate;
-
+typedef struct _SysError SysError;
 typedef struct _SysHData SysHData;
 typedef struct _SysString         SysString;
 typedef struct _SysPtrArray SysPtrArray;

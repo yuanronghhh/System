@@ -22,7 +22,6 @@ struct _SysAsyncQueue
   SysQueue queue;
   SysDestroyFunc item_free_func;
   SysUInt waiting_threads;
-  SysInt ref_count;
 };
 
 SYS_API void sys_async_queue_init (SysAsyncQueue *queue);

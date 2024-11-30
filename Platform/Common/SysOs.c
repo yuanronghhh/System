@@ -256,7 +256,7 @@ static void msort_r(void *b, size_t n, size_t s, SysCompareDataFunc cmp, void *a
     }
     msort_with_tmp(&p, b, n);
   }
-  free(tmp);
+  sys_free (tmp);
 }
 
 void sys_qsort_with_data(const SysPointer  pbase,

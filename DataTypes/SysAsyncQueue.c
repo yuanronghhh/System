@@ -1,5 +1,6 @@
 #include <System/DataTypes/SysAsyncQueue.h>
 #include <System/Platform/Common/SysThread.h>
+#include <System/Type/SysBlockPrivate.h>
 
 /**
  * this code from glib GAsyncQueue
@@ -20,7 +21,6 @@ void sys_async_queue_init_full (SysAsyncQueue *queue, SysDestroyFunc item_free_f
   sys_cond_init (&queue->cond);
   sys_queue_init (&queue->queue);
   queue->waiting_threads = 0;
-  queue->ref_count = 1;
   queue->item_free_func = item_free_func;
 }
 
@@ -54,7 +54,7 @@ sys_async_queue_new_full (SysDestroyFunc item_free_func)
 {
   SysAsyncQueue *queue;
 
-  queue = sys_new (SysAsyncQueue, 1);
+  queue = sys_block_new (SysAsyncQueue, 1);
   sys_async_queue_init_full(queue, item_free_func);
 
   return queue;
@@ -74,7 +74,7 @@ sys_async_queue_ref (SysAsyncQueue *queue)
 {
   sys_return_val_if_fail (queue, NULL);
 
-  sys_atomic_int_inc (&queue->ref_count);
+  sys_block_ref_count_inc (queue);
 
   return queue;
 }
@@ -109,12 +109,12 @@ sys_async_queue_unref (SysAsyncQueue *queue)
 {
   sys_return_if_fail (queue);
 
-  if (sys_atomic_int_dec_and_test (&queue->ref_count))
+  if (sys_block_ref_count_dec(queue))
     {
       sys_return_if_fail (queue->waiting_threads == 0);
 
       sys_async_queue_clear_full(queue);
-      sys_free (queue);
+      sys_block_free (queue);
     }
 }
 /**

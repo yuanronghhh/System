@@ -1,6 +1,12 @@
 add_use_name(iconv 1)
 add_use_name(openssl 1)
-add_use_name(ms_gc 0)
+add_use_name(refcount 1)
+
+if(USE_REFCOUNT)
+  add_use_name(marksweep 0)
+else()
+  add_use_name(marksweep 1)
+endif()
 
 if(WIN32)
   add_use_name(vld 1)
@@ -100,6 +106,30 @@ if(USE_VLD)
   LIST(APPEND OS_SYS_SRC ${VLD_SRC})
 endif()
 
+if(USE_MARKSWEEP)
+  set(MARKSWEEP_SRC
+    ./Type/MarkSweep/SysMarkSweep.c
+    ./Type/MarkSweep/SysMarkSweep.h
+    ./Type/MarkSweep/SysMsBlock.c
+    ./Type/MarkSweep/SysMsBlock.h
+    ./Type/MarkSweep/SysMsMap.c
+    ./Type/MarkSweep/SysMsMap.h
+  )
+
+  LIST(APPEND OS_SYS_SRC ${MARKSWEEP_SRC})
+endif()
+
+if(USE_REFCOUNT)
+  set(REFCOUNT_SRC
+    ./Type/Ref/SysRefBlock.c
+    ./Type/Ref/SysRefBlock.h
+    ./Type/Ref/SysRefGc.c
+    ./Type/Ref/SysRefGc.h
+  )
+
+  LIST(APPEND OS_SYS_SRC ${REFCOUNT_SRC})
+endif()
+
 set(SRC
   ${OS_SYS_SRC}
 
@@ -148,17 +178,17 @@ set(SRC
   ./Type/SysTypeCommon.h
   ./Type/SysTypeCommon.c
   ./Type/SysType.h
+  ./Type/SysTypePrivate.h
   ./Type/SysType.c
   ./Type/SysBlock.h
+  ./Type/SysBlockPrivate.h
   ./Type/SysBlock.c
+  ./Type/SysGcCommon.c
+  ./Type/SysGcCommon.h
   ./Type/SysObject.h
   ./Type/SysObject.c
   ./Type/SysParam.h
   ./Type/SysParam.c
-  ./Type/SysMarkSweep.h
-  ./Type/SysMarkSweep.c
-  ./Type/SysRefBlock.h
-  ./Type/SysRefBlock.c
 
   ./Utils/SysUtf8.h
   ./Utils/SysUtf8.c
@@ -206,6 +236,8 @@ set(SRC
   ./Platform/Common/SysOs.c
   ./Platform/Common/SysAtomic.h
   ./Platform/Common/SysAtomic.c
+  ./Platform/Common/SysRefCountPrivate.h
+  ./Platform/Common/SysRefCount.c
   ./Platform/Common/SysThread.c
   ./Platform/Common/SysThread.h
   ./Platform/Common/SysThreadPrivate.h

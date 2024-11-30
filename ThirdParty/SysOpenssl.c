@@ -1,5 +1,7 @@
 #include <System/ThirdParty/SysOpenssl.h>
 #include <System/Platform/Common/SysThread.h>
+#include <System/Platform/Common/SysMem.h>
+#include <System/Utils/SysError.h>
 
 static SysMutex ssl_ctx_mlock;
 static SysInt server_conf_index;

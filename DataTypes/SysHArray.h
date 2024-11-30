@@ -14,7 +14,6 @@ struct _SysHArray {
   SysUInt   elt_size;
   SysUInt   zero_terminated : 1;
   SysUInt   clear : 1;
-  SysRef ref_count;
   SysDestroyFunc  element_free_func;
 };
 

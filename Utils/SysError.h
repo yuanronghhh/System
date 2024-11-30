@@ -43,17 +43,6 @@ do {                                         \
   }                                          \
 } while(0)
 
-typedef struct _SysError SysError;
-
-typedef enum _SYS_LOG_LEVEL {
-  SYS_LOG_RESET,
-  SYS_LOG_DEBUG,
-  SYS_LOG_INFO,
-  SYS_LOG_WARNING,
-  SYS_LOG_ERROR,
-  SYS_LOG_RECORD
-} SYS_LOG_LEVEL;
-
 struct _SysError {
   SysChar *message;
 

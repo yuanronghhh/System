@@ -45,14 +45,11 @@ SYS_BEGIN_DECLS
 #define sys_cleanup(func) 
 #endif
 
-typedef struct _SysMVTable SysMVTable;
-
 struct _SysMVTable {
   void *(*malloc) (SysSize size);
   void (*free) (void *o);
   SysPointer (*realloc) (void *mem, SysSize size);
 };
-
 
 SYS_API void sys_memcpy(
   SysPointer  const dst,

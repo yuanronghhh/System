@@ -7,7 +7,7 @@
 
 static SysChar* sys_leakfile = NULL;
 
-static SysMVTable allocatior = {
+static SysMVTable allocator = {
   .malloc = malloc,
   .free = free,
   .realloc = realloc
@@ -39,7 +39,7 @@ SysPointer sys_realloc(void *mem, SysSize size) {
   void *nmem = NULL;
 
   if (size) {
-    nmem = allocatior.realloc(mem, size);
+    nmem = allocator.realloc(mem, size);
     if (nmem) { return nmem; }
 
     sys_error_N("%s", "realloc failed.");
@@ -60,7 +60,7 @@ void sys_free(void *ptr) {
     return;
   }
 
-  allocatior.free(ptr);
+  allocator.free(ptr);
 }
 
 /**
@@ -99,7 +99,7 @@ SysPointer sys_calloc(SysSize count, SysSize size) {
 }
 
 SysPointer sys_malloc(SysSize size) {
-  void *b = allocatior.malloc(size);
+  void *b = allocator.malloc(size);
 
   if(b == NULL) {
 
@@ -110,7 +110,7 @@ SysPointer sys_malloc(SysSize size) {
 }
 
 SysPointer sys_malloc0(SysSize size) {
-  void *b = sys_malloc(size);
+  void *b = allocator.malloc(size);
 
   sys_assert(b != NULL);
 
@@ -193,9 +193,9 @@ void _sys_slice_free_chain(SysSize typesize, SysPointer ptr, SysSize offset) {
 void sys_mem_set_vtable(SysMVTable *funcs) {
   sys_return_if_fail(funcs != NULL);
 
-  allocatior.malloc = funcs->malloc;
-  allocatior.free = funcs->free;
-  allocatior.realloc = funcs->realloc;
+  allocator.malloc = funcs->malloc;
+  allocator.free = funcs->free;
+  allocator.realloc = funcs->realloc;
 }
 
 static void sys_leaks_setup(void) {
