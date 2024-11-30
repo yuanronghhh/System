@@ -29,9 +29,6 @@ SYS_API void sys_ms_collect(void);
 SYS_API void sys_ms_block_prepend(SysHList *list);
 SYS_API void sys_ms_block_remove(SysMsBlock* o);
 
-SYS_API void sys_gc_setup(void);
-SYS_API void sys_gc_teardown(void);
-
 SYS_END_DECLS
 
 #endif

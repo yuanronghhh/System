@@ -38,7 +38,6 @@ struct _SysBytes
 {
   SysPointer data;  /* may be NULL iff (size == 0) */
   SysSize size;  /* may be 0 */
-  SysRef ref_count;
   SysDestroyFunc free_func;
   SysPointer user_data;
 };
@@ -147,13 +146,11 @@ SysBytes * sys_bytes_new_with_free_func (const SysPointer  data,
 
   sys_return_val_if_fail (data != NULL || size == 0, NULL);
 
-  bytes = sys_slice_new (SysBytes);
+  bytes = sys_block_new (SysBytes, 1);
   bytes->data = data;
   bytes->size = size;
   bytes->free_func = free_func;
   bytes->user_data = user_data;
-
-  sys_block_ref_init (bytes);
 
   return (SysBytes *)bytes;
 }
@@ -298,7 +295,7 @@ sys_bytes_unref (SysBytes *bytes)
     {
       if (bytes->free_func != NULL)
         bytes->free_func (bytes->user_data);
-      sys_slice_free (SysBytes, bytes);
+      sys_block_free (bytes);
     }
 }
 
@@ -414,7 +411,7 @@ try_steal_and_unref (SysBytes         *bytes,
     {
       *size = bytes->size;
       result = (SysPointer)bytes->data;
-      sys_slice_free (SysBytes, bytes);
+      sys_block_free (bytes);
       return result;
     }
 

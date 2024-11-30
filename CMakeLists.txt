@@ -180,6 +180,9 @@ set(SRC
   ./Type/SysBlock.c
   ./Type/SysGcCommon.c
   ./Type/SysGcCommon.h
+  ./Type/SysGcCommonPrivate.h
+  ./Type/SysGcCore.c
+  ./Type/SysGcCore.h
   ./Type/SysObject.h
   ./Type/SysObject.c
   ./Type/SysParam.h

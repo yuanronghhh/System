@@ -6,9 +6,6 @@
 
 SYS_BEGIN_DECLS
 
-SYS_API void sys_gc_setup(void);
-SYS_API void sys_gc_teardown(void);
-
 SYS_END_DECLS
 
 #endif

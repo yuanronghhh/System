@@ -21,7 +21,6 @@ struct _SysRealArray
   SysUInt   elt_size;
   SysUInt   zero_terminated : 1;
   SysUInt   clear : 1;
-  SysRef ref_count;
   SysDestroyFunc clear_func;
 };
 
@@ -72,7 +71,7 @@ SysArray* sys_array_sized_new(SysBool zero_terminated,
 
     sys_return_val_if_fail(elt_size > 0, NULL);
 
-    array = sys_slice_new(SysRealArray);
+    array = sys_block_new(SysRealArray, 1);
 
     array->data = NULL;
     array->len = 0;
@@ -176,7 +175,7 @@ static SysChar * array_free(SysRealArray     *array,
     }
     else
     {
-        sys_slice_free1(sizeof(SysRealArray), array);
+        sys_block_free(array);
     }
 
     return segment;
@@ -432,7 +431,6 @@ struct _SysRealPtrArray
     SysPointer       *pdata;
     SysUInt           len;
     SysUInt           alloc;
-    SysRef ref_count;
     SysDestroyFunc  element_free_func;
 };
 
@@ -444,14 +442,12 @@ static SysPtrArray * ptr_array_new(SysUInt reserved_size,
     SysDestroyFunc element_free_func) {
     SysRealPtrArray *array;
 
-    array = sys_slice_new(SysRealPtrArray);
+    array = sys_block_new(SysRealPtrArray, 1);
 
     array->pdata = NULL;
     array->len = 0;
     array->alloc = 0;
     array->element_free_func = element_free_func;
-
-    sys_block_ref_init(array);
 
     if (reserved_size != 0)
         sys_ptr_array_maybe_expand(array, reserved_size);
@@ -626,7 +622,7 @@ static SysPointer * ptr_array_free(SysPtrArray      *array,
     }
     else
     {
-        sys_slice_free1(sizeof(SysRealPtrArray), rarray);
+        sys_block_free(rarray);
     }
 
     return segment;

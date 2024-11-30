@@ -2,6 +2,7 @@
 #include <System/Type/MarkSweep/SysMsMap.h>
 #include <System/Type/MarkSweep/SysMsBlock.h>
 #include <System/Type/SysBlockPrivate.h>
+#include <System/Type/SysGcCommonPrivate.h>
 
 #define GC_LOCK sys_mutex_lock(&gc_lock)
 #define GC_UNLOCK sys_mutex_unlock(&gc_lock)
@@ -146,13 +147,13 @@ void sys_ms_collect(void) {
   GC_UNLOCK;
 }
 
-void sys_gc_setup(void) {
+void sys_real_gc_setup(void) {
   sys_mem_set_vtable(&allocator);
   sys_hqueue_init(&g_map_list);
   sys_mutex_init(&gc_lock);
 }
 
-void sys_gc_teardown(void) {
+void sys_real_gc_teardown(void) {
   SysPointer bptr;
   SysHList *node;
   SysMsBlock *b;

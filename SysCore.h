@@ -44,18 +44,7 @@
 #include <System/Type/SysParam.h>
 #include <System/Type/SysBlock.h>
 #include <System/Type/SysTypeCommon.h>
-#include <System/Type/SysGcCommon.h>
-
-#if USE_REFCOUNT
-#include <System/Type/Ref/SysRefBlock.h>
-#include <System/Type/Ref/SysRefGc.h>
-#endif
-
-#if USE_MARKSWEEP
-#include <System/Type/MarkSweep/SysMarkSweep.h>
-#include <System/Type/MarkSweep/SysMsBlock.h>
-#include <System/Type/MarkSweep/SysMsMap.h>
-#endif
+#include <System/Type/SysGcCore.h>
 
 #include <System/Utils/SysError.h>
 #include <System/Utils/SysError.h>
