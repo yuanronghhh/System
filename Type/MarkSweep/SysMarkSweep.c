@@ -136,14 +136,14 @@ void sys_ms_unregister_var(SysMsMap **mapaddr) {
   GC_UNLOCK;
 }
 
-void sys_ms_refore_collect(void) {
+static void sys_ms_force_collect(void) {
   ms_block_mark(SYS_MS_MAP(sys_hqueue_peek_head(&g_map_list)));
   ms_block_sweep(NODE_TO_MS_BLOCK(g_block_list));
 }
 
 void sys_ms_collect(void) {
   GC_LOCK;
-  sys_ms_refore_collect();
+  sys_ms_force_collect();
   GC_UNLOCK;
 }
 

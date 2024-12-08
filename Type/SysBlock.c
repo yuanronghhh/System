@@ -32,30 +32,30 @@ void sys_block_unref(SysPointer  self) {
 
 void sys_block_ref_init(SysPointer self) {
 
-  sys_real_block_ref_count_init(self);
+  sys_real_block_ref_init(self);
 }
 
 void sys_block_ref_inc(SysPointer self) {
 
-  sys_real_block_ref_count_inc(self);
+  sys_real_block_ref_inc(self);
 }
 
 SysRef sys_block_ref_get(SysPointer self) {
 
-  return sys_real_block_ref_count_get(self);
+  return sys_real_block_ref_get(self);
 }
 
 SysBool sys_block_ref_dec(SysPointer self) {
 
-  return sys_real_block_ref_count_dec(self);
+  return sys_real_block_ref_dec(self);
 }
 
 SysBool sys_block_ref_cmp(SysPointer self, SysRef n) {
 
-  return sys_real_block_ref_count_cmp(self, n);
+  return sys_real_block_ref_cmp(self, n);
 }
 
 void sys_block_ref_set(SysPointer self, SysRef n) {
 
-  sys_real_block_ref_count_set(self, n);
+  sys_real_block_ref_set(self, n);
 }

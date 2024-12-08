@@ -93,33 +93,33 @@ SysBool sys_real_block_check(SysBlock *o) {
   return sys_ref_count_check(self, MAX_REF_NODE);
 }
 
-void sys_real_block_ref_count_init(SysBlock *o) {
+void sys_real_block_ref_init(SysBlock *o) {
   SysRefBlock *self = SYS_REF_BLOCK(o);
   sys_ref_count_init(self);
 }
 
-void sys_real_block_ref_count_inc(SysBlock *o) {
+void sys_real_block_ref_inc(SysBlock *o) {
   SysRefBlock *self = SYS_REF_BLOCK(o);
   sys_ref_count_init(self);
 }
 
-SysRef sys_real_block_ref_count_get(SysBlock *o) {
+SysRef sys_real_block_ref_get(SysBlock *o) {
   SysRefBlock *self = SYS_REF_BLOCK(o);
   return sys_ref_count_get(self);
 }
 
-SysBool sys_real_block_ref_count_dec(SysBlock *o) {
+SysBool sys_real_block_ref_dec(SysBlock *o) {
   SysRefBlock *self = SYS_REF_BLOCK(o);
   return sys_ref_count_dec(self);
 }
 
-SysBool sys_real_block_ref_count_cmp(SysBlock *o, SysRef n) {
+SysBool sys_real_block_ref_cmp(SysBlock *o, SysRef n) {
   SysRefBlock *self = SYS_REF_BLOCK(o);
 
   return sys_ref_count_cmp(self, n);
 }
 
-void sys_real_block_ref_count_set(SysBlock *o, SysRef n) {
+void sys_real_block_ref_set(SysBlock *o, SysRef n) {
   SysRefBlock *self = SYS_REF_BLOCK(o);
 
   sys_ref_count_set(self, n);

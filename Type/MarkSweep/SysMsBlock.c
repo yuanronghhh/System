@@ -46,14 +46,14 @@ void sys_real_block_free(void* o) {
 
 SysBool sys_real_block_valid_check(SysBlock *o) {
   SysMsBlock *self = SYS_MS_BLOCK(o);
-  SYS_IS_HDATA(self);
+  sys_return_val_if_fail(SYS_IS_HDATA(self), false);
 
   return true;
 }
 
 SysBool sys_real_block_check(SysBlock *o) {
   SysMsBlock *self = SYS_MS_BLOCK(o);
-  SYS_IS_HDATA(self);
+  sys_return_val_if_fail(SYS_IS_HDATA(self), false);
 
   return true;
 }
@@ -65,23 +65,23 @@ SysPointer sys_real_block_ref(SysBlock* self) {
 void sys_real_block_unref(SysBlock* self) {
 }
 
-void sys_real_block_ref_count_init(SysBlock *self) {
+void sys_real_block_ref_init(SysBlock *self) {
 }
 
-void sys_real_block_ref_count_inc(SysBlock *self) {
+void sys_real_block_ref_inc(SysBlock *self) {
 }
 
-SysRef sys_real_block_ref_count_get(SysBlock *self) {
+SysRef sys_real_block_ref_get(SysBlock *self) {
   return 0;
 }
 
-SysBool sys_real_block_ref_count_dec(SysBlock *self) {
+SysBool sys_real_block_ref_dec(SysBlock *self) {
   return true;
 }
 
-SysBool sys_real_block_ref_count_cmp(SysBlock *self, SysRef n) {
+SysBool sys_real_block_ref_cmp(SysBlock *self, SysRef n) {
   return true;
 }
 
-void sys_real_block_ref_count_set(SysBlock *self, SysRef n) {
+void sys_real_block_ref_set(SysBlock *self, SysRef n) {
 }
