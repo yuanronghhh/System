@@ -419,11 +419,11 @@ sys_system_thread_new (SysThreadFunc proxy,
   const SysChar *message = NULL;
   SysInt thread_prio;
 
-  thread = sys_block_new (SysThreadWin32, 1);
+  thread = sys_ref_block_new (SysThreadWin32, 1);
   thread->proxy = proxy;
   thread->handle = (HANDLE) NULL;
   base_thread = (SysRealThread*)thread;
-  sys_block_ref_set(base_thread, 2);
+  sys_ref_block_ref_set(base_thread, 2);
 
   base_thread->ours = true;
   base_thread->thread.joinable = true;

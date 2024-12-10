@@ -1087,7 +1087,7 @@ sys_system_thread_new (SysThreadFunc proxy,
   pthread_attr_t attr;
   SysInt ret;
 
-  thread = sys_block_new (SysThreadPosix, 1);
+  thread = sys_ref_block_new (SysThreadPosix, 1);
   base_thread = (SysRealThread*)thread;
   base_thread->ours = true;
   base_thread->thread.joinable = true;

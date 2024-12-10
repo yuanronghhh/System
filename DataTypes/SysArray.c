@@ -71,7 +71,7 @@ SysArray* sys_array_sized_new(SysBool zero_terminated,
 
     sys_return_val_if_fail(elt_size > 0, NULL);
 
-    array = sys_block_new(SysRealArray, 1);
+    array = sys_ref_block_new(SysRealArray, 1);
 
     array->data = NULL;
     array->len = 0;
@@ -103,7 +103,7 @@ SysArray * sys_array_ref(SysArray *array) {
     SysRealArray *rarray = (SysRealArray*)array;
     sys_return_val_if_fail(array, NULL);
 
-    sys_block_ref_inc(rarray);
+    sys_ref_block_ref_inc(rarray);
 
     return array;
 }
@@ -120,7 +120,7 @@ void sys_array_unref(SysArray *array) {
     SysRealArray *rarray = (SysRealArray*)array;
     sys_return_if_fail(array);
 
-    if (sys_block_ref_dec(rarray))
+    if (sys_ref_block_ref_dec(rarray))
         array_free(rarray, FREE_SEGMENT);
 }
 
@@ -141,7 +141,7 @@ SysChar* sys_array_free(SysArray   *farray,
 
     flags = (free_segment ? FREE_SEGMENT : 0);
 
-        if (!sys_block_ref_dec(array))
+        if (!sys_ref_block_ref_dec(array))
         flags |= PRESERVE_WRAPPER;
 
     return array_free(array, flags);
@@ -442,7 +442,7 @@ static SysPtrArray * ptr_array_new(SysUInt reserved_size,
     SysDestroyFunc element_free_func) {
     SysRealPtrArray *array;
 
-    array = sys_block_new(SysRealPtrArray, 1);
+    array = sys_ref_block_new(SysRealPtrArray, 1);
 
     array->pdata = NULL;
     array->len = 0;
@@ -551,7 +551,7 @@ SysPtrArray* sys_ptr_array_ref(SysPtrArray *array) {
 
     sys_return_val_if_fail(array, NULL);
 
-    sys_block_ref_inc(rarray);
+    sys_ref_block_ref_inc(rarray);
 
     return array;
 }
@@ -563,7 +563,7 @@ void sys_ptr_array_unref(SysPtrArray *array) {
 
     sys_return_if_fail(array);
 
-    if (sys_block_ref_dec(rarray))
+    if (sys_ref_block_ref_dec(rarray))
         ptr_array_free(array, FREE_SEGMENT);
 }
 
@@ -579,7 +579,7 @@ SysPointer* sys_ptr_array_free(SysPtrArray *array,
     /* if others are holding a reference, preserve the wrapper but
      * do free/return the data
      */
-    if (!sys_block_ref_dec(rarray))
+    if (!sys_ref_block_ref_dec(rarray))
         flags |= PRESERVE_WRAPPER;
 
     return ptr_array_free(array, flags);

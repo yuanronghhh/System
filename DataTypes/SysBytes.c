@@ -146,7 +146,7 @@ SysBytes * sys_bytes_new_with_free_func (const SysPointer  data,
 
   sys_return_val_if_fail (data != NULL || size == 0, NULL);
 
-  bytes = sys_block_new (SysBytes, 1);
+  bytes = sys_ref_block_new (SysBytes, 1);
   bytes->data = data;
   bytes->size = size;
   bytes->free_func = free_func;
@@ -271,7 +271,7 @@ sys_bytes_ref (SysBytes *bytes)
 {
   sys_return_val_if_fail (bytes != NULL, NULL);
 
-  sys_block_ref_inc (bytes);
+  sys_ref_block_ref_inc (bytes);
 
   return bytes;
 }
@@ -291,7 +291,7 @@ sys_bytes_unref (SysBytes *bytes)
   if (bytes == NULL)
     return;
 
-  if (sys_block_ref_dec (bytes))
+  if (sys_ref_block_ref_dec (bytes))
     {
       if (bytes->free_func != NULL)
         bytes->free_func (bytes->user_data);
@@ -407,7 +407,7 @@ try_steal_and_unref (SysBytes         *bytes,
     return NULL;
 
   /* Are we the only reference? */
-  if (sys_block_ref_cmp (bytes, 1))
+  if (sys_ref_block_ref_cmp (bytes, 1))
     {
       *size = bytes->size;
       result = (SysPointer)bytes->data;

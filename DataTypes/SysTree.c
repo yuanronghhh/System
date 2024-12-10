@@ -93,7 +93,7 @@ SysTree* sys_tree_new_full (SysCompareDataFunc key_compare_func,
   
   sys_return_val_if_fail (key_compare_func != NULL, NULL);
   
-  tree = sys_block_new (SysTree, 1);
+  tree = sys_ref_block_new (SysTree, 1);
   tree->root               = NULL;
   tree->key_compare        = key_compare_func;
   tree->key_destroy_func   = key_destroy_func;
@@ -234,7 +234,7 @@ void sys_tree_remove_all (SysTree *tree) {
 SysTree* sys_tree_ref (SysTree *tree) {
   sys_return_val_if_fail (tree != NULL, NULL);
 
-  sys_block_ref_inc(tree);
+  sys_ref_block_ref_inc(tree);
 
   return tree;
 }
@@ -242,7 +242,7 @@ SysTree* sys_tree_ref (SysTree *tree) {
 void sys_tree_unref (SysTree *tree) {
   sys_return_if_fail (tree != NULL);
 
-  if (sys_block_ref_dec (tree)) {
+  if (sys_ref_block_ref_dec (tree)) {
       sys_tree_remove_all (tree);
       sys_block_free (tree);
     }

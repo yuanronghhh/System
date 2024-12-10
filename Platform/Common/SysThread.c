@@ -91,7 +91,7 @@ void sys_thread_detach(void) {
 SysThread * sys_thread_ref (SysThread *thread) {
   SysRealThread *real = (SysRealThread *) thread;
 
-  sys_block_ref_inc(real);
+  sys_ref_block_ref_inc(real);
 
   return thread;
 }
@@ -99,7 +99,7 @@ SysThread * sys_thread_ref (SysThread *thread) {
 void sys_thread_unref (SysThread *thread) {
   SysRealThread *real = (SysRealThread *) thread;
 
-  if (sys_block_ref_dec (real))
+  if (sys_ref_block_ref_dec (real))
     {
       if (real->ours)
         sys_system_thread_free (real);
@@ -205,7 +205,7 @@ SysThread* sys_thread_self (void) {
        * This can happen for the main thread and for threads
        * that are not created by GLib.
        */
-      thread = sys_block_new (SysRealThread, 1);
+      thread = sys_ref_block_new (SysRealThread, 1);
 
       sys_private_set (&sys_thread_specific_private, thread);
     }

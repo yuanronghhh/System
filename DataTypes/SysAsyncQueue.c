@@ -54,7 +54,7 @@ sys_async_queue_new_full (SysDestroyFunc item_free_func)
 {
   SysAsyncQueue *queue;
 
-  queue = sys_block_new (SysAsyncQueue, 1);
+  queue = sys_ref_block_new (SysAsyncQueue, 1);
   sys_async_queue_init_full(queue, item_free_func);
 
   return queue;
@@ -74,7 +74,7 @@ sys_async_queue_ref (SysAsyncQueue *queue)
 {
   sys_return_val_if_fail (queue, NULL);
 
-  sys_block_ref_inc (queue);
+  sys_ref_block_ref_inc (queue);
 
   return queue;
 }
@@ -109,7 +109,7 @@ sys_async_queue_unref (SysAsyncQueue *queue)
 {
   sys_return_if_fail (queue);
 
-  if (sys_block_ref_dec(queue))
+  if (sys_ref_block_ref_dec(queue))
     {
       sys_return_if_fail (queue->waiting_threads == 0);
 

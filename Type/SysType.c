@@ -472,14 +472,14 @@ void sys_type_class_free(SysTypeClass *cls) {
     }
 
     b = SYS_BLOCK(node->data.instance.class_ptr);
-    sys_block_unref(b);
+    sys_ref_block_unref(b);
   }
 }
 
 void sys_type_class_unref(SysTypeClass *cls) {
   SysTypeNode *node = sys_type_node(cls->type);
 
-  if (!sys_block_ref_dec(node)) {
+  if (!sys_ref_block_ref_dec(node)) {
     return;
   }
 
@@ -490,7 +490,7 @@ static SysTypeNode *sys_type_node_ref(SysTypeNode *node) {
   SysTypeNode *pnode;
   SysTypeClass *cls, *pcls;
 
-  sys_block_ref(node);
+  sys_ref_block_ref(node);
 
   switch (node->node_type) {
     case SYS_NODE_FUNDAMENTAL:
