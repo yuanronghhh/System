@@ -5,8 +5,8 @@
 
 SYS_BEGIN_DECLS
 
-void sys_real_gc_setup(void);
-void sys_real_gc_teardown(void);
+void sys_ms_gc_setup(void);
+void sys_ms_gc_teardown(void);
 
 SYS_END_DECLS
 

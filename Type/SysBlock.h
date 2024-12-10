@@ -6,13 +6,6 @@
 SYS_BEGIN_DECLS
 
 #define SYS_BLOCK(o) ((SysBlock *)o)
-#define SYS_IS_BLOCK(o) (sys_block_check((SysBlock *)o))
-
-SysPointer sys_block_malloc(SysSize size);
-void sys_block_free(SysPointer self);
-
-SysBool sys_block_check(SysPointer self);
-SysBool sys_block_valid_check(SysPointer self);
 
 SYS_END_DECLS
 

@@ -46,9 +46,9 @@ SYS_API void _sys_object_destroy(SysObject* self);
 SYS_API SysType sys_object_get_type(void);
 SYS_API SysPointer sys_object_new(SysType type, const SysChar * first, ...);
 
-void sys_object_set_unref_hook(SysRefHook hook);
-void sys_object_set_ref_hook(SysRefHook hook);
-void sys_object_set_new_hook(SysRefHook hook);
+void sys_object_set_unref_hook(SysObjectRefHook hook);
+void sys_object_set_ref_hook(SysObjectRefHook hook);
+void sys_object_set_new_hook(SysObjectRefHook hook);
 
 SYS_API void * _sys_object_cast_check(SysObject* self, SysType ttype);
 SYS_API void * _sys_class_cast_check(SysObjectClass* cls, SysType ttype);

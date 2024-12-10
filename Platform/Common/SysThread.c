@@ -1,7 +1,7 @@
 #include <System/Platform/Common/SysThreadPrivate.h>
 #include <System/DataTypes/SysSList.h>
 #include <System/Utils/SysStr.h>
-#include <System/Type/SysBlock.h>
+#include <System/Type/Ref/SysRefBlock.h>
 
 /**
  * this code from glib Thread
@@ -104,7 +104,7 @@ void sys_thread_unref (SysThread *thread) {
       if (real->ours)
         sys_system_thread_free (real);
       else
-        sys_block_free (real);
+        sys_ref_block_free (real);
     }
 }
 

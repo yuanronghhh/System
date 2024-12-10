@@ -1,6 +1,6 @@
 #include <System/Type/Ref/SysRefBlock.h>
 #include <System/Platform/Common/SysRefCountPrivate.h>
-#include <System/Type/SysBlockPrivate.h>
+#include <System/Type/Ref/SysRefBlock.h>
 #include <System/Platform/Common/SysMem.h>
 #include <System/Utils/SysError.h>
 #include <System/DataTypes/SysHCommon.h>

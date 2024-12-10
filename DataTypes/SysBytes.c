@@ -1,6 +1,6 @@
 #include <System/DataTypes/SysBytes.h>
 #include <System/DataTypes/SysArray.h>
-#include <System/Type/SysBlock.h>
+#include <System/Type/Ref/SysRefBlock.h>
 
 /**
  * SysBytes:
@@ -295,7 +295,7 @@ sys_bytes_unref (SysBytes *bytes)
     {
       if (bytes->free_func != NULL)
         bytes->free_func (bytes->user_data);
-      sys_block_free (bytes);
+      sys_ref_block_free (bytes);
     }
 }
 
@@ -411,7 +411,7 @@ try_steal_and_unref (SysBytes         *bytes,
     {
       *size = bytes->size;
       result = (SysPointer)bytes->data;
-      sys_block_free (bytes);
+      sys_ref_block_free (bytes);
       return result;
     }
 

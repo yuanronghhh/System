@@ -1,5 +1,5 @@
 #include <System/DataTypes/SysHashTable.h>
-#include <System/Type/SysBlock.h>
+#include <System/Type/Ref/SysRefBlock.h>
 #include <System/Utils/SysStr.h>
 
 /**
@@ -510,7 +510,7 @@ void sys_hash_table_unref(SysHashTable *hash_table) {
       sys_free(hash_table->hashes);
     }
 
-    sys_block_free(hash_table);
+    sys_ref_block_free(hash_table);
   }
 }
 

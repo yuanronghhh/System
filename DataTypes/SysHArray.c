@@ -1,5 +1,5 @@
 #include <System/DataTypes/SysHArray.h>
-#include <System/Type/SysBlock.h>
+#include <System/Type/Ref/SysRefBlock.h>
 
 #define MIN_ARRAY_SIZE  16
 static void harray_maybe_expand(SysHArray *self, SysUInt len);
@@ -88,7 +88,7 @@ void sys_harray_free(SysHArray* self, SysBool free_segment) {
     self->pdata = NULL;
     self->alloc = 0;
   }
-  sys_block_free(self);
+  sys_ref_block_free(self);
 }
 
 void sys_harray_unref(SysHArray* self) {

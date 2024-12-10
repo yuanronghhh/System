@@ -1,7 +1,6 @@
 #include <System/Type/MarkSweep/SysMarkSweep.h>
 #include <System/Type/MarkSweep/SysMsMap.h>
 #include <System/Type/MarkSweep/SysMsBlock.h>
-#include <System/Type/SysBlockPrivate.h>
 #include <System/Type/SysGcCommonPrivate.h>
 
 #define NODE_TO_MS_BLOCK(o) ((SysMsBlock *)o)
@@ -13,9 +12,9 @@ static SysHList* g_block_list = NULL;
 
 /* allocator */
 static SysMVTable allocator = {
-  .malloc = sys_real_block_malloc,
-  .free = sys_real_block_free,
-  .realloc = sys_real_block_realloc,
+  .malloc = sys_ms_block_malloc,
+  .free = sys_ms_block_free,
+  .realloc = sys_ms_block_realloc,
 };
 
 /* ms block */
@@ -27,7 +26,6 @@ void sys_ms_block_prepend(SysHList *list) {
 
 void sys_ms_block_remove(SysMsBlock* o) {
   g_block_list = sys_hlist_remove_link(g_block_list, SYS_HLIST(o));
-  ms_free(o);
 }
 
 static void ms_block_mark(SysMsMap *o) {
@@ -136,12 +134,12 @@ void sys_ms_collect(void) {
   sys_ms_force_collect();
 }
 
-void sys_real_gc_setup(void) {
+void sys_ms_gc_setup(void) {
   sys_mem_set_vtable(&allocator);
   sys_hqueue_init(&g_map_list);
 }
 
-void sys_real_gc_teardown(void) {
+void sys_ms_gc_teardown(void) {
   SysPointer bptr;
   SysHList *node;
   SysMsBlock *b;

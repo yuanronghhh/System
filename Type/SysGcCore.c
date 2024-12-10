@@ -4,11 +4,11 @@
 
 void sys_gc_setup(void) {
 
-  sys_real_gc_setup();
+  sys_ms_gc_setup();
 }
 
 void sys_gc_teardown(void) {
 
-  sys_real_gc_teardown();
+  sys_ms_gc_teardown();
 }
 

@@ -1,7 +1,7 @@
 #include <System/DataTypes/SysArray.h>
 #include <System/DataTypes/SysHashTable.h>
 #include <System/Utils/SysStr.h>
-#include <System/Type/SysBlock.h>
+#include <System/Type/Ref/SysRefBlock.h>
 
 /**
  * this code from glib array
@@ -175,7 +175,7 @@ static SysChar * array_free(SysRealArray     *array,
     }
     else
     {
-        sys_block_free(array);
+        sys_ref_block_free(array);
     }
 
     return segment;
@@ -622,7 +622,7 @@ static SysPointer * ptr_array_free(SysPtrArray      *array,
     }
     else
     {
-        sys_block_free(rarray);
+        sys_ref_block_free(rarray);
     }
 
     return segment;

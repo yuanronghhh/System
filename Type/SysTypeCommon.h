@@ -49,8 +49,11 @@ typedef void (*SysTypeFinalizeFunc) (void *self);
 typedef void (*SysInstanceInitFunc) (void* self);
 typedef void (*SysInterfaceInitFunc) (void *iface);
 typedef SysPointer (*SysCloneFunc) (SysPointer o);
-typedef void (*SysRefHook) (SysObject *o, SysType type, const SysChar *name, SysInt ref_count);
-typedef void (*SysRefBlockFunc) (SysObject *o, ...);
+typedef void (*SysRefHook) (SysPointer o, SysInt ref_count, ...);
+typedef void (*SysObjectRefHook) (SysObject *o,
+    SysInt ref_count,
+    SysType type, 
+    const SysChar *name);
 
 SYS_END_DECLS
 

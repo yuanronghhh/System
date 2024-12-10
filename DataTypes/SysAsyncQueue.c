@@ -1,6 +1,6 @@
 #include <System/DataTypes/SysAsyncQueue.h>
 #include <System/Platform/Common/SysThread.h>
-#include <System/Type/SysBlockPrivate.h>
+#include <System/Type/Ref/SysRefBlock.h>
 
 /**
  * this code from glib GAsyncQueue
@@ -114,7 +114,7 @@ sys_async_queue_unref (SysAsyncQueue *queue)
       sys_return_if_fail (queue->waiting_threads == 0);
 
       sys_async_queue_clear_full(queue);
-      sys_block_free (queue);
+      sys_ref_block_free (queue);
     }
 }
 /**

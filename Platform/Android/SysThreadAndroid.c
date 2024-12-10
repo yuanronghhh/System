@@ -1071,7 +1071,7 @@ sys_system_thread_free (SysRealThread *thread)
 
   sys_mutex_clear (&pt->lock);
 
-  sys_block_free (pt);
+  sys_ref_block_free (pt);
 }
 
 SysRealThread *
@@ -1127,7 +1127,7 @@ sys_system_thread_new (SysThreadFunc proxy,
     {
       sys_error_set_N (error, "Error creating thread: %s", sys_strerror (ret));
       sys_free (thread->thread.name);
-      sys_block_free (thread);
+      sys_ref_block_free (thread);
       return NULL;
     }
 

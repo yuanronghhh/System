@@ -1,7 +1,7 @@
 #ifndef __SYS_TYPE_H__
 #define __SYS_TYPE_H__
 
-#include <System/Type/SysBlock.h>
+#include <System/Type/Ref/SysRefBlock.h>
 
 SYS_BEGIN_DECLS
 

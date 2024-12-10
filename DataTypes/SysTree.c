@@ -244,7 +244,7 @@ void sys_tree_unref (SysTree *tree) {
 
   if (sys_ref_block_ref_dec (tree)) {
       sys_tree_remove_all (tree);
-      sys_block_free (tree);
+      sys_ref_block_free (tree);
     }
 }
 

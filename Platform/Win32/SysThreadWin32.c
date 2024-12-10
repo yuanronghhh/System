@@ -364,7 +364,7 @@ sys_system_thread_free (SysRealThread *thread)
   SysThreadWin32 *wt = (SysThreadWin32 *) thread;
 
   win32_check_for_error (CloseHandle (wt->handle));
-  sys_block_free (wt);
+  sys_ref_block_free (wt);
 }
 
 void
@@ -478,7 +478,7 @@ error:
   {
     if (thread->handle)
       CloseHandle (thread->handle);
-    sys_block_free (thread);
+    sys_ref_block_free (thread);
     return NULL;
   }
 }

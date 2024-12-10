@@ -152,7 +152,7 @@ static SysTypeNode* sys_type_make_node(const SysTypeNode* pnode,
 
   nodesize = (SysInt)sizeof(SysTypeNode) + (SysInt)sizeof(SysType) * (pn_supers + 1);
 
-  node = sys_block_malloc(nodesize);
+  node = sys_ref_block_malloc(nodesize);
   node->node_type = info->node_type;
   node->name = sys_strdup(info->name);
   node->n_supers = pn_supers;
@@ -401,11 +401,11 @@ void sys_type_node_free(SysTypeNode *node) {
   }
 
   sys_free(node->name);
-  sys_block_free(node);
+  sys_ref_block_free(node);
 }
 
 void sys_type_node_unref(SysTypeNode *node) {
-  sys_assert(SYS_IS_BLOCK(node));
+  sys_assert(SYS_IS_REF_BLOCK(node));
 
   sys_type_node_free(node);
 }
@@ -502,7 +502,7 @@ static SysTypeNode *sys_type_node_ref(SysTypeNode *node) {
       cls = node->data.instance.class_ptr;
 
       if(cls == NULL) {
-        cls = (SysTypeClass *)sys_block_malloc(node->data.instance.class_size);
+        cls = (SysTypeClass *)sys_ref_block_malloc(node->data.instance.class_size);
         cls->type = NODE_TYPE(node);
         node->data.instance.class_ptr = cls;
 
@@ -599,7 +599,7 @@ SysTypeInstance *sys_type_instance_new(SysTypeNode *node, SysSize count) {
   SysInt priv_psize = 0;
   priv_psize = node->data.instance.private_size;
 
-  mp = sys_block_malloc((priv_psize + node->data.instance.instance_size) * count);
+  mp = sys_ref_block_malloc((priv_psize + node->data.instance.instance_size) * count);
   instance = (SysTypeInstance *)((SysChar *)mp + priv_psize);
 
   return instance;
@@ -625,7 +625,7 @@ void sys_type_instance_free(SysTypeInstance *instance) {
   real_ptr = ((SysChar*)instance) - node->data.instance.private_size;
 
   b = SYS_BLOCK(real_ptr);
-  sys_block_free(b);
+  sys_ref_block_free(b);
 }
 
 const SysChar *sys_type_node_name(SysTypeNode *node) {
@@ -709,7 +709,7 @@ SysTypeNode* sys_type_node(SysType utype) {
 
   sys_return_val_if_fail(node != NULL, NULL);
   sys_return_val_if_fail(node->name != NULL, NULL);
-  sys_return_val_if_fail(sys_block_check(SYS_BLOCK(node)), NULL);
+  sys_return_val_if_fail(sys_ref_block_check(node), NULL);
 
   return node;
 }
