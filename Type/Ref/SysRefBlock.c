@@ -24,7 +24,7 @@ SysBool sys_ref_block_create(SysRefBlock* self) {
   return true;
 }
 
-SysPointer sys_real_block_malloc(SysSize size) {
+SysPointer sys_ref_block_malloc(SysSize size) {
   SysInt bsize = sizeof(SysRefBlock);
   SysRefBlock* o = ms_malloc0(bsize + size);
 
@@ -33,7 +33,7 @@ SysPointer sys_real_block_malloc(SysSize size) {
   return (SysChar *)o + bsize;
 }
 
-SysPointer sys_real_block_realloc(SysPointer b, SysSize size) {
+SysPointer sys_ref_block_realloc(SysPointer b, SysSize size) {
   SysInt bsize = sizeof(SysRefBlock);
   SysRefBlock* o = ms_realloc(b, bsize + size);
 
@@ -47,7 +47,7 @@ void _sys_ref_block_destroy(SysRefBlock* self) {
   sys_ref_count_set(self, 0);
 }
 
-void sys_real_block_unref(SysBlock* o) {
+void sys_ref_block_unref(SysPointer o) {
   SysRefBlock* self = SYS_REF_BLOCK(o);
   if (!sys_ref_count_valid_check(self, MAX_REF_NODE)) {
     sys_warning_N("block ref check failed: %p", self);
@@ -61,7 +61,7 @@ void sys_real_block_unref(SysBlock* o) {
   ms_free(self);
 }
 
-SysPointer sys_real_block_ref(SysBlock* o) {
+SysPointer sys_ref_block_ref(SysPointer o) {
   SysRefBlock* self = SYS_REF_BLOCK(o);
 
   sys_return_val_if_fail(self != NULL, NULL);
@@ -73,53 +73,53 @@ SysPointer sys_real_block_ref(SysBlock* o) {
 
   sys_ref_count_inc(self);
 
-  return (SysPointer)self;
+  return SYS_BLOCK(self);
 }
 
-void sys_real_block_free(SysPointer o) {
+void sys_ref_block_free(SysPointer o) {
   SysRefBlock* self = SYS_REF_BLOCK(o);
   ms_free(self);
 }
 
-SysBool sys_real_block_valid_check(SysBlock *o) {
+SysBool sys_ref_block_valid_check(SysPointer o) {
   SysRefBlock *self = SYS_REF_BLOCK_CAST(o);
 
   return sys_ref_count_valid_check(self, MAX_REF_NODE);
 }
 
-SysBool sys_real_block_check(SysBlock *o) {
+SysBool sys_ref_block_check(SysPointer o) {
   SysRefBlock *self = SYS_REF_BLOCK_CAST(o);
 
   return sys_ref_count_check(self, MAX_REF_NODE);
 }
 
-void sys_real_block_ref_init(SysBlock *o) {
+void sys_ref_block_ref_init(SysPointer o) {
   SysRefBlock *self = SYS_REF_BLOCK(o);
   sys_ref_count_init(self);
 }
 
-void sys_real_block_ref_inc(SysBlock *o) {
+void sys_ref_block_ref_inc(SysPointer o) {
   SysRefBlock *self = SYS_REF_BLOCK(o);
   sys_ref_count_init(self);
 }
 
-SysRef sys_real_block_ref_get(SysBlock *o) {
+SysRef sys_ref_block_ref_get(SysPointer o) {
   SysRefBlock *self = SYS_REF_BLOCK(o);
   return sys_ref_count_get(self);
 }
 
-SysBool sys_real_block_ref_dec(SysBlock *o) {
+SysBool sys_ref_block_ref_dec(SysPointer o) {
   SysRefBlock *self = SYS_REF_BLOCK(o);
   return sys_ref_count_dec(self);
 }
 
-SysBool sys_real_block_ref_cmp(SysBlock *o, SysRef n) {
+SysBool sys_ref_block_ref_cmp(SysPointer o, SysRef n) {
   SysRefBlock *self = SYS_REF_BLOCK(o);
 
   return sys_ref_count_cmp(self, n);
 }
 
-void sys_real_block_ref_set(SysBlock *o, SysRef n) {
+void sys_ref_block_ref_set(SysPointer o, SysRef n) {
   SysRefBlock *self = SYS_REF_BLOCK(o);
 
   sys_ref_count_set(self, n);

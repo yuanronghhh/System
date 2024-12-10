@@ -13,18 +13,21 @@ struct _SysRefBlock {
   SysRef ref_count;
 };
 
-#define sys_ref_block_ref_valid_check(o) sys_block_valid_check(o, MAX_REF_NODE)
-#define sys_ref_block_ref_check(o) sys_ref_block_ref_check(o, MAX_REF_NODE)
 #define sys_ref_block_new(TypeName, size) sys_ref_block_malloc((SysSize)size * sizeof(TypeName))
 
 SYS_API void sys_ref_block_set_unref_hook(SysRefHook hook);
 SYS_API void sys_ref_block_set_ref_hook(SysRefHook hook);
 SYS_API void sys_ref_block_set_new_hook(SysRefHook hook);
 
+SYS_API SysBool sys_ref_block_valid_check(SysPointer o);
+SYS_API SysBool sys_ref_block_check(SysPointer o);
 SYS_API SysPointer _sys_ref_block_cast_check(SysPointer o);
 SYS_API SysBool sys_ref_block_create(SysRefBlock* self);
 SYS_API void _sys_ref_block_destroy(SysRefBlock* self);
+SYS_API void sys_ref_block_free(SysPointer o);
 
+SYS_API SysPointer sys_ref_block_realloc(SysPointer b, SysSize size);
+SYS_API SysPointer sys_ref_block_malloc(SysSize size);
 SYS_API SysPointer sys_ref_block_ref(SysPointer self);
 SYS_API void sys_ref_block_unref(SysPointer self);
 SYS_API void sys_ref_block_ref_init(SysPointer self);

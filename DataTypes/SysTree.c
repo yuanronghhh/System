@@ -4,7 +4,7 @@
  * license under GNU Lesser General Public
  */
 #include <System/DataTypes/SysTree.h>
-#include <System/Type/SysBlock.h>
+#include <System/Type/Ref/SysRefBlock.h>
 
 #define MAX_SYSTREE_HEIGHT 40
 

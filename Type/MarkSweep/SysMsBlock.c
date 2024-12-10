@@ -47,14 +47,14 @@ void sys_real_block_free(void* o) {
 }
 
 SysBool sys_real_block_valid_check(SysBlock *o) {
-  SysMsBlock *self = SYS_MS_BLOCK(o);
+  SysMsBlock *self = SYS_MS_BLOCK_B_CAST(o);
   sys_return_val_if_fail(SYS_IS_HDATA(self), false);
 
   return true;
 }
 
 SysBool sys_real_block_check(SysBlock *o) {
-  SysMsBlock *self = SYS_MS_BLOCK(o);
+  SysMsBlock *self = SYS_MS_BLOCK_B_CAST(o);
   sys_return_val_if_fail(SYS_IS_HDATA(self), false);
 
   return true;

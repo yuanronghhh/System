@@ -1,7 +1,7 @@
 #include <System/Platform/Common/SysThreadPrivate.h>
 #include <System/Platform/Win32/SysThreadWin32.h>
 #include <System/Utils/SysStr.h>
-#include <System/Type/SysBlock.h>
+#include <System/Type/Ref/SysRefBlock.h>
 
 static void
 sys_thread_abort (SysInt         status,
