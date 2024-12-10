@@ -26,7 +26,7 @@ SysBool sys_ref_block_create(SysRefBlock* self) {
 
 SysPointer sys_ref_block_malloc(SysSize size) {
   SysInt bsize = sizeof(SysRefBlock);
-  SysRefBlock* o = ms_malloc0(bsize + size);
+  SysRefBlock* o = sys_malloc0(bsize + size);
 
   sys_ref_block_create(o);
 
@@ -35,7 +35,7 @@ SysPointer sys_ref_block_malloc(SysSize size) {
 
 SysPointer sys_ref_block_realloc(SysPointer b, SysSize size) {
   SysInt bsize = sizeof(SysRefBlock);
-  SysRefBlock* o = ms_realloc(b, bsize + size);
+  SysRefBlock* o = sys_realloc(b, bsize + size);
 
   sys_ref_block_create(o);
 
@@ -58,7 +58,7 @@ void sys_ref_block_unref(SysPointer o) {
     return;
   }
 
-  ms_free(self);
+  sys_free(self);
 }
 
 SysPointer sys_ref_block_ref(SysPointer o) {
@@ -78,7 +78,7 @@ SysPointer sys_ref_block_ref(SysPointer o) {
 
 void sys_ref_block_free(SysPointer o) {
   SysRefBlock* self = SYS_REF_BLOCK(o);
-  ms_free(self);
+  sys_free(self);
 }
 
 SysBool sys_ref_block_valid_check(SysPointer o) {

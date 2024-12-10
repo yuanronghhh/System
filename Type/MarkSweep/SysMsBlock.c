@@ -44,7 +44,7 @@ void sys_ms_block_free(void* o) {
   SysMsBlock *self = SYS_MS_BLOCK(o);
 
   sys_ms_block_remove(self);
-  ms_free(o);
+  ms_free(self);
 }
 
 SysBool sys_ms_block_check(SysPointer o) {
