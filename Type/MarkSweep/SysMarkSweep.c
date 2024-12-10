@@ -4,13 +4,10 @@
 #include <System/Type/SysBlockPrivate.h>
 #include <System/Type/SysGcCommonPrivate.h>
 
-#define GC_LOCK sys_mutex_lock(&gc_lock)
-#define GC_UNLOCK sys_mutex_unlock(&gc_lock)
 #define NODE_TO_MS_BLOCK(o) ((SysMsBlock *)o)
 
-static SysMutex gc_lock;
 /* SysMsMap */
-static SysHQueue g_map_list;
+static SYS_THREAD_LOCAL SysHQueue g_map_list;
 /* SysMsBlock */
 static SysHList* g_block_list = NULL;
 
@@ -114,9 +111,7 @@ void sys_ms_unregister_map(SysMsMap *map) {
 void sys_ms_register_map(SysMsMap *map) {
   sys_return_if_fail(SYS_IS_HDATA(map));
 
-  GC_LOCK;
   sys_ms_map_push_head(map);
-  GC_UNLOCK;
 }
 
 void sys_ms_unregister_var(SysMsMap **mapaddr) {
@@ -124,16 +119,12 @@ void sys_ms_unregister_var(SysMsMap **mapaddr) {
   SysMsMap *map = *mapaddr;
   void **addr = map->addr;
 
-  GC_LOCK;
-
   if(!MS_IS_NULL_OR_INIT(addr)) {
     b = SYS_MS_BLOCK_B_CAST(*addr);
     b->type = SYS_MS_TRACK_AUTO;
   }
 
   sys_ms_map_free(map);
-
-  GC_UNLOCK;
 }
 
 static void sys_ms_force_collect(void) {
@@ -142,15 +133,12 @@ static void sys_ms_force_collect(void) {
 }
 
 void sys_ms_collect(void) {
-  GC_LOCK;
   sys_ms_force_collect();
-  GC_UNLOCK;
 }
 
 void sys_real_gc_setup(void) {
   sys_mem_set_vtable(&allocator);
   sys_hqueue_init(&g_map_list);
-  sys_mutex_init(&gc_lock);
 }
 
 void sys_real_gc_teardown(void) {
@@ -168,6 +156,5 @@ void sys_real_gc_teardown(void) {
   }
 
   sys_hqueue_clear(&g_map_list);
-  sys_mutex_clear(&gc_lock);
 }
 

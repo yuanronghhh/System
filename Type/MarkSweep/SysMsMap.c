@@ -15,18 +15,18 @@ void sys_ms_map_construct(SysMsMap *o, void **addr, SysDestroyFunc destroy) {
 SysMsMap *sys_ms_map_new_by_addr(void **addr) {
   SysMsMap *o = ms_malloc0(sizeof(SysMsMap));
 
-  sys_ms_map_construct(o, addr, sys_free);
+  sys_ms_map_construct(o, addr, free);
 
   return o;
 }
 
 void sys_ms_map_free(SysMsMap *o) {
-  if(o->destroy) {
-
-    o->destroy(o);
-  }
-
-  o->addr = NULL;
   sys_ms_map_remove(o);
+  o->addr = NULL;
+
+  if (o->destroy) {
+
+      o->destroy(o);
+  }
 }
 

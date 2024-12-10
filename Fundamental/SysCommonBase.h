@@ -77,18 +77,21 @@ typedef SysUInt32 SysUniChar;
 #define SYS_WARNING_DISABLE_ALL SYS_DIAGNOSTIC_IGNORE(-Wall)
 #define SYS_DIAGNOSTIC_PUSH SYS_PRAGMA(GCC diagnostic push)
 #define SYS_DIAGNOSTIC_POP SYS_PRAGMA(GCC diagnostic pop)
+#define SYS_THREAD_LOCAL __thread
 #elif defined(__clang__)
 #define SYS_PRAGMA(x) _Pragma(#x)
 #define SYS_DIAGNOSTIC_IGNORE(warningName) SYS_PRAGMA(clang diagnostic ignored #warningName)
 #define SYS_WARNING_DISABLE_ALL SYS_DIAGNOSTIC_IGNORE(-Wall)
 #define SYS_DIAGNOSTIC_PUSH SYS_PRAGMA(clang diagnostic push)
 #define SYS_DIAGNOSTIC_POP SYS_PRAGMA(clang diagnostic pop)
+#define SYS_THREAD_LOCAL __thread
 #elif defined(_MSC_VER)
 #define SYS_PRAGMA(x)
 #define SYS_DIAGNOSTIC_IGNORE(warningName)
 #define SYS_WARNING_DISABLE_ALL
 #define SYS_DIAGNOSTIC_PUSH
 #define SYS_DIAGNOSTIC_POP
+#define SYS_THREAD_LOCAL 
 #endif
 
 #if defined(__GNUC__) && (__GNUC__ >= 3)

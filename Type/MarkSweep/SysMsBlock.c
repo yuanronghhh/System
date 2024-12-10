@@ -12,6 +12,8 @@ SysMsBlock* _sys_ms_block_cast_check(SysPointer o) {
 static void sys_ms_block_create(SysMsBlock *o) {
   SysHList *ms_list;
 
+  o->status = SYS_MS_STATUS_MALLOCED;
+  o->type = SYS_MS_TRACK_MANUAL;
   ms_list = SYS_HLIST(o);
   sys_hlist_init(ms_list);
 }
@@ -76,11 +78,11 @@ SysRef sys_real_block_ref_get(SysBlock *self) {
 }
 
 SysBool sys_real_block_ref_dec(SysBlock *self) {
-  return true;
+  return false;
 }
 
 SysBool sys_real_block_ref_cmp(SysBlock *self, SysRef n) {
-  return true;
+  return false;
 }
 
 void sys_real_block_ref_set(SysBlock *self, SysRef n) {
