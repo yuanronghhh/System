@@ -29,6 +29,12 @@ SYS_BEGIN_DECLS
 #define SYS_MS_STATIC_CLEAR(var) \
   SysMsMap_cleanup(&(var##_PrivateMap))
 
+#define SYS_MS_CALL(func, ...) ({ \
+  SysPointer ret = func(__VA_ARGS__); \
+  sys_ms_block_set_type(ret, SYS_MS_TRACK_AUTO); \
+  ret; \
+})
+
 SYS_API void sys_ms_map_remove(SysMsMap *o);
 SYS_API void sys_ms_unregister_var(SysMsMap **addr);
 SYS_API void sys_ms_register_map(SysMsMap *map);

@@ -63,18 +63,18 @@ static void ms_block_mark(SysMsMap *o) {
       sys_ms_map_free(mp);
 
     } else {
-      b = SYS_MS_BLOCK_B_CAST(*mp->addr);
+      b = sys_ms_block_b_cast(*mp->addr);
       if(!SYS_IS_HDATA(b)) {
 
         sys_warning_N("pointer reference to invalid block: %p", mp->addr);
         continue;
       }
 
-      if(b->type != SYS_MS_TRACK_AUTO) {
+      if(!sys_ms_block_need_mark(b)) {
         continue;
       }
+      sys_ms_block_set_status(b, SYS_MS_STATUS_MARKED);
 
-      b->status = SYS_MS_STATUS_MARKED;
       ms_block_reprepend(b);
     }
   }
@@ -82,23 +82,13 @@ static void ms_block_mark(SysMsMap *o) {
 
 static void ms_block_sweep(SysMsBlock *o) {
   SysMsBlock *b;
-  SysPointer bptr;
   SysHList *node = SYS_HLIST(o);
 
   while(node) {
     b = NODE_TO_MS_BLOCK(node);
-    bptr = SYS_MS_BLOCK_F_CAST(b);
     node = node->next;
 
-    if(bptr == NULL) {
-      continue;
-    }
-
-    if(b->type != SYS_MS_TRACK_AUTO) {
-      continue;
-    }
-
-    if(b->status != SYS_MS_STATUS_MALLOCED) {
+    if(!sys_ms_block_need_sweep(b)) {
       continue;
     }
 
@@ -141,8 +131,9 @@ void sys_ms_unregister_var(SysMsMap **mapaddr) {
   void **addr = map->addr;
 
   if(!MS_IS_NULL_OR_INIT(addr)) {
-    b = SYS_MS_BLOCK_B_CAST(*addr);
-    b->type = SYS_MS_TRACK_AUTO;
+    b = SYS_MS_BLOCK(*addr);
+
+    sys_ms_block_set_type(b, SYS_MS_TRACK_AUTO);
   }
 
   sys_ms_map_free(map);
@@ -179,7 +170,7 @@ void sys_ms_gc_teardown(void) {
   while(node) {
     b = NODE_TO_MS_BLOCK(node);
     node = node->next;
-    bptr = SYS_MS_BLOCK_F_CAST(b);
+    bptr = sys_ms_block_f_cast(b);
 
     sys_info_N("memory leak block: %p", bptr);
   }
