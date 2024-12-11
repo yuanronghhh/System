@@ -5,7 +5,7 @@
 
 SYS_BEGIN_DECLS
 
-#define SYS_HLIST(o) ((SysHList *)o)
+#define SYS_HLIST(o) ((SysHList *)SYS_HDATA(o))
 
 #define sys_hlist_foreach(list, node) for(SysHList *node = list;node;node = node->next)
 #define sys_hlist_remove(list, new_list) sys_hlist_remove_link(list, new_list);

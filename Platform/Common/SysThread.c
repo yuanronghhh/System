@@ -2,6 +2,7 @@
 #include <System/DataTypes/SysSList.h>
 #include <System/Utils/SysStr.h>
 #include <System/Type/Ref/SysRefBlock.h>
+#include <System/Type/MarkSweep/SysMarkSweep.h>
 
 /**
  * this code from glib Thread
@@ -105,6 +106,10 @@ void sys_thread_unref (SysThread *thread) {
         sys_system_thread_free (real);
       else
         sys_ref_block_free (real);
+
+#if USE_MARKSWEEP
+      sys_ms_collect();
+#endif
     }
 }
 
