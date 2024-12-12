@@ -65,7 +65,7 @@ SysPointer sys_ms_block_realloc(SysPointer b, SysSize nsize) {
 
 SysBool sys_ms_block_need_mark(SysMsBlock *self) {
 
-  return self->type != SYS_MS_TRACK_AUTO;
+  return self->type == SYS_MS_TRACK_AUTO;
 }
 
 SysBool sys_ms_block_need_sweep(SysMsBlock *self) {
