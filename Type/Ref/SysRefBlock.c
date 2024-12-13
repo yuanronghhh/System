@@ -7,6 +7,22 @@
 
 #define SYS_REF_BLOCK_CAST(o) _sys_hdata_b_cast(o, sizeof(SysRefBlock))
 
+static SysRefHook sys_unref_debug_func = NULL;
+static SysRefHook sys_ref_debug_func = NULL;
+static SysRefHook sys_new_debug_func = NULL;
+
+void sys_set_unref_hook(SysRefHook hook) {
+  sys_unref_debug_func = hook;
+}
+
+void sys_set_ref_hook(SysRefHook hook) {
+  sys_ref_debug_func = hook;
+}
+
+void sys_set_new_hook(SysRefHook hook) {
+  sys_new_debug_func = hook;
+}
+
 SysPointer _sys_ref_block_cast_check(SysPointer o) {
   SysRefBlock *self = SYS_REF_BLOCK_CAST(o);
   sys_return_val_if_fail(self != NULL, NULL);
@@ -26,9 +42,14 @@ SysBool sys_ref_block_create(SysRefBlock* self) {
 
 SysPointer sys_ref_block_malloc(SysSize size) {
   SysInt bsize = sizeof(SysRefBlock);
-  SysRefBlock* o = sys_malloc0(bsize + size);
+  SysRefBlock* o = ms_malloc0(bsize + size);
 
   sys_ref_block_create(o);
+
+  if (sys_new_debug_func) {
+    sys_new_debug_func(o,
+        sys_ref_count_get(o));
+  }
 
   return (SysChar *)o + bsize;
 }
@@ -54,11 +75,18 @@ void sys_ref_block_unref(SysPointer o) {
     return;
   }
 
+
+  if(sys_unref_debug_func) {
+
+    sys_unref_debug_func(o,
+        sys_ref_count_get(self));
+  }
+
   if(!sys_ref_count_dec(self)) {
     return;
   }
 
-  sys_free(self);
+  ms_free(self);
 }
 
 SysPointer sys_ref_block_ref(SysPointer o) {
@@ -71,6 +99,12 @@ SysPointer sys_ref_block_ref(SysPointer o) {
     return NULL;
   }
 
+  if(sys_ref_debug_func) {
+
+    sys_ref_debug_func(self,
+        sys_ref_count_get(self));
+  }
+
   sys_ref_count_inc(self);
 
   return SYS_BLOCK(self);
@@ -78,7 +112,7 @@ SysPointer sys_ref_block_ref(SysPointer o) {
 
 void sys_ref_block_free(SysPointer o) {
   SysRefBlock* self = SYS_REF_BLOCK(o);
-  sys_free(self);
+  ms_free(self);
 }
 
 SysBool sys_ref_block_valid_check(SysPointer o) {
@@ -95,12 +129,26 @@ SysBool sys_ref_block_check(SysPointer o) {
 
 void sys_ref_block_ref_init(SysPointer o) {
   SysRefBlock *self = SYS_REF_BLOCK(o);
+
   sys_ref_count_init(self);
+
+  if (sys_new_debug_func) {
+    sys_new_debug_func(self,
+        sys_ref_count_get(self));
+  }
+
 }
 
 void sys_ref_block_ref_inc(SysPointer o) {
   SysRefBlock *self = SYS_REF_BLOCK(o);
-  sys_ref_count_init(self);
+
+  if(sys_ref_debug_func) {
+
+    sys_ref_debug_func(self,
+        sys_ref_count_get(self));
+  }
+
+  sys_ref_count_inc(self);
 }
 
 SysRef sys_ref_block_ref_get(SysPointer o) {
@@ -110,6 +158,13 @@ SysRef sys_ref_block_ref_get(SysPointer o) {
 
 SysBool sys_ref_block_ref_dec(SysPointer o) {
   SysRefBlock *self = SYS_REF_BLOCK(o);
+
+  if(sys_unref_debug_func) {
+
+    sys_unref_debug_func(o,
+        sys_ref_count_get(self));
+  }
+
   return sys_ref_count_dec(self);
 }
 

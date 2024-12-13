@@ -13,13 +13,13 @@ static SysMutex g_block_lock;
 
 /* allocator */
 static SysMVTable allocator = {
-  .malloc = sys_ms_block_malloc,
-  .free = sys_ms_block_free,
-  .realloc = sys_ms_block_realloc,
+  .malloc = sys_ms_malloc,
+  .free = sys_ms_free,
+  .realloc = sys_ms_realloc,
 };
 
 /* ms block */
-static void ms_block_reprepend(SysMsBlock *o) {
+static void ms_reprepend(SysMsBlock *o) {
   SysHList *list = SYS_HLIST(o);
   sys_return_if_fail(list != NULL);
 
@@ -27,27 +27,51 @@ static void ms_block_reprepend(SysMsBlock *o) {
   g_block_list = sys_hlist_prepend(g_block_list, list);
 }
 
-void sys_ms_block_prepend(SysMsBlock *o) {
+static void ms_prepend(SysMsBlock *o) {
   SysHList *list = SYS_HLIST(o);
   sys_return_if_fail(list != NULL);
 
   g_block_list = sys_hlist_prepend(g_block_list, list);
 }
 
-void sys_ms_block_remove_nolock(SysMsBlock* o) {
+static void ms_remove(SysMsBlock* o) {
   SysHList *list = SYS_HLIST(o);
   sys_return_if_fail(list != NULL);
 
   g_block_list = sys_hlist_remove_link(g_block_list, list);
 }
 
-void sys_ms_block_remove(SysMsBlock* o) {
+
+SysPointer sys_ms_malloc(SysSize size) {
+  SysMsBlock *o;
+
+  o = sys_ms_block_malloc(size);
+  ms_prepend(o);
+
+  return SYS_MS_BLOCK_F_CAST(o);
+}
+
+void sys_ms_free(void* o) {
+  SysMsBlock *self = SYS_MS_BLOCK(o);
+
   sys_mutex_lock(&g_block_lock);
-  sys_ms_block_remove_nolock(o);
+
+  ms_remove(self);
+  sys_ms_block_free(self);
+
   sys_mutex_unlock(&g_block_lock);
 }
 
-static void ms_block_mark(SysMsMap *o) {
+SysPointer sys_ms_realloc(SysPointer b, SysSize nsize) {
+  SysMsBlock *o;
+
+  o = sys_ms_pointer_realloc(b, nsize);
+  ms_prepend(o);
+
+  return SYS_MS_BLOCK_F_CAST(o);
+}
+
+static void ms_map_mark(SysMsMap *o) {
   SysMsMap *mp;
   SysMsBlock *b;
   SysHList *node = SYS_HLIST(o);
@@ -63,7 +87,7 @@ static void ms_block_mark(SysMsMap *o) {
       sys_ms_map_free(mp);
 
     } else {
-      b = sys_ms_block_b_cast(*mp->addr);
+      b = SYS_MS_BLOCK_B_CAST(*mp->addr);
       if(!SYS_IS_HDATA(b)) {
 
         sys_warning_N("pointer reference to invalid block: %p", mp->addr);
@@ -75,7 +99,7 @@ static void ms_block_mark(SysMsMap *o) {
       }
       sys_ms_block_set_status(b, SYS_MS_STATUS_MARKED);
 
-      ms_block_reprepend(b);
+      ms_reprepend(b);
     }
   }
 }
@@ -92,8 +116,8 @@ static void ms_block_sweep(SysMsBlock *o) {
       continue;
     }
 
-    sys_ms_block_remove_nolock(b);
-    ms_free(b);
+    ms_remove(b);
+    sys_ms_block_free(b);
   }
 }
 
@@ -145,7 +169,7 @@ static void sys_ms_force_collect(void) {
 
   sys_mutex_lock(&g_block_lock);
 
-  ms_block_mark(head);
+  ms_map_mark(head);
   ms_block_sweep(o);
 
   sys_mutex_unlock(&g_block_lock);
@@ -170,7 +194,7 @@ void sys_ms_gc_teardown(void) {
   while(node) {
     b = NODE_TO_MS_BLOCK(node);
     node = node->next;
-    bptr = sys_ms_block_f_cast(b);
+    bptr = SYS_MS_BLOCK_F_CAST(b);
 
     sys_info_N("memory leak block: %p", bptr);
   }

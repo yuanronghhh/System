@@ -14,6 +14,7 @@ typedef enum _SYS_NODE_ENUM {
 } SYS_NODE_ENUM;
 
 typedef enum _SYS_MS_STATUS_ENUM {
+  SYS_MS_STATUS_FREEED,
   SYS_MS_STATUS_MALLOCED,
   SYS_MS_STATUS_MARKED,
 } SYS_MS_STATUS_ENUM;
@@ -49,7 +50,7 @@ typedef void (*SysTypeFinalizeFunc) (void *self);
 typedef void (*SysInstanceInitFunc) (void* self);
 typedef void (*SysInterfaceInitFunc) (void *iface);
 typedef SysPointer (*SysCloneFunc) (SysPointer o);
-typedef void (*SysRefHook) (SysPointer o, SysInt ref_count, ...);
+typedef void (*SysRefHook) (SysPointer o, SysInt ref_count);
 typedef void (*SysObjectRefHook) (SysObject *o,
     SysInt ref_count,
     SysType type, 

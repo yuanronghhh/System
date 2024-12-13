@@ -1,4 +1,6 @@
 #include <System/Platform/Common/SysThreadPrivate.h>
+#include <System/Type/Ref/SysRefBlock.h>
+#include <System/Type/SysGcCommon.h>
 #include <System/Utils/SysStr.h>
 
 /**
@@ -35,7 +37,7 @@ sys_mutex_impl_new (void)
   pthread_mutexattr_t attr;
 #endif
 
-  mutex = sys_malloc (sizeof (pthread_mutex_t));
+  mutex = ms_malloc (sizeof (pthread_mutex_t));
   if SYS_UNLIKELY (mutex == NULL)
     sys_thread_abort (errno, "malloc");
 
@@ -59,7 +61,7 @@ static void
 sys_mutex_impl_free (pthread_mutex_t *mutex)
 {
   pthread_mutex_destroy (mutex);
-  sys_free (mutex);
+  ms_free (mutex);
 }
 
 static inline pthread_mutex_t *
@@ -216,7 +218,7 @@ sys_rec_mutex_impl_new (void)
   pthread_mutexattr_t attr;
   pthread_mutex_t *mutex;
 
-  mutex = sys_malloc (sizeof (pthread_mutex_t));
+  mutex = ms_malloc (sizeof (pthread_mutex_t));
   if SYS_UNLIKELY (mutex == NULL)
     sys_thread_abort (errno, "malloc");
 
@@ -232,7 +234,7 @@ static void
 sys_rec_mutex_impl_free (pthread_mutex_t *mutex)
 {
   pthread_mutex_destroy (mutex);
-  sys_free (mutex);
+  ms_free (mutex);
 }
 
 static inline pthread_mutex_t *
@@ -378,7 +380,7 @@ sys_rw_lock_impl_new (void)
   pthread_rwlock_t *rwlock;
   SysInt status;
 
-  rwlock = sys_malloc (sizeof (pthread_rwlock_t));
+  rwlock = ms_malloc (sizeof (pthread_rwlock_t));
   if SYS_UNLIKELY (rwlock == NULL)
     sys_thread_abort (errno, "malloc");
 
@@ -392,7 +394,7 @@ static void
 sys_rw_lock_impl_free (pthread_rwlock_t *rwlock)
 {
   pthread_rwlock_destroy (rwlock);
-  sys_free (rwlock);
+  ms_free (rwlock);
 }
 
 static inline pthread_rwlock_t *
@@ -614,7 +616,7 @@ sys_cond_impl_new (void)
   if SYS_UNLIKELY ((status = pthread_condattr_setclock (&attr, CLOCK_MONOTONIC)) != 0)
     sys_thread_abort (status, "pthread_condattr_setclock");
 
-  cond = sys_malloc (sizeof (pthread_cond_t));
+  cond = ms_malloc (sizeof (pthread_cond_t));
   if SYS_UNLIKELY (cond == NULL)
     sys_thread_abort (errno, "malloc");
 
@@ -630,7 +632,7 @@ static void
 sys_cond_impl_free (pthread_cond_t *cond)
 {
   pthread_cond_destroy (cond);
-  sys_free (cond);
+  ms_free (cond);
 }
 
 static inline pthread_cond_t *
@@ -889,7 +891,7 @@ sys_cond_wait_until (SysCond  *cond,
  * examples below.
  *
  * |[<!-- language="C" --> 
- * static SysPrivate name_key = SYS_PRIVATE_INIT (sys_free);
+ * static SysPrivate name_key = SYS_PRIVATE_INIT (ms_free);
  *
  * // return value should not be freed
  * const SysChar *
@@ -905,7 +907,7 @@ sys_cond_wait_until (SysCond  *cond,
  * }
  *
  *
- * static SysPrivate count_key;   // no sys_free function
+ * static SysPrivate count_key;   // no ms_free function
  *
  * SysInt
  * get_local_count (void)
@@ -929,7 +931,7 @@ sys_private_impl_new (SysDestroyFunc notify)
   pthread_key_t *key;
   SysInt status;
 
-  key = sys_malloc (sizeof (pthread_key_t));
+  key = ms_malloc (sizeof (pthread_key_t));
   if SYS_UNLIKELY (key == NULL)
     sys_thread_abort (errno, "malloc");
   status = pthread_key_create (key, notify);
@@ -947,7 +949,7 @@ sys_private_impl_free (pthread_key_t *key)
   status = pthread_key_delete (*key);
   if SYS_UNLIKELY (status != 0)
     sys_thread_abort (status, "pthread_key_delete");
-  sys_free (key);
+  ms_free (key);
 }
 
 static inline pthread_key_t *
@@ -1071,7 +1073,7 @@ sys_system_thread_free (SysRealThread *thread)
 
   sys_mutex_clear (&pt->lock);
 
-  sys_slice_free (SysThreadPosix, pt);
+  sys_ref_block_free (pt);
 }
 
 SysRealThread *
@@ -1087,15 +1089,16 @@ sys_system_thread_new (SysThreadFunc proxy,
   pthread_attr_t attr;
   SysInt ret;
 
-  thread = sys_slice_new0 (SysThreadPosix);
+  thread = sys_ref_block_new (SysThreadPosix, 1);
   base_thread = (SysRealThread*)thread;
-  base_thread->ref_count = 2;
   base_thread->ours = true;
   base_thread->thread.joinable = true;
   base_thread->thread.func = func;
   base_thread->thread.data = data;
   base_thread->name = sys_strdup (name);
   thread->proxy = proxy;
+
+  sys_ref_block_ref_set(thread, 2);
 
   posix_check_cmd (pthread_attr_init (&attr));
 
@@ -1127,8 +1130,8 @@ sys_system_thread_new (SysThreadFunc proxy,
   if (ret == EAGAIN)
     {
       sys_error_set_N (error, "Error creating thread: %s", sys_strerror (ret));
-      sys_free (thread->thread.name);
-      sys_slice_free (SysThreadPosix, thread);
+      ms_free (thread->thread.name);
+      sys_ref_block_free (thread);
       return NULL;
     }
 

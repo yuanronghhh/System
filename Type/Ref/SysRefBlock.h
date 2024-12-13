@@ -28,6 +28,11 @@ SYS_API SysPointer sys_ref_block_malloc(SysSize size);
 SYS_API SysPointer sys_ref_block_ref(SysPointer self);
 SYS_API void sys_ref_block_unref(SysPointer self);
 
+SYS_API void sys_set_unref_hook(SysRefHook hook);
+SYS_API void sys_set_ref_hook(SysRefHook hook);
+SYS_API void sys_set_new_hook(SysRefHook hook);
+
+
 SYS_API void sys_ref_block_ref_init(SysPointer self);
 SYS_API void sys_ref_block_ref_inc(SysPointer self);
 SYS_API SysRef sys_ref_block_ref_get(SysPointer self);

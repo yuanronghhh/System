@@ -31,19 +31,18 @@ SYS_BEGIN_DECLS
 
 #define SYS_MS_CALL(func, ...) ({ \
   SysPointer ret = func(__VA_ARGS__); \
-  sys_ms_block_set_type(ret, SYS_MS_TRACK_AUTO); \
+  sys_ms_block_set_type(SYS_MS_BLOCK(ret), SYS_MS_TRACK_AUTO); \
   ret; \
 })
 
+SYS_API SysPointer sys_ms_realloc(SysPointer b, SysSize nsize);
+SYS_API SysPointer sys_ms_malloc(SysSize size);
+SYS_API void sys_ms_free(void* o);
 SYS_API void sys_ms_map_remove(SysMsMap *o);
 SYS_API void sys_ms_unregister_var(SysMsMap **addr);
 SYS_API void sys_ms_register_map(SysMsMap *map);
 SYS_API void sys_ms_unregister_map(SysMsMap *map);
 SYS_API void sys_ms_collect(void);
-
-SYS_API void sys_ms_block_prepend(SysMsBlock *o);
-SYS_API void sys_ms_block_remove(SysMsBlock* o);
-SYS_API void sys_ms_block_remove_nolock(SysMsBlock* o);
 
 SYS_END_DECLS
 
