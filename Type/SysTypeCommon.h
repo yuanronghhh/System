@@ -14,7 +14,6 @@ typedef enum _SYS_NODE_ENUM {
 } SYS_NODE_ENUM;
 
 typedef enum _SYS_MS_STATUS_ENUM {
-  SYS_MS_STATUS_FREEED,
   SYS_MS_STATUS_MALLOCED,
   SYS_MS_STATUS_MARKED,
 } SYS_MS_STATUS_ENUM;
@@ -42,6 +41,7 @@ typedef struct _SysObjectClass SysObjectClass;
 typedef struct _SysBlock SysBlock;
 typedef struct _SysRefBlock SysRefBlock;
 typedef struct _SysMsMap SysMsMap;
+typedef struct _SysMsStack SysMsStack;
 typedef struct _SysMsBlock SysMsBlock;
 
 typedef SysType (*SysTypeFunc) (void);

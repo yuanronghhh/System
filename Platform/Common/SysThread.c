@@ -102,14 +102,14 @@ void sys_thread_unref (SysThread *thread) {
 
   if (sys_ref_block_ref_dec (real))
     {
+#if USE_MARKSWEEP
+      sys_ms_collect();
+#endif
+
       if (real->ours)
         sys_system_thread_free (real);
       else
         sys_ref_block_free (real);
-
-#if USE_MARKSWEEP
-      sys_ms_collect();
-#endif
     }
 }
 

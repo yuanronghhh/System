@@ -17,9 +17,9 @@ struct _SysMsBlock {
   /* <private> */
 
   /* SYS_MS_TRACK_ENUM */
-  SysInt type;
+  SysUShort type;
   /* SYS_MS_STATUS_ENUM */
-  SysInt status;
+  SysUShort status;
 };
 
 SysBool sys_ms_pointer_check(SysPointer o);
@@ -32,11 +32,11 @@ SysMsBlock* sys_ms_pointer_realloc(SysPointer b, SysSize nsize);
 SysBool sys_ms_block_need_sweep(SysMsBlock *self);
 SysBool sys_ms_block_need_mark(SysMsBlock *self);
 
-void sys_ms_block_set_status(SysMsBlock *self, SysInt status);
-SysInt sys_ms_block_get_status(SysMsBlock *self);
+void sys_ms_block_set_status(SysMsBlock *self, SysShort status);
+SysShort sys_ms_block_get_status(SysMsBlock *self);
 
-void sys_ms_block_set_type(SysMsBlock *self, SysInt type);
-SysInt sys_ms_block_get_type(SysMsBlock *self);
+void sys_ms_block_set_type(SysMsBlock *self, SysShort type);
+SysShort sys_ms_block_get_type(SysMsBlock *self);
 
 SYS_END_DECLS
 

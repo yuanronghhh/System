@@ -8,12 +8,12 @@ SYS_BEGIN_DECLS
 #define SYS_MS_DECLARE_STACK(var) \
   sys_cleanup(SysMsMap_cleanup) SysMsMap* var##_PrivateMap; \
   var##_PrivateMap = sys_alloca(sizeof(SysMsMap)); \
-  sys_ms_map_construct(var##_PrivateMap, (void **)&var, #var, NULL); \
-  sys_ms_register_map(var##_PrivateMap) \
+  sys_ms_map_construct(var##_PrivateMap, (void **)&var, #var, 0); \
+  sys_ms_map_prepend(var##_PrivateMap) \
 
 #define SYS_MS_DECLARE_HEAP(var) \
   var##_PrivateMap = sys_ms_map_new_by_addr((void **)&var, #var); \
-  sys_ms_register_map(var##_PrivateMap) \
+  sys_ms_map_prepend(var##_PrivateMap) \
 
 #define SYS_MS_PTR(TypeName, var) \
   TypeName* var = SYS_MS_INIT_VALUE; \
@@ -24,6 +24,7 @@ SYS_BEGIN_DECLS
   static SysMsMap* var##_PrivateMap = NULL
 
 #define SYS_MS_STATIC_INIT(var) \
+  var = NULL; \
   SYS_MS_DECLARE_HEAP(var)
 
 #define SYS_MS_STATIC_CLEAR(var) \
@@ -39,9 +40,7 @@ SYS_API SysPointer sys_ms_realloc(SysPointer b, SysSize nsize);
 SYS_API SysPointer sys_ms_malloc(SysSize size);
 SYS_API void sys_ms_free(void* o);
 SYS_API void sys_ms_map_remove(SysMsMap *o);
-SYS_API void sys_ms_unregister_var(SysMsMap **addr);
-SYS_API void sys_ms_register_map(SysMsMap *map);
-SYS_API void sys_ms_unregister_map(SysMsMap *map);
+SYS_API void sys_ms_map_prepend(SysMsMap *map);
 SYS_API void sys_ms_collect(void);
 
 SYS_END_DECLS

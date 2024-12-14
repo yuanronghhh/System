@@ -62,7 +62,7 @@ sys_rec_mutex_impl_new (void)
 {
   CRITICAL_SECTION *cs;
 
-  cs = sys_slice_new (CRITICAL_SECTION);
+  cs = ms_malloc0 (sizeof(CRITICAL_SECTION));
   InitializeCriticalSection (cs);
 
   return cs;
@@ -72,7 +72,7 @@ static void
 sys_rec_mutex_impl_free (CRITICAL_SECTION *cs)
 {
   DeleteCriticalSection (cs);
-  sys_slice_free (CRITICAL_SECTION, cs);
+  ms_free (cs);
 }
 
 static CRITICAL_SECTION *

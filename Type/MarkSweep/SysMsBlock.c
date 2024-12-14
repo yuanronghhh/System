@@ -9,7 +9,6 @@ static void sys_ms_block_create(SysMsBlock *o) {
   sys_hlist_init((SysHList *)o);
 }
 
-
 SysPointer sys_ms_pointer_cast_check(SysPointer o) {
   SysMsBlock *self = SYS_MS_BLOCK_B_CAST(o);
   sys_return_val_if_fail(SYS_IS_HDATA(self), NULL);
@@ -68,25 +67,25 @@ SysBool sys_ms_block_need_sweep(SysMsBlock *self) {
   return true;
 }
 
-void sys_ms_block_set_status(SysMsBlock *self, SysInt status) {
+void sys_ms_block_set_status(SysMsBlock *self, SysShort status) {
   sys_return_if_fail(self != NULL);
 
   self->status = status;
 }
 
-SysInt sys_ms_block_get_status(SysMsBlock *self) {
+SysShort sys_ms_block_get_status(SysMsBlock *self) {
   sys_return_val_if_fail(self != NULL, -1);
 
   return self->status;
 }
 
-void sys_ms_block_set_type(SysMsBlock *self, SysInt type) {
+void sys_ms_block_set_type(SysMsBlock *self, SysShort type) {
   sys_return_if_fail(self != NULL);
 
   self->type = type;
 }
 
-SysInt sys_ms_block_get_type(SysMsBlock *self) {
+SysShort sys_ms_block_get_type(SysMsBlock *self) {
   sys_return_val_if_fail(self != NULL, -1);
 
   return self->type;
@@ -94,6 +93,6 @@ SysInt sys_ms_block_get_type(SysMsBlock *self) {
 
 void sys_ms_block_free(SysMsBlock *self) {
   sys_return_if_fail(self != NULL);
-  self->status = SYS_MS_STATUS_FREEED;
+
   ms_free(self);
 }

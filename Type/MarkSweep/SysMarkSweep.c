@@ -6,7 +6,7 @@
 #define NODE_TO_MS_BLOCK(o) ((SysMsBlock *)o)
 
 /* SysMsMap */
-static SYS_THREAD_LOCAL SysHQueue g_map_list;
+static SYS_THREAD_LOCAL SysHList* g_map_list;
 /* SysMsBlock */
 static SysHList* g_block_list = NULL;
 static SysMutex g_block_lock;
@@ -18,6 +18,8 @@ static SysMVTable allocator = {
   .realloc = sys_ms_realloc,
 };
 
+
+/* stack */
 /* ms block */
 static void ms_reprepend(SysMsBlock *o) {
   SysHList *list = SYS_HLIST(o);
@@ -71,40 +73,43 @@ SysPointer sys_ms_realloc(SysPointer b, SysSize nsize) {
   return SYS_MS_BLOCK_F_CAST(o);
 }
 
-static void ms_map_mark(SysMsMap *o) {
-  SysMsMap *mp;
+static void ms_map_mark(SysHList *o) {
+  SysMsMap *map;
   SysMsBlock *b;
-  SysHList *node = SYS_HLIST(o);
+  SysHList *node;
 
+  node = SYS_HLIST(o);
   while(node) {
-    mp = SYS_MS_MAP(node);
+    map = SYS_MS_MAP(node);
+    sys_assert(SYS_IS_MS_MAP(map));
+
     node = node->next;
 
-    if(*mp->addr == SYS_MS_INIT_VALUE) {
+    if(*map->addr == SYS_MS_INIT_VALUE) {
       continue;
 
-    } else if(*mp->addr == NULL) {
-      sys_ms_map_free(mp);
+    } else if(*map->addr == NULL) {
+      sys_ms_map_free(map);
 
     } else {
-      b = SYS_MS_BLOCK_B_CAST(*mp->addr);
+      b = SYS_MS_BLOCK_B_CAST(*map->addr);
       if(!SYS_IS_HDATA(b)) {
 
-        sys_warning_N("pointer reference to invalid block: %p", mp->addr);
+        sys_warning_N("pointer reference to invalid block: %p,%s -> %p", map->addr, map->name, *map->addr);
         continue;
       }
 
       if(!sys_ms_block_need_mark(b)) {
         continue;
       }
-      sys_ms_block_set_status(b, SYS_MS_STATUS_MARKED);
 
+      sys_ms_block_set_status(b, SYS_MS_STATUS_MARKED);
       ms_reprepend(b);
     }
   }
 }
 
-static void ms_block_sweep(SysMsBlock *o) {
+static void ms_block_sweep(SysHList *o) {
   SysMsBlock *b;
   SysHList *node = SYS_HLIST(o);
 
@@ -113,7 +118,8 @@ static void ms_block_sweep(SysMsBlock *o) {
     node = node->next;
 
     if(!sys_ms_block_need_sweep(b)) {
-      continue;
+      sys_ms_block_set_status(b, SYS_MS_STATUS_MALLOCED);
+      break;
     }
 
     ms_remove(b);
@@ -122,55 +128,25 @@ static void ms_block_sweep(SysMsBlock *o) {
 }
 
 /* ms map */
-static SYS_THREAD_LOCAL SysInt g_map_count = 0;
-void sys_ms_map_push_head(SysMsMap *o) {
-  SysHList *list = SYS_HLIST(o);
-  sys_return_if_fail(list != NULL);
+void sys_ms_map_prepend(SysMsMap *o) {
+  sys_return_if_fail(SYS_IS_MS_MAP(o));
 
-  sys_hqueue_push_head(&g_map_list, list);
-  sys_debug_N("%d,%s", ++g_map_count, o->name);
+  SysHList *list = SYS_HLIST(o);
+
+  g_map_list = sys_hlist_prepend(g_map_list, list);
 }
 
 void sys_ms_map_remove(SysMsMap *o) {
   SysHList *list = SYS_HLIST(o);
-  sys_return_if_fail(list != NULL);
 
-  sys_debug_N("%d,%s", --g_map_count, o->name);
-  sys_hqueue_unlink(&g_map_list, list);
-}
-
-void sys_ms_unregister_map(SysMsMap *map) {
-
-  sys_ms_map_free(map);
-}
-
-void sys_ms_register_map(SysMsMap *map) {
-
-  sys_ms_map_push_head(map);
-}
-
-void sys_ms_unregister_var(SysMsMap **mapaddr) {
-  SysMsBlock *b;
-  SysMsMap *map = *mapaddr;
-  void **addr = map->addr;
-
-  if(!MS_IS_NULL_OR_INIT(addr)) {
-    b = SYS_MS_BLOCK(*addr);
-
-    sys_ms_block_set_type(b, SYS_MS_TRACK_AUTO);
-  }
-
-  sys_ms_map_free(map);
+  g_map_list = sys_hlist_remove_link(g_map_list, list);
 }
 
 static void sys_ms_force_collect(void) {
-  SysMsMap *head = (SysMsMap *)sys_hqueue_peek_head(&g_map_list);
-  SysMsBlock *o = NODE_TO_MS_BLOCK(g_block_list);
-
   sys_mutex_lock(&g_block_lock);
 
-  ms_map_mark(head);
-  ms_block_sweep(o);
+  ms_map_mark(g_map_list);
+  ms_block_sweep(g_block_list);
 
   sys_mutex_unlock(&g_block_lock);
 }
@@ -181,7 +157,6 @@ void sys_ms_collect(void) {
 
 void sys_ms_gc_setup(void) {
   sys_mem_set_vtable(&allocator);
-  sys_hqueue_init(&g_map_list);
   sys_mutex_init(&g_block_lock);
 }
 
@@ -199,7 +174,7 @@ void sys_ms_gc_teardown(void) {
     sys_info_N("memory leak block: %p", bptr);
   }
 
-  sys_hqueue_clear(&g_map_list);
+  g_map_list = NULL;
   sys_mutex_clear(&g_block_lock);
 }
 
