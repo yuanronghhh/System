@@ -5,7 +5,7 @@ void SysMsMap_cleanup(SysMsMap **addr) {
   sys_return_if_fail(addr != NULL);
   if(*addr == NULL) {
 
-    sys_warning_N("Static variable must init, map address is: %p", addr);
+    sys_warning_N("Static variable not init or cleared, map address is: %p", addr);
     return;
   }
 
@@ -39,6 +39,13 @@ SysMsMap *sys_ms_map_new_by_addr(void **addr, const SysChar *name) {
   sys_ms_map_construct(o, addr, name, 1);
 
   return o;
+}
+
+SysBool sys_ms_map_is_real(SysMsMap *map) {
+  sys_return_val_if_fail(map != NULL, false);
+
+  return *map->addr != SYS_MS_INIT_VALUE
+    && *map->addr != NULL;
 }
 
 void sys_ms_map_free(SysMsMap *o) {

@@ -24,6 +24,7 @@ void sys_ms_map_construct(SysMsMap *o,
     const SysChar *name,
     SysShort type);
 SYS_API void sys_ms_map_free(SysMsMap *o);
+SYS_API SysBool sys_ms_map_is_real(SysMsMap *map);
 SYS_API SysMsMap *sys_ms_map_new_by_addr(void **addr, const SysChar *name);
 SYS_API void SysMsMap_cleanup(SysMsMap **addr);
 SYS_API SysBool sys_ms_map_check(SysMsMap *o);

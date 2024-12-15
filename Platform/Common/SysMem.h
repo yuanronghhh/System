@@ -40,9 +40,10 @@ SYS_BEGIN_DECLS
 
 /* cleanup */
 #if defined(__clang__) || defined(__GNUC__)
-#define sys_cleanup(func) __attribute__((cleanup(func)))
+#define SYS_CLEANUP(func) __attribute__((cleanup(func)))
+#define SYS_CONSTRUCT __attribute__((constructor))
 #else
-#define sys_cleanup(func) 
+#define SYS_CLEANUP(func) 
 #endif
 
 struct _SysMVTable {

@@ -95,7 +95,7 @@ static void ms_map_mark(SysHList *o) {
       b = SYS_MS_BLOCK_B_CAST(*map->addr);
       if(!SYS_IS_HDATA(b)) {
 
-        sys_warning_N("pointer reference to invalid block: %p,%s -> %p", map->addr, map->name, *map->addr);
+        sys_warning_N("pointer reference to invalid block: %p, %s -> %p", map->addr, map->name, *map->addr);
         continue;
       }
 
@@ -131,15 +131,13 @@ static void ms_block_sweep(SysHList *o) {
 void sys_ms_map_prepend(SysMsMap *o) {
   sys_return_if_fail(SYS_IS_MS_MAP(o));
 
-  SysHList *list = SYS_HLIST(o);
-
-  g_map_list = sys_hlist_prepend(g_map_list, list);
+  g_map_list = sys_hlist_prepend(g_map_list, (SysHList *)o);
 }
 
 void sys_ms_map_remove(SysMsMap *o) {
-  SysHList *list = SYS_HLIST(o);
+  sys_return_if_fail(SYS_IS_MS_MAP(o));
 
-  g_map_list = sys_hlist_remove_link(g_map_list, list);
+  g_map_list = sys_hlist_remove_link(g_map_list, (SysHList *)o);
 }
 
 static void sys_ms_force_collect(void) {
@@ -155,6 +153,29 @@ void sys_ms_collect(void) {
   sys_ms_force_collect();
 }
 
+
+static SysMsMap *ms_get_first_map(void *ptr) {
+  SysMsMap *map = NULL;
+  SysHList *node;
+
+  node = SYS_HLIST(g_map_list);
+  while(node) {
+    map = SYS_MS_MAP(node);
+    node = node->next;
+
+    if(!sys_ms_map_is_real(map)) {
+      continue;
+    }
+
+    if(*map->addr == ptr) {
+
+      return map;
+    }
+  }
+
+  return NULL;
+}
+
 void sys_ms_gc_setup(void) {
   sys_mem_set_vtable(&allocator);
   sys_mutex_init(&g_block_lock);
@@ -164,14 +185,21 @@ void sys_ms_gc_teardown(void) {
   SysPointer bptr;
   SysHList *node;
   SysMsBlock *b;
+  SysInt lcount = 0;
+  SysMsMap *map;
 
   node = SYS_HLIST(g_block_list);
   while(node) {
+    ++lcount;
+    if(lcount > 20) { break; }
+
     b = NODE_TO_MS_BLOCK(node);
     node = node->next;
     bptr = SYS_MS_BLOCK_F_CAST(b);
+    map = ms_get_first_map(bptr);
+    sys_assert(map != NULL);
 
-    sys_info_N("memory leak block: %p", bptr);
+    sys_info_N("memory leak block: %s, %p", map->name, bptr);
   }
 
   g_map_list = NULL;
