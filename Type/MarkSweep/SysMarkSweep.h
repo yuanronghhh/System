@@ -6,10 +6,10 @@
 SYS_BEGIN_DECLS
 
 #define SYS_MS_DECLARE_STACK(var) \
-  SYS_CLEANUP(SysMsMap_cleanup) SysMsMap* var##_PrivateMap; \
+  volatile SYS_CLEANUP(SysMsMap_cleanup) SysMsMap* var##_PrivateMap; \
   var##_PrivateMap = sys_alloca(sizeof(SysMsMap)); \
-  sys_ms_map_construct(var##_PrivateMap, (void **)&var, #var, 0); \
-  sys_ms_map_prepend(var##_PrivateMap)
+  sys_ms_map_construct((SysMsMap *)var##_PrivateMap, (void **)&var, #var, 0); \
+  sys_ms_map_prepend((SysMsMap *)var##_PrivateMap)
 
 #define SYS_MS_DECLARE_HEAP(var) \
   var##_PrivateMap = sys_ms_map_new_by_addr((void **)&var, #var); \

@@ -19,7 +19,7 @@ struct _SysMsMap {
 SYS_API void sys_ms_map_push_head(SysMsMap *o);
 SYS_API void sys_ms_map_push_tail(SysMsMap *o);
 SYS_API SysMsMap *sys_ms_map_new(void);
-void sys_ms_map_construct(SysMsMap *o,
+SYS_API void sys_ms_map_construct(SysMsMap *o,
     void **addr,
     const SysChar *name,
     SysShort type);
