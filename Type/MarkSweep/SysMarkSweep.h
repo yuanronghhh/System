@@ -6,7 +6,7 @@
 SYS_BEGIN_DECLS
 
 #define SYS_MS_DECLARE_STACK(var) \
-  volatile SYS_CLEANUP(SysMsMap_cleanup) SysMsMap* var##_PrivateMap; \
+  SYS_VOLATILE SYS_CLEANUP(SysMsMap_cleanup) SysMsMap* var##_PrivateMap; \
   var##_PrivateMap = sys_alloca(sizeof(SysMsMap)); \
   sys_ms_map_construct((SysMsMap *)var##_PrivateMap, (void **)&var, #var, 0); \
   sys_ms_map_prepend((SysMsMap *)var##_PrivateMap)
@@ -21,7 +21,7 @@ SYS_BEGIN_DECLS
 
 #define SYS_MS_STATIC(TypeName, var) \
   static TypeName* var = SYS_MS_INIT_VALUE; \
-  static SysMsMap* var##_PrivateMap = NULL
+  static SYS_VOLATILE SysMsMap* var##_PrivateMap = NULL
 
 #define SYS_MS_INIT_BEGIN() \
   SYS_CONSTRUCT static void SysMsBlock_statis_init(void) { \

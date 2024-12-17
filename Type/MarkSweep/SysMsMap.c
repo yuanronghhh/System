@@ -1,7 +1,7 @@
 #include <System/Type/MarkSweep/SysMsMap.h>
 #include <System/Type/MarkSweep/SysMarkSweep.h>
 
-void SysMsMap_cleanup(SysMsMap **addr) {
+void SysMsMap_cleanup(volatile SysMsMap **addr) {
   sys_return_if_fail(addr != NULL);
   if(*addr == NULL) {
 
@@ -9,7 +9,7 @@ void SysMsMap_cleanup(SysMsMap **addr) {
     return;
   }
 
-  sys_ms_map_free(*addr);
+  sys_ms_map_free((SysMsMap *)*addr);
 }
 
 void sys_ms_map_construct(SysMsMap *o,

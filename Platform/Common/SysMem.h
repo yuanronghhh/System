@@ -46,6 +46,8 @@ SYS_BEGIN_DECLS
 #define SYS_CLEANUP(func) 
 #endif
 
+#define SYS_VOLATILE volatile
+
 struct _SysMVTable {
   void *(*malloc) (SysSize size);
   void (*free) (void *o);
