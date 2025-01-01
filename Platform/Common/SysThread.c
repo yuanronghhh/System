@@ -103,7 +103,7 @@ void sys_thread_unref (SysThread *thread) {
   if (sys_ref_block_ref_dec (real))
     {
 #if USE_MARKSWEEP
-      sys_ms_collect();
+      sys_ms_collect(&sys_thread_unref);
 #endif
 
       if (real->ours)

@@ -21,6 +21,10 @@ SYS_DIAGNOSTIC_PUSH
 #include <System/ThirdParty/SysLibCharSet.h>
 #endif
 
+#if USE_LIBDWARF
+#include <System/ThirdParty/SysLibDwarf.h>
+#endif
+
 SYS_DIAGNOSTIC_POP
 
 SYS_END_DECLS

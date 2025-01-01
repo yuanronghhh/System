@@ -10,23 +10,21 @@ SYS_BEGIN_DECLS
 
 struct _SysMsMap {
   SysHList unowned;
+
   /* <private> */
+  void** frame_addr;
   void** addr;
+  SysInt fbreg;
   const SysChar *name;
-  SysShort type;
 };
 
-SYS_API void sys_ms_map_push_head(SysMsMap *o);
-SYS_API void sys_ms_map_push_tail(SysMsMap *o);
 SYS_API SysMsMap *sys_ms_map_new(void);
-SYS_API void sys_ms_map_construct(SysMsMap *o,
-    void **addr,
-    const SysChar *name,
-    SysShort type);
 SYS_API void sys_ms_map_free(SysMsMap *o);
 SYS_API SysBool sys_ms_map_is_real(SysMsMap *map);
-SYS_API SysMsMap *sys_ms_map_new_by_addr(void **addr, const SysChar *name);
-SYS_API void SysMsMap_cleanup(volatile SysMsMap **addr);
+SYS_API SysMsMap *sys_ms_map_new_by_addr(void **frame_addr,
+    void **addr, 
+    SysInt fbreg,
+    const SysChar *name);
 SYS_API SysBool sys_ms_map_check(SysMsMap *o);
 
 SYS_END_DECLS

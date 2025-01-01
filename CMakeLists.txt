@@ -9,6 +9,12 @@ else()
   add_use_name(vld 0)
 endif()
 
+if(USE_MARKSWEEP)
+  add_use_name(libdwarf 1)
+else()
+  add_use_name(libdwarf 0)
+endif()
+
 set(INC
   ../
 )
@@ -18,6 +24,7 @@ set(INC_SYS
   ${VLD_INCLUDE_DIRS}
   ${OPENSSL_INCLUDE_DIRS}
   ${ICONV_INCLUDE_DIRS}
+  ${LIBDWARF_INCLUDE_DIRS}
 )
 
 set(ANDROID_SYS_SRC
@@ -109,6 +116,8 @@ if(USE_MARKSWEEP)
     ./Type/MarkSweep/SysMsBlock.h
     ./Type/MarkSweep/SysMsMap.c
     ./Type/MarkSweep/SysMsMap.h
+    ./Type/MarkSweep/SysMsDwarf.c
+    ./Type/MarkSweep/SysMsDwarf.h
   )
 
   LIST(APPEND OS_SYS_SRC ${MARKSWEEP_SRC})
@@ -275,5 +284,6 @@ target_link_libraries(System
   ${VLD_LIBRARIES}
   ${ANDROID_LIBRARIES}
   ${ICONV_LIBRARIES}
+  ${LIBDWARF_LIBRARIES}
 )
 set_property(TARGET System PROPERTY FOLDER CstProject)

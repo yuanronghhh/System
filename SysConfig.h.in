@@ -35,6 +35,7 @@ typedef unsigned long long SysUInt64;
 #define USE_MARKSWEEP ${USE_MARKSWEEP}
 #define USE_REFCOUNT ${USE_REFCOUNT}
 #define USE_VLD ${USE_VLD}
+#define USE_LIBDWARF ${USE_LIBDWARF}
 
 typedef signed short SysInt16;
 typedef unsigned short SysUInt16;

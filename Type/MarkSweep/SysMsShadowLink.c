@@ -1,18 +1,15 @@
 #include <System/Type/MarkSweep/SysMarkSweep.h>
 #include <System/Type/MarkSweep/SysMsMap.h>
 #include <System/Type/MarkSweep/SysMsBlock.h>
-#include <System/Type/MarkSweep/SysMsDwarf.h>
 #include <System/Type/SysGcCommonPrivate.h>
-#include <System/Platform/Common/SysFile.h>
+
+/**
+ * Deprecated:
+ * shadow link too slow for precise gc in c
+ * this file is only for backup
+ */
 
 #define NODE_TO_MS_BLOCK(o) ((SysMsBlock *)o)
-
-typedef struct _SysMsStackInfo SysMsStackInfo;
-struct _SysMsStackInfo {
-  void* func;
-  void* frame_addr;
-  void* caller_addr;
-} ;
 
 /* SysMsMap */
 static SYS_THREAD_LOCAL SysHList* g_map_list;
@@ -27,13 +24,8 @@ static SysMVTable allocator = {
   .realloc = sys_ms_realloc,
 };
 
-static SysBool sys_ms_backtrace(SysInt maxlevel,
-    const SysInt level, 
-    SysMsStackInfo* info) {
 
-  return false;
-}
-
+/* stack */
 /* ms block */
 static void ms_reprepend(SysMsBlock *o) {
   SysHList *list = SYS_HLIST(o);
@@ -56,6 +48,7 @@ static void ms_remove(SysMsBlock* o) {
 
   g_block_list = sys_hlist_remove_link(g_block_list, list);
 }
+
 
 SysPointer sys_ms_malloc(SysSize size) {
   SysMsBlock *o;
@@ -153,7 +146,7 @@ void sys_ms_map_remove(SysMsMap *o) {
   g_map_list = sys_hlist_remove_link(g_map_list, (SysHList *)o);
 }
 
-void sys_ms_force_collect(void *func_addr, void **caddr) {
+static void sys_ms_force_collect(void) {
   sys_mutex_lock(&g_block_lock);
 
   ms_map_mark(g_map_list);
@@ -161,6 +154,11 @@ void sys_ms_force_collect(void *func_addr, void **caddr) {
 
   sys_mutex_unlock(&g_block_lock);
 }
+
+void sys_ms_collect(void) {
+  sys_ms_force_collect();
+}
+
 
 static SysMsMap *ms_get_first_map(void *ptr) {
   SysMsMap *map = NULL;
@@ -184,13 +182,7 @@ static SysMsMap *ms_get_first_map(void *ptr) {
   return NULL;
 }
 
-void sys_ms_tracker_setup(void) {
-  const SysChar *path = sys_exe_path();
-  g_map_list = sys_ms_dwarf_extact_pointer(path);
-}
-
 void sys_ms_gc_setup(void) {
-  sys_ms_tracker_setup();
   sys_mem_set_vtable(&allocator);
   sys_mutex_init(&g_block_lock);
 }
