@@ -5,7 +5,7 @@
 
 SYS_BEGIN_DECLS
 
-#if defined(SYS_OS_WIN32)
+#if USE_VLD
   #define SYS_LEAK_IGNORE_BEGIN VLDGlobalDisable()
   #define SYS_LEAK_IGNORE_END VLDGlobalEnable()
   #include <System/ThirdParty/SysVld.h>
