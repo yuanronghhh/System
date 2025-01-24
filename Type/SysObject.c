@@ -101,7 +101,7 @@ void _sys_object_create(SysObject *o, SysType type) {
   node = sys_type_node(type);
   b = SYS_REF_BLOCK(o);
 
-  sys_ref_block_ref_init(o);
+  sys_ref_block_ref_init(b);
   sys_type_instance_create((SysTypeInstance *)o, node);
 
   if (sys_new_debug_func) {

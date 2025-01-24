@@ -364,7 +364,7 @@ sys_system_thread_free (SysRealThread *thread)
   SysThreadWin32 *wt = (SysThreadWin32 *) thread;
 
   win32_check_for_error (CloseHandle (wt->handle));
-  sys_ref_block_free (wt);
+  sys_ref_block_free (SYS_REF_BLOCK(wt));
 }
 
 void
@@ -423,7 +423,7 @@ sys_system_thread_new (SysThreadFunc proxy,
   thread->proxy = proxy;
   thread->handle = (HANDLE) NULL;
   base_thread = (SysRealThread*)thread;
-  sys_ref_block_ref_set(base_thread, 2);
+  sys_ref_block_ref_set(SYS_REF_BLOCK(base_thread), 2);
 
   base_thread->ours = true;
   base_thread->thread.joinable = true;
@@ -478,7 +478,7 @@ error:
   {
     if (thread->handle)
       CloseHandle (thread->handle);
-    sys_ref_block_free (thread);
+    sys_ref_block_free (SYS_REF_BLOCK(thread));
     return NULL;
   }
 }

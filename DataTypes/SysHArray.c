@@ -88,13 +88,13 @@ void sys_harray_free(SysHArray* self, SysBool free_segment) {
     self->pdata = NULL;
     self->alloc = 0;
   }
-  sys_ref_block_free(self);
+  sys_ref_block_free(SYS_REF_BLOCK(self));
 }
 
 void sys_harray_unref(SysHArray* self) {
   sys_return_if_fail(self != NULL);
 
-  if (sys_ref_block_ref_dec(self)) {
+  if (sys_ref_block_ref_dec(SYS_REF_BLOCK(self))) {
 
     sys_harray_free(self, true);
   }
@@ -103,7 +103,7 @@ void sys_harray_unref(SysHArray* self) {
 SysHArray* sys_harray_ref(SysHArray *self) {
   sys_return_val_if_fail(self != NULL, NULL);
 
-  sys_ref_block_ref_inc(self);
+  sys_ref_block_ref_inc(SYS_REF_BLOCK(self));
 
   return self;
 }

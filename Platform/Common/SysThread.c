@@ -92,20 +92,21 @@ void sys_thread_detach(void) {
 SysThread * sys_thread_ref (SysThread *thread) {
   SysRealThread *real = (SysRealThread *) thread;
 
-  sys_ref_block_ref_inc(real);
+  sys_ref_block_ref_inc(SYS_REF_BLOCK(real));
 
   return thread;
 }
 
 void sys_thread_unref (SysThread *thread) {
   SysRealThread *real = (SysRealThread *) thread;
+  SysRefBlock *b = SYS_REF_BLOCK(real);
 
-  if (sys_ref_block_ref_dec (real))
+  if (sys_ref_block_ref_dec (b))
     {
       if (real->ours)
         sys_system_thread_free (real);
       else
-        sys_ref_block_free (real);
+        sys_ref_block_free (b);
 
 #if USE_MARKSWEEP
       sys_ms_collect();
