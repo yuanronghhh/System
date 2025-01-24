@@ -1073,7 +1073,7 @@ sys_system_thread_free (SysRealThread *thread)
 
   sys_mutex_clear (&pt->lock);
 
-  sys_ref_block_free (pt);
+  sys_ref_block_free (SYS_REF_BLOCK(pt));
 }
 
 SysRealThread *
@@ -1088,8 +1088,11 @@ sys_system_thread_new (SysThreadFunc proxy,
   SysRealThread *base_thread;
   pthread_attr_t attr;
   SysInt ret;
+  SysRefBlock *b;
 
   thread = sys_ref_block_new (SysThreadPosix, 1);
+  b = SYS_REF_BLOCK(thread);
+
   base_thread = (SysRealThread*)thread;
   base_thread->ours = true;
   base_thread->thread.joinable = true;
@@ -1098,7 +1101,7 @@ sys_system_thread_new (SysThreadFunc proxy,
   base_thread->name = sys_strdup (name);
   thread->proxy = proxy;
 
-  sys_ref_block_ref_set(thread, 2);
+  sys_ref_block_ref_set(b, 2);
 
   posix_check_cmd (pthread_attr_init (&attr));
 
@@ -1131,7 +1134,7 @@ sys_system_thread_new (SysThreadFunc proxy,
     {
       sys_error_set_N (error, "Error creating thread: %s", sys_strerror (ret));
       ms_free (thread->thread.name);
-      sys_ref_block_free (thread);
+      sys_ref_block_free (SYS_REF_BLOCK(b));
       return NULL;
     }
 

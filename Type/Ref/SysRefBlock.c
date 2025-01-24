@@ -78,7 +78,7 @@ void sys_ref_block_unref(SysRefBlock *self) {
 
   if(sys_unref_debug_func) {
 
-    sys_unref_debug_func(o,
+    sys_unref_debug_func(SYS_REF_BLOCK_F_CAST(self),
         sys_ref_count_get(self));
   }
 
