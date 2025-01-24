@@ -74,7 +74,7 @@ sys_async_queue_ref (SysAsyncQueue *queue)
 {
   sys_return_val_if_fail (queue, NULL);
 
-  sys_ref_block_ref_inc (queue);
+  sys_ref_block_ref_inc (SYS_REF_BLOCK(queue));
 
   return queue;
 }
@@ -109,12 +109,12 @@ sys_async_queue_unref (SysAsyncQueue *queue)
 {
   sys_return_if_fail (queue);
 
-  if (sys_ref_block_ref_dec(queue))
+  if (sys_ref_block_ref_dec(SYS_REF_BLOCK(queue)))
     {
       sys_return_if_fail (queue->waiting_threads == 0);
 
       sys_async_queue_clear_full(queue);
-      sys_ref_block_free (queue);
+      sys_ref_block_free (SYS_REF_BLOCK(queue));
     }
 }
 /**

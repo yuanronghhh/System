@@ -103,7 +103,7 @@ SysArray * sys_array_ref(SysArray *array) {
     SysRealArray *rarray = (SysRealArray*)array;
     sys_return_val_if_fail(array, NULL);
 
-    sys_ref_block_ref_inc(rarray);
+    sys_ref_block_ref_inc(SYS_REF_BLOCK(rarray));
 
     return array;
 }
@@ -120,7 +120,7 @@ void sys_array_unref(SysArray *array) {
     SysRealArray *rarray = (SysRealArray*)array;
     sys_return_if_fail(array);
 
-    if (sys_ref_block_ref_dec(rarray))
+    if (sys_ref_block_ref_dec(SYS_REF_BLOCK(rarray)))
         array_free(rarray, FREE_SEGMENT);
 }
 
@@ -141,7 +141,7 @@ SysChar* sys_array_free(SysArray   *farray,
 
     flags = (free_segment ? FREE_SEGMENT : 0);
 
-        if (!sys_ref_block_ref_dec(array))
+        if (!sys_ref_block_ref_dec(SYS_REF_BLOCK(array)))
         flags |= PRESERVE_WRAPPER;
 
     return array_free(array, flags);
@@ -175,7 +175,7 @@ static SysChar * array_free(SysRealArray     *array,
     }
     else
     {
-        sys_ref_block_free(array);
+        sys_ref_block_free(SYS_REF_BLOCK(array));
     }
 
     return segment;
@@ -551,7 +551,7 @@ SysPtrArray* sys_ptr_array_ref(SysPtrArray *array) {
 
     sys_return_val_if_fail(array, NULL);
 
-    sys_ref_block_ref_inc(rarray);
+    sys_ref_block_ref_inc(SYS_REF_BLOCK(rarray));
 
     return array;
 }
@@ -563,7 +563,7 @@ void sys_ptr_array_unref(SysPtrArray *array) {
 
     sys_return_if_fail(array);
 
-    if (sys_ref_block_ref_dec(rarray))
+    if (sys_ref_block_ref_dec(SYS_REF_BLOCK(rarray)))
         ptr_array_free(array, FREE_SEGMENT);
 }
 
@@ -579,7 +579,7 @@ SysPointer* sys_ptr_array_free(SysPtrArray *array,
     /* if others are holding a reference, preserve the wrapper but
      * do free/return the data
      */
-    if (!sys_ref_block_ref_dec(rarray))
+    if (!sys_ref_block_ref_dec(SYS_REF_BLOCK(rarray)))
         flags |= PRESERVE_WRAPPER;
 
     return ptr_array_free(array, flags);
@@ -622,7 +622,7 @@ static SysPointer * ptr_array_free(SysPtrArray      *array,
     }
     else
     {
-        sys_ref_block_free(rarray);
+        sys_ref_block_free(SYS_REF_BLOCK(rarray));
     }
 
     return segment;

@@ -401,7 +401,7 @@ void sys_type_node_free(SysTypeNode *node) {
   }
 
   sys_free(node->name);
-  sys_ref_block_free(node);
+  sys_ref_block_free(SYS_REF_BLOCK(node));
 }
 
 void sys_type_node_unref(SysTypeNode *node) {
@@ -452,7 +452,7 @@ static void iface_entry_free(IFaceEntry *entry) {
 }
 
 void sys_type_class_free(SysTypeClass *cls) {
-  SysBlock *b;
+  SysRefBlock *b;
   SysTypeNode *node;
   SysType type;
 
@@ -471,7 +471,7 @@ void sys_type_class_free(SysTypeClass *cls) {
       sys_clear_pointer(&cls->ifaces, sys_free);
     }
 
-    b = SYS_BLOCK(node->data.instance.class_ptr);
+    b = SYS_REF_BLOCK(node->data.instance.class_ptr);
     sys_ref_block_unref(b);
   }
 }
@@ -479,7 +479,7 @@ void sys_type_class_free(SysTypeClass *cls) {
 void sys_type_class_unref(SysTypeClass *cls) {
   SysTypeNode *node = sys_type_node(cls->type);
 
-  if (!sys_ref_block_ref_dec(node)) {
+  if (!sys_ref_block_ref_dec(SYS_REF_BLOCK(node))) {
     return;
   }
 
@@ -489,8 +489,9 @@ void sys_type_class_unref(SysTypeClass *cls) {
 static SysTypeNode *sys_type_node_ref(SysTypeNode *node) {
   SysTypeNode *pnode;
   SysTypeClass *cls, *pcls;
+  SysRefBlock *b = SYS_REF_BLOCK(node);
 
-  sys_ref_block_ref(node);
+  sys_ref_block_ref(b);
 
   switch (node->node_type) {
     case SYS_NODE_FUNDAMENTAL:
@@ -625,7 +626,7 @@ void sys_type_instance_free(SysTypeInstance *instance) {
   real_ptr = ((SysChar*)instance) - node->data.instance.private_size;
 
   b = SYS_BLOCK(real_ptr);
-  sys_ref_block_free(b);
+  sys_ref_block_free(SYS_REF_BLOCK(b));
 }
 
 const SysChar *sys_type_node_name(SysTypeNode *node) {

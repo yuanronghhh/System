@@ -234,17 +234,18 @@ void sys_tree_remove_all (SysTree *tree) {
 SysTree* sys_tree_ref (SysTree *tree) {
   sys_return_val_if_fail (tree != NULL, NULL);
 
-  sys_ref_block_ref_inc(tree);
+  sys_ref_block_ref_inc(SYS_REF_BLOCK(tree));
 
   return tree;
 }
 
 void sys_tree_unref (SysTree *tree) {
   sys_return_if_fail (tree != NULL);
+  SysRefBlock *b = SYS_REF_BLOCK(tree);
 
-  if (sys_ref_block_ref_dec (tree)) {
+  if (sys_ref_block_ref_dec (b)) {
       sys_tree_remove_all (tree);
-      sys_ref_block_free (tree);
+      sys_ref_block_free (b);
     }
 }
 

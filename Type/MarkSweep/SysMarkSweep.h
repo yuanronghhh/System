@@ -57,8 +57,10 @@ SYS_API void sys_ms_free(void* o);
 SYS_API void sys_ms_map_remove(SysMsMap *o);
 SYS_API void sys_ms_map_prepend(SysMsMap *map);
 #define sys_ms_collect(funcname) \
+{ \
   void *caddr = __builtin_frame_address(0); \
-  sys_ms_force_collect(funcname, caddr);
+  sys_ms_force_collect(funcname, caddr); \
+}
 
 SYS_API void sys_ms_force_collect(void *func_addr, void **caddr);
 

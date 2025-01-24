@@ -271,7 +271,7 @@ sys_bytes_ref (SysBytes *bytes)
 {
   sys_return_val_if_fail (bytes != NULL, NULL);
 
-  sys_ref_block_ref_inc (bytes);
+  sys_ref_block_ref_inc (SYS_REF_BLOCK(bytes));
 
   return bytes;
 }
@@ -291,11 +291,11 @@ sys_bytes_unref (SysBytes *bytes)
   if (bytes == NULL)
     return;
 
-  if (sys_ref_block_ref_dec (bytes))
+  if (sys_ref_block_ref_dec (SYS_REF_BLOCK(bytes)))
     {
       if (bytes->free_func != NULL)
         bytes->free_func (bytes->user_data);
-      sys_ref_block_free (bytes);
+      sys_ref_block_free (SYS_REF_BLOCK(bytes));
     }
 }
 
@@ -407,11 +407,11 @@ try_steal_and_unref (SysBytes         *bytes,
     return NULL;
 
   /* Are we the only reference? */
-  if (sys_ref_block_ref_cmp (bytes, 1))
+  if (sys_ref_block_ref_cmp (SYS_REF_BLOCK(bytes), 1))
     {
       *size = bytes->size;
       result = (SysPointer)bytes->data;
-      sys_ref_block_free (bytes);
+      sys_ref_block_free (SYS_REF_BLOCK(bytes));
       return result;
     }
 

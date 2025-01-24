@@ -2,12 +2,7 @@ add_use_name(iconv 1)
 add_use_name(openssl 1)
 add_use_name(refcount 1)
 add_use_name(marksweep 1)
-
-if(WIN32)
-  add_use_name(vld 1)
-else()
-  add_use_name(vld 0)
-endif()
+add_use_name(vld 0)
 
 if(USE_MARKSWEEP)
   add_use_name(libdwarf 1)

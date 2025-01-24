@@ -281,21 +281,21 @@ void sys_value_free(SysValue* self) {
       break;
   }
 
-  sys_ref_block_free(self);
+  sys_ref_block_free(SYS_REF_BLOCK(self));
 }
 
 void sys_value_ref(SysValue* value) {
   sys_return_if_fail(value != NULL);
   sys_return_if_fail(sys_ref_block_valid_check(value));
 
-  sys_ref_block_ref_inc(value);
+  sys_ref_block_ref_inc(SYS_REF_BLOCK(value));
 }
 
 void sys_value_unref(SysValue* self) {
   sys_return_if_fail(self != NULL);
-  sys_return_if_fail(sys_ref_block_valid_check(self));
+  SysRefBlock *b = SYS_REF_BLOCK(self);
 
-  if (!sys_ref_block_ref_dec(self)) {
+  if (!sys_ref_block_ref_dec(b)) {
     return;
   }
 
