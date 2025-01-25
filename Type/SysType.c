@@ -390,7 +390,7 @@ void sys_type_node_free(SysTypeNode *node) {
       if (cls != NULL) {
         sys_type_class_free(cls);
       } else {
-        sys_debug_N("type class is null, maybe useless type: \"%s\" ?", node->name);
+        // sys_debug_N("type class is null, maybe useless type: \"%s\" ?", node->name);
       }
       break;
     case SYS_NODE_INTERFACE:
