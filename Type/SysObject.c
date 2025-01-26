@@ -119,6 +119,7 @@ SysPointer sys_object_new(SysType type, const SysChar * first, ...) {
   node = sys_type_node(type);
   o = sys_type_instance_new(node, 1);
   self = (SysObject *)o;
+  sys_ref_count_init(self);
 
   if(sys_new_debug_func) {
 
@@ -204,6 +205,13 @@ void _sys_object_unref(SysObject* self) {
 
   type = sys_type_from_instance(self);
   node = sys_type_node(type);
+
+  if(!sys_ref_count_valid_check(self, MAX_REF_NODE)) {
+
+    sys_warning_N("failed to cast: %p, %s", self, sys_type_node_name(node));
+    return;
+  }
+
   if(sys_unref_debug_func) {
 
     sys_unref_debug_func(self,

@@ -154,7 +154,7 @@ static SysTypeNode* sys_type_make_node(const SysTypeNode* pnode,
 
   nodesize = (SysInt)sizeof(SysTypeNode) + (SysInt)sizeof(SysType) * (pn_supers + 1);
 
-  node = sys_malloc(nodesize);
+  node = sys_malloc0(nodesize);
   sys_ref_count_init(node);
 
   node->node_type = info->node_type;
@@ -510,7 +510,7 @@ static SysTypeNode *sys_type_node_ref(SysTypeNode *node) {
       cls = node->data.instance.class_ptr;
 
       if(cls == NULL) {
-        cls = (SysTypeClass *)sys_malloc(node->data.instance.class_size);
+        cls = (SysTypeClass *)sys_malloc0(node->data.instance.class_size);
         cls->type = NODE_TYPE(node);
         node->data.instance.class_ptr = cls;
 
