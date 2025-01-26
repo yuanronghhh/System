@@ -1,1 +1,1 @@
-#include <System/Platform/Common/SysRefCountPrivate.h>
+#include <System/Platform/Common/SysRefCount.h>

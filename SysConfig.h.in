@@ -33,7 +33,6 @@ typedef unsigned long long SysUInt64;
 #define USE_ICONV ${USE_ICONV}
 #define USE_OPENSSL ${USE_OPENSSL}
 #define USE_MARKSWEEP ${USE_MARKSWEEP}
-#define USE_REFCOUNT ${USE_REFCOUNT}
 #define USE_VLD ${USE_VLD}
 #define USE_LIBDWARF ${USE_LIBDWARF}
 

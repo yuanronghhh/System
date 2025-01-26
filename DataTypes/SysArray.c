@@ -1,7 +1,7 @@
 #include <System/DataTypes/SysArray.h>
 #include <System/DataTypes/SysHashTable.h>
 #include <System/Utils/SysStr.h>
-#include <System/Type/Ref/SysRefBlock.h>
+#include <System/Platform/Common/SysRefCount.h>
 
 /**
  * this code from glib array
@@ -22,6 +22,7 @@ struct _SysRealArray
   SysUInt   zero_terminated : 1;
   SysUInt   clear : 1;
   SysDestroyFunc clear_func;
+  SysRef ref_count;
 };
 
 #define sys_array_elt_len(array,i) ((array)->elt_size * (i))
@@ -71,7 +72,8 @@ SysArray* sys_array_sized_new(SysBool zero_terminated,
 
     sys_return_val_if_fail(elt_size > 0, NULL);
 
-    array = sys_ref_block_new(SysRealArray, 1);
+    array = sys_new0(SysRealArray, 1);
+    sys_ref_count_init(array);
 
     array->data = NULL;
     array->len = 0;
@@ -103,7 +105,7 @@ SysArray * sys_array_ref(SysArray *array) {
     SysRealArray *rarray = (SysRealArray*)array;
     sys_return_val_if_fail(array, NULL);
 
-    sys_ref_block_ref_inc(SYS_REF_BLOCK(rarray));
+    sys_ref_count_inc(rarray);
 
     return array;
 }
@@ -120,7 +122,7 @@ void sys_array_unref(SysArray *array) {
     SysRealArray *rarray = (SysRealArray*)array;
     sys_return_if_fail(array);
 
-    if (sys_ref_block_ref_dec(SYS_REF_BLOCK(rarray)))
+    if (sys_ref_count_dec(rarray))
         array_free(rarray, FREE_SEGMENT);
 }
 
@@ -141,7 +143,7 @@ SysChar* sys_array_free(SysArray   *farray,
 
     flags = (free_segment ? FREE_SEGMENT : 0);
 
-        if (!sys_ref_block_ref_dec(SYS_REF_BLOCK(array)))
+        if (!sys_ref_count_dec(array))
         flags |= PRESERVE_WRAPPER;
 
     return array_free(array, flags);
@@ -175,7 +177,7 @@ static SysChar * array_free(SysRealArray     *array,
     }
     else
     {
-        sys_ref_block_free(SYS_REF_BLOCK(array));
+        sys_free(array);
     }
 
     return segment;
@@ -432,6 +434,7 @@ struct _SysRealPtrArray
     SysUInt           len;
     SysUInt           alloc;
     SysDestroyFunc  element_free_func;
+    SysRef ref_count;
 };
 
 
@@ -442,7 +445,8 @@ static SysPtrArray * ptr_array_new(SysUInt reserved_size,
     SysDestroyFunc element_free_func) {
     SysRealPtrArray *array;
 
-    array = sys_ref_block_new(SysRealPtrArray, 1);
+    array = sys_new0(SysRealPtrArray, 1);
+    sys_ref_count_init(array);
 
     array->pdata = NULL;
     array->len = 0;
@@ -551,7 +555,7 @@ SysPtrArray* sys_ptr_array_ref(SysPtrArray *array) {
 
     sys_return_val_if_fail(array, NULL);
 
-    sys_ref_block_ref_inc(SYS_REF_BLOCK(rarray));
+    sys_ref_count_inc(rarray);
 
     return array;
 }
@@ -563,7 +567,7 @@ void sys_ptr_array_unref(SysPtrArray *array) {
 
     sys_return_if_fail(array);
 
-    if (sys_ref_block_ref_dec(SYS_REF_BLOCK(rarray)))
+    if (sys_ref_count_dec(rarray))
         ptr_array_free(array, FREE_SEGMENT);
 }
 
@@ -579,7 +583,7 @@ SysPointer* sys_ptr_array_free(SysPtrArray *array,
     /* if others are holding a reference, preserve the wrapper but
      * do free/return the data
      */
-    if (!sys_ref_block_ref_dec(SYS_REF_BLOCK(rarray)))
+    if (!sys_ref_count_dec(rarray))
         flags |= PRESERVE_WRAPPER;
 
     return ptr_array_free(array, flags);
@@ -622,7 +626,7 @@ static SysPointer * ptr_array_free(SysPtrArray      *array,
     }
     else
     {
-        sys_ref_block_free(SYS_REF_BLOCK(rarray));
+        sys_free(rarray);
     }
 
     return segment;

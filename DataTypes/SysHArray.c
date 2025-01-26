@@ -1,5 +1,5 @@
 #include <System/DataTypes/SysHArray.h>
-#include <System/Type/Ref/SysRefBlock.h>
+#include <System/Platform/Common/SysRefCount.h>
 
 #define MIN_ARRAY_SIZE  16
 static void harray_maybe_expand(SysHArray *self, SysUInt len);
@@ -9,12 +9,12 @@ static SysHArray * ptr_harray_new(SysUInt reserved_size,
     SysDestroyFunc element_free_func) {
     SysHArray *array;
 
-    array = sys_ref_block_new(SysHArray, 1);
-
+    array = sys_new0(SysHArray, 1);
     array->pdata = NULL;
     array->len = 0;
     array->alloc = 0;
     array->element_free_func = element_free_func;
+    sys_ref_count_init(array);
 
     if (reserved_size != 0)
         harray_maybe_expand(array, reserved_size);
@@ -88,13 +88,13 @@ void sys_harray_free(SysHArray* self, SysBool free_segment) {
     self->pdata = NULL;
     self->alloc = 0;
   }
-  sys_ref_block_free(SYS_REF_BLOCK(self));
+  sys_free(self);
 }
 
 void sys_harray_unref(SysHArray* self) {
   sys_return_if_fail(self != NULL);
 
-  if (sys_ref_block_ref_dec(SYS_REF_BLOCK(self))) {
+  if (sys_ref_count_dec(self)) {
 
     sys_harray_free(self, true);
   }
@@ -103,7 +103,7 @@ void sys_harray_unref(SysHArray* self) {
 SysHArray* sys_harray_ref(SysHArray *self) {
   sys_return_val_if_fail(self != NULL, NULL);
 
-  sys_ref_block_ref_inc(SYS_REF_BLOCK(self));
+  sys_ref_count_inc(self);
 
   return self;
 }

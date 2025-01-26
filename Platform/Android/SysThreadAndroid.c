@@ -1,6 +1,5 @@
 #include <System/Platform/Common/SysThreadPrivate.h>
 #include <System/Type/SysGcCommon.h>
-#include <System/Type/Ref/SysRefBlock.h>
 #include <System/Utils/SysStr.h>
 
 /**
@@ -1073,7 +1072,7 @@ sys_system_thread_free (SysRealThread *thread)
 
   sys_mutex_clear (&pt->lock);
 
-  sys_ref_block_free (pt);
+  sys_free (pt);
 }
 
 SysRealThread *
@@ -1089,7 +1088,7 @@ sys_system_thread_new (SysThreadFunc proxy,
   pthread_attr_t attr;
   SysInt ret;
 
-  thread = sys_ref_block_new (SysThreadPosix, 1);
+  thread = sys_new0 (SysThreadPosix, 1);
   base_thread = (SysRealThread*)thread;
   base_thread->ours = true;
   base_thread->thread.joinable = true;
@@ -1097,6 +1096,7 @@ sys_system_thread_new (SysThreadFunc proxy,
   base_thread->thread.data = data;
   base_thread->name = sys_strdup (name);
   thread->proxy = proxy;
+  sys_ref_count_set(base_thread, 2);
 
   posix_check_cmd (pthread_attr_init (&attr));
 
@@ -1129,7 +1129,7 @@ sys_system_thread_new (SysThreadFunc proxy,
     {
       sys_error_set_N (error, "Error creating thread: %s", sys_strerror (ret));
       ms_free (thread->thread.name);
-      sys_ref_block_free (thread);
+      sys_free (thread);
       return NULL;
     }
 

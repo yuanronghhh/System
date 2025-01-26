@@ -1,5 +1,5 @@
-#ifndef __SYS_REF_COUNT_PRIVATE_H__
-#define __SYS_REF_COUNT_PRIVATE_H__
+#ifndef __SYS_REF_COUNT_H__
+#define __SYS_REF_COUNT_H__
 
 #include <System/Platform/Common/SysAtomic.h>
 

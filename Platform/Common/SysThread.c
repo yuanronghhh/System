@@ -1,7 +1,7 @@
 #include <System/Platform/Common/SysThreadPrivate.h>
 #include <System/DataTypes/SysSList.h>
 #include <System/Utils/SysStr.h>
-#include <System/Type/Ref/SysRefBlock.h>
+#include <System/Platform/Common/SysRefCount.h>
 #include <System/Type/MarkSweep/SysMarkSweep.h>
 
 /**
@@ -92,16 +92,15 @@ void sys_thread_detach(void) {
 SysThread * sys_thread_ref (SysThread *thread) {
   SysRealThread *real = (SysRealThread *) thread;
 
-  sys_ref_block_ref_inc(SYS_REF_BLOCK(real));
+  sys_ref_count_inc(real);
 
   return thread;
 }
 
 void sys_thread_unref (SysThread *thread) {
   SysRealThread *real = (SysRealThread *) thread;
-  SysRefBlock *b = SYS_REF_BLOCK(real);
 
-  if (sys_ref_block_ref_dec (b))
+  if (sys_ref_count_dec (real))
     {
 #if USE_MARKSWEEP
       sys_ms_collect(&sys_thread_unref);
@@ -110,7 +109,7 @@ void sys_thread_unref (SysThread *thread) {
       if (real->ours)
         sys_system_thread_free (real);
       else
-        sys_ref_block_free (b);
+        sys_free (real);
     }
 }
 
@@ -211,7 +210,8 @@ SysThread* sys_thread_self (void) {
        * This can happen for the main thread and for threads
        * that are not created by GLib.
        */
-      thread = sys_ref_block_new (SysRealThread, 1);
+      thread = sys_new0 (SysRealThread, 1);
+      sys_ref_count_init(thread);
 
       sys_private_set (&sys_thread_specific_private, thread);
     }

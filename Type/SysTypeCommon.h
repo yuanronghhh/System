@@ -38,8 +38,6 @@ typedef struct _SysParamClass SysParamClass;
 typedef struct _SysObject SysObject;
 typedef struct _SysObjectClass SysObjectClass;
 
-typedef struct _SysBlock SysBlock;
-typedef struct _SysRefBlock SysRefBlock;
 typedef struct _SysMsMap SysMsMap;
 typedef struct _SysMsStack SysMsStack;
 typedef struct _SysMsBlock SysMsBlock;
@@ -50,7 +48,6 @@ typedef void (*SysTypeFinalizeFunc) (void *self);
 typedef void (*SysInstanceInitFunc) (void* self);
 typedef void (*SysInterfaceInitFunc) (void *iface);
 typedef SysPointer (*SysCloneFunc) (SysPointer o);
-typedef void (*SysRefHook) (SysPointer o, SysInt ref_count);
 typedef void (*SysObjectRefHook) (SysObject *o,
     SysInt ref_count,
     SysType type, 

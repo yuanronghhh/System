@@ -5,6 +5,7 @@
 #include <System/DataTypes/SysHQueue.h>
 #include <System/Platform/Common/SysMem.h>
 #include <System/Platform/Common/SysThread.h>
+#include <System/Platform/Common/SysRefCount.h>
 
 SYS_BEGIN_DECLS
 

@@ -27,6 +27,7 @@ struct _SysObjectClass {
 
 struct _SysObject {
   SysTypeInstance instance;
+  SysRef ref_count;
 };
 
 #define sys_object_create(o, type) _sys_object_create((SysObject *)o, type)

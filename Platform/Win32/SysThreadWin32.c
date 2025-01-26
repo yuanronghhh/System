@@ -1,7 +1,6 @@
 #include <System/Platform/Common/SysThreadPrivate.h>
 #include <System/Platform/Win32/SysThreadWin32.h>
 #include <System/Utils/SysStr.h>
-#include <System/Type/Ref/SysRefBlock.h>
 
 static void
 sys_thread_abort (SysInt         status,
@@ -364,7 +363,7 @@ sys_system_thread_free (SysRealThread *thread)
   SysThreadWin32 *wt = (SysThreadWin32 *) thread;
 
   win32_check_for_error (CloseHandle (wt->handle));
-  sys_ref_block_free (SYS_REF_BLOCK(wt));
+  sys_free (wt);
 }
 
 void
@@ -419,17 +418,16 @@ sys_system_thread_new (SysThreadFunc proxy,
   const SysChar *message = NULL;
   SysInt thread_prio;
 
-  thread = sys_ref_block_new (SysThreadWin32, 1);
+  thread = sys_new0 (SysThreadWin32, 1);
   thread->proxy = proxy;
   thread->handle = (HANDLE) NULL;
   base_thread = (SysRealThread*)thread;
-  sys_ref_block_ref_set(SYS_REF_BLOCK(base_thread), 2);
-
   base_thread->ours = true;
   base_thread->thread.joinable = true;
   base_thread->thread.func = func;
   base_thread->thread.data = data;
   base_thread->name = sys_strdup (name);
+  sys_ref_count_set(base_thread, 2);
 
   thread->handle = (HANDLE) _beginthreadex(NULL, (SysUInt)stack_size, sys_thread_win32_proxy, thread,
                                             CREATE_SUSPENDED, &ignore);
@@ -478,7 +476,7 @@ error:
   {
     if (thread->handle)
       CloseHandle (thread->handle);
-    sys_ref_block_free (SYS_REF_BLOCK(thread));
+    sys_free (thread);
     return NULL;
   }
 }

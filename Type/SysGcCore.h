@@ -5,11 +5,6 @@
 
 SYS_BEGIN_DECLS
 
-#if USE_REFCOUNT
-#include <System/Type/Ref/SysRefBlock.h>
-#include <System/Type/Ref/SysRefGc.h>
-#endif
-
 #if USE_MARKSWEEP
 #include <System/Type/MarkSweep/SysMarkSweep.h>
 #include <System/Type/MarkSweep/SysMsBlock.h>

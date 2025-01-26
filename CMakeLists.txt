@@ -1,6 +1,5 @@
 add_use_name(iconv 1)
 add_use_name(openssl 1)
-add_use_name(refcount 1)
 add_use_name(marksweep 1)
 add_use_name(vld 0)
 
@@ -118,17 +117,6 @@ if(USE_MARKSWEEP)
   LIST(APPEND OS_SYS_SRC ${MARKSWEEP_SRC})
 endif()
 
-if(USE_REFCOUNT)
-  set(REFCOUNT_SRC
-    ./Type/Ref/SysRefBlock.c
-    ./Type/Ref/SysRefBlock.h
-    ./Type/Ref/SysRefGc.c
-    ./Type/Ref/SysRefGc.h
-  )
-
-  LIST(APPEND OS_SYS_SRC ${REFCOUNT_SRC})
-endif()
-
 set(SRC
   ${OS_SYS_SRC}
 
@@ -238,7 +226,7 @@ set(SRC
   ./Platform/Common/SysOs.c
   ./Platform/Common/SysAtomic.h
   ./Platform/Common/SysAtomic.c
-  ./Platform/Common/SysRefCountPrivate.h
+  ./Platform/Common/SysRefCount.h
   ./Platform/Common/SysRefCount.c
   ./Platform/Common/SysThread.c
   ./Platform/Common/SysThread.h

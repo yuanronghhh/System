@@ -13,6 +13,7 @@ struct  _SysRealThread
   SysBool ours;
   SysChar *name;
   SysPointer retval;
+  SysRef ref_count;
 };
 
 void sys_system_thread_init(void);

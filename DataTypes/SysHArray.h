@@ -15,6 +15,7 @@ struct _SysHArray {
   SysUInt   zero_terminated : 1;
   SysUInt   clear : 1;
   SysDestroyFunc  element_free_func;
+  SysRef ref_count;
 };
 
 SYS_API SysHArray* sys_harray_new(void);

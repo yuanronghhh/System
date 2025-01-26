@@ -1,6 +1,6 @@
 #include <System/DataTypes/SysAsyncQueue.h>
 #include <System/Platform/Common/SysThread.h>
-#include <System/Type/Ref/SysRefBlock.h>
+#include <System/Platform/Common/SysRefCount.h>
 
 /**
  * this code from glib GAsyncQueue
@@ -54,8 +54,10 @@ sys_async_queue_new_full (SysDestroyFunc item_free_func)
 {
   SysAsyncQueue *queue;
 
-  queue = sys_ref_block_new (SysAsyncQueue, 1);
+  queue = sys_new0 (SysAsyncQueue, 1);
   sys_async_queue_init_full(queue, item_free_func);
+
+  sys_ref_count_init(queue);
 
   return queue;
 }
@@ -74,7 +76,7 @@ sys_async_queue_ref (SysAsyncQueue *queue)
 {
   sys_return_val_if_fail (queue, NULL);
 
-  sys_ref_block_ref_inc (SYS_REF_BLOCK(queue));
+  sys_ref_count_inc (queue);
 
   return queue;
 }
@@ -109,12 +111,12 @@ sys_async_queue_unref (SysAsyncQueue *queue)
 {
   sys_return_if_fail (queue);
 
-  if (sys_ref_block_ref_dec(SYS_REF_BLOCK(queue)))
+  if (sys_ref_count_dec(queue))
     {
       sys_return_if_fail (queue->waiting_threads == 0);
 
       sys_async_queue_clear_full(queue);
-      sys_ref_block_free (SYS_REF_BLOCK(queue));
+      sys_free (queue);
     }
 }
 /**

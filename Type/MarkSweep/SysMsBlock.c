@@ -1,5 +1,4 @@
 #include <System/Type/MarkSweep/SysMsBlock.h>
-#include <System/Type/Ref/SysRefBlock.h>
 #include <System/Type/MarkSweep/SysMarkSweep.h>
 
 static void sys_ms_block_create(SysMsBlock *o) {
