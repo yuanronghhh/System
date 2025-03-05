@@ -477,13 +477,7 @@ void sys_type_class_free(SysTypeClass *cls) {
   }
 }
 
-static int a = 0;
-
 void sys_type_class_unref(SysTypeClass *cls) {
-  if(++a == 1)
-  {
-    puts("debugger put here");
-  }
   SysTypeNode *node = sys_type_node(cls->type);
   sys_assert(node != NULL);
 
@@ -607,7 +601,7 @@ SysTypeInstance *sys_type_instance_new(SysTypeNode *node, SysSize count) {
   SysInt priv_psize = 0;
   priv_psize = node->data.instance.private_size;
 
-  mp = sys_malloc((priv_psize + node->data.instance.instance_size) * count);
+  mp = sys_malloc0((priv_psize + node->data.instance.instance_size) * count);
   instance = (SysTypeInstance *)((SysChar *)mp + priv_psize);
 
   return instance;

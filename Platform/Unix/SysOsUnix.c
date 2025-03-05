@@ -128,3 +128,22 @@ SysChar * sys_os_getlocale (void) {
 
   return sys_strdup(locale);
 }
+
+SysInt sys_poll_set_fd (fd_set *fds,
+    SysSocket *socket) {
+  struct timeval tv;
+  fd_set rset, wset, xset;
+  fd_set *f;
+  int ready;
+  int maxfd = 0;
+
+  FD_ZERO (&rset);
+  FD_ZERO (&wset);
+  FD_ZERO (&xset);
+
+  FD_SET (socket->fd, &rset);
+  FD_SET (socket->fd, &wset);
+  FD_SET (socket->fd, &xset);
+
+  return ready;
+}

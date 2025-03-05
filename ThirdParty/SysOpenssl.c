@@ -266,7 +266,7 @@ fail:
 }
 
 void sys_ssl_ctx_setup(
-  const SysChar *server_crt, 
+  const SysChar *server_crt,
   const SysChar* server_priv,
   const SysChar* client_ca,
   const SysChar* client_priv) {
