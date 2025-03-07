@@ -9,7 +9,10 @@ SysBool sys_real_console_is_utf8(void);
 void sys_real_setup(void);
 void sys_real_teardown(void);
 
-void sys_real_poll(void);
+SysInt sys_real_poll (SysPollFD *fds,
+    SysUInt nfds,
+    SysInt flags,
+    SysInt timeout);
 const SysChar *sys_real_env_get(const SysChar *var);
 SysBool sys_real_env_set(const SysChar *var, const SysChar *value);
 SysUInt64 sys_real_get_monotonic_time(void);

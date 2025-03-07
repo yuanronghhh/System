@@ -131,6 +131,15 @@ typedef enum _SYS_IO_ENUM {
   SYS_IO_DEV_NULL
 } SYS_IO_ENUM;
 
+typedef enum _SYS_POLL_ENUM {
+  SYS_POLL_IN,
+  SYS_POLL_OUT,
+  SYS_POLL_PRI,
+  SYS_POLL_ERR,
+  SYS_POLL_HUP,
+  SYS_POLL_NVAL
+} SYS_POLL_ENUM;
+
 typedef enum
 {
   SYS_TIME_TYPE_STANDARD,
@@ -200,6 +209,7 @@ typedef struct _SysBytes SysBytes;
 typedef struct _SysHArray SysHArray;
 typedef struct _SysValue SysValue;
 typedef struct _SysSArg SysSArg;
+typedef struct _SysPollFD SysPollFD;
 typedef struct _SysElapse SysElapse;
 typedef struct _SysSocket SysSocket;
 typedef struct _SysSocketClass SysSocketClass;

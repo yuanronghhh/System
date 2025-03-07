@@ -394,3 +394,11 @@ void sys_set_debugger (SysBool bvalue) {
 SysBool sys_get_debugger (void) {
   return g_use_debugger;
 }
+
+SysInt sys_poll (SysPollFD *fds,
+    SysUInt nfds,
+    SysInt flags,
+    SysInt timeout)
+{
+  return sys_real_poll(fds, nfds, flags, timeout);
+}

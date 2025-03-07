@@ -17,6 +17,12 @@ struct _SysSArg {
   SysChar** argv;
 };
 
+struct _SysPollFD {
+  SysInt fd;
+  SysUShort events;
+  SysUShort revents;
+};
+
 #define sys_sleep(ms) sys_usleep((unsigned long)ms)
 #define SYS_(text) text
 #define SYS_C_(Context,String) Context"\004"String
@@ -54,6 +60,11 @@ SYS_API void sys_elapse_end(SysElapse *self);
 
 SYS_API void sys_set_debugger (SysBool bvalue);
 SYS_API SysBool sys_get_debugger (void);
+
+SysInt sys_poll (SysPollFD *fds,
+    SysUInt nfds,
+    SysInt flags,
+    SysInt timeout);
 
 SYS_END_DECLS
 
