@@ -1,5 +1,6 @@
 #include <System/DataTypes/SysHArray.h>
 #include <System/Platform/Common/SysRefCount.h>
+#include <System/DataTypes/SysHashTable.h>
 
 #define MIN_ARRAY_SIZE  16
 static void harray_maybe_expand(SysHArray *self, SysUInt len);
@@ -181,4 +182,21 @@ void sys_harray_insert(SysHArray *self, SysInt index_, SysPointer data) {
 
   self->len++;
   self->pdata[index_] = data;
+}
+
+SysPointer sys_harray_find(SysHArray *self,
+    SysEqualFunc     equal_func,
+    const SysPointer needle) {
+  SysUInt i;
+
+  sys_return_val_if_fail(self != NULL, NULL);
+  sys_return_val_if_fail(equal_func != NULL, NULL);
+
+  for (i = 0; i < self->len; i++) {
+    if (equal_func(self->pdata[i], needle)) {
+      return self->pdata[i];
+    }
+  }
+
+  return NULL;
 }
