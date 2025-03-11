@@ -10,6 +10,7 @@ SysInt sys_socket_real_connect(SysSocket *s, const struct sockaddr *addr, sockle
 SysSocket* sys_socket_real_accept(SysSocket *s, struct sockaddr *addr, socklen_t *addrlen);
 SysInt sys_socket_real_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen);
 SysInt sys_socket_real_recv(SysSocket *s, void *buf, size_t len, SysInt flags);
+SysInt sys_socket_real_read(SysSocket *s, void *buf, size_t len);
 void sys_socket_real_close(SysSocket *s);
 SysInt sys_socket_real_ioctl(SysSocket *s, long cmd, u_long * argp);
 SysInt sys_socket_real_send(SysSocket *s, const void *buf, size_t len, SysInt flags);

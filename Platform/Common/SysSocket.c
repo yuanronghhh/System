@@ -80,6 +80,20 @@ SysInt sys_socket_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addr
   return r;
 }
 
+
+SysInt sys_socket_read(SysSocket *s, void *buf, size_t len) {
+  sys_return_val_if_fail(s != NULL, -1);
+  SysInt r;
+
+  r = sys_socket_real_read(s, buf, (SysInt)len);
+  if (r < 0) {
+
+    sys_warning_N("recv: %s", sys_socket_error());
+  }
+
+  return r;
+}
+
 SysInt sys_socket_recv(SysSocket *s, void *buf, size_t len, SysInt flags) {
   sys_return_val_if_fail(s != NULL, -1);
   SysInt r;

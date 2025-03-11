@@ -46,6 +46,7 @@ SYS_API void sys_freeaddrinfo(struct addrinfo *res);
 SYS_API SysInt sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen);
 SYS_API SOCKET sys_socket_get_fd(SysSocket *s);
 SYS_API SysInt sys_socket_recv(SysSocket *s, void *buf, size_t len, SysInt flags);
+SYS_API SysInt sys_socket_read(SysSocket *s, void *buf, size_t len);
 SYS_API SysInt sys_socket_send(SysSocket *s, const void *buf, size_t len, SysInt flags);
 SYS_API SysInt sys_socket_ioctl(SysSocket * s, long cmd, u_long * argp);
 SYS_API const SysChar* sys_socket_strerror(SysInt err);

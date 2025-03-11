@@ -67,6 +67,12 @@ SysInt sys_socket_real_connect(SysSocket *s, const struct sockaddr *addr, sockle
   return (SysInt)connect(s->fd, addr, addrlen);
 }
 
+SysInt sys_socket_real_read(SysSocket *s, void *buf, size_t len) {
+  sys_return_val_if_fail(s != NULL, -1);
+
+  return (SysInt)read(s->fd, buf, len);
+}
+
 SysInt sys_socket_real_recv(SysSocket *s, void *buf, size_t len, SysInt flags) {
   sys_return_val_if_fail(s != NULL, -1);
 
