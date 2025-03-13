@@ -21,6 +21,8 @@ struct _SysSocket {
   SOCKET fd;
 
   SysBool noblocking;
+  SysBool closed;
+  SysBool connected;
 };
 
 SYS_API SysType sys_socket_get_type(void);
@@ -29,6 +31,7 @@ SYS_API SysSocket* sys_socket_new(void);
 SYS_API SysSocket *sys_socket_new_I(SysInt domain, SysInt type, SysInt protocol);
 SYS_API SysSocket *sys_socket_new_fd(SOCKET fd);
 SYS_API SysInt sys_socket_set_blocking(SysSocket *s, SysBool bvalue);
+SYS_API SysBool sys_socket_is_connected(SysSocket *s);
 SYS_API SysInt sys_socket_setopt(SysSocket *s, 
   SysInt level, 
   SysInt optname, 
