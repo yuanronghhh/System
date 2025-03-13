@@ -2,7 +2,7 @@
 #include <System/DataTypes/SysQuark.h>
 #include <System/Utils/SysStr.h>
 
-SysSocket *sys_socket_real_new_I(SysInt domain, SysInt type, SysInt protocol, SysBool noblocking) {
+SysSocket *sys_socket_real_new_I(SysInt domain, SysInt type, SysInt protocol) {
   SOCKET fd;
 
   fd = socket(domain, type, protocol);

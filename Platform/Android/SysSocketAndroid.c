@@ -1,7 +1,7 @@
 #include <System/Platform/Common/SysSocketPrivate.h>
 
 
-SysSocket *sys_socket_real_new_I(SysInt domain, SysInt type, SysInt protocol, SysBool noblocking) {
+SysSocket *sys_socket_real_new_I(SysInt domain, SysInt type, SysInt protocol) {
   SysInt fd;
 
   fd = socket(domain, type, protocol);

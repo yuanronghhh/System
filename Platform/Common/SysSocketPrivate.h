@@ -5,7 +5,7 @@
 
 SYS_BEGIN_DECLS
 
-SysSocket *sys_socket_real_new_I(SysInt domain, SysInt type, SysInt protocol, SysBool noblocking);
+SysSocket *sys_socket_real_new_I(SysInt domain, SysInt type, SysInt protocol);
 SysInt sys_socket_real_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen);
 SysSocket* sys_socket_real_accept(SysSocket *s, struct sockaddr *addr, socklen_t *addrlen);
 SysInt sys_socket_real_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen);

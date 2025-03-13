@@ -11,10 +11,6 @@ SYS_BEGIN_DECLS
 #define SYS_SOCKET_CLASS(o) ((SysSocketClass *)sys_class_cast_check(o, SYS_TYPE_SOCKET))
 #define SYS_SOCKET_GET_CLASS(o) sys_instance_get_class(o, SysSocketClass)
 
-#if defined(SYS_OS_UNIX)
-#define SOCKET SysInt
-#endif
-
 struct _SysSocketClass {
   SysObjectClass parent;
 };
@@ -30,7 +26,7 @@ struct _SysSocket {
 SYS_API SysType sys_socket_get_type(void);
 SYS_API SysSocket* sys_socket_new(void);
 
-SYS_API SysSocket *sys_socket_new_I(SysInt domain, SysInt type, SysInt protocol, SysBool noblocking);
+SYS_API SysSocket *sys_socket_new_I(SysInt domain, SysInt type, SysInt protocol);
 SYS_API SysSocket *sys_socket_new_fd(SOCKET fd);
 SYS_API SysInt sys_socket_set_blocking(SysSocket *s, SysBool bvalue);
 SYS_API SysInt sys_socket_setopt(SysSocket *s, 
