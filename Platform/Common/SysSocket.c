@@ -11,6 +11,7 @@ SysSocket *sys_socket_new_I(SysInt domain, SysInt type, SysInt protocol) {
 
     return NULL;
   }
+  ns->closed = false;
 
   return ns;
 }
@@ -51,8 +52,6 @@ SysInt sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t a
     sys_warning_N("connect: %s", sys_socket_error());
   }
 
-  s->connected = true;
-
   return r;
 }
 
@@ -90,7 +89,7 @@ SysInt sys_socket_read(SysSocket *s, void *buf, size_t len) {
   r = sys_socket_real_read(s, buf, (SysInt)len);
   if (r < 0) {
 
-    sys_warning_N("recv: %s", sys_socket_error());
+    sys_warning_N("read: %s", sys_socket_error());
   }
 
   return r;
@@ -122,7 +121,7 @@ SysInt sys_socket_ioctl(SysSocket *s, long cmd, u_long * argp) {
 
 SysBool sys_socket_is_connected(SysSocket *s) {
 
-  return s->closed;
+  return !s->closed;
 }
 
 SOCKET sys_socket_get_fd(SysSocket *s) {

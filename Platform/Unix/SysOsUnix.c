@@ -131,7 +131,6 @@ SysChar * sys_os_getlocale (void) {
 
 SysInt sys_real_poll (SysPollFD *fds,
     SysUInt nfds,
-    SysInt flags,
     SysInt timeout)
 {
   struct timeval tv;

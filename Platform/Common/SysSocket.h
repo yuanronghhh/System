@@ -22,7 +22,6 @@ struct _SysSocket {
 
   SysBool noblocking;
   SysBool closed;
-  SysBool connected;
 };
 
 SYS_API SysType sys_socket_get_type(void);

@@ -80,6 +80,12 @@ SysInt sys_socket_real_connect(SysSocket *s, const struct sockaddr *addr, sockle
   return r;
 }
 
+SysInt sys_socket_real_read(SysSocket *s, void *buf, size_t len) {
+  sys_return_val_if_fail(s != NULL, -1);
+
+  return sys_socket_real_recv(s, buf, len, 0);
+}
+
 SysInt sys_socket_real_recv(SysSocket *s, void *buf, size_t len, SysInt flags) {
   sys_return_val_if_fail(s != NULL, -1);
 
@@ -125,7 +131,7 @@ const SysChar* sys_socket_strerror(SysInt err) {
 
   qmsg = sys_quark_string(umsg);
   LocalFree(msg);
-  LocalFree(umsg);
+  sys_free(umsg);
 
   return qmsg;
 }

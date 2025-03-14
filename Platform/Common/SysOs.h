@@ -63,7 +63,6 @@ SYS_API SysBool sys_get_debugger (void);
 
 SysInt sys_poll (SysPollFD *fds,
     SysUInt nfds,
-    SysInt flags,
     SysInt timeout);
 
 SYS_END_DECLS

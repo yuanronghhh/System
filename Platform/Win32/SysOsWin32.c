@@ -372,7 +372,6 @@ void sys_real_teardown(void) {
 
 SysInt sys_real_poll (SysPollFD *fds,
     SysUInt nfds,
-    SysInt flags,
     SysInt timeout)
 {
   struct timeval tv;

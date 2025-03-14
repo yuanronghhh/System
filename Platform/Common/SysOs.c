@@ -397,8 +397,7 @@ SysBool sys_get_debugger (void) {
 
 SysInt sys_poll (SysPollFD *fds,
     SysUInt nfds,
-    SysInt flags,
     SysInt timeout)
 {
-  return sys_real_poll(fds, nfds, flags, timeout);
+  return sys_real_poll(fds, nfds, timeout);
 }

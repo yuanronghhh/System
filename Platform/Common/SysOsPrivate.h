@@ -11,7 +11,6 @@ void sys_real_teardown(void);
 
 SysInt sys_real_poll (SysPollFD *fds,
     SysUInt nfds,
-    SysInt flags,
     SysInt timeout);
 const SysChar *sys_real_env_get(const SysChar *var);
 SysBool sys_real_env_set(const SysChar *var, const SysChar *value);

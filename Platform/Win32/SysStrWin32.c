@@ -6,7 +6,7 @@ SysChar *sys_wchar_to_mbyte(const SysWChar *wchar, SysInt *nsize) {
   SysChar *nstr;
 
   size = WideCharToMultiByte(CP_UTF8, 0, wchar, -1, NULL, 0, NULL, NULL);
-  nstr = (SysChar *)sys_malloc((SysSSize)(size + 1) + sizeof(SysChar));
+  nstr = (SysChar *)sys_malloc0((SysSSize)(size + 1) + sizeof(SysChar));
   nstr[size] = '\0';
 
   WideCharToMultiByte(CP_UTF8, 0, wchar, -1, nstr, size, NULL, NULL);
@@ -22,7 +22,7 @@ SysWChar *sys_mbyte_to_wchar(const SysChar *mbyte, SysInt *nsize) {
   SysWChar *wstr;
 
   size = MultiByteToWideChar(CP_UTF8, 0, mbyte, -1, NULL, 0);
-  wstr = (SysWChar *)sys_malloc((SysSSize)(size + 1) * sizeof(SysWChar));
+  wstr = (SysWChar *)sys_malloc0((SysSSize)(size + 1) * sizeof(SysWChar));
   MultiByteToWideChar(CP_UTF8, 0, mbyte, -1, wstr, size);
 
   if (nsize) {
