@@ -49,7 +49,9 @@ SysInt sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t a
   r = sys_socket_real_connect(s, addr, addrlen);
   if (r < 0) {
 
-    sys_warning_N("connect: %s", sys_socket_error());
+    sys_warning_N("connect: %s,%s",
+        sys_socket_addr_to_string((SysSocketAddrIn *)addr),
+        sys_socket_error());
   }
 
   return r;

@@ -10,7 +10,10 @@
 #include <System/Platform/Common/SysAtomic.h>
 #include <System/Platform/Common/SysProcess.h>
 #include <System/Platform/Common/SysThread.h>
+#include <System/Platform/Common/SysSocketConnection.h>
+#include <System/Platform/Common/SysSocketAddr.h>
 #include <System/Platform/Common/SysSocket.h>
+#include <System/Platform/Common/SysSocketCommon.h>
 #include <System/Platform/Common/SysFile.h>
 #include <System/Platform/Common/SysDate.h>
 #include <System/Platform/Common/SysDateTime.h>

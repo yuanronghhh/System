@@ -1,8 +1,7 @@
 #ifndef __SYS_SOCKET_H__
 #define __SYS_SOCKET_H__
 
-#include <System/Type/SysObject.h>
-
+#include <System/Platform/Common/SysSocketCommon.h>
 
 SYS_BEGIN_DECLS
 
