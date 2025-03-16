@@ -132,12 +132,12 @@ typedef enum _SYS_IO_ENUM {
 } SYS_IO_ENUM;
 
 typedef enum _SYS_POLL_ENUM {
-  SYS_POLL_IN,
-  SYS_POLL_OUT,
-  SYS_POLL_PRI,
-  SYS_POLL_ERR,
-  SYS_POLL_HUP,
-  SYS_POLL_NVAL
+  SYS_POLL_IN = 1 << 0,
+  SYS_POLL_OUT = 1 << 1,
+  SYS_POLL_PRI = 1 << 2,
+  SYS_POLL_ERR = 1 << 3,
+  SYS_POLL_HUP = 1 << 4,
+  SYS_POLL_NVAL = 1 << 5
 } SYS_POLL_ENUM;
 
 typedef enum

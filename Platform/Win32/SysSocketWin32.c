@@ -14,6 +14,18 @@ SysSocket *sys_socket_real_new_I(SysInt domain, SysInt type, SysInt protocol) {
   return sys_socket_new_fd(fd);
 }
 
+SysBool sys_socket_real_set_no_blocking(SysSocket *s, SysBool bvalue) {
+  SysULong ul = bvalue;
+
+  return sys_socket_real_ioctl(s, FIONBIO, &ul);
+}
+
+void sys_socket_real_shutdown(SysSocket *s, int flags) {
+  sys_return_if_fail(s != NULL);
+
+  shutdown(s->fd, flags);
+}
+
 void sys_socket_real_close(SysSocket *s) {
   sys_return_if_fail(s != NULL);
 
