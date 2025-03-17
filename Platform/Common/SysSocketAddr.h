@@ -5,6 +5,11 @@
 
 SYS_BEGIN_DECLS
 
+struct _SysSocketAddrIn {
+  struct sockaddr_in parent;
+  char storage[INET6_ADDRSTRLEN];
+};
+
 int sys_socket_addr_get_port(SysSocketAddrIn *self);
 
 const SysChar *sys_socket_addr_get_host(SysSocketAddrIn *self);

@@ -1,7 +1,7 @@
 #ifndef __SYS_SOCKET_CONNECTION__
 #define __SYS_SOCKET_CONNECTION__
 
-#include <System/Platform/Common/SysSocketCommon.h>
+#include <System/Platform/Common/SysSocketAddr.h>
 
 SYS_BEGIN_DECLS
 
