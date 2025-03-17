@@ -8,21 +8,24 @@ SysSocket *sys_socket_new_I(SysInt domain, SysInt type, SysInt protocol) {
   SysSocket *ns = sys_socket_real_new_I(domain, type, protocol);
   socklen_t addrlen;
 
+  union {
+    struct sockaddr_storage storage;
+    struct sockaddr sa;
+  } address;
+
+  memset (&address, 0, sizeof (address));
+
   if (ns == NULL) {
     sys_warning_N("%s", sys_socket_error());
 
     return NULL;
   }
 
-  struct sockaddr sa;
-  addrlen = sizeof(struct sockaddr);
-  if (getsockname (ns->fd, &sa, &addrlen) != 0) {
-
-    return NULL;
+  addrlen = sizeof(address);
+  if (getpeername (ns->fd, &address.sa, &addrlen) >= 0) {
+    ns->can_write = true;
+    ns->can_read = true;
   }
-
-  ns->can_write = true;
-  ns->can_read = true;
 
   return ns;
 }
