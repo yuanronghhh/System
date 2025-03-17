@@ -4,11 +4,11 @@
 
 static unsigned long get_inet_addr(int family, const SysChar* host) {
   if (sys_str_equal(host, "localhost")) {
-    return INADDR_LOOPBACK;
+    return htonl(INADDR_LOOPBACK);
   }
 
   if (sys_str_equal(host, "0.0.0.0")) {
-    return INADDR_ANY;
+    return htonl(INADDR_ANY);
   }
 
   unsigned long addrv;
@@ -37,13 +37,13 @@ int sys_socket_addr_get_port(SysSocketAddrIn *self) {
   return ntohs(addr->sin_port);
 }
 
-SysChar* sys_socket_addr_to_string(SysSocketAddrIn *self) {
-  struct sockaddr_in *addr = (struct sockaddr_in *)self;
-
+const SysChar* sys_socket_addr_to_string(SysSocketAddrIn *self) {
   const SysChar *host = sys_socket_addr_get_host(self);
-  int port = ntohs(addr->sin_port);
+  SysInt port = sys_socket_addr_get_port(self);
 
-  return sys_strdup_printf("%s:%d", host, port);
+  sys_snprintf(self->storage, INET6_ADDRSTRLEN, "%s:%d", host, port);
+
+  return self->storage;
 }
 
 SysBool sys_socket_addr_equal(SysSocketAddrIn *a, SysSocketAddrIn *b) {
@@ -55,20 +55,19 @@ SysBool sys_socket_addr_equal(SysSocketAddrIn *a, SysSocketAddrIn *b) {
 }
 
 static void sys_socket_addr_create_i(SysSocketAddrIn *self,
-    int sin_family,
+    SysInt sin_family,
     const SysChar *host,
-    int port) {
-
+    SysInt port) {
   struct sockaddr_in *addr = (struct sockaddr_in *)self;
 
-  addr->sin_port = htons(port);
   addr->sin_family = sin_family;
+  addr->sin_port = htons(port);
   addr->sin_addr.s_addr = get_inet_addr(addr->sin_family, host);
 }
 
 void sys_socket_addr_create_inet(SysSocketAddrIn *self,
     const SysChar *host,
-    int port) {
+    SysInt port) {
 
   sys_socket_addr_create_i(self, AF_INET, host, port);
 }

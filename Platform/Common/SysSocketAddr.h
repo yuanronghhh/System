@@ -18,9 +18,9 @@ SysBool sys_socket_addr_equal(SysSocketAddrIn *a, SysSocketAddrIn *b);
 
 void sys_socket_addr_create_inet(SysSocketAddrIn *self,
     const SysChar *host,
-    int port);
+    SysInt port);
 
-SysChar* sys_socket_addr_to_string(SysSocketAddrIn *self);
+const SysChar* sys_socket_addr_to_string(SysSocketAddrIn *self);
 
 SYS_END_DECLS
 
