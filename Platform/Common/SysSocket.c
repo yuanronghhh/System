@@ -154,7 +154,7 @@ void sys_socket_shutdown(SysSocket *s, SysInt flags) {
 }
 
 void sys_socket_close(SysSocket *s) {
-  sys_socket_shutdown(s, SHUT_RDWR);
+  sys_socket_shutdown(s, SYS_SOCKET_SD_BOTH);
   sys_socket_real_close(s);
 
   s->can_read = false;

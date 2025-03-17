@@ -192,6 +192,12 @@ typedef enum _SYS_LOG_LEVEL {
   SYS_LOG_RECORD
 } SYS_LOG_LEVEL;
 
+typedef enum _SYS_SOCKET_SD_ENUM {
+  SYS_SOCKET_SD_READ,
+  SYS_SOCKET_SD_WRITE,
+  SYS_SOCKET_SD_BOTH,
+} SYS_SOCKET_SD_ENUM;
+
 typedef SysUInt16 SysDateYear;
 typedef SysUInt8  SysDateDay;   /* day of the month */
 typedef struct _SysMVTable SysMVTable;
