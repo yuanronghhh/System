@@ -1,5 +1,6 @@
 #include <System/DataTypes/SysHArray.h>
 #include <System/Platform/Common/SysRefCount.h>
+#include <System/DataTypes/SysHashTable.h>
 
 #define MIN_ARRAY_SIZE  16
 static void harray_maybe_expand(SysHArray *self, SysUInt len);
@@ -52,6 +53,38 @@ static SysPointer harray_remove_index(SysHArray* array,
   array->len -= 1;
 
   return result;
+}
+
+SysBool sys_harray_remove(SysHArray *array,
+    SysPointer   data) {
+    SysUInt i;
+
+    sys_return_val_if_fail(array, false);
+    sys_return_val_if_fail(array->len == 0 || (array->len != 0 && array->pdata != NULL), false);
+
+    for (i = 0; i < array->len; i += 1)
+    {
+        if (array->pdata[i] == data)
+        {
+            sys_harray_remove_index(array, i);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+SysPointer sys_harray_remove_index_fast(SysHArray *array,
+    SysUInt      index_) {
+
+    return harray_remove_index(array, index_, true, true);
+}
+
+SysPointer sys_harray_remove_index(SysHArray *array,
+    SysUInt      index_) {
+
+  return harray_remove_index(array, index_, false, true);
 }
 
 SysPointer sys_harray_steal_index(SysHArray* array, SysUInt index_) {
@@ -142,6 +175,7 @@ void sys_harray_init_full(SysHArray* self,
   self->len = 0;
   self->alloc = 0;
   self->element_free_func = element_free_func;
+  sys_ref_count_init(self);
 
   if (reserved_size != 0)
     harray_maybe_expand(self, reserved_size);
@@ -181,4 +215,23 @@ void sys_harray_insert(SysHArray *self, SysInt index_, SysPointer data) {
 
   self->len++;
   self->pdata[index_] = data;
+}
+
+SysPointer sys_harray_find(SysHArray *self,
+    SysEqualFunc     equal_func,
+    const SysPointer needle,
+    SysInt *index_) {
+  SysUInt i;
+
+  sys_return_val_if_fail(self != NULL, NULL);
+  sys_return_val_if_fail(equal_func != NULL, NULL);
+
+  for (i = 0; i < self->len; i++) {
+    if (equal_func(self->pdata[i], needle)) {
+      *index_ = i;
+      return self->pdata[i];
+    }
+  }
+
+  return NULL;
 }

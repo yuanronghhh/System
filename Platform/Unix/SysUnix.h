@@ -35,6 +35,7 @@ extern "C" {
   #define MAX_PATH 260
 #endif
 
+#define SOCKET SysInt
 #define SYS_HANDLE SysInt
 #define SYS_OS_UNIX 1
 #define SYS_API extern __attribute__((visibility("default")))

@@ -128,3 +128,59 @@ SysChar * sys_os_getlocale (void) {
 
   return sys_strdup(locale);
 }
+
+SysInt sys_real_poll (SysPollFD *fds,
+    SysUInt nfds,
+    SysInt timeout)
+{
+  struct timeval tv;
+  fd_set rset, wset, xset;
+  int ready;
+  int maxfd = 0;
+  SysPollFD *f;
+
+  FD_ZERO (&rset);
+  FD_ZERO (&wset);
+  FD_ZERO (&xset);
+
+  for (f = fds; f < &fds[nfds]; ++f)
+    if (f->fd >= 0)
+    {
+      if (f->events & SYS_POLL_IN)
+        FD_SET (f->fd, &rset);
+      if (f->events & SYS_POLL_OUT)
+        FD_SET (f->fd, &wset);
+      if (f->events & SYS_POLL_PRI)
+        FD_SET (f->fd, &xset);
+      if (f->fd > maxfd && (f->events & (SYS_POLL_IN|SYS_POLL_OUT|SYS_POLL_PRI)))
+        maxfd = f->fd;
+    }
+
+  tv.tv_sec = timeout / 1000;
+  tv.tv_usec = (timeout % 1000) * 1000;
+
+  ready = select (maxfd + 1, 
+      &rset, 
+      &wset, 
+      &xset,
+      timeout == -1 ? NULL : &tv);
+
+  if (ready > 0)
+  {
+    for (f = fds; f < &fds[nfds]; ++f)
+    {
+      f->revents = 0;
+      if (f->fd >= 0)
+      {
+        if (FD_ISSET (f->fd, &rset))
+          f->revents |= SYS_POLL_IN;
+        if (FD_ISSET (f->fd, &wset))
+          f->revents |= SYS_POLL_OUT;
+        if (FD_ISSET (f->fd, &xset))
+          f->revents |= SYS_POLL_PRI;
+      }
+    }
+  }
+
+  return ready;
+}

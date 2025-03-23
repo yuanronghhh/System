@@ -131,6 +131,15 @@ typedef enum _SYS_IO_ENUM {
   SYS_IO_DEV_NULL
 } SYS_IO_ENUM;
 
+typedef enum _SYS_POLL_ENUM {
+  SYS_POLL_IN = 1 << 0,
+  SYS_POLL_OUT = 1 << 1,
+  SYS_POLL_PRI = 1 << 2,
+  SYS_POLL_ERR = 1 << 3,
+  SYS_POLL_HUP = 1 << 4,
+  SYS_POLL_NVAL = 1 << 5
+} SYS_POLL_ENUM;
+
 typedef enum
 {
   SYS_TIME_TYPE_STANDARD,
@@ -183,6 +192,12 @@ typedef enum _SYS_LOG_LEVEL {
   SYS_LOG_RECORD
 } SYS_LOG_LEVEL;
 
+typedef enum _SYS_SOCKET_SD_ENUM {
+  SYS_SOCKET_SD_READ,
+  SYS_SOCKET_SD_WRITE,
+  SYS_SOCKET_SD_BOTH,
+} SYS_SOCKET_SD_ENUM;
+
 typedef SysUInt16 SysDateYear;
 typedef SysUInt8  SysDateDay;   /* day of the month */
 typedef struct _SysMVTable SysMVTable;
@@ -200,6 +215,7 @@ typedef struct _SysBytes SysBytes;
 typedef struct _SysHArray SysHArray;
 typedef struct _SysValue SysValue;
 typedef struct _SysSArg SysSArg;
+typedef struct _SysPollFD SysPollFD;
 typedef struct _SysElapse SysElapse;
 typedef struct _SysSocket SysSocket;
 typedef struct _SysSocketClass SysSocketClass;

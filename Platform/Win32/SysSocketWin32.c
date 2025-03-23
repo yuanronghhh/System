@@ -2,7 +2,7 @@
 #include <System/DataTypes/SysQuark.h>
 #include <System/Utils/SysStr.h>
 
-SysSocket *sys_socket_real_new_I(SysInt domain, SysInt type, SysInt protocol, SysBool noblocking) {
+SysSocket *sys_socket_real_new_I(SysInt domain, SysInt type, SysInt protocol) {
   SOCKET fd;
 
   fd = socket(domain, type, protocol);
@@ -12,6 +12,18 @@ SysSocket *sys_socket_real_new_I(SysInt domain, SysInt type, SysInt protocol, Sy
   }
 
   return sys_socket_new_fd(fd);
+}
+
+SysBool sys_socket_real_set_no_blocking(SysSocket *s, SysBool bvalue) {
+  SysULong ul = bvalue;
+
+  return sys_socket_real_ioctl(s, FIONBIO, &ul) >= 0;
+}
+
+void sys_socket_real_shutdown(SysSocket *s, int flags) {
+  sys_return_if_fail(s != NULL);
+
+  shutdown(s->fd, flags);
 }
 
 void sys_socket_real_close(SysSocket *s) {
@@ -80,6 +92,12 @@ SysInt sys_socket_real_connect(SysSocket *s, const struct sockaddr *addr, sockle
   return r;
 }
 
+SysInt sys_socket_real_read(SysSocket *s, void *buf, size_t len) {
+  sys_return_val_if_fail(s != NULL, -1);
+
+  return sys_socket_real_recv(s, buf, len, 0);
+}
+
 SysInt sys_socket_real_recv(SysSocket *s, void *buf, size_t len, SysInt flags) {
   sys_return_val_if_fail(s != NULL, -1);
 
@@ -125,7 +143,7 @@ const SysChar* sys_socket_strerror(SysInt err) {
 
   qmsg = sys_quark_string(umsg);
   LocalFree(msg);
-  LocalFree(umsg);
+  sys_free(umsg);
 
   return qmsg;
 }

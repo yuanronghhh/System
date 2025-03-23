@@ -1,7 +1,7 @@
 #include <System/Platform/Common/SysSocketPrivate.h>
 #include <System/Utils/SysError.h>
 
-SysSocket *sys_socket_real_new_I(SysInt domain, SysInt type, SysInt protocol, SysBool noblocking) {
+SysSocket *sys_socket_real_new_I(SysInt domain, SysInt type, SysInt protocol) {
   SysInt fd;
 
   fd = socket(domain, type, protocol);
@@ -11,6 +11,12 @@ SysSocket *sys_socket_real_new_I(SysInt domain, SysInt type, SysInt protocol, Sy
   }
 
   return sys_socket_new_fd(fd);
+}
+
+void sys_socket_real_shutdown(SysSocket *s, int flags) {
+  sys_return_if_fail(s != NULL);
+
+  shutdown(s->fd, flags);
 }
 
 void sys_socket_real_close(SysSocket *s) {
@@ -67,10 +73,45 @@ SysInt sys_socket_real_connect(SysSocket *s, const struct sockaddr *addr, sockle
   return (SysInt)connect(s->fd, addr, addrlen);
 }
 
+SysInt sys_socket_real_read(SysSocket *s, void *buf, size_t len) {
+  sys_return_val_if_fail(s != NULL, -1);
+
+  return (SysInt)read(s->fd, buf, len);
+}
+
 SysInt sys_socket_real_recv(SysSocket *s, void *buf, size_t len, SysInt flags) {
   sys_return_val_if_fail(s != NULL, -1);
 
   return (SysInt)recv(s->fd, buf, len, flags);
+}
+
+SysBool sys_socket_real_set_no_blocking(SysSocket *s, SysBool bvalue) {
+  SysLong flags;
+  flags = fcntl (s->fd, F_GETFL);
+  if(flags == -1) { return false; }
+
+  if (bvalue) {
+
+#ifdef O_NONBLOCK
+    flags |= O_NONBLOCK;
+#else
+    flags |= O_NDELAY;
+#endif
+  } else {
+
+#ifdef O_NONBLOCK
+    flags &= ~O_NONBLOCK;
+#else
+    fcntl_flags &= ~O_NDELAY;
+#endif
+  }
+
+  if (fcntl (s->fd, F_SETFL, flags) == -1) {
+
+    return false;
+  }
+
+  return true;
 }
 
 SysInt sys_socket_real_send(SysSocket *s, const void *buf, size_t len, SysInt flags) {

@@ -231,6 +231,12 @@ set(SRC
   ./Platform/Common/SysThread.c
   ./Platform/Common/SysThread.h
   ./Platform/Common/SysThreadPrivate.h
+  ./Platform/Common/SysSocketAddr.c
+  ./Platform/Common/SysSocketAddr.h
+  ./Platform/Common/SysSocketCommon.c
+  ./Platform/Common/SysSocketCommon.h
+  ./Platform/Common/SysSocketConnection.c
+  ./Platform/Common/SysSocketConnection.h
   ./Platform/Common/SysSocket.c
   ./Platform/Common/SysSocket.h
   ./Platform/Common/SysSocketPrivate.h

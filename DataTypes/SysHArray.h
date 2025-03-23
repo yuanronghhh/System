@@ -31,6 +31,16 @@ SYS_API void sys_harray_init_full(SysHArray* self, SysUInt reserved_size, SysDes
 SYS_API void sys_harray_init_with_free_func(SysHArray* self, SysDestroyFunc element_free_func);
 SYS_API void sys_harray_add(SysHArray* self, SysPointer data);
 SYS_API void sys_harray_insert(SysHArray* self, SysInt index_, SysPointer data);
+SYS_API SysPointer sys_harray_find(SysHArray *self,
+    SysEqualFunc     equal_func,
+    const SysPointer needle,
+    SysInt *index_);
+SYS_API SysBool sys_harray_remove(SysHArray *array,
+    SysPointer   data);
+SYS_API SysPointer sys_harray_remove_index(SysHArray *array,
+    SysUInt      index_);
+SYS_API SysPointer sys_harray_remove_index_fast(SysHArray *array,
+    SysUInt      index_);
 
 SYS_END_DECLS
 
