@@ -61,15 +61,15 @@ const SysChar *sys_socket_error(void) {
   return sys_socket_strerror(sys_socket_errno());
 }
 
-SysInt sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen) {
+SysInt sys_socket_connect(SysSocket *s, SysSocketAddrIn *addr, socklen_t addrlen) {
   sys_return_val_if_fail(s != NULL, -1);
   SysInt r;
 
-  r = sys_socket_real_connect(s, addr, addrlen);
+  r = sys_socket_real_connect(s, (struct sockaddr *)addr, addrlen);
   if (r < 0) {
 
     sys_warning_N("%s, %s",
-        sys_socket_addr_to_string((SysSocketAddrIn *)addr),
+        sys_socket_addr_to_string(addr),
         sys_socket_error());
   }
 
@@ -79,11 +79,11 @@ SysInt sys_socket_connect(SysSocket *s, const struct sockaddr *addr, socklen_t a
   return r;
 }
 
-SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *addrlen) {
+SysSocket* sys_socket_accept(SysSocket *s, SysSocketAddrIn *addr, socklen_t *addrlen) {
   sys_return_val_if_fail(s != NULL, NULL);
   SysSocket* cs;
 
-  cs = sys_socket_real_accept(s, addr, addrlen);
+  cs = sys_socket_real_accept(s, (struct sockaddr *)addr, addrlen);
   if(cs == NULL) {
 
     sys_warning_N("%s", sys_socket_error());
@@ -96,10 +96,10 @@ SysSocket* sys_socket_accept(SysSocket *s, struct sockaddr *addr, socklen_t *add
   return cs;
 }
 
-SysInt sys_socket_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
+SysInt sys_socket_bind(SysSocket* s, SysSocketAddrIn *addr, socklen_t addrlen) {
   sys_return_val_if_fail(s != NULL, -1);
 
-  SysInt r = bind(s->fd, addr, addrlen);
+  SysInt r = bind(s->fd, (struct sockaddr *)addr, addrlen);
   if (r < 0) {
 
     sys_warning_N("%d, %s", r, sys_socket_error());

@@ -1,6 +1,7 @@
 #include <System/Platform/Common/SysSocketAddr.h>
 #include <System/Utils/SysError.h>
 #include <System/Utils/SysStr.h>
+#include <System/DataTypes/SysQuark.h>
 
 static unsigned long get_inet_addr(int family, const SysChar* host) {
   if (sys_str_equal(host, "localhost")) {
@@ -17,18 +18,18 @@ static unsigned long get_inet_addr(int family, const SysChar* host) {
   return addrv;
 }
 
-const SysChar *sys_socket_addr_get_host(SysSocketAddrIn *self) {
-  struct sockaddr_in *addr = &self->parent;
+const SysChar *sys_socket_addr_get_host(SysSocketAddrIn *addr) {
+  SysChar buf[16];
 
   if(inet_ntop(addr->sin_family,
-        &addr->sin_addr, 
-        self->storage,
+        &addr->sin_addr,
+        buf,
         INET6_ADDRSTRLEN) == NULL) {
 
     return NULL;
   }
 
-  return self->storage;
+  return sys_quark_string(buf);
 }
 
 int sys_socket_addr_get_port(SysSocketAddrIn *self) {
@@ -40,10 +41,11 @@ int sys_socket_addr_get_port(SysSocketAddrIn *self) {
 const SysChar* sys_socket_addr_to_string(SysSocketAddrIn *self) {
   const SysChar *host = sys_socket_addr_get_host(self);
   SysInt port = sys_socket_addr_get_port(self);
+  SysChar buf[22];
 
-  sys_snprintf(self->storage, INET6_ADDRSTRLEN, "%s:%d", host, port);
+  sys_snprintf(buf, sizeof(buf), "%s:%d", host, port);
 
-  return self->storage;
+  return sys_quark_string(buf);
 }
 
 SysBool sys_socket_addr_equal(SysSocketAddrIn *a, SysSocketAddrIn *b) {

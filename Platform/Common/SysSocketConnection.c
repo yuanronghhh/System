@@ -10,7 +10,7 @@ SysSSize sys_socket_connection_connect(SysSocketConnection *self) {
   sys_return_val_if_fail(self != NULL, -1);
   SysSSize r;
 
-  r = sys_socket_connect(self->socket, (struct sockaddr*)&self->raddr, sizeof(struct sockaddr_in));
+  r = sys_socket_connect(self->socket, &self->raddr, sizeof(struct sockaddr_in));
   if (r < 0) {
     sys_warning_N("connect remote failed: %s:%d",
         sys_socket_addr_get_host(&self->raddr),

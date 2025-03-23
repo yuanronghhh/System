@@ -10,7 +10,7 @@ typedef struct _SysSocketConnection SysSocketConnection;
 typedef struct _SysSocketConnectionClass SysSocketConnectionClass;
 
 typedef SysSSize (*SysSocketConnectionFunc)(SysSocketConnection *self, SysPointer user_data);
-typedef struct _SysSocketAddrIn SysSocketAddrIn;
+typedef struct sockaddr_in SysSocketAddrIn;
 
 SYS_END_DECLS
 
