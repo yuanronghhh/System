@@ -477,13 +477,7 @@ void sys_type_class_free(SysTypeClass *cls) {
   }
 }
 
-static int a = 0;
-
 void sys_type_class_unref(SysTypeClass *cls) {
-  if(++a == 1)
-  {
-    puts("debugger put here");
-  }
   SysTypeNode *node = sys_type_node(cls->type);
   sys_assert(node != NULL);
 
