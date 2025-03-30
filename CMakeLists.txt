@@ -1,6 +1,7 @@
-add_use_name(iconv 1)
-add_use_name(openssl 1)
+add_use_name(iconv 0)
+add_use_name(openssl 0)
 add_use_name(marksweep 0)
+add_use_name(mingw 0)
 add_use_name(vld 0)
 
 if(USE_MARKSWEEP)
@@ -33,6 +34,7 @@ set(ANDROID_SYS_SRC
   ./Platform/Android/SysProcessAndroid.c
   ./Platform/Android/SysPathAndroid.c
   ./Platform/Android/SysSocketAndroid.c
+  ./Platform/Android/SysTimeZoneAndorid.c
 )
 
 set(UNIX_SYS_SRC
@@ -47,8 +49,10 @@ set(UNIX_SYS_SRC
   ./Platform/Unix/SysProcessUnix.c
   ./Platform/Unix/SysPathUnix.c
   ./Platform/Unix/SysSocketUnix.c
+  ./Platform/Unix/SysTimeZoneUnix.c
 )
 set(WIN32_SYS_SRC
+  ./Platform/Win32/dirent.h
   ./Platform/Win32/SysFileWin32.c
   ./Platform/Win32/SysStrWin32.c
   ./Platform/Win32/SysOsWin32.c
@@ -60,6 +64,22 @@ set(WIN32_SYS_SRC
   ./Platform/Win32/SysWin32.h
   ./Platform/Win32/SysProcessWin32.c
   ./Platform/Win32/SysSocketWin32.c
+  ./Platform/Win32/SysTimeZoneWin32.c
+)
+
+set(MINGW_SYS_SRC
+  ./Platform/MinGW/SysFileMinGW.c
+  ./Platform/MinGW/SysStrMinGW.c
+  ./Platform/MinGW/SysOsMinGW.c
+  ./Platform/MinGW/SysPathMinGW.c
+  ./Platform/MinGW/SysErrorMinGW.c
+  ./Platform/MinGW/SysMemMinGW.c
+  ./Platform/MinGW/SysAtomicMinGW.c
+  ./Platform/MinGW/SysThreadMinGW.c
+  ./Platform/MinGW/SysMinGW.h
+  ./Platform/MinGW/SysProcessMinGW.c
+  ./Platform/MinGW/SysSocketMinGW.c
+  ./Platform/MinGW/SysTimeZoneMinGW.c
 )
 
 if(ANDROID)
@@ -67,7 +87,12 @@ if(ANDROID)
 elseif(UNIX)
   set(OS_SYS_SRC ${UNIX_SYS_SRC})
 elseif(WIN32)
-  set(OS_SYS_SRC ${WIN32_SYS_SRC})
+  if(MSVC)
+    set(OS_SYS_SRC ${WIN32_SYS_SRC})
+  endif()
+  if(USE_MSYS)
+    set(OS_SYS_SRC ${MINGW_SYS_SRC})
+  endif()
 endif()
 
 if(USE_OPENSSL)
@@ -81,6 +106,13 @@ endif()
 
 if(USE_ICONV)
   set(ICONV_SRC
+    ./Utils/SysConvert.h
+    ./Utils/SysConvert.c
+    ./Utils/SysConvertPrivate.h
+    ./Utils/SysCharSet.h
+    ./Utils/SysCharSet.c
+    ./Utils/SysCharSetPrivate.h
+
     ./ThirdParty/SysIconv.h
     ./ThirdParty/SysIconv.c
     ./ThirdParty/SysLibCharSet.h
@@ -190,8 +222,6 @@ set(SRC
   ./Utils/SysUnicodeMirrorTable.h
   ./Utils/SysUnicodeScriptTable.h
   ./Utils/SysUnicodeTable.h
-  ./Utils/SysConvert.h
-  ./Utils/SysConvert.c
   ./Utils/SysStr.h
   ./Utils/SysStr.c
   ./Utils/SysEnum.h
@@ -206,8 +236,6 @@ set(SRC
   ./Utils/SysTextIO.c
   ./Utils/SysSsl.h
   ./Utils/SysSsl.c
-  ./Utils/SysCharSet.h
-  ./Utils/SysCharSet.c
 
   ./Platform/Common/SysTimeZone.h
   ./Platform/Common/SysTimeZone.c
@@ -268,11 +296,11 @@ configure_file(${CMAKE_CURRENT_LIST_DIR}/SysConfig.h.in
 target_link_libraries(System
   ${PTHREAD_LIBRARIES}
   ${OPENSSL_LIBRARIES}
-  ${ADDTIONAL_LIBRARIES}
   ${DBG_LIBRAREIS}
   ${VLD_LIBRARIES}
   ${ANDROID_LIBRARIES}
   ${ICONV_LIBRARIES}
   ${LIBDWARF_LIBRARIES}
+  ${ADDTIONAL_LIBRARIES}
 )
 set_property(TARGET System PROPERTY FOLDER CstProject)

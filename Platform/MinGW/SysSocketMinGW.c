@@ -1,0 +1,150 @@
+#include <System/Platform/Common/SysSocketPrivate.h>
+#include <System/DataTypes/SysQuark.h>
+#include <System/Utils/SysStr.h>
+
+SysSocket *sys_socket_real_new_I(SysInt domain, SysInt type, SysInt protocol) {
+  SOCKET fd;
+
+  fd = socket(domain, type, protocol);
+
+  if (fd == INVALID_SOCKET) {
+    return NULL;
+  }
+
+  return sys_socket_new_fd(fd);
+}
+
+SysBool sys_socket_real_set_no_blocking(SysSocket *s, SysBool bvalue) {
+  SysULong ul = bvalue;
+
+  return sys_socket_real_ioctl(s, FIONBIO, &ul) >= 0;
+}
+
+void sys_socket_real_shutdown(SysSocket *s, int flags) {
+  sys_return_if_fail(s != NULL);
+
+  shutdown(s->fd, flags);
+}
+
+void sys_socket_real_close(SysSocket *s) {
+  sys_return_if_fail(s != NULL);
+
+  closesocket(s->fd);
+}
+
+SysInt sys_socket_setopt(SysSocket *s, 
+  SysInt level, 
+  SysInt optname, 
+  const void *optval, 
+  socklen_t optlen) {
+  SysInt r;
+  sys_return_val_if_fail(s != NULL, -1);
+
+  r = setsockopt(s->fd, level, optname, (SysChar *)optval, optlen);
+  return r;
+}
+
+SysInt sys_socket_listen(SysSocket *s, SysInt backlog) {
+  sys_return_val_if_fail(s != NULL, -1);
+
+  return listen(s->fd, backlog);
+}
+
+SysSocket* sys_socket_real_accept(SysSocket *s, struct sockaddr *addr, socklen_t *addrlen) {
+  SOCKET fd;
+
+  sys_return_val_if_fail(s != NULL, NULL);
+
+  fd = accept(s->fd, addr, addrlen);
+  if(fd == INVALID_SOCKET) {
+
+    return NULL;
+  }
+
+  return sys_socket_new_fd(fd);
+}
+
+SysInt sys_socket_real_bind(SysSocket* s, const struct sockaddr *addr, socklen_t addrlen) {
+  SysInt r;
+  sys_return_val_if_fail(s != NULL, -1);
+
+  r = bind(s->fd, addr, addrlen);
+
+  return r;
+}
+
+SysInt sys_getaddrinfo(const SysChar *node, const SysChar *service, const struct addrinfo *hints, struct addrinfo **res) {
+  return getaddrinfo (node, service, hints, res);
+}
+
+void sys_freeaddrinfo(struct addrinfo *res) {
+  sys_return_if_fail(res != NULL);
+
+  freeaddrinfo(res);
+}
+
+SysInt sys_socket_real_connect(SysSocket *s, const struct sockaddr *addr, socklen_t addrlen) {
+  SysInt r;
+  sys_return_val_if_fail(s != NULL, -1);
+
+  r = connect(s->fd, addr, addrlen);
+
+  return r;
+}
+
+SysInt sys_socket_real_read(SysSocket *s, void *buf, size_t len) {
+  sys_return_val_if_fail(s != NULL, -1);
+
+  return sys_socket_real_recv(s, buf, len, 0);
+}
+
+SysInt sys_socket_real_recv(SysSocket *s, void *buf, size_t len, SysInt flags) {
+  sys_return_val_if_fail(s != NULL, -1);
+
+  return recv(s->fd, buf, (SysInt)len, flags);
+}
+
+SysInt sys_socket_real_send(SysSocket *s, const void *buf, size_t len, SysInt flags) {
+  sys_return_val_if_fail(s != NULL, -1);
+
+  return send(s->fd, buf, (SysInt)len, flags);
+}
+
+SysInt sys_socket_real_ioctl(SysSocket *s, long cmd, u_long * argp) {
+  sys_return_val_if_fail(s != NULL, -1);
+
+  return ioctlsocket(s->fd, cmd, argp);
+}
+
+SysInt sys_socket_errno(void) {
+  return WSAGetLastError();
+}
+
+const SysChar* sys_socket_strerror(SysInt err) {
+  SysChar *umsg;
+  const SysChar *qmsg;
+  wchar_t *msg;
+
+  FormatMessageW(
+    FORMAT_MESSAGE_ALLOCATE_BUFFER
+    | FORMAT_MESSAGE_IGNORE_INSERTS
+    | FORMAT_MESSAGE_FROM_SYSTEM,
+    NULL, err, 0,
+    (LPWSTR)&msg, 0, NULL);
+
+  if (msg == NULL) {
+    return NULL;
+  }
+
+  umsg = sys_wchar_to_mbyte(msg, NULL);
+  if(umsg == NULL) {
+    return NULL;
+  }
+
+  qmsg = sys_quark_string(umsg);
+  LocalFree(msg);
+  sys_free(umsg);
+
+  return qmsg;
+}
+
