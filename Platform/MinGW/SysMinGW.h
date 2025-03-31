@@ -8,8 +8,8 @@ extern "C" {
 #define _CRT_INTERNAL_NONSTDC_NAMES 1
 #if defined(_WIN32_WINNT)
 #undef _WIN32_WINNT
-#define _WIN32_WINNT 0x0600
 #endif
+#define _WIN32_WINNT 0x0600
 
 #include <WinSock2.h>
 #include <WS2tcpip.h>
@@ -27,12 +27,16 @@ extern "C" {
 #include <winioctl.h>
 
 #define SYS_OS_MINGW 1
+
+#if !defined(USE_STATIC)
 #define SYS_API __declspec(dllexport)
+#endif
+
 #define PATH_SEP '\\'
 #define SYS_DIR_SEPARATOR PATH_SEP
 typedef SSIZE_T ssize_t;
 #define fileno _fileno
-#define __builtin_frame_address(x)  ((void)(x), _AddressOfReturnAddress())
+// #define __builtin_frame_address(x)  ((void)(x), _AddressOfReturnAddress())
 
 #ifdef __cplusplus
 }

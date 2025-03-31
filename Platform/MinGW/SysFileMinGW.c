@@ -1,63 +1,6 @@
-#include <System/Platform/Common/SysFile.h>
+#include <System/Platform/Common/SysFilePrivate.h>
 #include <System/Utils/SysPath.h>
 #include <System/Utils/SysUtf8.h>
-
-typedef struct _REPARSE_DATA_BUFFER
-{
-  ULONG  ReparseTag;
-  USHORT ReparseDataLength;
-  USHORT Reserved;
-  union
-  {
-    struct
-    {
-      USHORT SubstituteNameOffset;
-      USHORT SubstituteNameLength;
-      USHORT PrintNameOffset;
-      USHORT PrintNameLength;
-      ULONG  Flags;
-      WCHAR  PathBuffer[1];
-    } SymbolicLinkReparseBuffer;
-    struct
-    {
-      USHORT SubstituteNameOffset;
-      USHORT SubstituteNameLength;
-      USHORT PrintNameOffset;
-      USHORT PrintNameLength;
-      WCHAR  PathBuffer[1];
-    } MountPointReparseBuffer;
-    struct
-    {
-      UCHAR  DataBuffer[1];
-    } GenericReparseBuffer;
-  };
-} REPARSE_DATA_BUFFER, *PREPARSE_DATA_BUFFER;
-
-struct _SysTimeSpec {
-  SysInt64 tv_sec;
-  SysInt32 tv_nsec;
-};
-
-struct _SysWin32PrivateStat
-{
-  SysUInt32 volume_serial;
-  SysUInt64 file_index;
-  SysUInt64 attributes;
-  SysUInt64 allocated_size;
-  SysUInt32 reparse_tag;
-
-  SysUInt32 st_dev;
-  SysUInt32 st_ino;
-  SysUInt16 st_mode;
-  SysUInt16 st_uid;
-  SysUInt16 st_gid;
-  SysUInt32 st_nlink;
-  SysUInt64 st_size;
-  SysTimeSpec st_ctim;
-  SysTimeSpec st_atim;
-  SysTimeSpec st_mtim;
-};
-
 
 static int _sys_win32_readlink_utf16_handle (const SysUniChar2  *filename,
                                 HANDLE            file_handle,
@@ -682,7 +625,7 @@ static void _sys_win32_fill_privatestat (const struct __stat64            *statb
                            const BY_HANDLE_FILE_INFORMATION *handle_info,
                            const FILE_STANDARD_INFO         *std_info,
                            DWORD                             reparse_tag,
-                           SysWin32PrivateStat *buf)
+                           SysMinGWPrivateStat *buf)
 {
   SysInt32 nsec;
 
@@ -707,7 +650,7 @@ static void _sys_win32_fill_privatestat (const struct __stat64            *statb
 }
 
 static int _sys_win32_stat_utf16_no_trailing_slashes (const SysUniChar2    *filename,
-    SysWin32PrivateStat  *buf,
+    SysMinGWPrivateStat  *buf,
     SysBool            for_symlink)
 {
   struct __stat64 statbuf;
@@ -814,7 +757,7 @@ static int _sys_win32_stat_utf16_no_trailing_slashes (const SysUniChar2    *file
 
 static int
 _sys_win32_stat_utf8 (const SysChar       *filename,
-                    SysWin32PrivateStat *buf,
+                    SysMinGWPrivateStat *buf,
                     SysBool for_symlink)
 {
   wchar_t *wfilename;
@@ -852,13 +795,13 @@ _sys_win32_stat_utf8 (const SysChar       *filename,
 }
 
 static int sys_win32_lstat_utf8 (const SysChar       *filename,
-                    SysWin32PrivateStat *buf)
+                    SysMinGWPrivateStat *buf)
 {
   return _sys_win32_stat_utf8 (filename, buf, true);
 }
 
 SysInt sys_lstat(const SysChar *filename, struct stat * buf) {
-  SysWin32PrivateStat w32_buf;
+  SysMinGWPrivateStat w32_buf;
   int retval;
 
   sys_return_val_if_fail(buf != NULL, -1);

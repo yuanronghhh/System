@@ -7,7 +7,6 @@ SYS_BEGIN_DECLS
 
 typedef struct _SysFileState SysFileState;
 typedef struct _SysTimeSpec  SysTimeSpec;
-typedef struct _SysWin32PrivateStat SysWin32PrivateStat;
 
 struct _SysFileState {
   SysSize st_size;

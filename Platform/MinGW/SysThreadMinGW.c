@@ -1,5 +1,5 @@
 #include <System/Platform/Common/SysThreadPrivate.h>
-#include <System/Platform/Win32/SysThreadWin32.h>
+#include <System/Platform/MinGW/SysThreadMinGW.h>
 #include <System/Utils/SysStr.h>
 #include <System/Type/SysGcCommon.h>
 
@@ -7,7 +7,7 @@ static void
 sys_thread_abort (SysInt         status,
                 const SysChar *function)
 {
-  sys_abort_N ("GLib (gthread-win32.c): Unexpected error from C library during '%s': %s.  Aborting.\n",
+  sys_abort_N ("GLib (gthread-mingw.c): Unexpected error from C library during '%s': %s.  Aborting.\n",
     sys_strerror(status), function);
 }
 
@@ -343,7 +343,7 @@ sys_private_replace (SysPrivate *key,
 
 /* {{{1 SysThread */
 
-#define win32_check_for_error(what) SYS_STMT_START{			\
+#define mingw_check_for_error(what) SYS_STMT_START{			\
   if (!(what))								\
     sys_error_N ("error %s during %s",	GetLastError (), #what);		\
   }SYS_STMT_END
@@ -356,14 +356,14 @@ typedef struct
 
   SysThreadFunc proxy;
   HANDLE      handle;
-} SysThreadWin32;
+} SysThreadMinGW;
 
 void
 sys_system_thread_free (SysRealThread *thread)
 {
-  SysThreadWin32 *wt = (SysThreadWin32 *) thread;
+  SysThreadMinGW *wt = (SysThreadMinGW *) thread;
 
-  win32_check_for_error (CloseHandle (wt->handle));
+  mingw_check_for_error (CloseHandle (wt->handle));
   sys_free (wt);
 }
 
@@ -375,8 +375,8 @@ sys_system_thread_exit (void)
    * To ensure that notifications are correctly triggered in static
    * compilation mode, we call directly the "detach" function here right
    * before terminating the thread.
-   * As all win32 threads initialized through the glib API are run through
-   * the same proxy function sys_thread_win32_proxy() which calls systematically
+   * As all mingw threads initialized through the glib API are run through
+   * the same proxy function sys_thread_mingw_proxy() which calls systematically
    * sys_system_thread_exit() when finishing, we obtain the same behavior as
    * with dynamic compilation.
    *
@@ -394,9 +394,9 @@ sys_system_thread_exit (void)
 }
 
 static SysUInt __stdcall
-sys_thread_win32_proxy (SysPointer data)
+sys_thread_mingw_proxy (SysPointer data)
 {
-  SysThreadWin32 *self = data;
+  SysThreadMinGW *self = data;
 
   self->proxy (self);
 
@@ -413,13 +413,13 @@ sys_system_thread_new (SysThreadFunc proxy,
                      SysPointer data,
                      SysError **error)
 {
-  SysThreadWin32 *thread;
+  SysThreadMinGW *thread;
   SysRealThread *base_thread;
   SysUInt ignore;
   const SysChar *message = NULL;
   SysInt thread_prio;
 
-  thread = sys_new0 (SysThreadWin32, 1);
+  thread = sys_new0 (SysThreadMinGW, 1);
   thread->proxy = proxy;
   thread->handle = (HANDLE) NULL;
   base_thread = (SysRealThread*)thread;
@@ -430,7 +430,7 @@ sys_system_thread_new (SysThreadFunc proxy,
   base_thread->name = sys_strdup (name);
   sys_ref_count_set(base_thread, 2);
 
-  thread->handle = (HANDLE) _beginthreadex(NULL, (SysUInt)stack_size, sys_thread_win32_proxy, thread,
+  thread->handle = (HANDLE) _beginthreadex(NULL, (SysUInt)stack_size, sys_thread_mingw_proxy, thread,
                                             CREATE_SUSPENDED, &ignore);
 
   if (thread->handle == NULL)
@@ -491,9 +491,9 @@ sys_thread_yield (void)
 void
 sys_system_thread_wait (SysRealThread *thread)
 {
-  SysThreadWin32 *wt = (SysThreadWin32 *) thread;
+  SysThreadMinGW *wt = (SysThreadMinGW *) thread;
 
-  win32_check_for_error (WAIT_FAILED != WaitForSingleObject (wt->handle, INFINITE));
+  mingw_check_for_error (WAIT_FAILED != WaitForSingleObject (wt->handle, INFINITE));
 }
 
 #define EXCEPTION_SET_THREAD_NAME ((DWORD) 0x406D1388)
@@ -560,7 +560,7 @@ static pSetThreadDescription SetThreadDescriptionFunc = NULL;
 static HMODULE kernel32_module = NULL;
 
 static SysBool
-sys_thread_win32_load_library (void)
+sys_thread_mingw_load_library (void)
 {
   /* FIXME: Add support for UWP app */
 #if !defined(SYS_WINAPI_ONLY_APP)
@@ -584,12 +584,12 @@ sys_thread_win32_load_library (void)
 }
 
 static SysBool
-sys_thread_win32_set_thread_desc (const SysChar *name)
+sys_thread_mingw_set_thread_desc (const SysChar *name)
 {
   HRESULT hr;
   wchar_t *namew;
 
-  if (!sys_thread_win32_load_library () || !name)
+  if (!sys_thread_mingw_load_library () || !name)
     return false;
 
   namew = sys_mbyte_to_wchar(name, NULL);
@@ -608,7 +608,7 @@ sys_system_thread_set_name (const SysChar *name)
   /* Prefer SetThreadDescription over exception based way if available,
    * since thread description set by SetThreadDescription will be preserved
    * in dump file */
-  if (!sys_thread_win32_set_thread_desc (name))
+  if (!sys_thread_mingw_set_thread_desc (name))
     SetThreadName ((DWORD) -1, name);
 }
 
@@ -662,7 +662,7 @@ sys_system_thread_detach (void)
   while (dtors_called);
 }
 
-static void sys_thread_win32_process_detach (void) {
+static void sys_thread_mingw_process_detach (void) {
 #ifndef _MSC_VER
   if (SetThreadName_VEH_handle != NULL)
     {

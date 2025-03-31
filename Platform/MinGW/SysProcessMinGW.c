@@ -11,9 +11,9 @@ do {                                         \
   }                                          \
 } while(0)
 
-typedef struct _SysSubProcessWin32 SysSubProcessWin32;
+typedef struct _SysSubProcessMinGW SysSubProcessMinGW;
 
-struct _SysSubProcessWin32 {
+struct _SysSubProcessMinGW {
   SysSubProcess option;
 
   STARTUPINFO s_si;
@@ -134,7 +134,7 @@ static SysBool win32_get_handle(
   return true;
 }
 
-static SysBool win32_execute_child(SysSubProcessWin32 *pwin32,
+static SysBool win32_execute_child(SysSubProcessMinGW *pwin32,
     SysSubProcessOption *option,
     HANDLE rfd0, HANDLE wfd0,
     HANDLE rfd1, HANDLE wfd1,
@@ -176,15 +176,15 @@ static SysBool win32_execute_child(SysSubProcessWin32 *pwin32,
   return true;
 }
 
-static SysSubProcessWin32 *sys_real_subprocess_internal(SysSubProcessOption* option) {
-  SysSubProcessWin32 *pwin32;
+static SysSubProcessMinGW *sys_real_subprocess_internal(SysSubProcessOption* option) {
+  SysSubProcessMinGW *pwin32;
   HANDLE std0read = NULL, std0write = NULL;
   HANDLE std1read = NULL, std1write = NULL;
   HANDLE std2read = NULL, std2write = NULL;
 
   sys_return_val_if_fail(option != NULL, NULL);
 
-  pwin32 = sys_new0(SysSubProcessWin32, 1);
+  pwin32 = sys_new0(SysSubProcessMinGW, 1);
 
   win32_get_handle(
     &std0read, &std0write,
@@ -220,7 +220,7 @@ SysSubProcess* sys_real_subprocess_new(const SysChar *cmd[]) {
 }
 
 SysSubProcess* sys_real_subprocess_new_option(SysSubProcessOption* option) {
-  SysSubProcessWin32 *pwin32;
+  SysSubProcessMinGW *pwin32;
 
   sys_return_val_if_fail(option != NULL, NULL);
 
@@ -229,11 +229,11 @@ SysSubProcess* sys_real_subprocess_new_option(SysSubProcessOption* option) {
 }
 
 void sys_real_subprocess_terminate(SysSubProcess *sub) {
-  SysSubProcessWin32 *pwin32;
+  SysSubProcessMinGW *pwin32;
 
   sys_return_if_fail(sub != NULL);
 
-  pwin32= (SysSubProcessWin32 *)sub;
+  pwin32= (SysSubProcessMinGW *)sub;
 
   TerminateProcess(pwin32->s_pi.hProcess, 300);
   CloseHandle_N(pwin32->s_pi.hProcess);

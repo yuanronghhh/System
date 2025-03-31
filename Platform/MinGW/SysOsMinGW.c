@@ -283,7 +283,7 @@ SysChar * sys_os_getlocale (void) {
   /* Let the user override the system settings through environment
    * variables, as on POSIX systems. Note that in GTK applications
    * since GTK 2.10.7 setting either LC_ALL or LANG also sets the
-   * Win32 locale and C library locale through code in gtkmain.c.
+   * MinGW locale and C library locale through code in gtkmain.c.
    */
   if (((ev = sys_env_get ("LC_ALL")) != NULL && ev[0] != '\0')
       || ((ev = sys_env_get ("LC_MESSAGES")) != NULL && ev[0] != '\0')

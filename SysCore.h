@@ -8,6 +8,7 @@
 #include <System/Platform/Common/SysOs.h>
 #include <System/Platform/Common/SysMem.h>
 #include <System/Platform/Common/SysAtomic.h>
+#include <System/Platform/Common/SysRefCount.h>
 #include <System/Platform/Common/SysProcess.h>
 #include <System/Platform/Common/SysThread.h>
 #include <System/Platform/Common/SysSocketConnection.h>

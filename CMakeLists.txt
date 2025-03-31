@@ -51,6 +51,7 @@ set(UNIX_SYS_SRC
   ./Platform/Unix/SysSocketUnix.c
   ./Platform/Unix/SysTimeZoneUnix.c
 )
+
 set(WIN32_SYS_SRC
   ./Platform/Win32/dirent.h
   ./Platform/Win32/SysFileWin32.c
@@ -244,6 +245,7 @@ set(SRC
   ./Platform/Common/SysDate.h
   ./Platform/Common/SysDate.c
   ./Platform/Common/SysFile.h
+  ./Platform/Common/SysFilePrivate.h
   ./Platform/Common/SysFile.c
   ./Platform/Common/SysMemPrivate.h
   ./Platform/Common/SysMem.h
