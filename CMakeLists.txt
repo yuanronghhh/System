@@ -1,5 +1,5 @@
-add_use_name(iconv 0)
-add_use_name(openssl 0)
+add_use_name(iconv 1)
+add_use_name(openssl 1)
 add_use_name(marksweep 0)
 add_use_name(mingw 0)
 add_use_name(vld 0)
